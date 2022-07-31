@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         body {
-            background-image: url(https://pic.imgdb.cn/item/62e680a88c61dc3b8e037ad6.jpg);
+            background-image: url(./bg.jpg);
             /* background-size: contain; */
             background-size: initial cover;
             width: 350px;
@@ -86,9 +86,9 @@
             August 4, 2021.
         </div>
     </div>
-    <img src="../Screenshot_20220731_210145-removebg-preview.png">
+    <img src="./sticker.png">
     <div id="footer" class="animate__animated animate__jello">
-        <a href="#" alt="Albums are under creation"> More </a>
+        <a href="https://github.com/Ki-Seki/ki-seki.github.io"> More </a>
     </div>
     <script>
         // 运行天数
@@ -106,15 +106,16 @@
         }
 
         function getRunningDays() {
-            var start = new Date(2022, 8 - 1, 4).getTime();
+            var start = new Date(2022, 8 - 1, 4, 0, 0, 0, 0).getTime();
             var end = Date.now();
             return runningDays = Math.ceil((end - start) / (24 * 3600 * 1000));
         }
 
         function getSuffix(days) {
+            days = Math.abs(days);
             if (11 <= days % 100 && days % 100 < 20) return "th.";
             var suffixs = {0: "th.", 1: "st.", 2: "nd.", 3: "rd."};
-            if (days % 10 < 4) return suffixs[runningDays % 10];
+            if (days % 10 < 4) return suffixs[days % 10];
             else return suffixs[0];
         }
     </script>
