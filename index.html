@@ -7,19 +7,24 @@
     <link rel="shortcut icon" href="./favicon.ico" />
     <title>SSC ❤ CJY</title>
     <style>
+        @font-face {
+            font-family: paraFont;
+            src: url(./Numberlin.ttf);
+        }
+
         body {
             background-image: url(./bg.jpg);
             background-size: initial;
             background-color: #003770;
             width: 350px;
             text-align: center;
+            /* font-family: paraFont; */
             margin: auto;
             margin-top: 100px;
-        }
-
-        #content {
             color: white;
         }
+
+
 
         #counter {
             height: 60px;
@@ -42,6 +47,12 @@
             text-align: left;
         }
 
+        #content {
+            
+            font-family: paraFont;
+            font-size: 1.5rem;
+        }
+
         img {
             width: 100%;
         }
@@ -49,10 +60,11 @@
         #footer {
             font-size: 14px;
             font-weight: 100;
-            position: fixed;
-            bottom: 30px;
+            /* position: fixed; */
+            /* bottom: 30px; */
             text-align: center;
             text-shadow: 0 0 40px rgb(255, 183, 0);
+            margin-bottom: 1.5rem;
             display: inline-block;
             padding: 3px 10px;
             border-radius: 6px;
@@ -71,25 +83,51 @@
         #footer a:hover, a:active {
             text-decoration:underline;
         }
+
+        audio {
+				display: none;
+			}
     </style>
 </head>
 <body>
+    <div id="counter">
+        <div id="number"> Error. </div>
+        <div id="suffix"> Error. </div>
+    </div>
+    <br>
+
     <div id="content">
-        <div id="counter">
-            <div id="number"> Error. </div>
-            <div id="suffix"> Error. </div>
-        </div>
         <div id="subtitle">
-            day since Ms Cui & Mr Song <br>
-            fell in love on <br>
-            August 4, 2022.
+            day since Miss Cui <br>
+            was born on <br>
+            November 14, 2001.
+        </div>
+        <img src="./t.png">
+        <div id="quote">
+            Prisoners of the Dark Master, <br>
+            hear me! <br>
+            We have come to free you. <br>
+            Do you hear us? <br>
+            Show me that you hear us! <br>
+            Can't hear you! <br>
+            - Bridge to Terabithia <br>
         </div>
     </div>
-    <img src="./sticker.png">
+    <br>
+    
     <div id="footer">
-        <a href="https://1drv.ms/a/s!At-lGuwy4ObyhqVKenbNjtpRkDxc0g"> More </a>
+        <a href="./gallery/index.html"> More </a>
+        <br>
     </div>
+    <br>
+
+    <audio id="music" autoplay="autoplay" controls="controls"loop="loop" preload="auto" 
+        src="https://music.163.com/song/media/outer/url?id=33346163.mp3">
+	</audio>
+
     <script>
+        // 计时控件
+
         // 运行天数
         var days = getRunningDays();
         document.getElementById("number").innerHTML = days;
@@ -105,7 +143,7 @@
         }
 
         function getRunningDays() {
-            var start = new Date(2022, 8 - 1, 4, 0, 0, 0, 0).getTime();
+            var start = new Date(2001, 11 - 1, 14, 0, 0, 0, 0).getTime();
             var end = Date.now();
             return runningDays = Math.ceil((end - start) / (24 * 3600 * 1000));
         }
@@ -117,6 +155,28 @@
             if (days % 10 < 4) return suffixs[days % 10];
             else return suffixs[0];
         }
+
+        // 音乐控件
+        window.onload = function(){
+			setInterval("toggleSound()",1);
+		}
+        function toggleSound() {
+            var music = document.getElementById("music");//获取ID  
+            if (music.paused) { //判读是否播放  
+                music.paused=false;
+                music.play(); //没有就播放 
+            }    
+        }
+
+        //--创建触摸监听，当浏览器打开页面时，触摸屏幕触发事件，进行音频播放
+        document.addEventListener('touchstart', function () {
+            function audioAutoPlay() {
+                var audio = document.getElementById('music');
+                    audio.play();
+            }
+            audioAutoPlay();
+        });
+
     </script>
 </body>
 </html>
