@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <title>SSC ❤ CJY</title>
+    <style>
+        @font-face {
+            font-family: paraFont;
+            src: url(./Numberlin.ttf);
+        }
+
+        body {
+            background-image: url(./bg.jpg);
+            background-size: initial;
+            background-color: #003770;
+            width: 350px;
+            text-align: center;
+            /* font-family: paraFont; */
+            margin: auto;
+            margin-top: 100px;
+            color: white;
+        }
+
+
+
+        #counter {
+            height: 60px;
+            margin: auto;
+            width: 350px;
+            font-family: serif;
+        }
+
+        #number {
+            float: left;
+            font-size: 50px;
+            width: 190px;
+            text-align: right;
+        }
+
+        #suffix {
+            float: left;
+            margin-top: 30px;
+            width: 160px;
+            text-align: left;
+        }
+
+        #content {
+            
+            font-family: paraFont;
+            font-size: 1.5rem;
+        }
+
+        img {
+            width: 100%;
+        }
+
+        #footer {
+            font-size: 14px;
+            font-weight: 100;
+            /* position: fixed; */
+            /* bottom: 30px; */
+            text-align: center;
+            text-shadow: 0 0 40px rgb(255, 183, 0);
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid white;
+            left: calc(50% - 27.71px);  /* 需根据最终大小调整数据 */
+        }
+
+        #footer a {
+            color: white;
+        }
+
+        #footer a:link, a:visited {
+            text-decoration:none;
+        }
+
+        #footer a:hover, a:active {
+            text-decoration:underline;
+        }
+
+        audio {
+				display: none;
+			}
+    </style>
+</head>
+<body>
+    <div id="counter">
+        <div id="number"> Error. </div>
+        <div id="suffix"> Error. </div>
+    </div>
+    <br>
+
+    <div id="content">
+        <div id="subtitle">
+            day since Miss Cui <br>
+            was born on <br>
+            November 14, 2001.
+        </div>
+        <img src="./cake.png">
+        <div id="quote">
+            Prisoners of the Dark Master, <br>
+            hear me! <br>
+            We have come to free you. <br>
+            Do you hear us? <br>
+            Show me that you hear us! <br>
+            Can't hear you! <br>
+            - Bridge to Terabithia <br>
+        </div>
+    </div>
+    <br>
+    
+    <!-- <div id="footer">
+        <a href="./gallery/index.html"> More </a>
+        <br>
+    </div>
+    <br> -->
+
+    <audio id="music" autoplay="autoplay" controls="controls"loop="loop" preload="auto" 
+        src="https://music.163.com/song/media/outer/url?id=33346163.mp3">
+	</audio>
+
+    <script>
+        // 计时控件
+
+        // 运行天数
+        var days = getRunningDays();
+        document.getElementById("number").innerHTML = days;
+        document.getElementById("suffix").innerHTML = getSuffix(days);
+
+        // 运行天数显示样式
+        var len = String(days).length;
+        if (len > 2)
+        {
+            var bias = (len - 2) * 15;  // 计算偏置量，平衡视觉效果
+            document.getElementById("number").style.width = 185 + bias + "px";
+            document.getElementById("suffix").style.width = 165 - bias + "px";
+        }
+
+        function getRunningDays() {
+            var start = new Date(2001, 11 - 1, 14, 0, 0, 0, 0).getTime();
+            var end = Date.now();
+            return runningDays = Math.ceil((end - start) / (24 * 3600 * 1000));
+        }
+
+        function getSuffix(days) {
+            days = Math.abs(days);
+            if (11 <= days % 100 && days % 100 < 20) return "th.";
+            var suffixs = {0: "th.", 1: "st.", 2: "nd.", 3: "rd."};
+            if (days % 10 < 4) return suffixs[days % 10];
+            else return suffixs[0];
+        }
+
+        // 音乐控件
+        window.onload = function(){
+			setInterval("toggleSound()",1);
+		}
+        function toggleSound() {
+            var music = document.getElementById("music");//获取ID  
+            if (music.paused) { //判读是否播放  
+                music.paused=false;
+                music.play(); //没有就播放 
+            }    
+        }
+
+        //--创建触摸监听，当浏览器打开页面时，触摸屏幕触发事件，进行音频播放
+        document.addEventListener('touchstart', function () {
+            function audioAutoPlay() {
+                var audio = document.getElementById('music');
+                    audio.play();
+            }
+            audioAutoPlay();
+        });
+
+    </script>
+</body>
+</html>

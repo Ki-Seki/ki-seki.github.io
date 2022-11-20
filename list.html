@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <title>More~</title>
+    <style>
+        body {
+            background-image: url(./bg.jpg);
+            background-size: initial;
+            background-color: #003770;
+            width: 350px;
+            text-align: center;
+            margin: auto;
+            margin-top: 100px;
+        }
+
+        #navlist {
+            color: white;
+            text-align: left;
+            /* font-weight: 100; */
+            /* position: fixed; */
+            /* bottom: 30px; */
+            /* text-align: center; */
+            text-shadow: 0 0 40px rgb(255, 183, 0);
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid white;
+            left: calc(50% - 27.71px);  /* 需根据最终大小调整数据 */
+        }
+
+        #navlist ul {
+            list-style-type: none;
+        }
+
+        #navlist a {
+            color: white;
+            /* font-size: 1.5rem; */
+        }
+
+        #navlist a:link, a:visited {
+            text-decoration:none;
+        }
+
+        #navlist a:hover, a:active {
+            text-decoration:underline;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="navlist">
+        <h2>发现</h2>
+        <ul id="discovery">
+            <li><a href="./gallery/index.html">我们的相册</a></li>
+        </ul>
+
+        <h2>日子</h2>
+        <ul id="event">
+            <li>2022-11-14 <a href="./birthday/index.html">小崔的21岁生日</a></li>
+            <li>2022-11-11 <a href="./anniversary/index.html">100天纪念日</a></li>
+        </ul>
+    </div>
+</body>
+</html>
