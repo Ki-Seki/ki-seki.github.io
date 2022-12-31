@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="shortcut icon" href="./assets/favicon.ico" />
     <title>SSC ❤ CJY</title>
     <style>
         body {
-            background-image: url(./bg.jpg);
+            background-image: url(./assets/bg.jpg);
             background-size: initial;
             background-color: #003770;
             width: 350px;
@@ -72,6 +72,7 @@
             text-decoration:underline;
         }
     </style>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.js"></script>
 </head>
 <body>
     <div id="content">
@@ -80,16 +81,26 @@
             <div id="suffix"> Error. </div>
         </div>
         <div id="subtitle">
-            day since Ms Cui & Mr Song <br>
+            day since <br>
+            Ms Cui & Mr Song <br>
             fell in love on <br>
             August 4, 2022.
         </div>
     </div>
-    <img src="./sticker.png">
+    <img src="./assets/sticker.png">
     <div id="footer">
         <a href="./list.html"> More </a>
     </div>
     <script>
+        // 事件处理
+        urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('event')) {
+            event = urlParams.get('event');
+            eval(event+'(Date.now(), true)');
+        }
+        else
+            event230101();
+
         // 运行天数
         var days = getRunningDays();
         document.getElementById("number").innerHTML = days;
@@ -102,6 +113,15 @@
             var bias = (len - 2) * 15;  // 计算偏置量，平衡视觉效果
             document.getElementById("number").style.width = 185 + bias + "px";
             document.getElementById("suffix").style.width = 165 - bias + "px";
+        }
+
+        // Event Happy New Year
+        function event230101 (now=Date.now(), specialJudge=false) {
+            timeDiff = now - new Date(2023, 1 - 1, 1).getTime()
+            if (0 <= timeDiff && timeDiff <= 24 * 60 * 60 * 1000 || specialJudge) {
+                $("img").attr('src', './assets/Happy New Year.png');
+                console.log('Succeeded!');
+            }
         }
 
         function getRunningDays() {
