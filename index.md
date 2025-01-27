@@ -21,7 +21,6 @@ title: Shichao Song (宋世超)
     <a href='https://twitter.com/Ki_Seki_here'>X</a> /
     <a href='https://www.linkedin.com/in/song-sc/'>LinkedIn</a> /
     <a href='https://scholar.google.com/citations?user=6t4_yXMAAAAJ'>Google Scholar</a> /
-    <a href='https://www.semanticscholar.org/author/Shichao-Song/2268434524'>Semantic Scholar</a> /
     <a href='https://www.prophy.science/author/100188805/Shichao-Song'>Prophy</a> /
     <a href='https://github.com/Ki-Seki'>GitHub</a> /
     <a href='https://huggingface.co/Ki-Seki'>Hugging Face</a> /
@@ -57,6 +56,23 @@ $^*$ Contributed Equally
 $^†$ Corresponding Author
 
 ### <font color="lightgray">H3</font> Peer Reviewed
+
+- **xFinder: Robust and Pinpoint Answer Extraction for Large Language Models**  
+    Qingchen Yu$^*$, Zifan Zheng$^*$, **Shichao Song$^*$**, Zhiyu Li$^†$, Feiyu Xiong, Bo Tang, Ding Chen  
+    *ICLR*, 2025.04.
+    [ICLR](https://iclr.cc/) /
+    [arXiv](https://arxiv.org/abs/2405.11874) /
+    [GitHub](https://github.com/IAAR-Shanghai/xFinder) /
+    [Hugging Face](https://huggingface.co/collections/IAAR-Shanghai/xfinder-664b7b21e94e9a93f25a8412) /
+    [WeChat Article](https://mp.weixin.qq.com/s/C5G-rpen9OM4MmBhrByTIQ)
+
+- **Attention Heads of Large Language Models: A Survey**  
+    Zifan Zheng$^*$, Yezhaohui Wang$^*$, Yuxin Huang$^*$, **Shichao Song**, Mingchuan Yang, Bo Tang, Feiyu Xiong, Zhiyu Li$^†$  
+    *Patterns*, 2025.02.
+    [Cell Press](https://www.cell.com/patterns/) /
+    [arXiv](https://arxiv.org/abs/2409.03752) /
+    [GitHub](https://github.com/IAAR-Shanghai/Awesome-Attention-Heads) /
+    [Hugging Face](https://huggingface.co/papers/2409.03752)
 
 - **$\text{Memory}^3$: Language Modeling with Explicit Memory**  
     Hongkang Yang$^†$, Zehao Lin, Wenjin Wang, Hao Wu, Zhiyu Li, Bo Tang, Wenqiang Wei, Jinbo Wang, Zeyun Tang, **Shichao Song**, Chenyang Xi, Yu Yu, Kai Chen, Feiyu Xiong, Linpeng Tang, Weinan E  
@@ -101,13 +117,6 @@ $^†$ Corresponding Author
     [Online Game](https://tanghenre.com/) /
     [Blog Post](https://mazzzystar.github.io/2024/08/09/turtle-benchmark-zh/)
 
-- **Attention Heads of Large Language Models: A Survey**  
-    Zifan Zheng$^*$, Yezhaohui Wang$^*$, Yuxin Huang$^*$, **Shichao Song**, Mingchuan Yang, Bo Tang, Feiyu Xiong, Zhiyu Li$^†$  
-    *arXiv*, 2024.09.
-    [arXiv](https://arxiv.org/abs/2409.03752) /
-    [GitHub](https://github.com/IAAR-Shanghai/Awesome-Attention-Heads) /
-    [Hugging Face](https://huggingface.co/papers/2409.03752)
-
 - **Controllable Text Generation for Large Language Models: A Survey**  
     Xun Liang$^*$, Hanyu Wang$^*$, Yezhaohui Wang$^*$, **Shichao Song**, Jiawei Yang, Simin Niu, Jie Hu, Dan Liu, Shunyu Yao, Feiyu Xiong, Zhiyu Li$^†$  
     *arXiv*, 2024.08.
@@ -139,14 +148,6 @@ $^†$ Corresponding Author
     [arXiv](https://arxiv.org/abs/2405.16933) /
     [GitHub](https://github.com/IAAR-Shanghai/PGRAG) /
     [WeChat Article](https://mp.weixin.qq.com/s/0x0gtDWwxDR95DfpOHzKVQ)
-
-- **xFinder: Robust and Pinpoint Answer Extraction for Large Language Models**  
-    Qingchen Yu$^*$, Zifan Zheng$^*$, **Shichao Song$^*$**, Zhiyu Li$^†$, Feiyu Xiong, Bo Tang, Ding Chen  
-    *arXiv*, 2024.05.
-    [arXiv](https://arxiv.org/abs/2405.11874) /
-    [GitHub](https://github.com/IAAR-Shanghai/xFinder) /
-    [Hugging Face](https://huggingface.co/collections/IAAR-Shanghai/xfinder-664b7b21e94e9a93f25a8412) /
-    [WeChat Article](https://mp.weixin.qq.com/s/C5G-rpen9OM4MmBhrByTIQ)
 
 - **Fake Artificial Intelligence Generated Contents (FAIGC): A Survey of Theories, Detection Methods, and Opportunities**  
     Xiaomin Yu$^*$, Yezhaohui Wang$^*$, Yanfang Chen$^†$, Zhen Tao, Dinghao Xi, **Shichao Song**, Simin Niu, Zhiyu Li  
@@ -202,7 +203,7 @@ $^†$ Corresponding Author
 ------
 
 <footer style='text-align:center; font-size:0.85em; line-height: 1.35em'>
-    Last update: 2024.11 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/edit/master/index.md'>Edit this page</a><br>
-    &copy; 2023-2024 Shichao Song
+    Last update: 2025.01 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/edit/master/index.md'>Edit this page</a><br>
+    &copy; 2023-2025 Shichao Song
 </footer>
 <br>
