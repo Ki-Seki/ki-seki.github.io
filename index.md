@@ -60,7 +60,7 @@ $^†$ Corresponding Author
 - **xFinder: Robust and Pinpoint Answer Extraction for Large Language Models**  
     Qingchen Yu$^*$, Zifan Zheng$^*$, **Shichao Song$^*$**, Zhiyu Li$^†$, Feiyu Xiong, Bo Tang, Ding Chen  
     *ICLR*, 2025.04.
-    [ICLR](https://iclr.cc/) /
+    [ICLR](https://iclr.cc/virtual/2025/poster/30821) /
     [arXiv](https://arxiv.org/abs/2405.11874) /
     [GitHub](https://github.com/IAAR-Shanghai/xFinder) /
     [Hugging Face](https://huggingface.co/collections/IAAR-Shanghai/xfinder-664b7b21e94e9a93f25a8412) /
@@ -69,7 +69,7 @@ $^†$ Corresponding Author
 - **Attention Heads of Large Language Models: A Survey**  
     Zifan Zheng$^*$, Yezhaohui Wang$^*$, Yuxin Huang$^*$, **Shichao Song**, Mingchuan Yang, Bo Tang, Feiyu Xiong, Zhiyu Li$^†$  
     *Patterns*, 2025.02.
-    [Cell Press](https://www.cell.com/patterns/) /
+    [Cell Press](https://www.cell.com/patterns/fulltext/S2666-3899(25)00024-8) /
     [arXiv](https://arxiv.org/abs/2409.03752) /
     [GitHub](https://github.com/IAAR-Shanghai/Awesome-Attention-Heads) /
     [Hugging Face](https://huggingface.co/papers/2409.03752)
@@ -203,7 +203,7 @@ $^†$ Corresponding Author
 ------
 
 <footer style='text-align:center; font-size:0.85em; line-height: 1.35em'>
-    Last update: 2025.01 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/edit/master/index.md'>Edit this page</a><br>
+    Last update: 2025.02 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/edit/master/index.md'>Edit this page</a><br>
     &copy; 2023-2025 Shichao Song
 </footer>
 <br>
