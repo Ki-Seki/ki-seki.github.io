@@ -109,7 +109,7 @@ $^†$ Corresponding Author
 ### <font color="lightgray">H3</font> Preprints
 
 - **SafeRAG: Benchmarking Security in Retrieval-Augmented Generation of Large Language Model**  
-    Xun Liang, Simin Niu, Zhiyu Li$^†$, Sensen Zhang, Hanyu Wang, Feiyu Xiong, Jason Zhaoxin Fan, Bo Tang, Shichao Song, Mengwei Wang, Jiawei Yang  
+    Xun Liang, Simin Niu, Zhiyu Li$^†$, Sensen Zhang, Hanyu Wang, Feiyu Xiong, Jason Zhaoxin Fan, Bo Tang, **Shichao Song**, Mengwei Wang, Jiawei Yang  
     *arXiv*, 2025.01.
     [arXiv](https://arxiv.org/abs/2501.18636) /
     [GitHub](https://github.com/IAAR-Shanghai/SafeRAG)
