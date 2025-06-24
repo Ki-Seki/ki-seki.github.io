@@ -12,7 +12,7 @@ title: Shichao Song (宋世超)
 <img src='./assets/avatar.jpg' alt='avatar' width='160px'><br>
 
 <p>
-    I am Shichao Song, a second-year PhD student. My current research focuses on large language models, specifically on two aspects: <b>internal consistency mining</b> (which can be understood as hallucination mitigation and reasoning enhancement, as discussed in <a href='https://arxiv.org/abs/2407.14507'>ICSFSurvey</a>) and <b>reliable evaluation for LLMs</b> (such as <a href='https://aclanthology.org/2024.acl-long.288/'>UHGEval</a>, <a href='https://arxiv.org/abs/2405.11874'>xFinder</a>, <a href='https://arxiv.org/abs/2410.05262'>TurtleBench</a>, and <a href='https://github.com/Ki-Seki/SituEval'>SituEval</a>). Previously, my research has covered topics like route optimization, recommender systems, and graph neural networks.
+    I am Shichao Song, a second-year PhD student. My current research focuses on large language models.
 </p>
 
 <p>
@@ -24,7 +24,7 @@ title: Shichao Song (宋世超)
     <a href='https://www.prophy.science/author/100188805/Shichao-Song'>Prophy</a> /
     <a href='https://github.com/Ki-Seki'>GitHub</a> /
     <a href='https://huggingface.co/Ki-Seki'>Hugging Face</a> /
-    <a href='./assets/Resume-241016.pdf'>CV</a> /
+    <a href='./assets/Resume-250624.pdf'>CV</a> /
     <a href='https://songsc.atomgit.net/us/'>💘</a>
 </p>
 
@@ -47,15 +47,20 @@ title: Shichao Song (宋世超)
 
 - **Institute for Advanced Algorithms Research, Shanghai**  
     Research Intern at the Large Language Model Center  
-    Supervised by Dr. **Zhiyu Li**  
-    2023.09 - Present
+    Supervised by Dr. **Zhiyu Li** and Dr. **Zehao Lin**  
+    2023.09 - 2025.06
 
-## <font color="lightgray">H2</font> Researches
+## <font color="lightgray">H2</font> Selected Researches
 
 $^*$ Contributed Equally  
 $^†$ Corresponding Author
 
-### <font color="lightgray">H3</font> Peer Reviewed
+- **MemOS: An Operating System for Memory-Augmented Generation (MAG) in Large Language Models**  
+    Zhiyu Li$^*$, **Shichao Song$^*$**, Hanyu Wang$^*$, Simin Niu$^*$, Ding Chen$^*$, Jiawei Yang, Chenyang Xi, Huayi Lai, Jihao Zhao, Yezhaohui Wang, Junpeng Ren, Zehao Lin, Jiahao Huo, Tianyi Chen, Kai Chen, Kehang Li, Zhiqiang Yin, Qingchen Yu, Bo Tang, Hongkang Yang$^†$, Zhi-Qin John Xu$^†$, Feiyu Xiong$^†$  
+    *arXiv*, 2025.05.
+    [arXiv](https://arxiv.org/abs/2505.22101) /
+    [GitHub](https://github.com/MemTensor/MemOS) /
+    [WeChat Article](https://mp.weixin.qq.com/s/J6UE9h8iJOh044Umq-Ok1g)
 
 - **xFinder: Robust and Pinpoint Answer Extraction for Large Language Models**  
     Qingchen Yu$^*$, Zifan Zheng$^*$, **Shichao Song$^*$**, Zhiyu Li$^†$, Feiyu Xiong, Bo Tang, Ding Chen  
@@ -73,6 +78,15 @@ $^†$ Corresponding Author
     [arXiv](https://arxiv.org/abs/2409.03752) /
     [GitHub](https://github.com/IAAR-Shanghai/Awesome-Attention-Heads) /
     [Hugging Face](https://huggingface.co/papers/2409.03752)
+
+- **TurtleBench: Evaluating Top Language Models via Real-World Yes/No Puzzles**  
+    Qingchen Yu$^*$, **Shichao Song$^*$**, Ke Fang$^*$, Yunfeng Shi, Zifan Zheng, Hanyu Wang, Simin Niu, Zhiyu Li$^†$  
+    *arXiv*, 2024.10.
+    [arXiv](https://arxiv.org/abs/2410.05262) /
+    [GitHub](https://github.com/mazzzystar/TurtleBench) /
+    [TurtleBench1.5k](https://huggingface.co/datasets/Duguce/TurtleBench1.5k) /
+    [Online Game](https://tanghenre.com/) /
+    [Blog Post](https://mazzzystar.github.io/2024/08/09/turtle-benchmark-zh/)
 
 - **$\text{Memory}^3$: Language Modeling with Explicit Memory**  
     Hongkang Yang$^†$, Zehao Lin, Wenjin Wang, Hao Wu, Zhiyu Li, Bo Tang, Wenqiang Wei, Jinbo Wang, Zeyun Tang, **Shichao Song**, Chenyang Xi, Yu Yu, Kai Chen, Feiyu Xiong, Linpeng Tang, Weinan E  
@@ -101,38 +115,6 @@ $^†$ Corresponding Author
     [GitHub](https://github.com/IAAR-Shanghai/DATG) /
     [WeChat Article](https://mp.weixin.qq.com/s/TO3X1koI0peOXVOwA0YjtA)
 
-- **When Sparse Graph Representation Learning Falls into Domain Shift: Data Augmentation for Cross-Domain Graph Meta-Learning (Student Abstract)**  
-    Simin Niu, Xun Liang$^†$, Sensen Zhang, **Shichao Song**, Xuan Zhang, Xiaoping Zhou  
-    *AAAI*, 2024.03.
-    [AAAI Press](https://ojs.aaai.org/index.php/AAAI/article/view/30489)
-
-### <font color="lightgray">H3</font> Preprints
-
-- **SafeRAG: Benchmarking Security in Retrieval-Augmented Generation of Large Language Model**  
-    Xun Liang, Simin Niu, Zhiyu Li$^†$, Sensen Zhang, Hanyu Wang, Feiyu Xiong, Jason Zhaoxin Fan, Bo Tang, **Shichao Song**, Mengwei Wang, Jiawei Yang  
-    *arXiv*, 2025.01.
-    [arXiv](https://arxiv.org/abs/2501.18636) /
-    [GitHub](https://github.com/IAAR-Shanghai/SafeRAG)
-
-- **TurtleBench: Evaluating Top Language Models via Real-World Yes/No Puzzles**  
-    Qingchen Yu$^*$, **Shichao Song$^*$**, Ke Fang$^*$, Yunfeng Shi, Zifan Zheng, Hanyu Wang, Simin Niu, Zhiyu Li$^†$  
-    *arXiv*, 2024.10.
-    [arXiv](https://arxiv.org/abs/2410.05262) /
-    [GitHub](https://github.com/mazzzystar/TurtleBench) /
-    [TurtleBench1.5k](https://huggingface.co/datasets/Duguce/TurtleBench1.5k) /
-    [Online Game](https://tanghenre.com/) /
-    [Blog Post](https://mazzzystar.github.io/2024/08/09/turtle-benchmark-zh/)
-
-- **Controllable Text Generation for Large Language Models: A Survey**  
-    Xun Liang$^*$, Hanyu Wang$^*$, Yezhaohui Wang$^*$, **Shichao Song**, Jiawei Yang, Simin Niu, Jie Hu, Dan Liu, Shunyu Yao, Feiyu Xiong, Zhiyu Li$^†$  
-    *arXiv*, 2024.08.
-    [arXiv](https://arxiv.org/abs/2408.12599) /
-    [GitHub](https://github.com/IAAR-Shanghai/CTGSurvey) /
-    [Hugging Face](https://huggingface.co/papers/2408.12599) /
-    [PDF in Chinese](https://github.com/IAAR-Shanghai/CTGSurvey/blob/main/CTG_Survey_Chinese.pdf) /
-    [X Thread](https://x.com/IntuitMachine/status/1828951964069019882) /
-    [WeChat Article](https://mp.weixin.qq.com/s/Ws1KjHHEjtDfCpKklG8R_A)
-
 - **Internal Consistency and Self-Feedback in Large Language Models: A Survey**  
     Xun Liang$^*$, **Shichao Song$^*$**, Zifan Zheng$^*$, Hanyu Wang, Qingchen Yu, Xunkai Li, Rong-Hua Li, Yi Wang, Zhonghao Wang, Feiyu Xiong, Zhiyu Li$^†$  
     *arXiv*, 2024.07.
@@ -142,32 +124,12 @@ $^†$ Corresponding Author
     [X Thread](https://x.com/Ki_Seki_here/status/1836020241538908529) /
     [WeChat Article](https://mp.weixin.qq.com/s/fSc0Szi-zO6YVwp2oV8Uhg)
 
-- **HRDE: Retrieval-Augmented Large Language Models for Chinese Health Rumor Detection and Explainability**  
-    Yanfang Chen$^*$, Ding Chen$^*$, **Shichao Song**, Simin Niu, Hanyu Wang, Zeyun Tang, Feiyu Xiong, Zhiyu Li$^†$  
-    *arXiv*, 2024.07.
-    [arXiv](https://arxiv.org/abs/2407.00668) /
-    [GitHub](https://github.com/hush-cd/HRDE)
-
-- **Empowering Large Language Models to Set up a Knowledge Retrieval Indexer via Self-Learning**  
-    Xun Liang$^*$, Simin Niu$^*$, Zhiyu li$^†$, Sensen Zhang, **Shichao Song**, Hanyu Wang, Jiawei Yang, Feiyu Xiong, Bo Tang, Chenyang Xi  
-    *arXiv*, 2024.05.
-    [arXiv](https://arxiv.org/abs/2405.16933) /
-    [GitHub](https://github.com/IAAR-Shanghai/PGRAG) /
-    [WeChat Article](https://mp.weixin.qq.com/s/0x0gtDWwxDR95DfpOHzKVQ)
-
-- **Fake Artificial Intelligence Generated Contents (FAIGC): A Survey of Theories, Detection Methods, and Opportunities**  
-    Xiaomin Yu$^*$, Yezhaohui Wang$^*$, Yanfang Chen$^†$, Zhen Tao, Dinghao Xi, **Shichao Song**, Simin Niu, Zhiyu Li  
-    *arXiv*, 2024.05.
-    [arXiv](https://arxiv.org/abs/2405.00711)
-
 - **Grimoire is All You Need for Enhancing Large Language Models**  
     Ding Chen$^*$, **Shichao Song$^*$**, Qingchen Yu, Zhiyu Li$^†$, Wenjin Wang, Feiyu Xiong, Bo Tang  
     *arXiv*, 2024.01.
     [arXiv](https://arxiv.org/abs/2401.03385) /
     [GitHub](https://github.com/IAAR-Shanghai/Grimoire) /
     [WeChat Article](https://mp.weixin.qq.com/s/uz-BVUm6KCZ0r02K6wd8Sw)
-
-### <font color="lightgray">H3</font> Unpublished
 
 - **Research on Cold-Start of Product Recommendation with Graph Neural Network (In Chinese, 基于图神经网络的商品推荐冷启动研究)**  
     **Shichao Song**  
@@ -209,7 +171,7 @@ $^†$ Corresponding Author
 ------
 
 <footer style='text-align:center; font-size:0.85em; line-height: 1.35em'>
-    Last update: 2025.02 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/edit/master/index.md'>Edit this page</a><br>
+    Last update: 2025.06 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/edit/master/index.md'>Edit this page</a><br>
     &copy; 2023-2025 Shichao Song
 </footer>
 <br>
