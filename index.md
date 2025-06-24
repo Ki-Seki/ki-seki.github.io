@@ -21,7 +21,6 @@ title: Shichao Song (宋世超)
     <a href='https://twitter.com/Ki_Seki_here'>X</a> /
     <a href='https://www.linkedin.com/in/song-sc/'>LinkedIn</a> /
     <a href='https://scholar.google.com/citations?user=6t4_yXMAAAAJ'>Google Scholar</a> /
-    <a href='https://www.prophy.science/author/100188805/Shichao-Song'>Prophy</a> /
     <a href='https://github.com/Ki-Seki'>GitHub</a> /
     <a href='https://huggingface.co/Ki-Seki'>Hugging Face</a> /
     <a href='./assets/Resume-250624.pdf'>CV</a> /
