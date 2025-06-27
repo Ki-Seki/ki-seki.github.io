@@ -18,7 +18,7 @@ title: Shichao Song (宋世超)
 <p>
     More: 
     <a href='mailto:songsc.hello@gmail.com'>E-mail</a> /
-    <a href='https://twitter.com/Ki_Seki_here'>X</a> /
+    <a href='https://x.com/songsc_'>X</a> /
     <a href='https://www.linkedin.com/in/song-sc/'>LinkedIn</a> /
     <a href='https://scholar.google.com/citations?user=6t4_yXMAAAAJ'>Google Scholar</a> /
     <a href='https://github.com/Ki-Seki'>GitHub</a> /
@@ -58,7 +58,7 @@ $^†$ Corresponding Author
     Zhiyu Li$^*$, **Shichao Song$^*$**, Hanyu Wang$^*$, Simin Niu$^*$, Ding Chen$^*$, Jiawei Yang, Chenyang Xi, Huayi Lai, Jihao Zhao, Yezhaohui Wang, Junpeng Ren, Zehao Lin, Jiahao Huo, Tianyi Chen, Kai Chen, Kehang Li, Zhiqiang Yin, Qingchen Yu, Bo Tang, Hongkang Yang$^†$, Zhi-Qin John Xu$^†$, Feiyu Xiong$^†$  
     *arXiv*, 2025.05.
     [arXiv](https://arxiv.org/abs/2505.22101) /
-    [GitHub](https://github.com/MemTensor/MemOS) /
+    [GitHub (TO BE RELEASED)](https://github.com/MemTensor/MemOS) /
     [WeChat Article](https://mp.weixin.qq.com/s/J6UE9h8iJOh044Umq-Ok1g)
 
 - **xFinder: Robust and Pinpoint Answer Extraction for Large Language Models**  
