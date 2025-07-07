@@ -23,7 +23,7 @@ title: Shichao Song (宋世超)
     <a href='https://scholar.google.com/citations?user=6t4_yXMAAAAJ'>Google Scholar</a> /
     <a href='https://github.com/Ki-Seki'>GitHub</a> /
     <a href='https://huggingface.co/Ki-Seki'>Hugging Face</a> /
-    <a href='./assets/Resume-250624.pdf'>CV</a> /
+    <a href='./assets/Resume-250707.pdf'>CV</a> /
     <a href='https://songsc.atomgit.net/us/'>💘</a>
 </p>
 
