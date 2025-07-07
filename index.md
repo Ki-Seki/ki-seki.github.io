@@ -54,7 +54,7 @@ title: Shichao Song (宋世超)
 $^*$ Contributed Equally  
 $^†$ Corresponding Author
 
-- **MemOS: An Operating System for Memory-Augmented Generation (MAG) in Large Language Models**  
+- **MemOS: A Memory OS for AI System**  
     Zhiyu Li, **Shichao Song**, Chenyang Xi, Hanyu Wang, Chen Tang, Simin Niu, Ding Chen, Jiawei Yang, Chunyu Li, Qingchen Yu, Jihao Zhao, Yezhaohui Wang, Peng Liu, Zehao Lin, Pengyuan Wang, Jiahao Huo, Tianyi Chen, Kai Chen, Kehang Li, Zhen Tao, Junpeng Ren, Huayi Lai, Hao Wu, Bo Tang, Zhenren Wang, Zhaoxin Fan, Ningyu Zhang, Linfeng Zhang, Junchi Yan, Mingchuan Yang, Tong Xu, Wei Xu, Huajun Chen, Haofeng Wang, Hongkang Yang, Wentao Zhang$^†$, Zhi-Qin John Xu$^†$, Siheng Chen$^†$, Feiyu Xiong$^†$  
     *arXiv*, 2025.05.
     [arXiv](https://arxiv.org/abs/2505.22101) /
