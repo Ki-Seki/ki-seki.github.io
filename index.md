@@ -56,8 +56,8 @@ $^†$ Corresponding Author
 
 - **MemOS: A Memory OS for AI System**  
     Zhiyu Li, **Shichao Song**, Chenyang Xi, Hanyu Wang, Chen Tang, Simin Niu, Ding Chen, Jiawei Yang, Chunyu Li, Qingchen Yu, Jihao Zhao, Yezhaohui Wang, Peng Liu, Zehao Lin, Pengyuan Wang, Jiahao Huo, Tianyi Chen, Kai Chen, Kehang Li, Zhen Tao, Junpeng Ren, Huayi Lai, Hao Wu, Bo Tang, Zhenren Wang, Zhaoxin Fan, Ningyu Zhang, Linfeng Zhang, Junchi Yan, Mingchuan Yang, Tong Xu, Wei Xu, Huajun Chen, Haofeng Wang, Hongkang Yang, Wentao Zhang$^†$, Zhi-Qin John Xu$^†$, Siheng Chen$^†$, Feiyu Xiong$^†$  
-    *arXiv*, 2025.05.
-    [arXiv](https://arxiv.org/abs/2505.22101) /
+    *arXiv*, 2025.07.
+    [arXiv](https://arxiv.org/abs/2507.03724) /
     [GitHub](https://github.com/MemTensor/MemOS) /
     [X Thread](https://x.com/omarsar0/status/1928116365640225222) /
     [WeChat Article](https://mp.weixin.qq.com/s/J6UE9h8iJOh044Umq-Ok1g)
