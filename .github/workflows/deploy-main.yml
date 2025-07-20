@@ -1,12 +1,10 @@
-name: Deploy Hugo Site to Pages
+name: Deploy to Production
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
 # Allow one concurrent deployment
 concurrency:
   group: "pages"
@@ -50,6 +48,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
+
   # Deployment job
   deploy:
     environment:

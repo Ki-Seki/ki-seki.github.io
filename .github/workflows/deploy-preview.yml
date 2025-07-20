@@ -1,0 +1,99 @@
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    branches:
+      - main
+
+# Default to bash
+defaults:
+  run:
+    shell: bash
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to preview branches
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # Build and deploy preview
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      HUGO_VERSION: 0.146.0
+    steps:
+      - name: Install Hugo CLI
+        run: |
+          wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_linux-amd64.deb \
+          && sudo dpkg -i ${{ runner.temp }}/hugo.deb
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build with Hugo
+        run: |
+          hugo \
+            --gc \
+            --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+      - name: Deploy Preview to Branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages-preview-${{ github.head_ref }}
+          force_orphan: true
+        
+      - name: Comment Preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = context.payload.pull_request.head.ref;
+            const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/`;
+            const comment = `🚀 **Preview deployed!**
+            
+            📖 Preview URL: ${previewUrl}
+            🌿 Branch: \`gh-pages-preview-${branchName}\`
+            
+            This preview will be updated automatically when you push new commits to this PR.`;
+            
+            // Check if preview comment already exists
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            
+            const existingComment = comments.data.find(comment => 
+              comment.body.includes('Preview deployed!')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  # Cleanup preview when PR is closed
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Delete Preview Branch
+        run: |
+          git push origin --delete gh-pages-preview-${{ github.head_ref }} || echo "Preview branch already deleted or doesn't exist"
