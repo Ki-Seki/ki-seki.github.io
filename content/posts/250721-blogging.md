@@ -12,10 +12,10 @@ So, I hope to create cool stuff, write fascinating content, and hopefully catch 
 ## Citation
 
 ```bibtex
-@article{song2025blogging,
+@article{song2025whyistarted,
   title = {Why I Started Blogging},
   author = {Song, Shichao},
-  journal = {ki-seki.github.io},
+  journal = {Shichao's Blog},
   year = {2025},
   month = {July},
   url = "https://ki-seki.github.io/posts/250721-blogging/"
