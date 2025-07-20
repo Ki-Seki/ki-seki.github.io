@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Auto-generate BibTeX citation for blog posts based on config.yml and post YAML frontmatter.
+Auto-generate BibTeX citations for blog posts based on config.yml and post YAML frontmatter.
 
 Usage:
     python generate_bibtex_citation.py <post_file_path>
