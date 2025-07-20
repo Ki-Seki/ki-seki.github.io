@@ -12,7 +12,7 @@ defaults:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to preview branches
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
