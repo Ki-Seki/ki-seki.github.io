@@ -1,0 +1,168 @@
+baseURL: https://ki-seki.github.io/
+title: Shichao's Blog
+languageCode: en
+copyright: "© 2025 Shichao Song"
+theme: PaperMod
+
+enableInlineShortcodes: true
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+enableEmoji: true
+pygmentsUseClasses: true
+mainsections:
+  - posts
+  - archives
+
+
+minify:
+  disableXML: false
+  minifyOutput: true
+
+pagination:
+  disableAliases: false
+  pagerSize: 5
+
+languages:
+  en:
+    languageName: "English"
+    weight: 1
+    taxonomies:
+      category: categories
+      tag: tags
+      series: series
+    menu:
+      main:
+        - name: Posts
+          url: posts/
+          weight: 1
+        - name: Archive
+          url: archives/
+          weight: 5
+        - name: Search
+          url: search/
+          weight: 10
+        - name: Tags
+          url: tags/
+          weight: 10
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+params:
+  env: production # to enable google analytics, opengraph, twitter-cards and schema.
+  description: Shichao's personal blog
+  author:
+    - Shichao Song
+
+  defaultTheme: auto
+  disableThemeToggle: false
+  ShowShareButtons: true
+  ShowReadingTime: true
+  # disableSpecial1stPost: true
+  displayFullLangName: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowRssButtonInSectionTermList: true
+  ShowAllPagesInArchive: true
+  ShowPageNums: true
+  ShowToc: true
+  comments: true
+
+  profileMode:
+    enabled: false
+    title: PaperMod
+    imageUrl: "#"
+    imageTitle: my image
+    imageWidth: 120
+    imageHeight: 120
+    buttons:
+      - name: Archives
+        url: archives
+      - name: Tags
+        url: tags
+
+  homeInfoParams:
+    Title: 👋 Hi, all!
+    Content: >
+      I am Shichao Song, a second-year PhD student.
+      My current research focuses on large language models.
+      I blog about my research and life.
+
+  socialIcons:
+    - name: linkedin
+      url: https://www.linkedin.com/in/song-sc/
+    - name: googlescholar
+      url: https://scholar.google.com/citations?user=6t4_yXMAAAAJ
+    - name: github
+      url: https://github.com/Ki-Seki
+    - name: X
+      url: https://x.com/songsc_
+    - name: huggingface
+      title: Hugging Face
+      url: https://huggingface.co/Ki-Seki
+
+  editPost:
+    URL: "https://github.com/Ki-Seki/ki-seki.github.io/edit/main/content"
+    Text: "Suggest Changes" # edit text
+    appendFilePath: true # to append file path to Edit link
+
+  analytics:
+      google:
+          SiteVerificationTag: "songsc_blog"
+
+  assets:
+    disableHLJS: true
+    favicon: https://img.icons8.com/ios/50/capybara.png
+    apple_touch_icon: https://img.icons8.com/ios/50/capybara.png
+    safari_pinned_tab: https://img.icons8.com/ios/50/capybara.png
+
+  fuseOpts:
+      isCaseSensitive: false
+      shouldSort: true
+      location: 0
+      distance: 1000
+      threshold: 0.4
+      minMatchCharLength: 0
+      keys: ["title", "permalink", "summary", "content"]
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false
+    anchorLineNos: true
+    codeFences: true
+    guessSyntax: true
+    lineNos: true
+    style: monokai
+
+privacy:
+  vimeo:
+    disabled: false
+    simple: true
+
+  x:
+    disabled: false
+    enableDNT: true
+    simple: true
+
+  instagram:
+    disabled: false
+    simple: true
+
+  youtube:
+    disabled: false
+    privacyEnhanced: true
+
+services:
+  instagram:
+    disableInlineCSS: true
+  x:
+    disableInlineCSS: true
