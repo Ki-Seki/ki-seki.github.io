@@ -149,11 +149,12 @@ def generate_bibtex(config, frontmatter, post_path):
 def main():
     parser = argparse.ArgumentParser(description='Generate BibTeX citation for blog posts')
     parser.add_argument('post_path', help='Path to the blog post markdown file')
+    parser.add_argument('--config', default='config.yml', help='Path to the configuration file (default: config.yml)')
     
     args = parser.parse_args()
     
     # Load config
-    config = load_config("config.yml")
+    config = load_config(args.config)
     
     # Parse post frontmatter
     frontmatter = parse_post_frontmatter(args.post_path)
