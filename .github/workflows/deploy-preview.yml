@@ -34,7 +34,7 @@ jobs:
         run: |
           hugo \
             --gc \
-            --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+            --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/gh-pages-preview-${{ github.head_ref }}/"
       - name: Deploy Preview to Branch
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -48,7 +48,7 @@ jobs:
         with:
           script: |
             const branchName = context.payload.pull_request.head.ref;
-            const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/`;
+            const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/gh-pages-preview-${branchName}/`;
             const comment = `🚀 **Preview deployed!**
             
             📖 Preview URL: ${previewUrl}
