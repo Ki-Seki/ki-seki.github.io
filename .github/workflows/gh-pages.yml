@@ -1,22 +1,12 @@
-name: Deploy Hugo PaperMod Demo to Pages
+name: Deploy Hugo Site to Pages
 
 on:
   push:
-    paths-ignore:
-      - "images/**"
-      - "LICENSE"
-      - "README.md"
     branches:
-      - master
-      - exampleSite
-  workflow_dispatch:
-    # manual run
-    inputs:
-      hugoVersion:
-        description: "Hugo Version"
-        required: false
-        default: "0.146.0"
-
+      - main
+  pull_request:
+    branches:
+      - main
 # Allow one concurrent deployment
 concurrency:
   group: "pages"
@@ -38,7 +28,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      HUGO_VERSION: ${{ github.event.inputs.hugoVersion || '0.146.0' }}
+      HUGO_VERSION: 0.146.0
     steps:
       - name: Install Hugo CLI
         run: |
@@ -47,18 +37,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: exampleSite
+          submodules: recursive
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-      - name: Get Theme
-        run: git submodule update --init --recursive
-      - name: Update theme to Latest commit
-        run: git submodule update --remote --merge
       - name: Build with Hugo
         run: |
           hugo \
-            --buildDrafts --gc \
+            --gc \
             --baseURL ${{ steps.pages.outputs.base_url }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
