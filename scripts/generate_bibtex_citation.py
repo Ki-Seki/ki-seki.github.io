@@ -93,7 +93,8 @@ def format_date(date_str):
         }
     except ValueError as e:
         print(f"Warning: Could not parse date '{date_str}': {e}")
-        return {'year': '2025', 'month': 'January'}
+        current_year = datetime.now().year
+        return {'year': str(current_year), 'month': 'January'}
 
 
 def generate_bibtex(config, frontmatter, post_path):
