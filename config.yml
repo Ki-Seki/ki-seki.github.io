@@ -59,11 +59,11 @@ params:
   author:
     - Shichao Song
 
+  math: true
   defaultTheme: auto
   disableThemeToggle: false
   ShowShareButtons: true
   ShowReadingTime: true
-  # disableSpecial1stPost: true
   displayFullLangName: true
   ShowPostNavLinks: true
   ShowBreadCrumbs: true
@@ -108,7 +108,7 @@ params:
       url: https://huggingface.co/Ki-Seki
 
   editPost:
-    URL: "https://github.com/Ki-Seki/ki-seki.github.io/edit/main/content"
+    URL: "https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content"
     Text: "Suggest Changes" # edit text
     appendFilePath: true # to append file path to Edit link
 
