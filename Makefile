@@ -1,6 +1,7 @@
 clean:
 	rm -rf public
 	rm -rf .hugo_build.lock
+	rm -rf .ruff_cache
 
 bibtex:
 	@echo "Generating BibTeX citations for all posts:"
@@ -12,3 +13,6 @@ bibtex:
 			python scripts/generate_bibtex_citation.py "$$post"; \
 		fi; \
 	done
+
+pre_commit:
+	pre-commit run --all-files

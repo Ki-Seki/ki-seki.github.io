@@ -1,0 +1,54 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+        exclude: ^.*\.egg-info/
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: pretty-format-json
+        args: [--autofix, --no-ensure-ascii, --no-sort-keys]
+      - id: check-ast
+      - id: debug-statements
+      - id: check-docstring-first
+
+  - repo: https://github.com/pre-commit/pre-commit
+    rev: v4.2.0
+    hooks:
+      - id: validate_manifest
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.8
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: https://github.com/python-poetry/poetry
+    rev: '2.1.3'
+    hooks:
+    -   id: poetry-check
+    -   id: poetry-lock
+    -   id: poetry-install
+
+  - repo: https://github.com/hauntsaninja/no_implicit_optional
+    rev: '1.4'
+    hooks:
+    -   id: no_implicit_optional
+        name: no_implicit_optional
+        description: "A codemod to make your implicit optional type hints PEP 484 compliant"
+        entry: no_implicit_optional
+        language: python
+        minimum_pre_commit_version: 2.9.2
+        require_serial: true
+        types_or: [python, pyi]
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+    - id: markdownlint
+      args: [ --dot ]
