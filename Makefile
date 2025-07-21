@@ -1,6 +1,7 @@
 clean:
 	rm -rf public
 	rm -rf .hugo_build.lock
+	rm -rf .ruff_cache
 
 bibtex:
 	@echo "Generating BibTeX citations for all posts:"
