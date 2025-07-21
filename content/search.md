@@ -1,5 +1,5 @@
 ---
 title: "Search"
-placeholder: "Search Shichao's blogs"
+placeholder: "Search blogs"
 layout: "search"
 ---
