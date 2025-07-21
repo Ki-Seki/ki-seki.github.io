@@ -2,7 +2,7 @@
 date: "2025-07-21T01:59:43+08:00"
 title: "Why I Started Blogging"
 tags: ["blog", "academia", "AI"]
-ShowToc: true
+math: false
 ---
 
 The future of research won't belong to the peer-review system—which is already crumbling, in my view. Plus, blogging has become an integral part of academic discourse; for instance, ICLR introduced blog post tracks in 2021 [^Gauthier].
