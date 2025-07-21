@@ -95,14 +95,14 @@ params:
       I blog about my research and life.
 
   socialIcons:
-    - name: linkedin
-      url: https://www.linkedin.com/in/song-sc/
     - name: googlescholar
       url: https://scholar.google.com/citations?user=6t4_yXMAAAAJ
     - name: github
       url: https://github.com/Ki-Seki
     - name: X
       url: https://x.com/songsc_
+    - name: linkedin
+      url: https://www.linkedin.com/in/song-sc/
     - name: huggingface
       title: Hugging Face
       url: https://huggingface.co/Ki-Seki
