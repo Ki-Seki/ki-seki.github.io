@@ -11,11 +11,19 @@ math: true
 
 The following HTML `<h1>`—`<h6>` elements represent six levels of section headings. `<h1>` is the highest section level while `<h6>` is the lowest.
 
+```md
+# H1
+
+## H2
+
+### H3
+
 #### H4
 
 ##### H5
 
 ###### H6
+```
 
 ### Paragraph
 
@@ -25,12 +33,12 @@ Itatur? Quiatae cullecum rem ent aut odis in re eossequodi nonsequ idebis ne sap
 
 The blockquote element represents content that is quoted from another source, optionally with a citation which must be within a `footer` or `cite` element, and optionally with in-line changes such as annotations and abbreviations.
 
-##### Blockquote without attribution
+#### Blockquote without attribution
 
 > Tiam, ad mint andaepu dandae nostion secatur sequo quae.
 > **Note** that you can use _Markdown syntax_ within a blockquote.
 
-##### Blockquote with attribution
+#### Blockquote with attribution
 
 > Don't communicate by sharing memory, share memory by communicating.
 >
@@ -47,7 +55,7 @@ Tables aren't part of the core Markdown spec, but Hugo supports them out-of-the-
 | Bob   | 27  |
 | Alice | 23  |
 
-##### Inline Markdown within tables
+#### Inline Markdown within tables
 
 | Italics   | Bold     | Code   |
 | --------- | -------- | ------ |
@@ -55,19 +63,19 @@ Tables aren't part of the core Markdown spec, but Hugo supports them out-of-the-
 
 ### List Types
 
-##### Ordered List
+#### Ordered List
 
 1. First item
 2. Second item
 3. Third item
 
-##### Unordered List
+#### Unordered List
 
 - List item
 - Another item
 - And another item
 
-##### Nested Unordered list
+#### Nested Unordered list
 
 - Fruit
   - Apple
@@ -77,7 +85,7 @@ Tables aren't part of the core Markdown spec, but Hugo supports them out-of-the-
   - Milk
   - Cheese
 
-##### Nested Ordered list
+#### Nested Ordered list
 
 1. Fruit
     - Apple

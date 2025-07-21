@@ -12,3 +12,6 @@ bibtex:
 			python scripts/generate_bibtex_citation.py "$$post"; \
 		fi; \
 	done
+
+pre_commit:
+	pre-commit run --all-files
