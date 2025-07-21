@@ -59,9 +59,9 @@ params:
   author:
     - Shichao Song
 
-  math: true
   defaultTheme: auto
   disableThemeToggle: false
+  ShowWordCount: true
   ShowShareButtons: true
   ShowReadingTime: true
   displayFullLangName: true
