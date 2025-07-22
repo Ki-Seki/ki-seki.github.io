@@ -1,6 +1,12 @@
 ---
 title: "About"
 summary: "About Shichao Song"
+layout: "about"
+type: "page"
+hideMeta: true
+ShowToc: false
+ShowShareButtons: false
+ShowPostNavLinks: false
 ---
 
 # 👋 Hi, I'm Shichao Song!

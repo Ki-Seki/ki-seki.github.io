@@ -13,3 +13,78 @@
           }
     );"></script>
 {{ end }}
+
+{{/* Custom styles for About page */}}
+{{ if eq .Type "page" }}
+<style>
+.page-single {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+.page-content {
+    line-height: 1.7;
+    font-size: 1.1rem;
+}
+
+.page-content h1 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    color: var(--primary);
+}
+
+.page-content h2 {
+    margin-top: 1.8rem;
+    margin-bottom: 0.8rem;
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.page-content p {
+    margin-bottom: 1.2rem;
+}
+
+.page-content ul {
+    margin-bottom: 1.5rem;
+}
+
+.page-content li {
+    margin-bottom: 0.5rem;
+}
+
+.page-footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+/* Make social links in content more prominent */
+.page-content a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom-color 0.2s ease;
+}
+
+.page-content a:hover {
+    border-bottom-color: var(--primary);
+}
+</style>
+{{ end }}
