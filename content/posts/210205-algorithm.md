@@ -1,46 +1,277 @@
 ---
 date: '2021-02-05T22:57:00+08:00'
 title: 'C/C++ 语言算法与数据结构学习笔记'
-summary: '原创的 C/C++ 语言算法与数据结构学习笔记，主要是给自己备考用的。面向有经验的程序员，提供参考。从 https://github.com/Ki-Seki/algorithm 迁移而来。'
+summary: '给自己备考用的 C/C++ 语言算法与数据结构学习笔记。从 https://github.com/Ki-Seki/algorithm 迁移而来。'
 tags: ['C++', 'data structure', 'algorithm']
 math: true
 ---
 
-## 1. 排序 Sort
+> 注意：文中许多算法设计是根据《算法笔记》[^algo_note] 来写的。
 
-* I 冒泡排序 Bubble Sort
-  * 源码：
+## 排序 Sort
+
+* 冒泡排序 Bubble Sort
   * 思想：每趟中，依次比较两个相邻元素，传递式地在将一个最值传递到端
   * 评价：$O(n^2)$
-* II 选择排序 Selection Sort
-  * [源码](./sort.cpp)
+* 选择排序 Selection Sort
   * 思想：每趟中，找到最值置于一端
   * 评价：$O(n^2)$
-* III 插入排序 Insertion Sort
-  * [源码](./sort.cpp)
+* 插入排序 Insertion Sort
   * 思想：原始序列一切为二，有序和无序。每一趟，从无序中取一个插入有序的。类比整理纸牌。
   * 评价：$O(n^2)$
-* IV 归并排序 Merge Sort
-  * [源码](./sort.cpp)
+* 归并排序 Merge Sort
   * 思想：二分思想，每次归并两个不相交的部分。
   * 实现：**merge 函数**，合并两个不相交的两部分，拉链式合并到新数组，最后用 memcpy；**merge_sort 函数**，利用辅助函数 merge 递归地或迭代地合并
   * 评价：$O(nlogn)$
-* V 快速排序 Quick Sort
-  * [源码](./sort.cpp)
+* 快速排序 Quick Sort
   * 思想：two pointers，分而治之。按主元分割序列。
   * 实现：**partition 函数**，以 two pointers 的方法将序列分割成两个部分，返回主元（prime）下标；**quick_sort 函数**，分而治之地使用 partition 函数
   * 评价：$O(nlogn)$
-* VI 堆排序 Heap Sort
-  * [源码](./data_structure/Heap.cpp)
+* 堆排序 Heap Sort
   * 思想：利用堆优先队列的性质
   * 实现：不断取堆顶置于末尾
   * 评价：$O(nlogn)$
 
-## 2. 查找 Search
+{{<details "代码模板">}}
 
-### 2.1. 二分查找 Binary Search
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>  // 用于随机生成待排序的测试数据
+#include <cmath>  // 为使用 round
+#define MAXN 10005  // 待排序数组的元素大小范围
+using namespace std;
 
-[源码](./BinarySearch.cpp)
+// 选择排序：一趟结束，找出最值放在前面，start 和 end 左闭右开
+void select_sort(int *start, int *end)
+{
+    for (int i = 0; start + i < end; i++)  // 从 start + i 到 end 是 待排部分
+    {
+        int min = i;
+        for (int j = i + 1; start + j < end; j++)  // 找到最小值下标
+            if (*(start + j) < *(start + min))
+                min = j;
+        if (start[min] != start[i])  // 当找到的最小值需要交换时
+        {
+            int tmp = start[min];
+            start[min] = start[i];
+            start[i] = tmp;
+        }
+    }
+}
+
+// 插入排序：每一趟找到一个合适的值，插入前面，其余值后移，start 和 end 左闭右开
+void insertion_sort(int *start, int *end)
+{
+    for (int i = 0; start + i < end; i++)  // 从 start + i 到 end 是 待排部分
+    {
+        int tmp = start[i],  // 取待排的首个
+        pos = i - 1;  // 找到要插入的位置
+        for (; pos >= 0; pos--)
+            if (start[pos] > tmp)
+                start[pos+1] = start[pos];  // 后移以腾开要插入的位置
+            else
+                break;  // 找到位置
+        start[pos+1] = tmp;  // 插入
+    }
+}
+
+// 归并排序：二分 + 归并的思想
+
+// merge() 是辅助函数，归并一个数组的任意两个不相交的部分
+// 假设其中 l2 = r1 + 1
+void merge(int a[], int l1, int r1, int l2, int r2)
+{
+    int i = l1, j = l2;
+    int tmp[MAXN], index = 0;
+    while (i <= r1 && j <= r2)
+        if (a[i] < a[j]) tmp[index++] = a[i++];
+        else tmp[index++] = a[j++];
+    while (i <= r1)
+        tmp[index++] = a[i++];
+    while (j <= r2)
+        tmp[index++] = a[j++];
+    memcpy(a + l1, tmp, sizeof(int) * index);
+}
+// 递归实现的归并排序，left 和 right 左闭右闭
+void merge_sort_recursion(int a[], int left, int right)
+{
+    if (left < right)
+    {
+        int mid = left + (right - left) / 2;
+        merge_sort_recursion(a, left, mid);
+        merge_sort_recursion(a, mid + 1, right);
+        merge(a, left, mid, mid + 1, right);
+    }
+}
+// 迭代实现的归并排序，n 是数组长度
+void merge_sort_iteration(int a[], int n)
+{
+    for (int step = 2; step / 2 <= n; step *= 2)
+    {
+        for (int l1 = 0; l1 < n; l1 += step)  // 左区间的左端点按照 step 来遍历
+        {
+            int r1 = l1 + step / 2 - 1;
+            if (r1 + 1 < n)  // 当右区间存在元素，则合并
+                // 左区间 [l1, r1]，右区间 [r1 + 1, min(l1 + step - 1, n - 1)]
+                merge(a, l1, r1, r1 + 1, min(l1 + step - 1, n - 1));
+        }
+    }
+}
+
+// 快速排序：按主元分割数组，分而治之
+
+// 分割是辅助函数，返回最终主元下标，left 和 right 左闭右闭
+int partition(int a[], int left, int right)
+{
+    // 删去前两行，将固定 a[left] 为主元
+    int p = round(1.0 * rand() / RAND_MAX * (right - left) + left);
+    swap(a[p], a[left]);
+
+    int temp = a[left];
+    while (left < right)
+    {
+        while (left < right && a[right] > temp) right--;
+        a[left] = a[right];
+        while (left < right && a[left] <= temp) left++;
+        a[right] = a[left];
+    }
+    a[left] = temp;
+    return left;
+}
+
+// 分割函数的另一种写法
+// decreasingly partition the array in [left, right]
+int randPartition(int array[], int left, int right)
+{
+    int p = rand() % (right - left) + left;
+    swap(array[p], array[left]);
+
+    int prime = left++;  // 主元为初始的 left 值，left 值 然后向后位移一位
+    while (left < right)  // until left == right
+    {
+        while (left < right && array[left] >= array[prime]) left++;
+        while (left < right && array[right] < array[prime]) right--;
+        swap(array[left], array[right]);
+    }
+    swap(array[prime], array[left - 1]);  // 交换主元到中间
+    return left;
+}
+
+// 快速排序主函数，left 和 right 左闭右闭
+void quick_sort(int a[], int left, int right)
+{
+    if (left < right)
+    {
+        // pos 为分割点
+        int pos = partition(a, left, right);
+        quick_sort(a, left, pos - 1);
+        quick_sort(a, pos + 1, right);
+    }
+}
+
+// 测试 ↓
+
+// 根据 seed 生成随机的 n 个随机数
+void gen_data(int data[], unsigned seed, int n)
+{
+    srand(seed);
+    for (int i = 0; i < n; i++)
+        data[i] = rand() - (RAND_MAX / 2);
+}
+
+void output_array(int data[], int n)
+{
+    for (int i = 0; i < n; i++)
+        printf("%d ", data[i]);
+    printf("\n");
+}
+
+void sort_test()
+{
+    int data[MAXN];
+    // test 1
+    {
+        int seed = 23, n = 9;
+        gen_data(data, seed, n);
+        printf("test data: "); output_array(data, n);
+        select_sort(data, data + n);
+        printf("ss   "); output_array(data, n);
+        gen_data(data, seed, n); insertion_sort(data, data + n);
+        printf("is   "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_recursion(data, 0, n - 1);
+        printf("msr  "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_iteration(data, n);
+        printf("msi  "); output_array(data, n);
+        gen_data(data, seed, n); quick_sort(data, 0, n - 1);
+        printf("qs   "); output_array(data, n);
+        printf("\n");
+    }
+    // test 2
+    {
+        int seed = 3, n = 15;
+        gen_data(data, seed, n);
+        printf("test data: "); output_array(data, n);
+        select_sort(data, data + n);
+        printf("ss   "); output_array(data, n);
+        gen_data(data, seed, n); insertion_sort(data, data + n);
+        printf("is   "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_recursion(data, 0, n - 1);
+        printf("msr  "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_iteration(data, n);
+        printf("msi  "); output_array(data, n);
+        gen_data(data, seed, n); quick_sort(data, 0, n - 1);
+        printf("qs   "); output_array(data, n);
+        printf("\n");
+    }
+    // test 3
+    {
+        int seed = 1, n = 4;
+        gen_data(data, seed, n);
+        printf("test data: "); output_array(data, n);
+        select_sort(data, data + n);
+        printf("ss   "); output_array(data, n);
+        gen_data(data, seed, n); insertion_sort(data, data + n);
+        printf("is   "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_recursion(data, 0, n - 1);
+        printf("msr  "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_iteration(data, n);
+        printf("msi  "); output_array(data, n);
+        gen_data(data, seed, n); quick_sort(data, 0, n - 1);
+        printf("qs   "); output_array(data, n);
+        printf("\n");
+    }
+    // test 4
+    {
+        int seed = 8967, n = 10;
+        gen_data(data, seed, n);
+        printf("test data: "); output_array(data, n);
+        select_sort(data, data + n);
+        printf("ss   "); output_array(data, n);
+        gen_data(data, seed, n); insertion_sort(data, data + n);
+        printf("is   "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_recursion(data, 0, n - 1);
+        printf("msr  "); output_array(data, n);
+        gen_data(data, seed, n); merge_sort_iteration(data, n);
+        printf("msi  "); output_array(data, n);
+        gen_data(data, seed, n); quick_sort(data, 0, n - 1);
+        printf("qs   "); output_array(data, n);
+        printf("\n");
+    }
+}
+
+int main()
+{
+    sort_test();
+    return 0;
+}
+```
+
+{{</details>}}
+
+## 查找 Search
+
+### 二分查找 Binary Search
 
 * while 循环中是 left <= right or left < right
 * 接收参数 left，right 所代表的区间开闭
@@ -48,7 +279,143 @@ math: true
 * 不满足情况时的返回值
 * 返回值返回什么
 
-### 2.2. 散列 Hash
+{{<details "代码模板">}}
+
+```c++
+/*
+1. `二分查找的本质：查询有序序列第一个满足（或最后一个不满足）给定条件元素的位置`
+
+2. `要注意的关键点：`
+
+   * `while 循环中是 left <= right or left < right`
+   * `接收参数 left，right 所代表的区间开闭`
+   * `判断时的 array[mid] > or < or >= or <= x`
+   * `不满足情况时的返回值`
+   * `返回值返回什么`
+*/
+
+#include <iostream>
+#include <algorithm>
+
+// search x in a[] from left to right (both ends included)
+// return -1 if nothing was found
+int binarySearch(int x, int a[], int left, int right)
+{
+    int mid;
+    while (left <= right)  // to make mid cover all the possible points
+    {
+        mid = left + (right - left) / 2;  // using (left + right) / 2 might cause overflow
+        if (a[mid] == x)
+            return mid;
+        else if (a[mid] < x)
+            left = mid + 1;
+        else
+            right = mid -1;
+    }
+    return -1;
+}
+
+void binarySearchTest()
+{
+    const int n = 10;
+    int a[] = {-2, 0, 1, 2, 34, 56, 999, 1990, 11999, 12000};
+    printf("Array: {-2, 0, 1, 2, 34, 56, 999, 1990, 11999, 12000}\n");
+    printf("Search %d: %d\n", 9, binarySearch(9, a, 0, n - 1));
+    printf("Search %d: %d\n", 0, binarySearch(0, a, 0, n - 1));
+    printf("Search %d: %d\n", -5, binarySearch(-5, a, 4, n - 1));
+    printf("Search %d: %d\n", 100000, binarySearch(100000, a, 0, n - 1));
+    printf("Search %d: %d\n", 56, binarySearch(56, a, 0, n - 7));
+    printf("Search %d: %d\n", -2, binarySearch(-2, a, 0, n - 1));
+    printf("Search %d: %d\n", 12000, binarySearch(12000, a, 0, n - 1));
+    printf("Search %d: %d\n", 1990, binarySearch(1990, a, 0, n - 1));
+}
+
+// find the first one who is equal to x from left to right (both ends included)
+// return -1 if nothing was found
+int lowerBound(int x, int a[], int left, int right)
+{
+    if (left > right) return -1;
+    int mid;
+    while (left < right)  // 保证结束时 left 和 right 具有相同值
+    {
+        mid = left + (right - left) / 2;
+        if (a[mid] < x)
+            left = mid + 1;
+        else
+            right = mid - 1;
+    }
+    if (a[left] == x)
+        return left;
+    else
+        return -1;
+}
+
+// find the first one who is equal to x from left (included) to right (excluded)
+// return original right if no one bigger than x
+int upperBound(int x, int a[], int left, int right)
+{
+    int mid, r = right;
+    while (left < right)  // 保证结束时 left 和 right 具有相同值
+    {
+        mid = left + (right - left) / 2;
+        if (a[mid] <= x)
+            left = mid + 1;
+        else
+            right = mid;  // 不满足条件，所以不能 - 1
+    }
+    if (left >= r)
+        return r;
+    else
+        return left;
+}
+
+void lowerBoundUpperBoundTest()
+{
+    const int n = 10;
+    int a[] = {-2, 0, 2, 2, 34, 56, 999, 999, 999, 12000};
+    printf("Array: {-2, 0, 2, 2, 34, 56, 999, 999, 999, 12000}\n");
+    printf("Search %d: [%d, %d)\n", 9, lowerBound(9, a, 0, n - 1), upperBound(9, a, 0, n));
+    printf("Search %d: [%d, %d)\n", 2, lowerBound(2, a, 0, n - 1), upperBound(2, a, 0, n));
+    printf("Search %d: [%d, %d)\n", -5, lowerBound(-5, a, 4, n - 1), upperBound(-5, a, 4, n));
+    printf("Search %d: [%d, %d)\n", 100000, lowerBound(100000, a, 0, n - 1), upperBound(100000, a, 0, n));
+    printf("Search %d: [%d, %d)\n", 56, lowerBound(56, a, 0, n - 7), upperBound(56, a, 0, n - 6));
+    printf("Search %d: [%d, %d)\n", -2, lowerBound(-2, a, 0, n - 1), upperBound(-2, a, 0, n));
+    printf("Search %d: [%d, %d)\n", 12000, lowerBound(12000, a, 0, n - 1), upperBound(12000, a, 0, n));
+    printf("Search %d: [%d, %d)\n", 999, lowerBound(999, a, 0, n - 1), upperBound(999, a, 0, n));
+}
+
+// 有序序列第一个满足（最后一个不满足）给定条件元素位置查询问题的模板
+int sequentialProblemTemplate(int left, int right)
+{
+    int mid;
+    bool condition; // 条件
+    while (left < right)  // 最终 left == right
+    {
+        mid = left + (right - left) / 2;
+        if (condition)  // 条件成立，且待查元素在右
+            left = mid + 1;
+        else
+            right = mid;
+    }
+    return left;
+}
+
+int main()
+{
+    printf("BEGIN OF binarySearch() TEST\n");
+    binarySearchTest();
+    printf("END OF binarySearch() TEST\n");
+
+    printf("BEGIN OF lowerBound() & upperBound() TEST\n");
+    lowerBoundUpperBoundTest();
+    printf("END OF lowerBound() & upperBound() TEST\n");
+    return 0;
+}
+```
+
+{{</details>}}
+
+### 散列 Hash
 
 散列本质上是查找算法。常用的哈希函数 `hash(key) = key % table_size`，其中 `table_size` 尽量为素数，减少冲突（collision）。其他处理冲突的方法：
 
@@ -56,7 +423,7 @@ math: true
 * 平方探查法（Quadratic Probing）：若冲突，则 `hash(key) = (key ± n²) % table_size`；
 * 链表法：`hash(key)` 值相同的保存在相同的链表节点上
 
-### 2.3. 深度优先搜索 Depth First Search
+### 深度优先搜索 Depth First Search
 
 ```cpp
 // 使用递归实现 DFS 的模板
@@ -82,7 +449,7 @@ dfs(some_values_indicating_status)
 >
 > 3. **存在依赖性变量时更灵活的处理**：PAT A1087 “All Roads Lead to Rome”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1087.cpp` 中查看题解。
 
-### 2.4. 广度优先搜索 Breath First Search
+### 广度优先搜索 Breath First Search
 
 关键点：
 
@@ -132,28 +499,232 @@ void bfs(int s)  // 用 s 作索引，而非 Node 本身
 >
 > CODEUP 100000609-03 “【宽搜入门】魔板”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-CODEUP/100000609-03.cpp` 中查看题解。
 
-## 3. 数学 Mathematics
+## 数学 Mathematics
 
-### 3.1. 快速幂 Fast Power
-
-[源码](./fastPower.cpp)
+### 快速幂 Fast Power
 
 快速幂的核心原理是 $a^{m+n} = a^m + a^n$
 
-### 3.2. 最大公约数和最小公倍数 Greatest Common Divisor & Least Common Multiple
+{{<details "代码模板">}}
 
-[源码](./gcd_lcm.cpp)
+```c++
+/*
+ * hint:
+ * 三种快速幂计算 a ^ b % c，假设数据范围如下：
+ *      a < 10 ^ 9
+ * 0 <= b < 10 ^ 9
+ *  1 < c < 10 ^ 9
+ *
+ * 注意保存中间值的变量一定要定义为 long long 类型的；
+ * 如 fpr 中的 tmp，fpi 中的 ans 和 fpib 中的 ans。
+ * 如果定义为 int，可能导致意外的变量截断
+*/
+
+#include <iostream>
+#include <ctime>
+
+typedef long long LL;
+
+LL fastPowerRecursion(LL a, LL b, LL c)
+{
+    if (a == 0 || c == 1) return 0;  // special judge
+    if (b == 0) return 1;  // recursive boundary
+    a %= c;  // optimization
+    if (b & 1)  // if b is even
+        return a * fastPowerRecursion(a, b - 1, c) % c;
+    else
+    {
+        LL tmp = fastPowerRecursion(a, b / 2, c);
+        return tmp * tmp % c;
+    }
+}
+
+LL fastPowerIteration(LL a, LL b, LL c)
+{
+    if (a == 0 || c == 1) return 0;  // special judge
+    a %= c;
+    LL ans = 1;
+    while (b > 0)
+    {
+        if (b & 1) ans = ans * a % c;
+        a = a * a % c;
+        b >>= 1;
+    }
+    return ans;
+}
+
+LL fastPowerIterationBits(LL a, LL b, LL c)
+{
+    if (a == 0 || c == 1) return 0;  // special judge
+    a %= c;
+    int len = sizeof(LL) * 8, bit;
+    LL ans = 1;
+    for (int i = len - 1; i >= 0; i--)  // traversal from high bit to low bit in b
+    {
+        bit = (b >> i) & 1;
+        ans = (ans * ans) * (bit ? a : 1) %c;
+    }
+    return ans;
+}
+
+void test()
+{
+    LL data_set[300][3] = {
+        {55, 100, 450},
+        {34, 12, 43},
+        {0, 1, 1},
+        {1, 0, 1},
+        {0, 0, 23},
+        {100, 100, 10},
+        {5, 7, 99999},
+        {-1, 45, 4},
+        {99993425, 5345, 456754},
+        {987654321, 783589549, 4354359834}  // 正确答案可能是：34099175
+    };
+    int len = 10;
+
+    for (int i = 0; i < len; i++)
+    {
+        long begin, end;
+        LL fpr, fpi, fpib;
+        printf("Test %d:\n(a, b, c) = (%d, %d, %d)\n", i + 1, data_set[i][0], data_set[i][1], data_set[i][2]);
+        begin = clock();
+        fpr = fastPowerRecursion(data_set[i][0], data_set[i][1], data_set[i][2]);
+        end = clock();
+        printf("fpr  %lld\t%ldms\n", fpr, (end - begin));
+
+        begin = clock();
+        fpi = fastPowerIteration(data_set[i][0], data_set[i][1], data_set[i][2]);
+        end = clock();
+        printf("fpi  %lld\t%ldms\n", fpi, (end - begin));
+
+        begin = clock();
+        fpib = fastPowerIterationBits(data_set[i][0], data_set[i][1], data_set[i][2]);
+        end = clock();
+        printf("fpib %lld\t%ldms\n", fpib, (end - begin));
+        printf("\n");
+    }
+}
+
+int main()
+{
+    printf("%d %d %d", fastPowerIteration(2, 499, 100000), fastPowerRecursion(2, 499, 100000), fastPowerIterationBits(2, 499, 100000));
+    // test();
+    return 0;
+}
+```
+
+{{</details>}}
+
+### 最大公约数和最小公倍数 Greatest Common Divisor & Least Common Multiple
 
 更相减损法：直接假设 a > b，则 gcd(a, b) = gcd(b, a%b)
 
-### 3.3. 素数 Prime Number
+{{<details "代码模板">}}
 
-[源码](./prime.cpp)
+```c++
+#include <iostream>
+
+using namespace std;
+
+// 最大公倍数的核心要点是:
+// 1. a, b, a%b 三个数的公约数相同
+// 2. a%b < a, a%b < b
+// 3. 假设 gcd(a, b) 中 a >= b 会使问题简化
+// 4. 即使初始时 a < b, (a, b) -> (b, a%b) 后也会重回标准
+int gcd(int a, int b)
+{
+    return (!b ? a : gcd(b, a%b));
+}
+
+int lcm(int a, int b)
+{
+    return a / gcd(a, b) * b;
+}
+
+int main()
+{
+    cout << lcm(1, 3) << lcm(2, 4) << lcm(3, 1) << lcm(4, 2);
+    return 0;
+}
+```
+
+{{</details>}}
+
+### 素数 Prime Number
 
 * 平方技术：判断给定数字是否是素数
 * 埃氏（Eratosthenes）筛法：求某范围内的所有素数，原理在于素数不是任何非 1 与非本身数字的倍数，因此从 2 开始枚举所有的倍数，枚举 3 所有的倍数...
 
-### 3.4. 取整与舍入 Round
+{{<details "代码模板">}}
+
+```c++
+/*
+ * hint:
+ * 素数相关的算法,包括：
+ * 使用 sqrt 来优化的素数判断函数
+ * 使用平方技巧来优化的素数判断函数
+ * 求素数表：埃氏筛法，Eratosthenes 筛法
+*/
+#include <iostream>
+#include <cmath>
+
+/* 平方技巧的证明：
+ * 任何一个数可以拆分成两因子相乘，如 a = n * m；
+ * 不失一般性，令 n <= m；
+ * 则 max(n) = √a
+ * 由于只需要判断所有的 n 是否既不是 1 和 a 且是 a 的因子；
+ * 所以循环中遍历到 √a 即可
+*/
+
+// 使用 sqrt 来优化的素数判断函数
+// 需要 <cmath>
+bool is_prime(int n)
+{
+    for (int i = 2; i <= (int) sqrt(n * 1.0); i++)
+        if (n % i == 0)
+            return false;
+    return true;
+}
+
+// 使用平方技巧来优化的素数判断函数
+// 缺点是若 n 较大，易产生溢出
+bool is_prime_vice(int n)
+{
+    for (int i = 2; i * i <= n; i++)
+        if (n % i == 0)
+            return false;
+    return true;
+}
+
+// 求素数表：埃氏筛法，Eratosthenes 筛法
+// 时间复杂度 O(nloglogn)
+#define MAXN 100  // 素数表大小
+int prime[MAXN + 5], p_len = 0;
+bool not_prime[MAXN * 20] = {};
+// 找到 [2, n] 范围内的素数，保存至 prime[]
+void find_prime(int n)
+{
+    for (int i = 2; i <= n; i++)
+        if (not_prime[i] == false)
+        {
+            prime[p_len++] = i;
+            for (int j = i + i; j <= n; j += i)
+                not_prime[j] = true;
+        }
+}
+
+int main()
+{
+    find_prime(MAXN);
+    for (int i = 0; i < p_len; i++)
+        printf(" %d", prime[i]);
+}
+```
+
+{{</details>}}
+
+### 取整与舍入 Round
 
 * 向下取整
   * C 函数：`Rounded_down(double x) = int(x)`
@@ -168,33 +739,86 @@ void bfs(int s)  // 用 s 作索引，而非 Node 本身
 * 上下取整的关系
   * 数学公式：$\lceil x \rceil = \lfloor x \rfloor + \Delta,\quad \Delta = 1 - \lfloor 1.0 \cdot \lfloor x + 1 \rfloor - x \rfloor$
 
-### 3.5. 扩展欧几里得算法 Extended Euclidean algorithm
+### 扩展欧几里得算法 Extended Euclidean algorithm
 
 扩展欧几里得算法以 gcd 算法为基础，解决以下几个问题
 
-问题 1：ax + by = gcd(a, b) 的整数解？
+#### 问题 1：ax + by = gcd(a, b) 的整数解？
 
-[源码](./exGcd.cpp)
-
-1. 求解其中一组解：联立 $a \% b = a - (a / b) * b$ 与 $ax_0 + by_0 = bx_1 + (a\%b)y_2$
+1. 求解其中一组解：联立 $a \bmod b = a - (a / b) * b$ 与 $ax_0 + by_0 = bx_1 + (a \bmod b)y_2$
 2. 求解全部解：联立 $ax + by = gcd(a, b)$ 与 $a(x + s_1) + b(y - s_2) = gcd(a, b)$
-3. 求解最小正整数 x' 的解：$x' = (x \% \frac{b}{gcd} + \frac{b}{gcd}) \% \frac{b}{gcd}$
+3. 求解最小正整数 x' 的解：$x' = (x \bmod \frac{b}{gcd} + \frac{b}{gcd}) \bmod \frac{b}{gcd}$
 
-问题 2：ax + by = c 的整数解？
+{{<details "代码模板">}}
 
-若 $c \% gcd = 0$，则可以将问题转化 $ax + by = gcd \leftrightarrow a \frac{cx'}{gcd} + b \frac{cy'}{gcd} = c$
+```c++
+// 扩展欧几里得算法 Extended Euclidean algorithm
+// 求解方程 ax + by = gcd(a, b)
+#include <iostream>
+using namespace std;
 
-若 $c \% gcd ≠ 0$，则无解
+// 得到其中一组解
+int exGcd(int a, int b, int& x, int& y)
+{
+    if (b == 0)
+    {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    else
+    {
+        int gcd = exGcd(b, a % b, x, y), tmp = x;
+        x = y;
+        y = tmp - (a / b) * y;
+        return gcd;
+    }
+}
+// 输出全部解。(x, y) 是组已知解，输出已知解左右共 n 个解
+void output_all(int a, int b, int n)
+{
+    int x, y, g = exGcd(a, b, x, y);
+    for (int i = -n / 2; i <= n / 2; i++)
+        printf("(%d, %d)\n", x + b / g * i, y - a / g * i);
+}
+// 得到 x 的最小正整数解
+void get_min_positive(int a, int b, int& x, int& y)
+{
+    int gcd = exGcd(a, b, x, y),
+        b_gcd = b / gcd;
+    x = (x % b_gcd + b_gcd) % b_gcd;
+    y = (gcd - a * x) / b;
+}
 
-问题 3：同余式 ax ≡ c(mod m) 的整数解？
+int main()
+{
+    int a, b;
+    cin >> a >> b;
+    output_all(a, b, 10);
+    int x, y;
+    get_min_positive(a, b, x, y);
+    cout << x << ' ' << y << endl;
+    return 0;
+}
+```
 
-$ax ≡ c(mod \ m)$ 等价于 $(ax - c) \% m = 0$ 等价于求解 $ax + my = c$ 中 x 的值
+{{</details>}}
 
-若 $c \% gcd(a, m) = 0$，则同余式恰好有 gcd(a, m) 个模 m 意义下不相同的解
+#### 问题 2：ax + by = c 的整数解？
 
-若 $c \% gcd(a, m) ≠ 0$，则无解
+若 $c \bmod gcd = 0$，则可以将问题转化 $ax + by = gcd \leftrightarrow a \frac{cx'}{gcd} + b \frac{cy'}{gcd} = c$
 
-问题 4：ax ≡ 1 中 a 逆元的求解？
+若 $c \bmod gcd ≠ 0$，则无解
+
+#### 问题 3：同余式 ax ≡ c(mod m) 的整数解？
+
+$ax ≡ c(mod \ m)$ 等价于 $(ax - c) \bmod m = 0$ 等价于求解 $ax + my = c$ 中 x 的值
+
+若 $c \bmod gcd(a, m) = 0$，则同余式恰好有 gcd(a, m) 个模 m 意义下不相同的解
+
+若 $c \bmod gcd(a, m) ≠ 0$，则无解
+
+#### 问题 4：ax ≡ 1 中 a 逆元的求解？
 
 > **模运算下的乘法逆元**：若 $m > 1, ab ≡ 1(mod \ m)$，则 a 与 b 互为模运算下的乘法逆元。
 
@@ -208,11 +832,11 @@ ps. 找逆元主要是找到最小的正整数 x。
 
 方法一：利用逆元
 
-$\quad (b / a) \% m$
+$\quad (b / a) \bmod m$
 
-$\leftrightarrow (b * a') \% m$
+$\leftrightarrow (b * a') \bmod m$
 
-$\leftrightarrow (b \% m) * (a \% m) \% m$
+$\leftrightarrow (b \bmod m) * (a \bmod m) \bmod m$
 
 方法二：利用费马小定理
 
@@ -222,19 +846,91 @@ $\leftrightarrow (b \% m) * (a \% m) \% m$
 
 方法三：硬求解
 
-$\quad (b / a) \% m = x$
+$\quad (b / a) \bmod m = x$
 
 $\leftrightarrow b / a = km + x$
 
-$\leftrightarrow b \% (am) / a = x$
+$\leftrightarrow b \bmod (am) / a = x$
 
-### 3.6. 全排列 Full Permutation
+### 全排列 Full Permutation
 
-[源码](./full_permutation.cpp)
+{{<details "代码模板">}}
 
-### 3.7. 组合数学 Combinatorial Mathematics
+```c++
+#include <iostream>
+#define MAXN 11
+using namespace std;
 
-[源码](./combination.cpp)
+int n, p[MAXN];
+bool exist[MAXN] = {};
+
+void perm(int index)
+{
+    if (index == n + 1)
+    {
+        for (int i = 1; i <= n; i++)
+            printf("%d", p[i]);
+        printf("\n");
+        return;
+    }
+    for (int i = 1; i <= n; i++)
+        if (! exist[i])
+        {
+            p[index] = i;
+            exist[i] = true;
+            perm(index + 1);
+            exist[i] = false;
+        }
+}
+
+/*
+参数：
+    index: 现在正在为 p[index] 找合适的值
+    n: n 阶全排列
+    p[]: 暂存排列的数组
+    exist[]: 保存是否已经使用过某个数字的布尔状态数组
+功能：
+    按升序输出 n 阶数字全排列，返回全排列个数
+*/
+int perm(int index, int n, int p[], bool exist[])
+{
+    int cnt = 0;
+    if (index == n + 1)  // 递归边界
+    {
+        for (int i = 1; i <= n; i++)
+            printf("%d", p[i]);
+        printf("\n");
+        cnt++;
+    }
+    else
+        for (int x = 1; x <= n; x++)  // 枚举 1 ~ n 所有 x
+            if (! exist[x])  // 若 x 未被使用，填在 p[index]
+            {
+                p[index] = x;
+                exist[x] = true;
+                cnt += perm(index + 1, n, p, exist);
+                exist[x] = false;
+            }
+    return cnt;
+}
+
+int main()
+{
+    // 1st method, using global variables
+    n = 3;
+    perm(1);
+
+    // 2nd method
+    int p[15];
+    bool exist[15];
+    printf("%d : \n\n", perm(1, 5, p, exist));
+    return 0;
+}
+```
+
+{{</details>}}
+
+### 组合数学 Combinatorial Mathematics
 
 组合数的计算问题与快速幂，素数筛选，阶乘质因子分解，扩展欧几里得算法等相关。组合数算法是这些算法的综合应用。
 
@@ -248,11 +944,11 @@ $\leftrightarrow b \% (am) / a = x$
 >
 > 方法二：公式变形，边乘边除
 
-问题 3：$C^m_n \% p$ 的计算
+问题 3：$C^m_n \bmod p$ 的计算
 
 > 方法一：递推公式
 >
-> $C^m_n = (C^{m-1}_{n-1} + C^m_{n-1}) \% p$
+> $C^m_n = (C^{m-1}_{n-1} + C^m_{n-1}) \bmod p$
 >
 > 方法二：定义式 + 组合中各阶乘的质因子分解
 >
@@ -280,19 +976,319 @@ $\leftrightarrow b \% (am) / a = x$
 >
 > 方法六：Lucas 定理
 >
-> 计算 $C^m_n \% p$ 时，若 p 为素数，将 m 和 n 表示为 p 进制：
+> 计算 $C^m_n \bmod p$ 时，若 p 为素数，将 m 和 n 表示为 p 进制：
 >
 > $m = m_kp^k+m_{k-1}p^{k-1}+...+m_0$
 >
 > $n = n_kp^k+n_{k-1}p^{k-1}+...+n_0$
 >
-> 则 $C^m_n \% p \equiv C_{n_k}^{m_k}  C_{n_{k-1}}^{m_{k-1}} ... C_{n_0}^{m_0} \% p$
+> 则 $C^m_n \bmod p \equiv C_{n_k}^{m_k}  C_{n_{k-1}}^{m_{k-1}} ... C_{n_0}^{m_0} \bmod p$
 
-### 3.8. 欧拉公式 Euler's Formula
+{{<details "代码模板">}}
+
+```c++
+/*
+ * hint
+ *
+ * 警告！本部分所有内容仅供学习，程序健壮性未经严格测试
+*/
+#include <iostream>
+#include <cstring>
+#include <cmath>
+#define MAXN 80  // 组合数表的最大尺度
+typedef long long LL;
+using namespace std;
+
+// <<<<<<部分辅助函数>>>>>>
+
+LL primes[MAXN], primes_cnt = 0;
+bool not_prime[MAXN] = {};
+// 找到 n 以内的素数
+void find_prime(LL n)
+{
+    primes_cnt = 0;
+    for (int i = 2; i <= n; i++)
+        if (not_prime[i] == 0)
+        {
+            primes[primes_cnt++] = i;
+            for (int j = i + i; j <= n; j += i)
+                not_prime[j] = true;
+        }
+}
+
+// 快速幂计算 a^b%c
+LL fastPower(LL a, LL b, LL c)
+{
+    LL ans = 1;
+    a %= c;  // 优化
+    while (b)
+    {
+        if (b & 1) ans = ans * a % c;
+        a *= a;
+        b >>= 1;
+    }
+    return ans;
+}
+
+// 扩展欧几里得算法
+LL exGcd(LL a, LL b, LL& x, LL& y)
+{
+    if (b == 0)
+    {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    else
+    {
+        LL gcd = exGcd(b, a%b, x, y),
+            tmp = x;
+        x = y;
+        y = tmp - (a / b) * y;
+        return gcd;
+    }
+}
+
+// 逆元求解，即求解 ax ≡ 1(mod b)
+LL inverse(LL a, LL b)
+{
+    LL x, y, interval = b / exGcd(a, b, x, y);
+    return ((x % interval) + interval) % interval;
+}
+
+struct Factor {
+    int p, k;
+} factors[20];
+int factors_len = 0;
+// 分解质因数
+void factorize(LL n)
+{
+    // 建立素数表
+    find_prime(n);
+
+    // 再次初始化，如果去掉本行，factors_len 会改变成其他值，可能因为内存泄漏，暂时不管
+    factors_len = 0;
+
+    // 分解质因子
+    for (int i = 0; i < primes_cnt; i++)
+    {
+        if (primes[i] <= (int) sqrt(n * 1.0) && n % primes[i] == 0)
+        {
+            factors[factors_len].p = primes[i];
+            factors[factors_len].k = 0;
+            while (n % primes[i] == 0)
+            {
+                n /= primes[i];
+                factors[factors_len].k++;
+            }
+            factors_len++;
+        }
+    }
+    // 如有剩余
+    if (n != 1)
+    {
+        factors[factors_len].p = n;
+        factors[factors_len++].k = 1;
+    }
+}
+
+
+// <<<<<<问题 1：计算 prime counts in a factorial，即 n! 中有多少个质因子 p>>>>>>
+
+int pcf_recursion(int n, int p)
+{
+    if (n >= p) return n / p + pcf_recursion(n / p, p);
+    else return 0;
+}
+int pcf_iteration(int n, int p)
+{
+    int cnt = 0;
+    while (n)
+    {
+        cnt += n / p;
+        n /= p;
+    }
+    return cnt;
+}
+
+LL cbn[MAXN][MAXN] = {};  // 组合数计算记忆优化所用到的表
+
+// <<<<<<问题 2：组合数 C_n^m 的计算>>>>>>
+
+// 递归 + 记忆优化
+LL cbn_recursion(LL n, LL m)
+{
+    if (m == 0 || n == m) return 1;
+    else if (cbn[n][m] != 0) return cbn[n][m];
+    else return cbn[n][m] = cbn_recursion(n - 1, m - 1) + cbn_recursion(n - 1, m);
+}
+// 递推 + 记忆优化
+LL cbn_iteration(LL n, LL m)
+{
+    // 初始化边界值
+    for (int i = 1; i <= n; i++)
+        cbn[i][0] = cbn[i][i] = 1;
+    // 递推计算
+    for (int i = 2; i <= n; i++)
+        for (int j = 1; j <= i / 2; j++)
+        {
+            cbn[i][j] = cbn[i-1][j-1] + cbn[i-1][j];
+            cbn[i][i - j] = cbn[i][j];  // 优化
+        }
+    return cbn[n][m];
+}
+// 定义式分解，边乘边除，时间复杂度：O(n)
+LL cbn_defination(LL n, LL m)
+{
+    LL ans = 1;
+    for (LL i = 1; i <= m; i++)
+        ans = ans * (n - m + i) / i;  // 必须先乘后除，不然不能够整除
+        // 不能写成：“ans *= (n - m + i) / i;” ≡ “ans = ans *((n - m + i) / i);”
+    return ans;
+}
+
+// <<<<<<问题 3：C_n^m % p 的计算>>>>>>
+
+// 递归 + 记忆优化
+LL cbn_recursion(LL n, LL m, LL p)
+{
+    if (m == 0 || n == m) return 1;
+    if (cbn[n][m] != 0) return cbn[n][m];
+    return cbn[n][m] = (cbn_recursion(n - 1, m) + cbn_recursion(n - 1, m - 1)) % p;
+}
+// 递推 + 记忆优化
+LL cbn_iteration(LL n, LL m, LL p)
+{
+    for (int i = 0; i <= n; i++)
+        cbn[i][0] = cbn[i][i] = 1;
+    for (int i = 2; i <= n; i++)
+        for (int j = 1; j <= i / 2; j++)
+        {
+            cbn[i][j] = (cbn[i-1][j-1] + cbn[i-1][j]) % p;
+            cbn[i][i - j] = cbn[i][j];  // 优化
+        }
+    return cbn[n][m];
+}
+// 定义式 + 阶乘的质因子分解
+LL cbn_defination(LL n, LL m, LL p)
+{
+    LL ans = 1;
+    find_prime(n);
+    for (int i = 0; i < primes_cnt; i++)
+    {
+        // 找到 cbn 中质因子 primes[i] 的个数 p_cnt
+        LL p_cnt = pcf_recursion(n, primes[i]) - pcf_recursion(m, primes[i]) - pcf_recursion(n - m, primes[i]);
+        // 快速幂计算 primes[i] ^ p_cnt % p
+        ans = (ans * fastPower(primes[i], p_cnt, p)) % p;
+    }
+    return ans;
+}
+// 特殊情况 1（m < p, p 是素数）：利用逆元求解
+LL cbn_inverse(LL n, LL m, LL p)
+{
+    LL ans = 1;
+    for (int i = 1; i <= m; i++)
+        ans = ans * (n - m + i) % p * inverse(i, p) % p;
+    return ans;
+}
+// 特殊情况 2（m 任意，p 是素数）：去除分子分母中多余素数 p + 边乘边除 + 逆元求解
+LL cbn_remove_p(LL n, LL m, LL p)
+{
+    LL ans = 1, cnt_p = 0;
+    for (int i = 1; i <= m; i++)
+    {
+        LL tmp = n - m + i;  // numerator
+        while (tmp % p == 0)
+        {
+            tmp /= p;
+            cnt_p++;
+        }
+        ans = ans * tmp % p;
+
+        tmp = i; // denominator
+        while (tmp % p == 0)
+        {
+            tmp /= p;
+            cnt_p--;
+        }
+        ans = ans * inverse(tmp, p) % p;
+    }
+    if (cnt_p > 0) return 0;
+    else return ans;
+}
+// 特殊情况 3（m，p 均任意）：① 对 p 进行质因子分解（下面用此法）；② 对分子分母中每一项都进行质因子分解
+LL cbn_factorization(LL n, LL m, LL p)
+{
+    // 分解质因子
+    factorize(p);
+
+    LL ans = 1, p_cnt[20];
+    // 初始化 p_cnt
+    for (int i = 0; i < factors_len; i++)
+        p_cnt[i] = 0;
+
+    for (int i = 1; i <= m; i++)  // 遍历每一对分子，分母
+    {
+        LL tmp = n - m + i;  // numerator
+        for (int j = 0; j < factors_len; j++)  // 遍历 p 中的每一个质因子
+        {
+            while (tmp % factors[j].p == 0)
+            {
+                p_cnt[j]++;
+                tmp /= factors[j].p;
+            }
+        }
+        ans = ans * tmp % p;  // 乘上分子
+
+        tmp = i;  // denominator
+        for (int j = 0; j < factors_len; j++)
+        {
+            while (tmp % factors[j].p == 0)
+            {
+                p_cnt[j]--;
+                tmp /= factors[j].p;
+            }
+        }
+        ans = ans * inverse(tmp, p) % p;  // 乘上分母的逆元
+    }
+
+    // 处理多余的一些质因子
+    for (int i = 0; i < factors_len; i++)
+    {
+        if (p_cnt[i] != 0)
+            ans = ans * fastPower(factors[i].p, p_cnt[i], p) % p;
+    }
+    return ans;
+}
+// Lucas 定理
+LL cbn_lucas(LL n, LL m, LL p)
+{
+    if (m == 0) return 1;
+    else return cbn_inverse(n % p, m % p, p) * cbn_lucas(n / p, m / p, p);
+    // 其中的 cbn_inverse 可以改成各种 cbn 计算函数
+}
+
+int main()
+{
+    factorize(120);
+    cout << pcf_recursion(10, 2) << ' ' << pcf_iteration(10, 2)  << endl
+         << cbn_recursion(41, 17) << ' ' << cbn_iteration(41, 17) << ' ' << cbn_defination(41, 17) << endl;
+    memset(cbn, 0, sizeof(cbn));
+    cout << cbn_recursion(41, 17, 29) << ' ' << cbn_iteration(41, 17, 29) << endl;
+    memset(cbn, 0, sizeof(cbn));
+    cout << cbn_defination(41, 17, 29) << ' ' << cbn_inverse(41, 17, 29) << endl;
+    cout << cbn_remove_p(41, 17, 29) << ' ' << cbn_factorization(10, 5, 29) << ' ' << cbn_lucas(41, 17, 29);
+    return 0;
+}
+```
+
+{{</details>}}
+
+### 欧拉公式 Euler's Formula
 
 $V+E-F=2$
 
-### 3.9. 基姆拉尔森公式 Kim Larson Formula
+### 基姆拉尔森公式 Kim Larson Formula
 
 是日期到星期的转换公式
 
@@ -309,12 +1305,12 @@ int kim_larson(int y, int m, int d)
 }
 ```
 
-## 4. 随机选择算法 Randomized Selection
+## 随机选择算法 Randomized Selection
 
 * 常见案例如：快速排序，找出第 n 大的值
-* 上述两个案例都不存在特定输入使其达到 O(n^2)；平均 O(n)
+* 上述两个案例都不存在特定输入使其达到 $O(n^2)$；平均 $O(n)$
 
-## 5. 有限状态机 Finite State Machine
+## 有限状态机 Finite State Machine
 
 针对字符串处理的相关题目，可以使用 FSM 解决。首先分清楚两个概念
 
@@ -325,22 +1321,260 @@ int kim_larson(int y, int m, int d)
 
 > 例子
 >
-> PAT B1003 “我要通过”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/B1003.cpp` 中查看题解。
+> PAT B1003 “我要通过”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/B1003.cpp` 中查看题解。其 FSM 图如下：
+> ![B1003 FSM](../images/B1003_FSM.png)
 >
 > PAT A1060 “Are They Equal”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1060.cpp` 中查看题解。
 
-## 6. 高精度整数 Big Integer
-
-[源码](./data_structure/BigInteger.cpp)
+## 高精度整数 Big Integer
 
 * 只要掌握“高精度 × int”，该类型的题就迎刃而解了
 * “高精度 × int”：高精度拆分成 bit，bit 乘 int，结果 carry 累加
 
-## 7. 分数 Fraction
+{{<details "代码模板">}}
 
-[源码](./data_structure/Fraction.cpp)
+```c++
+/*
+ * 算法竞赛提示：
+ * * 接口规范：非负整数；无前导的 0；对于减法，确保减数大于被减数
+ * * 使用最简单的 C++ 语法
+ * * 数组下标与数字的高位与低位相对应，以简化计算
+ * * 充分使用 carry，remainder 等变量
+*/
 
-## 8. 链表 Linked List
+#include <iostream>
+#include <cstring>
+#define MAXN 1000  // 大整数的最大位数
+
+// only represents non-negatives
+struct BigInteger {
+    int digits[MAXN];
+    int len;
+
+    BigInteger()
+    {
+        memset(digits, 0, sizeof(digits));
+        len = 0;
+    }
+};
+
+// c-string to BigInteger
+// hypothesis: no 0s at the beginning of the str
+BigInteger s2i(char str[])
+{
+    BigInteger a;
+    a.len = strlen(str);
+    for (int i = a.len - 1; i >= 0; i--)
+        a.digits[a.len - i - 1] = str[i] - '0';
+    return a;
+}
+
+// comparison: return a - b
+int cmp(BigInteger a, BigInteger b)
+{
+    if (a.len > b.len) return 1;
+    else if (a.len < b.len) return -1;
+    else for (int i = a.len - 1; i >= 0; i--)
+        if (a.digits[i] > b.digits[i]) return 1;
+        else if (a.digits[i] < b.digits[i]) return -1;
+    return 0;
+}
+
+// arithmetic
+// hypothesis for minus: a >= b
+
+BigInteger operator + (BigInteger a, BigInteger b)
+{
+    BigInteger sum;
+    int carry = 0;
+    for (int i = 0; i < a.len || i < b.len; i++)
+    {
+        sum.digits[sum.len++] = (a.digits[i] + b.digits[i] + carry) % 10;
+        carry = (a.digits[i] + b.digits[i] + carry) / 10;
+    }
+    if (carry != 0) sum.digits[sum.len++] = carry;
+    return sum;
+}
+BigInteger operator - (BigInteger a, BigInteger b)
+{
+    BigInteger diff;
+    for (int i = 0; i < a.len; i++)
+    {
+        diff.digits[i] = a.digits[i] - b.digits[i];
+        if (diff.digits[i] < 0)  // 借位
+        {
+            diff.digits[i] += 10;
+            a.digits[i + 1] -= 1;
+        }
+        diff.len += 1;
+    }
+
+    // get rid of 0s at the beginning of diff
+    while (diff.len > 1 && diff.digits[diff.len - 1] == 0) diff.len--;
+    return diff;
+}
+BigInteger operator * (BigInteger a, int b)
+{
+    BigInteger prod;
+    long long carry;
+    for (int i = 0; i < a.len; i++)
+    {
+        carry += a.digits[i] * b;
+        prod.digits[prod.len++] = carry % 10;
+        carry /= 10;
+    }
+    while (carry != 0)
+    {
+        prod.digits[prod.len++] = carry % 10;
+        carry /= 10;
+    }
+    return prod;
+}
+BigInteger operator / (BigInteger a, int b)
+{
+    BigInteger quot;
+    int remainder = 0;
+    quot.len = a.len;
+    for (int i = a.len; i >= 0; i--)
+    {
+        remainder += a.digits[i];
+        quot.digits[i] = remainder / b;
+        remainder = (remainder % b) * 10;
+    }
+
+    // get rid of 0s at the beginning of diff
+    while (quot.len > 1 && quot.digits[quot.len - 1] == 0) quot.len--;
+    return quot;
+}
+
+// output
+void output(const BigInteger& n)
+{
+    for (int i = n.len - 1; i >= 0; i--)
+        printf("%d", n.digits[i]);
+}
+
+int main()
+{
+    char sa[MAXN], sb[MAXN];
+    int c, d;
+    scanf("%s %s %d %d", sa, sb, &c, &d);
+    BigInteger a = s2i(sa), b = s2i(sb);
+    BigInteger ans = (a + b) / c + (a - b) * d;
+    output(ans);
+    return 0;
+}
+
+/* test data
+1223456789012345678901234567890 5 5 30
+that is (1223456789012345678901234567890 + 5) / 5 + (1223456789012345678901234567890 - 5) * 30
+*/
+```
+
+{{</details>}}
+
+## 分数 Fraction
+
+{{<details "代码模板">}}
+
+```c++
+#include <iostream>
+typedef long long LL;
+using namespace std;
+
+struct Fraction {
+    LL numerator, denominator;
+
+    // 构造函数
+    Fraction(){}
+    Fraction(LL integer)
+    {
+        this->numerator = integer;
+        this->denominator = 1;
+    }
+    Fraction(LL a, LL b)
+    {
+        this->numerator = a;
+        this->denominator = b;
+    }
+
+    // 分数形式合法性判断
+    bool isValid()
+    {
+        if (this->numerator == 0)
+            return (this->denominator == 1);
+        else
+            return (this->denominator > 0);
+    }
+};
+
+LL gcd(LL a, LL b)
+{
+    return (b ? gcd(b, a%b) : a);
+}
+
+// 约分化简；对非法的数据能改造则改造
+Fraction reduction(Fraction n)
+{
+    if (n.numerator == 0)
+        return Fraction(0, 1);
+    else if (n.denominator < 0)
+        return Fraction(n.numerator * -1, n.denominator * -1);
+    else if (n.denominator == 0)
+        return Fraction(n.numerator, n.denominator);
+    else
+    {
+        LL d = gcd(n.numerator, n.denominator);
+        return Fraction(n.numerator / d, n.denominator / d);
+    }
+}
+
+// arithmetic
+Fraction operator + (const Fraction& a, const Fraction& b)
+    {
+        Fraction ans;
+        ans.numerator = a.numerator * b.denominator + b.numerator * a.denominator;
+        ans.denominator = a.denominator * b.denominator;
+        return reduction(ans);
+    }
+Fraction operator - (const Fraction& a, const Fraction& b)
+    {
+        Fraction ans;
+        ans.numerator = a.numerator * b.denominator - b.numerator * a.denominator;
+        ans.denominator = a.denominator * b.denominator;
+        return reduction(ans);
+    }
+Fraction operator * (const Fraction& a, const Fraction& b)
+    {
+        return reduction(Fraction(a.numerator * b.numerator, a.denominator * b.denominator));
+    }
+Fraction operator / (const Fraction& a, const Fraction& b)
+    {
+        if (b.numerator == 0)  // 当除数为 0
+            return Fraction(LLONG_MAX, 1);
+        else
+            return reduction(Fraction(a.numerator * b.denominator, a.denominator * b.numerator));
+    }
+
+
+ostream& operator << (ostream& out, const Fraction& f)
+{
+    if (f.denominator == 1) out << f.numerator;
+    else out << f.numerator << " / " << f.denominator;
+    return out;
+}
+
+int main()
+{
+    Fraction a(1, 2), b(-2, -3), c(5, 1), d(-9, 5), e(4, -8);
+    cout << a + b - c * d / e;
+    return 0;
+}
+```
+
+{{</details>}}
+
+## 链表 Linked List
 
 部分线性表之间的关系
 
@@ -350,7 +1584,7 @@ int kim_larson(int y, int m, int d)
     * 动态链表
     * 静态链表
 
-### 8.1. 动态链表 Dynamic Linked List
+### 动态链表 Dynamic Linked List
 
 链表内存空间在使用过程中动态生成与消灭
 
@@ -386,7 +1620,7 @@ Node* p = new Node;
 delete(p)
 ```
 
-### 8.2. 静态链表 Static Linked List
+### 静态链表 Static Linked List
 
 因为问题规模确定且较小，实现分配好空间的链表。这类题目有较为一般的解题步骤：
 
@@ -448,9 +1682,9 @@ Step 5: Output
 >
 > PAT A1097 “Deduplication on a Linked List”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1097.cpp` 中查看题解。
 
-## 9. 树 Tree
+## 树 Tree
 
-### 9.1. 分类 Classification
+### 分类 Classification
 
 树形态上的分类
 
@@ -471,11 +1705,9 @@ Step 5: Output
   * 普通的静态树
   * 二维化的树：对于完全二叉树来说，若从 1 开始层次化顺次索引，则任一节点 n 的左子节点为 2n，右子节点为 2n+1
 
-### 9.2. 二叉树 Binary Tree
+### 二叉树 Binary Tree
 
-#### 9.2.1. 一般二叉树 General Binary Tree
-
-[源码](./data_structure/BinaryTree.cpp)
+#### 一般二叉树 General Binary Tree
 
 二叉树是指节点度不超过 2 的树。有以下关键点必须掌握：
 
@@ -487,9 +1719,192 @@ Step 5: Output
 
 > ps. 预设二叉树一般不含重复值的节点
 
-#### 9.2.2. 二叉查找树 Binary Search Tree
+{{<details "代码模板">}}
 
-[源码](./data_structure/BinarySearchTree.cpp)
+```c++
+#include <cstdio>
+#include <queue>
+
+using namespace std;
+
+// 二叉树节点
+struct Node
+{
+    int data;
+    // int layer;  // 层次遍历时所需要的层次号
+    Node* left;
+    Node* right;
+};
+
+// 新建节点
+Node* newNode(int val)
+{
+    Node* p = new Node;
+    p->data = val;
+    p->left = p->right = NULL;
+    return p;
+}
+
+// 替换节点：将树中所有为 data 的节点值替换为 new_data
+void replace(Node* root, int data, int new_data)
+{
+    // 递归边界
+    if (root == NULL)
+        return;
+    if (root->data == data)
+        root->data = new_data;
+
+    // 分岔口
+    replace(root->left, data, new_data);
+    replace(root->right, data, new_data);
+}
+
+// 为树插上一个值为 data 的新节点
+// 由于要创建值，所以 root 当使用引用
+void insert(Node* &root, int data)
+{
+    if (root == NULL)
+    {
+        root = newNode(data);
+        return;
+    }
+    // 根据二叉树性质改变此行，以实现不同插入方式
+    if (root->left == NULL)
+        insert(root->left, data);
+    else if (root->right == NULL)
+        insert(root->right, data);
+    else if (data % 2)
+        insert(root->left, data);
+    else
+        insert(root->right, data);
+}
+
+// 从数组创建一个满二叉树
+Node* createByArray(int data[], int size)
+{
+    Node* root = NULL;
+    for (int i = 0; i < size; i++)
+        insert(root, data[i]);
+    return root;
+}
+
+// 先序遍历
+void preorder(Node* root)
+{
+    if (root == NULL)
+        return;
+    printf("%d ", root->data);
+    preorder(root->left);
+    preorder(root->right);
+}
+
+// 中序遍历
+void inorder(Node* root)
+{
+    if (root == NULL)
+        return;
+    inorder(root->left);
+    printf("%d ", root->data);
+    inorder(root->right);
+}
+
+// 后序遍历
+void postorder(Node* root)
+{
+    if (root == NULL)
+        return;
+    postorder(root->left);
+    postorder(root->right);
+    printf("%d ", root->data);
+}
+
+// 层次遍历：需要在结构体中新增属性，层次号，即 layer
+// 函数体内被注释掉的行：计算层次号
+void layerOrder(Node* root)
+{
+    queue<Node*> q;
+    // root->layer = 1;
+    q.push(root);
+    while (!q.empty())
+    {
+        Node* front = q.front();
+        q.pop();
+        printf("%d ", front->data);
+        if (front->left)
+        {
+            // front->left->layer = front->layer + 1;
+            q.push(front->left);
+        }
+        if (front->right)
+        {
+            // front->right->layer = front->layer + 1;
+            q.push(front->right);
+        }
+    }
+}
+
+// 通过先序和后序遍历序列复原二叉树
+Node* createByPreIn(int pre[], int in[], int preL, int preR, int inL, int inR)
+{
+    // 递归边界
+    if (preL > preR)
+        return NULL;
+
+    Node* root = new Node;
+    root->data = pre[preL];
+    int left_len = 0, i;
+    for (i = inL; i < inR; i++)
+        if (pre[preL] == in[i])
+        {
+            left_len = i - inL;
+            break;
+        }
+
+    // 分岔口
+    root->left = createByPreIn(pre,
+                               in,
+                               preL + 1,
+                               preL + left_len,
+                               inL,
+                               i - 1);
+    root->right = createByPreIn(pre,
+                                in,
+                                preL + 1 + left_len,
+                                preR,
+                                i + 1,
+                                inR);
+    return root;
+}
+
+Node* createByLayerIn()
+{
+
+}
+
+int main()
+{
+    int data[] = {1, 2, 3, 4, 5, 6};
+    Node* root = createByArray(data, 6);
+    replace(root, 6, 7);
+
+    // 遍历
+    preorder(root); printf("\n");
+    inorder(root); printf("\n");
+    postorder(root); printf("\n");
+    layerOrder(root); printf("\n");
+
+    // 通过遍历序列复原二叉树
+    int pre[] = {1, 2, 5, 3, 4, 7},
+        in[] = {5, 2, 1, 4, 3, 7};
+    Node* recovered = createByPreIn(pre, in, 0, 5, 0, 5);
+    postorder(recovered); printf("\n");
+    return 0;
+}
+```
+
+{{</details>}}
+
+#### 二叉查找树 Binary Search Tree
 
 二叉查找树是有序的二叉树。在一般二叉树的基础上，还要掌握：
 
@@ -500,9 +1915,137 @@ Step 5: Output
       * `Node* find_min(Node* root)`：寻找以 root 为根节点的树中最小权值节点
   3. 复制前驱值到当前节点，递归删除前驱节点
 
-#### 9.2.3. 平衡二叉树 AVL Tree
+{{<details "代码模板">}}
 
-[源码](./data_structure/AVLTree.cpp)
+```c++
+/*
+ * hint:
+ * 任何新建的节点都要用 NULL 初始化，包括头指针 root
+*/
+
+#include <cstdio>
+
+struct Node
+{
+    int data;
+    Node *left, *right;
+};
+
+// 创建元素
+Node* new_node(int data)
+{
+    Node *root = new Node ;
+    root->data = data;
+    root->left = root->right = NULL;
+    return root;
+}
+
+// 查找
+void search(Node* root, int x)
+{
+    if (root == NULL)
+    {
+        printf("Search failed.\n");
+        return;
+    }
+    if (root->data == x)
+        printf("%d\n", root->data);
+    else if (x < root->data)
+        search(root->left, x);
+    else
+        search(root->right, x);
+}
+
+// 插入
+void insert(Node* &root, int x)
+{
+    if (root == NULL)
+    {
+        root = new_node(x);
+        return;
+    }
+    if (root->data == x)
+        return;  // 表示此二叉树结构中不存在重复元素
+    else if (x < root->data)
+        insert(root->left, x);
+    else
+        insert(root->right, x);
+}
+
+// 从一个数组建树
+Node* create_by_array(int arr[], int n)
+{
+    Node *root = NULL;
+    for (int i = 0; i < n; i++)
+        insert(root, arr[i]);
+    return root;
+}
+
+// 辅助函数：寻找以 root 为根节点的树中最大权值节点
+Node* find_max(Node* root)
+{
+    while (root->right != NULL)
+        root = root->right;
+    return root;
+}
+
+// 辅助函数：寻找以 root 为根节点的树中最小权值节点
+Node* find_min(Node* root)
+{
+    while (root->left != NULL)
+        root = root->left;
+    return root;
+}
+
+// 删除元素：找到 x 的前驱，替换 x 为其前驱，然后删除前驱
+void delete_node(Node* &root, int x)
+{
+    if (root == NULL)
+        return;
+    if (root->data == x)  // 找到要删除元素
+        if (root->left == NULL && root->right == NULL)  // 是叶子节点
+            root = NULL;
+        else if (root->left != NULL)  // 左子树存在
+        {
+            Node* pre = find_max(root->left);  // 找到前驱节点
+            root->data = pre->data;
+            delete_node(root->left, pre->data);
+            // 删除节点也可以不采用递归删除的方法，只不过编写代码会麻烦些
+            // 采用分类讨论的方法直接删除 root 左子树中最靠右的节点
+            // 分为：①当 pre 是 root 的左孩子；② pre 是仅有一个左孩子的节点
+            // 下面的右子树也可以类比操作
+        }
+        else  // 右子树存在
+        {
+            Node* next = find_min(root->right);  // 找到后继节点
+            root->data = next->data;
+            delete_node(root->right, next->data);
+        }
+        // 通过判断左右子树是否存在去删除节点的方法易造成二叉树不平衡
+        // 两种解决方法：
+        // 1. 交替找前驱或后继
+        // 2. 记录子树高度，总是在高的那个里面找
+    else if (x < root->data)  // 向左子树寻找删除元素
+        delete_node(root->left, x);
+    else
+        delete_node(root->right, x);  // 向右子树寻找删除节点
+}
+
+int main()
+{
+    int array[] = {1, 32, 3, 90, 1, -9, 12, 11, 9};
+    Node* root = create_by_array(array, 9);
+    delete_node(root, 8);
+    delete_node(root, -9);
+    delete_node(root, 32);
+    delete_node(root, 1);
+    return 0;
+}
+```
+
+{{</details>}}
+
+#### 平衡二叉树 AVL Tree
 
 AVL 树加速 BST 查找速度。在 BST 的基础上，要掌握插入新节点的方法：
 
@@ -516,9 +2059,156 @@ AVL 树加速 BST 查找速度。在 BST 的基础上，要掌握插入新节点
   * `void right_rotation(Node* &root)`
 * insert 函数：通过平衡因子，判断 LL、LR、RR、RL 四种插入情形进行旋转
 
-#### 9.2.4. 堆 Heap
+{{<details "代码模板">}}
 
-[源码](./data_structure/Heap.cpp)
+```c++
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+struct Node {
+    int data;
+    int height;  // 本质上等于定义了一个 layer
+    Node *left, *right;
+};
+
+// 新建节点
+Node* new_node(int data)
+{
+    Node *root = new Node;
+    root->data = data;
+    root->height = 1;
+    root->left = root->right = NULL;
+    return root;
+}
+
+// 查找
+void search(Node* root, int x)
+{
+    if (root == NULL)
+    {
+        printf("Search failed!");
+        return;
+    }
+    if (root->data == x)
+    {
+        printf("%d", root->data);
+        return;
+    }
+    else if (root->data < x)
+        search(root->left, x);
+    else
+        search(root->right, x);
+}
+
+// insert() 的辅助函数：获取 root 节点的高度
+int get_height(Node* root)
+{
+    if (root == NULL) return 0;
+    else return root->height;
+}
+
+// insert() 的辅助函数：获取 root 节点的平衡因子
+int get_balance_factor(Node* root)
+{
+    return get_height(root->left) - get_height(root->right);
+}
+
+// insert() 的辅助函数：更新 root 节点的高度
+void update_height(Node* root)
+{
+    root->height = max(get_height(root->left), get_height(root->right)) + 1;
+}
+
+// insert() 的辅助函数：左旋 root 节点
+// 会伴随节点高度的变化
+void left_rotation(Node* &root)
+{
+    Node* temp = root->right;
+    root->right = temp->left;
+    temp->left = root;
+
+    update_height(root);  // 更新较低节点 root
+    update_height(temp);  // 跟新较高节点 temp
+
+    root = temp;
+}
+
+// insert() 的辅助函数：右旋 root 节点
+// 会伴随节点高度的变化
+void right_rotation(Node* &root)
+{
+    Node* temp = root->left;
+    root->left = temp->right;
+    temp->right = root;
+
+    update_height(root);
+    update_height(temp);
+
+    root = temp;
+}
+
+// 插入：递归插入，更新节点高度，旋转保持 AVL 性质
+void insert(Node* &root, int v)
+{
+    if (root == NULL)
+    {
+        root = new_node(v);
+        return;
+    }
+    if (v < root->data)
+    {
+        insert(root->left, v);
+        update_height(root);
+        if (get_balance_factor(root) == 2)
+        {
+            if (get_balance_factor(root->left)  == 1)  // LL
+                right_rotation(root);
+            else if (get_balance_factor(root->left) == -1)  // LR
+            {
+                left_rotation(root->left);
+                right_rotation(root->right);
+            }
+        }
+    }
+    else
+    {
+        insert(root->right, v);
+        update_height(root);
+        if (get_balance_factor(root) == -2)
+        {
+            if (get_balance_factor(root->right) == -1)  // RR
+                left_rotation(root);
+            else if (get_balance_factor(root->right) == 1)  // RL
+            {
+                right_rotation(root->right);
+                left_rotation(root);
+            }
+        }
+    }
+}
+
+// 创建树
+Node* create_by_array(int data[], int n)
+{
+    Node* root = NULL;
+    for (int i = 0; i < n; i++)
+        insert(root, data[i]);
+    return root;
+}
+
+int main()
+{
+    int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    Node* root = create_by_array(a, 10);
+    return 0;
+}
+```
+
+{{</details>}}
+
+#### 堆 Heap
 
 堆的本质是一颗有序的 CBT。其应用包括优先队列、堆排序等。主要应掌握以下内容：
 
@@ -539,9 +2229,166 @@ AVL 树加速 BST 查找速度。在 BST 的基础上，要掌握插入新节点
 * $CBT 节点数 = 叶子节点数 + 非叶子节点数 = \lceil \frac{n}{2} \rceil + \lfloor \frac{n}{2} \rfloor$
 * 二维化的 CBT 恰是层序遍历的结果
 
-#### 9.2.5. 哈夫曼树 Huffman Tree
+{{<details "代码模板">}}
 
-[源码](./data_structure/HuffmanTree.cpp)
+```c++
+/*
+ * 堆数据结构
+ * 实践中发现，递归代码版本的调整函数效率可能比迭代的好
+*/
+#include <cstdio>
+#include <algorithm>
+#define MAXN 100
+
+using namespace std;
+
+// 定义堆：允许重值出现
+int heap[MAXN],  // 大顶堆，下标从 1 开始（若是小顶堆，则类比操作即可）
+    size;  // 堆的大小
+
+// 向下调整：以 low 为欲调整节点，将区间 [low, high] 调整为合法的堆
+void down_adjust(int low, int high)
+{
+    int node = low,  // 欲调节点
+    max_child = low * 2;  // 欲调节点子结点中较大的
+    while (max_child <= high)
+    {
+        // 当右孩子存在且右孩子大于左孩子时
+        if (max_child + 1 <= high && heap[max_child + 1] > heap[max_child])
+            max_child++;
+
+        if (heap[max_child] > heap[node])  // 需要调整当前节点
+        {
+            swap(heap[max_child], heap[node]);
+
+            // 为迭代地向下调整做准备
+            node = max_child;
+            max_child = node * 2;
+        }
+        else  // 已经无需调整
+            break;
+    }
+}
+
+// 递归版本的向下调整
+void down_adjust_recursion(int low, int high)
+{
+    if (2 * low > high)  // 当 low 的左子节点不在 high 之下
+        return;
+    int node = low, max_child = low * 2;
+    if (max_child + 1 <= high && heap[max_child + 1] > heap[max_child])
+        max_child++;
+    if (heap[max_child] > heap[node])
+    {
+        swap(heap[max_child], heap[node]);
+        down_adjust_recursion(max_child, high);
+    }
+}
+
+// 建堆：条件是 heap 中已有初始数据，size 已赋过初值
+void create_heap()
+{
+    // 一颗 CBT 有 rounded_up(size / 2.0) 个叶子节点，有 rounded_down(size / 2.0) 个非叶子节点
+    for (int i = size / 2; i >= 1; i--)
+        down_adjust_recursion(i, size);
+}
+
+// 删除堆顶元素
+void delete_top()
+{
+    heap[1] = heap[size--];  // 用尾元素替换堆顶元素
+    down_adjust_recursion(1, size);  // 堆顶向下调整
+}
+
+// 向上调整：以 high 为欲调节点，将区间 [low, high] 调整为合法的堆
+// 一般来说，low 为 1，这表示调整至顶
+void up_adjust(int low, int high)
+{
+    int node = high,  // 欲调节点
+        parent = high / 2;  // 欲调节点的父亲
+    while (parent >= low)
+    {
+        if (heap[node] > heap[parent])  // 需要调整
+        {
+            swap(heap[node], heap[parent]);
+            node = parent;
+            parent = node / 2;
+        }
+        else  // 无需调整
+            break;
+    }
+}
+
+// 递归版本的向上调整
+void up_adjust_recursion(int low, int high)
+{
+    if (high / 2 < low)  // 当 high 的父亲节点不在 low 之上
+        return;
+    int node = high, parent = high / 2;
+    if (heap[node] > heap[parent])
+    {
+        swap(heap[node], heap[parent]);
+        up_adjust(low, parent);
+    }
+}
+
+// 添加元素
+void insert(int x)
+{
+    heap[++size] = x;
+    up_adjust_recursion(1, size);
+}
+
+// 堆排序：大顶堆可以实现递增排序
+// 条件是 heap 中已有初始数据，size 已赋过初值
+void heap_sort()
+{
+    create_heap();
+    int n = size;
+    while (n)
+    {
+        swap(heap[1], heap[n]);  // 堆顶置于末尾
+        down_adjust_recursion(1, --n);  // 调整区间 [1, n-1]
+    }
+}
+
+// 用于测试的两个函数
+
+void init_from_array(int data[], int n)
+{
+    for (int i = 1; i <= n; i++)
+        heap[i] = data[i - 1];
+    size = n;
+}
+
+void output()
+{
+    for (int i = 1; i <= size; i++)
+        printf("%d ", heap[i]);
+    printf("\n");
+}
+
+int main()
+{
+    int data[] = {85, 55, 82, 57, 68, 92, 99, 98, 66, 56};
+    init_from_array(data, 10);
+    create_heap();
+    output();
+    delete_top();
+    output();
+    insert(99);
+    output();
+    insert(70);
+    output();
+    heap_sort();
+    output();
+    return 0;
+}
+```
+
+{{</details>}}
+
+#### 哈夫曼树 Huffman Tree
 
 首先应了解以下内容：
 
@@ -584,17 +2431,319 @@ AVL 树加速 BST 查找速度。在 BST 的基础上，要掌握插入新节点
   * 编码生成 `void gen_code(Node* root, string init)`：生成哈夫曼编码
 * 主函数：依照 BFS 的思想，一直合并最小的两个节点即可
 
-### 9.3. 普通的树 Normal Tree
+{{<details "代码模板">}}
 
-#### 9.3.1. 一般的树 General Tree
+```c++
+/*
+ * 哈夫曼树
+ *
+ * 以下用了三种方法能够部分或完全实现哈夫曼编码的功能：
+ *
+ * 1. 自建一个小顶堆，也就是手动实现优先队列，这个方法可以完整的实现哈夫曼树
+ * 2. 使用系统自带的 priority_queue 实现优先队列的功能，同时创建二叉树节点
+ * 3. 只是为了完成合并果子（即求总带权路径长度 Total WPL）这一具体问题，将 2. 中的二叉树节点删掉，只用 int 保存结果
+ *
+ * 推荐使用第二种方法，因为他既实现了完整的哈夫曼树，又易于编码
+*/
+#include <cstdio>
+#include <algorithm>
+#include <string>
+#include <queue>
+#define MAXN 100
 
-[源码](./data_structure/Tree.cpp)
+using namespace std;
+
+// 普通二叉树节点
+struct Node {
+    int data;
+    Node *left, *right;
+    // 下面这一行用于生成哈夫曼编码，如果只是要输出编码，那么可以将其注释掉
+    string code;  // huffman code
+};
+
+// 二叉树：新建节点，这个节点值是用 new 运算符生成的，因此并非临时的
+Node* new_node(int val)
+{
+    Node* root = new Node;
+    root->data = val;
+    root->left = root->right = NULL;
+    return root;
+}
+
+/************************* 方法一 *************************/
+
+// 小顶堆：保存指向树的指针
+// 之所以保存指针，而不保存值，是因为保存值就会有被覆盖的风险，而导致已构造的哈夫曼树被破坏
+Node* heap[MAXN];
+int size;
+
+// 堆：初始化，data 从 1 开始计数
+void init(int data[], int n)
+{
+    size = n;
+    for (int i = 1; i <= n; i++)
+        heap[i] = new_node(data[i-1]);
+}
+
+// 堆：向下调整 [low, high]
+void down_adjust(int low, int high)
+{
+    int node = low, min_child = node * 2;
+    while (min_child <= high)
+    {
+        if (min_child + 1 <= high && heap[min_child+1]->data < heap[min_child]->data)
+            min_child++;
+        if (heap[min_child]->data < heap[node]->data)
+        {
+            swap(heap[node], heap[min_child]);
+            node = min_child;
+            min_child = node * 2;
+        }
+        else
+            break;
+    }
+}
+
+// 堆：向上调整 [low, high]
+void up_adjust(int low, int high)
+{
+    int node = high, parent = high / 2;
+    while (parent >= low)
+    {
+        if (heap[node]->data < heap[parent]->data)
+        {
+            swap(heap[node], heap[parent]);
+            node = parent;
+            parent = node / 2;
+        }
+        else
+            break;
+    }
+}
+
+// 堆：建堆
+void create_heap()
+{
+    for (int i = size / 2; i >= 1; i--)
+        down_adjust(i, size);
+}
+
+// 堆：删除堆顶元素
+void delete_top()
+{
+    heap[1] = heap[size--];
+    down_adjust(1, size);
+}
+
+// 堆：插入新元素
+void insert(Node* x)
+{
+    heap[++size] = x;
+    up_adjust(1, size);
+}
+
+// 堆：弹出堆顶指针元素，并删除堆顶
+Node* pop()
+{
+    Node* top = heap[1];
+    delete_top();
+    return top;
+}
+
+// 哈夫曼树：合并两个节点，返回合并后的根节点，假设 a < b
+Node* merge(Node* a, Node* b)
+{
+    Node* root = new_node(a->data + b->data);
+    root->left = a;
+    root->right = b;
+    return root;
+}
+
+// 哈夫曼树：建树
+Node* create_huffman()
+{
+    create_heap();
+    while (size > 1)
+    {
+        Node* first = pop();
+        Node* second = pop();
+        insert(merge(first, second));
+    }
+    return heap[1];
+}
+
+// 哈夫曼树：生成哈夫曼编码，一般为 init 赋值 ""
+// 哈夫曼编码结果
+void gen_code(Node* root, string init)
+{
+    // 递归终止条件
+    if (root == NULL)
+        return;
+    if (root->left == NULL && root->right == NULL)  // 只有叶子节点才有前缀编码
+        root->code = init;
+    else
+    {
+        gen_code(root->left, init + "0");
+        gen_code(root->right, init + "1");
+    }
+}
+
+/************************* 方法二 *************************/
+
+// 定义 Node 结构体：上面已有，略
+
+// 二叉树新建节点：上面已有，略
+
+// 定义一个有关 Node 结构体的 cmp 函数
+struct cmp {
+    bool operator () (Node* a, Node* b)
+    {
+        return a->data > b->data;
+    }
+};
+
+// 定义节点指针的优先队列
+priority_queue<Node*, vector<Node*>, cmp> node_q;
+
+// 哈夫曼树的 merge 函数和 gen_code：上面已有，略
+
+/************************* 方法三 *************************/
+
+// 定义代表小顶堆的优先队列，greater 实现小的优先
+priority_queue<long long, vector<long long>, greater<long long>> q;
+
+int main()
+{
+    /************************* 方法一 *************************/
+
+    // int data[] = {4, 3, 2, 1}, n = 4;
+    // init(data, n);
+    // Node* root = create_huffman();
+    // gen_code(root, "");
+
+    /************************* 方法二 *************************/
+
+    int data[] = {1, 2, 2, 3, 6}, n = 5;
+    // 将节点加载到 node_q 中
+    for (int i = 0; i < n; i++)
+        node_q.push(new_node(data[i]));
+
+    // 合并
+    while (node_q.size() > 1)
+    {
+        Node* first = node_q.top(); node_q.pop();
+        Node* second = node_q.top(); node_q.pop();
+        node_q.push(merge(first, second));
+    }
+
+    // 生成哈夫曼编码
+    gen_code(node_q.top(), "");
+
+    /************************* 方法三 *************************/
+
+    // int data[] = {1, 2, 2, 3, 6}, n = 5;
+    // int ans = 0;
+    // for (int i = 0; i < n; i++)
+    //     q.push(data[i]);  // 将数据压入优先队列
+    // while (q.size() > 1)
+    // {
+    //     int first = q.top(); q.pop();
+    //     int second = q.top(); q.pop();
+    //     q.push(first + second);
+    //     ans += first + second;
+    // }
+    // printf("%d", ans);
+
+    return 0;
+}
+```
+
+{{</details>}}
+
+### 普通的树 Normal Tree
+
+#### 一般的树 General Tree
 
 树这一类的题往往联系四种遍历和 DFS 与 BFS。只要掌握好这些遍历和搜索即可轻松应对。
 
-#### 9.3.2. 并查集 Union-Find Set
+{{<details "代码模板">}}
 
-[源码](./data_structure/UnionFindSet.cpp)
+```c++
+#include<cstdio>
+#include<vector>
+#include<queue>
+#define MAXN 123
+
+using namespace std;
+
+// 静态树节点的定义
+
+// // 方法一：数组保存：占内存空间大
+// struct Node
+// {
+//     int data;
+//     int child[MAXN];
+// } tree[MAXN];
+
+// // 方法二：vector 保存：方便，效率高
+// struct Node
+// {
+//     int data;
+//     vector<int> child;
+// } tree[MAXN];
+
+// // 方法三：无数据域：极简形式（实际上是图的邻接表表示法）
+// vector<int> child[MAXN];
+
+// 方法四：包括层号
+struct Node
+{
+    int layer,
+        data;
+    vector<int> child;
+} tree[MAXN];
+
+// 新建节点
+int index = 0;
+int new_node(int data)
+{
+    tree[index].data = data;
+    tree[index].child.clear();
+    return index++;
+}
+
+// 先序遍历
+void preorder(int root)
+{
+    printf("%d ", tree[root].data);
+    for (int i = 0; i < tree[root].child.size(); i++)
+        preorder(tree[root].child[i]);
+}
+
+// 计算层号的层序遍历
+void layerorder(int root)
+{
+    queue<int> q;
+    q.push(root);
+    tree[root].layer = 1;
+    while (!q.empty())
+    {
+        int front = q.front();
+        q.pop();
+        printf("%d", tree[front].data);
+        for (int i = 0; i < tree[front].child.size(); i++)
+        {
+            int kid = tree[front].child[i];
+            tree[kid].layer = tree[front].layer + 1;
+            q.push(kid);
+        }
+    }
+}
+```
+
+{{</details>}}
+
+#### 并查集 Union-Find Set
 
 并查集实质上是由数组实现的一种树。其数据结构 `set[x] = y` 表示节点 `x` 的父节点为 `y`，当且仅当 `x == y` 时，`x` 或 `y` 是根节点。应掌握：
 
@@ -602,9 +2751,98 @@ AVL 树加速 BST 查找速度。在 BST 的基础上，要掌握插入新节点
 * `void union(int a, int b)`：合并 `a` 和 `b` 所在的两个集合
 * 路径优化：将所有节点都指向根节点，将查找速度优化到 O(1)。包括迭代和递归两种实现
 
-## 10. 图 Graph
+{{<details "代码模板">}}
 
-### 10.1. 基础 Basis
+```c++
+#include <cstdio>
+#define N 100
+
+// define
+int set[N];
+
+// find root of x
+
+int find_iteration(int x)
+{
+    while (x != set[x])
+        x = set[x];
+    return x;
+}
+
+int find_recursion(int x)
+{
+    if (x == set[x])
+        return x;
+    else
+        return find_recursion(set[x]);
+}
+
+// union two sets, that is, replaces the set containing x and the set containing y with their union
+void union_sets(int a, int b)
+{
+    int root_a = find_iteration(a), root_b = find_iteration(b);
+    if (root_a != root_b)
+        set[root_b] = root_a;
+    return;
+}
+
+// optimize find() 利用路径压缩
+
+int optimized_find_iteration(int x)
+{
+    // find root
+    int root = x;
+    while (root != set[root])
+        root = set[root];
+
+    // replace all nodes' parent with the root
+    int index = x;
+    while (index != set[index])
+    {
+        int temp = index;
+        set[temp] = root;
+        index = set[index];
+    }
+    return root;
+}
+
+int optimized_find_recursion(int x)
+{
+    if (x == set[x])
+        return x;
+    else
+    {
+        int root = optimized_find_recursion(set[x]);
+        set[x] = root;
+        return root;
+    }
+}
+
+int main()
+{
+    // 1st set
+    set[1] = 1;
+    set[2] = 1;
+    set[3] = 2;
+    set[4] = 2;
+
+    // 2nd set
+    set[5] = 5;
+    set[6] = 5;
+
+    printf("%d %d\n", find_iteration(4), find_recursion(6));
+    union_sets(4, 6);
+    printf("%d %d\n", find_iteration(4), find_recursion(6));
+    printf("%d %d\n", optimized_find_iteration(4), optimized_find_recursion(6));
+    return 0;
+}
+```
+
+{{</details>}}
+
+## 图 Graph
+
+### 基础知识 Basic Knowledge
 
 术语 Terminology
 
@@ -626,11 +2864,11 @@ AVL 树加速 BST 查找速度。在 BST 的基础上，要掌握插入新节点
 
 > ps. 不管是邻接矩阵还是邻接表，都应该显式地既保存 a 到 b 方向的，又保存 b 到 a 方向的。就是说，从实现角度看，所有的图都是有向图，要把无向图看作是双向连通的有向图。
 
-### 10.2. 图的遍历 Graph Traversal
+### 图的遍历 Graph Traversal
 
 对图的遍历，要考虑最一般的连通性。熟练掌握以下两个模板：
 
-#### 10.2.1. 深度优先搜索遍历
+#### 深度优先搜索遍历
 
 ```cpp
 dfs(n)
@@ -664,7 +2902,7 @@ graph_traversal()
 }
 ```
 
-#### 10.2.2. 广度优先搜索遍历
+#### 广度优先搜索遍历
 
 ```cpp
 bfs(vertex)
@@ -692,9 +2930,9 @@ graph_traversal()
 }
 ```
 
-### 10.3. 最短路径 Shortest Path
+### 最短路径 Shortest Path
 
-#### 10.3.1. 迪杰斯特拉算法 Dijkstra's Algorithm
+#### 迪杰斯特拉算法 Dijkstra's Algorithm
 
 解决问题：边权非负的单源最短路径问题, i.e. Single Source Shortest Path(SSSP) Problem
 
@@ -746,7 +2984,7 @@ dijkstra(int start)
 * 算法正确性证明：归纳法 + 反证法
 * 算法复杂度在 $O(V^2 + E)$，如果内层找未访问的最小顶点利用优先队列实现，可降低复杂度到 $O(VlogV + E)$，这称为堆优化的迪杰斯特拉算法
 
-#### 10.3.2. 贝尔曼-福特算法 Bellman-Ford Algorithm
+#### 贝尔曼-福特算法 Bellman-Ford Algorithm
 
 **解决问题**：
 
@@ -803,7 +3041,7 @@ bool bellman_ford(int start)
 
 由于有 n - 1 此操作，所以不能按照 Dijkstra's Algorithm 的做法每次 + 1，而应定义 set<int> pre[MAXV]，则 $num[v] = \sum\limits_{i ∈ pre[v]}num[i]$
 
-#### 10.3.3. 最短路径快速算法 Shortest Path Faster Algorithm (SPFA)
+#### 最短路径快速算法 Shortest Path Faster Algorithm (SPFA)
 
 **算法本质**：并不能单独称之为一种算法，仅仅是 Bellman-Ford Algorithm 的一种队列优化形式。其优化思路是：因为只有当某个顶点 u 的 d[u] 值发生改变时，从 u 出发的边邻接的 v 的 d[v] 值才可能发生改变，因此可以建立队列保存应当判断是否需要松弛的节点
 
@@ -871,7 +3109,7 @@ bool spfa(int start)
 
 PAT A1003 “Emergency”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1003.cpp` 中查看题解。
 
-#### 10.3.4. 弗洛伊德算法 Floyd's Algorithm
+#### 弗洛伊德算法 Floyd's Algorithm
 
 **解决问题**：不含负环的全源最短路问题，i.e. All Pairs Shortest Paths (APSP) without Negative Cycle
 
@@ -891,9 +3129,9 @@ void floyd()
 
 **算法正确性证明**：暂不谈证明。思考中介点枚举为什么不能放在最内层循环?
 
-### 10.4. 最小生成树 Minimum Spanning Tree
+### 最小生成树 Minimum Spanning Tree
 
-#### 10.4.1. 基础 Basis
+#### 基础 Basis
 
 **定义 Definition**：
 
@@ -911,7 +3149,7 @@ void floyd()
 2. 最小生成树不唯一，但最小边权和唯一
 3. 图中任何节点都可以作为最小生成树的根节点
 
-#### 10.4.2. 普里姆算法 Prim's Algorithm
+#### 普里姆算法 Prim's Algorithm
 
 **原理 Theory**：
 
@@ -949,7 +3187,7 @@ prim(int start)
 }
 ```
 
-#### 10.4.3. 克鲁斯卡尔算法 Kruskal's Algorithm
+#### 克鲁斯卡尔算法 Kruskal's Algorithm
 
 **原理 Theory**：
 
@@ -1000,7 +3238,7 @@ int kruskal()
 }
 ```
 
-### 10.5. 拓扑排序 Topological Sort
+### 拓扑排序 Topological Sort
 
 基础 Basis：
 
@@ -1058,7 +3296,7 @@ bool topological_sort()
 * 代码 ANCHOR 行有时非常重要，尤其是在连续输入多组数据时，需要复原变量，这个时候 ANCHOR 行可以直接复原。但是如果存在 num < n 时的情况，则 ANCHOR 行不能完全清空 adj 变量，*最好的方法是单独定义清空函数*
 * 根据原理，可以实现出不同版本的拓扑排序，包括 bfs，dfs，栈，贪心法（暴力法）等形式。各有优劣及适用情景
 
-### 10.6. 关键路径 Critical Path
+### 关键路径 Critical Path
 
 基础 Basis：
 
@@ -1189,9 +3427,9 @@ int critical_path()
 >
 > Codeup 100000624-00 题“关键路径”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-CODEUP/100000624-00.cpp` 中查看题解。
 
-## 11. 动态规划 Dynamic Programming
+## 动态规划 Dynamic Programming
 
-术语 Terminology：
+### 术语 Terminology
 
 * 最优化问题 Optimization Problem：根据约束条件求得最优结果。
 * 多阶段决策问题 Multistage Decision-making Problem：最优化问题的一种，可以将问题划分成相关联的若干阶段。
@@ -1205,24 +3443,91 @@ int critical_path()
 * 贪心选择性 Greedy Choice Property：一个问题的整体最优解可通过一系列局部的最优解的选择达到，并且每次的选择可以依赖以前作出的选择，但不依赖于后面要作出的选择。
 * 无后效性 Non-aftereffect Property：状态只影响下一个状态，而不影响之后的。状态转移方程应当满足该性质。
 
-方法 Approach：
+### 方法 Approach
 
 * 自顶向下的方法 / 递归 Top-down Approach / Recursion
 * 自底向上的方法 / 递推 Bottom-up Approach / Iteration
 
-比较 Comparison：
+### 比较 Comparison
 
-|方法|理解|比较|
-|--|--|--|
-|分治 Divide-and-Conquer：|=非重叠子问题|可以解决非优化类问题，比如归并排序|
-|贪心 Greedy Algorithm：|=贪心选择性+最优子结构|每一步不必依靠上一步的解|
-|动态规划 Dynamic Programming：|=重叠子问题+最优子结构||
+| 方法                           | 理解                   | 比较                               |
+| ------------------------------ | ---------------------- | ---------------------------------- |
+| 分治 Divide-and-Conquer：      | =非重叠子问题          | 可以解决非优化类问题，比如归并排序 |
+| 贪心 Greedy Algorithm：        | =贪心选择性+最优子结构 | 每一步不必依靠上一步的解           |
+| 动态规划 Dynamic Programming： | =重叠子问题+最优子结构 |                                    |
 
-注意 Note：
+### 注意 Note
 
 DP 算法最好选择从 1 开始计数，因为下标为 0 时往往是边界
 
-## 12. 引用
+## 字符串 String
+
+### KMP 算法 Knuth–Morris–Pratt string-searching algorithm
+
+{{<details "代码模板">}}
+
+```c++
+// 代码参考王道教程
+
+#include <iostream>
+#include <cstring>
+#define MAXN 50
+using namespace std;
+char s[MAXN], t[MAXN];
+int ls, lt, nxt[MAXN] = {0};
+
+void get_next()
+{
+    int i = 1, j = 0;
+    nxt[1] = 0;
+    while (i <= ls)
+    {
+        if (j == 0 || s[i] == t[j])
+        {
+            i++; j++;
+
+            // 初级的方法
+            // nxt[i] = j;
+
+            // 高级的方法
+            if (s[i] != s[j]) nxt[i] = j;
+            else nxt[i] = nxt[j];
+        }
+        else
+            j = nxt[j];
+    }
+}
+
+int kmp_index()
+{
+    int i = 1, j = 1;
+    while (i <= ls && j <= lt)
+    {
+        if (j == 0 || s[i] == t[j])
+        {
+            i++;
+            j++;
+        }
+        else
+            j = nxt[j];
+    }
+    if (j > lt) return i - lt;
+    else return 0;
+}
+
+int main()
+{
+    cin >> s+1 >> t+1;
+    ls = strlen(s+1);
+    lt = strlen(t+1);
+    cout << kmp_index();
+    return 0;
+}
+```
+
+{{</details>}}
+
+## Citation
 
 ```bibtex
 @article{song2021algorithm,
@@ -1234,3 +3539,7 @@ DP 算法最好选择从 1 开始计数，因为下标为 0 时往往是边界
   url = "https://ki-seki.github.io/posts/210205-algorithm/"
 }
 ```
+
+## References
+
+[^algo_note]: 胡凡, and 曾磊. 算法笔记. 机械工业出版社, July 2026.
