@@ -1,6 +1,6 @@
 <details>
     <summary style="font-weight: bold; margin: -0.5em -0.5em 0; padding: 0.5em;">
-        <font color="#817f7f">{{ with .Get 0 }}{{ . }}{{ else }}Details{{ end }}</font>
+        <span style="color: #817f7f;">{{ with .Get 0 }}{{ . }}{{ else }}Details{{ end }}</span>
     </summary>
     {{ .Inner | markdownify }}
 </details>
