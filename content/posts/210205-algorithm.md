@@ -24,7 +24,7 @@ math: true
   * 实现：**merge 函数**，合并两个不相交的两部分，拉链式合并到新数组，最后用 memcpy；**merge_sort 函数**，利用辅助函数 merge 递归地或迭代地合并
   * 评价：$O(nlogn)$
 * 快速排序 Quick Sort
-  * 思想：two pointers，分而治之。按主元分割序列。
+  * 思想：two pointers，分而治之。按主元分割序列。另外，快排也体现出一种随机选择(Random Selection)的思想。
   * 实现：**partition 函数**，以 two pointers 的方法将序列分割成两个部分，返回主元（prime）下标；**quick_sort 函数**，分而治之地使用 partition 函数
   * 评价：$O(nlogn)$
 * 堆排序 Heap Sort
@@ -1304,11 +1304,6 @@ int kim_larson(int y, int m, int d)
     return (1 + d + 2*m + 3*(m+1)/5 + y + y/4 - y/100 + y/400) % 7;
 }
 ```
-
-## 随机选择算法 Randomized Selection
-
-* 常见案例如：快速排序，找出第 n 大的值
-* 不存在特定输入使其达到 $O(n^2)$；平均 $O(n)$
 
 ## 高精度整数 Big Integer
 
