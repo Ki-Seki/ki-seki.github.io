@@ -1310,22 +1310,6 @@ int kim_larson(int y, int m, int d)
 * 常见案例如：快速排序，找出第 n 大的值
 * 不存在特定输入使其达到 $O(n^2)$；平均 $O(n)$
 
-## 有限状态机 Finite State Machine
-
-针对字符串处理的相关题目，可以使用 FSM 解决。首先分清楚两个概念
-
-* 有限的状态节点
-* 表示状态转移条件的有向边
-
-在做题时，首先定义好要解决问题的字符串模式，接下来定义有穷的状态码及其内涵，最后找到所有的可状态转移条件。
-
-> 例子
->
-> PAT B1003 “我要通过”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/B1003.cpp` 中查看题解。其 FSM 图如下：
-> ![B1003 FSM](https://raw.githubusercontent.com/Ki-Seki/ki-seki.github.io/refs/heads/main/content/images/B1003_FSM.png)
->
-> PAT A1060 “Are They Equal”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1060.cpp` 中查看题解。
-
 ## 高精度整数 Big Integer
 
 * 只要掌握“高精度 × int”，该类型的题就迎刃而解了
@@ -3461,6 +3445,22 @@ int critical_path()
 DP 算法最好选择从 1 开始计数，因为下标为 0 时往往是边界
 
 ## 字符串 String
+
+### 有限状态机 Finite State Machine
+
+针对字符串处理的相关题目，可以使用 FSM 解决。首先分清楚两个概念
+
+* 有限的状态节点
+* 表示状态转移条件的有向边
+
+在做题时，首先定义好要解决问题的字符串模式，接下来定义有穷的状态码及其内涵，最后找到所有的可状态转移条件。
+
+> 例子
+>
+> PAT B1003 “我要通过”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/B1003.cpp` 中查看题解。其 FSM 图如下：
+> ![B1003 FSM](https://raw.githubusercontent.com/Ki-Seki/ki-seki.github.io/refs/heads/main/content/images/B1003_FSM.png)
+>
+> PAT A1060 “Are They Equal”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1060.cpp` 中查看题解。
 
 ### KMP 算法 Knuth–Morris–Pratt string-searching algorithm
 
