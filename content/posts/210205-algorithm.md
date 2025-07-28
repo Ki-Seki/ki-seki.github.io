@@ -1308,7 +1308,7 @@ int kim_larson(int y, int m, int d)
 ## 随机选择算法 Randomized Selection
 
 * 常见案例如：快速排序，找出第 n 大的值
-* 上述两个案例都不存在特定输入使其达到 $O(n^2)$；平均 $O(n)$
+* 不存在特定输入使其达到 $O(n^2)$；平均 $O(n)$
 
 ## 有限状态机 Finite State Machine
 
@@ -1322,7 +1322,7 @@ int kim_larson(int y, int m, int d)
 > 例子
 >
 > PAT B1003 “我要通过”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/B1003.cpp` 中查看题解。其 FSM 图如下：
-> ![B1003 FSM](../images/B1003_FSM.png)
+> ![B1003 FSM](https://raw.githubusercontent.com/Ki-Seki/ki-seki.github.io/refs/heads/main/content/images/B1003_FSM.png)
 >
 > PAT A1060 “Are They Equal”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1060.cpp` 中查看题解。
 
