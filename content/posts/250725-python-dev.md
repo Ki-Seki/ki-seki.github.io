@@ -5,7 +5,7 @@ summary: 本文会介绍下Python Package开发中的一些设计思路，主要
 tags: ["python", "dowhen", "MemOS"]
 ---
 
-本文介绍的时候会多以dowhen和MemOS为例，可以通过 [Appendix](#appendix) 来了解更多。
+本文介绍的时候会多以dowhen和MemOS为例，这是笔者深度参与过的相对比较有热度的项目。可以通过 [Appendix](#appendix) 来了解更多。
 
 ## API design
 
@@ -39,13 +39,31 @@ tags: ["python", "dowhen", "MemOS"]
 
 ## Dependency Management
 
-务必使用 uv，不需要考虑其他选项。Python 不如 Rust 或者 NodeJS 那样有成熟的包管理工具。Python 的包管理工具有很多，但是都不够好。不过随着Python组织官方对pyproject.toml的
+### 管理工具
 
-可选依赖组。
+Python 不如 Rust 或者 NodeJS 那样有成熟的包管理工具。Python 的包管理工具有很多，但是都不够好。不过随着Python组织官方对pyproject.toml的逐步规范化 [^pep735] [^pep751]，Python的包管理工具正在逐步走向成熟，不过目前Python官方还没有推出统一的工具。
 
-开发依赖组。
+所以业界常用第三方管理工具，包括传统的setuptools，poetry等。我的个人建议是使用 uv，这是打包的未来发展方向。吸引我的是三大好处:
 
-延迟导入。
+- 底层是用Rust开发的，速度快 [^uv_rust]。
+- 支持Python官方的pyproject.toml规范。
+- 支持对pytorch生态的integration [^uv_torch]。
+
+### 三种不同类型的依赖
+
+正如 uv 官方文档中所讲的，总共有三种不同类型的依赖[^uv_deps]：
+
+> - `project.dependencies`: Published dependencies.
+> - `project.optional-dependencies`: Published optional dependencies, or "extras".
+> - `dependency-groups`: Local dependencies for development.
+
+### 延迟导入
+
+如果IDE提示错误。
+
+### 依赖组解析
+
+## CI/CD Design
 
 ## Common Utilities
 
@@ -66,15 +84,19 @@ tags: ["python", "dowhen", "MemOS"]
 
 ```
 
-## References
-
 ## Appendix
 
+### 了解 `dowhen`
+
+dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev [@gaogaotiantian](https://github.com/gaogaotiantian) 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
+
+dowhen的核心API就两个，一是负责执行什么的 callback/do，二是负责什么时候执行的trigger/when。为了把do和when更好的结合起来，比如提供context manager，提供trigger时机的判断等，因此dowhen的底层是一个handler模块；为了使用系统提供的sys.monitoring模块，更底层是一个instrumenter模块。
+
+dowhen的基本使用方法可以参考其官方文档 [^dowhen]。本文会介绍下dowhen的API设计和实现思路。
+
+#### `dowhen` 的 `trigger` 执行流
+
 {{<details>}}
-
-### `dowhen` 的介绍与讲解
-
-`dowhen` 的 `trigger` 执行流
 
 ```python
 @classmethod
@@ -158,7 +180,11 @@ def when(
     return cls(events, condition=condition, is_global=entity is None)
 ```
 
-`dowhen` 的 `callback` 执行流
+{{</details>}}
+
+#### `dowhen` 的 `callback` 执行流
+
+{{<details>}}
 
 ```python
 被instrumented的代码行
@@ -179,3 +205,17 @@ callback.py::Callback.call_*()  # 回调执行
 ```
 
 {{</details>}}
+
+## References
+
+[^pep735]: Rosen, Stephen. PEP 735 – Dependency Groups in pyproject.toml.. Python Enhancement Proposals, 20 Nov. 2023, https://peps.python.org/pep-0735/.
+
+[^pep751]: Cannon, Brett. PEP 751 – A file format to record Python dependencies for installation reproducibility. Python Enhancement Proposals, 24 July 2024, https://peps.python.org/pep-0751/.
+
+[^uv_rust]: https://docs.astral.sh/uv/
+
+[^uv_torch]: https://docs.astral.sh/uv/guides/integration/pytorch/
+
+[^uv_deps]: https://docs.astral.sh/uv/concepts/projects/dependencies/
+
+[^dowhen]: https://dowhen.readthedocs.io/en/latest/
