@@ -5,15 +5,28 @@ summary: 本文会介绍下Python Package开发中的一些设计思路，主要
 tags: ["python", "dowhen", "MemOS"]
 ---
 
+本文推荐具有AI研究背景的开发者阅读，可能对开发更具有影响力的框架有帮助。
+
 本文介绍的时候会多以dowhen和MemOS为例，这是笔者深度参与过的相对比较有热度的项目。可以通过 [Appendix](#appendix) 来了解更多。
 
 ## API design
 
-**API 是包的交付物，核心产出产品。** 只有包的 API 是暴漏给用户去使用的；其他非API的代码都无需向用户解释，用户也不应该在使用API时去阅读他们（仅开发者在协作时需要去阅读）。
+### API是什么？
 
-**接口稳定性。** 代码应该被不断重构，以适应新情况。但是至少在每个major version（eg. v0.\*.\*, v1.\*.\*都是major versions）内，API应该保持稳定。这也意味着至少在*开发一个包之前*，就应该想好包要提供什么样的核心功能！
+API 是包的交付物，核心产出产品。
 
-**应该提供少量的包的API，即放置少量的类或者函数在顶层__all__中。** 这样做的好处是方便用户记忆，毕竟数量少；同时也方便开发者撰写文档，因为很明确要对什么函数/类撰写详细的说明，示例讲解，使用场景等；同时也方便我们来编写tests，因为这些API的接口稳定性应当更高。
+- 只有包的 API 是暴漏给用户去使用的；
+- 其他非API的代码都无需向用户解释，用户也不应该在使用API时去阅读他们（仅开发者在协作时需要去阅读）。
+
+### API 应该保持稳定且简洁
+
+代码应该被不断重构，以适应新情况。但是至少在每个major version（eg. v0.\*.\*, v1.\*.\*都是major versions）内，API应该保持稳定。这也意味着至少在*开发一个包之前*，就应该想好包要提供什么样的核心功能！
+
+如果核心功能是逻辑上完备的，那么API就应该是稳定的，同时也能让API保持简洁。例如，增/删/改/查就是一个典型的逻辑上完备的功能集合；再比如Einstein Operation就是一个逻辑上完备的数学运算集合，一个示例的实现einops [^einops]只提供三个核心的APIs！良好的API设计需要我们从逻辑学，数学来找到启发。
+
+API数量少还有其他的好处。一来方便用户记忆，毕竟数量少；同时也方便开发者撰写文档，因为很明确要对什么函数/类撰写详细的说明，示例讲解，使用场景等；同时也方便我们来编写tests，因为这些API的接口稳定性应当更高。
+
+### 如何实现稳定且简洁的API？
 
 **通过参数多态来实现简洁API。** `dowhen` 仅设计了 `['bp', 'clear_all', 'do', 'get_source_hash', 'goto', 'when', 'DISABLE']` 七个函数暴露给用户去用，其中 `bp`、`goto` 、 `do` 和 `when` 是最核心的。用户使用什么非常明确。`dowhen` 主要是用参数多态来完成这个目标的。比如制作trigger的when函数，其函数签名是这样的：
 
@@ -27,11 +40,13 @@ tags: ["python", "dowhen", "MemOS"]
     ):
 ```
 
-其中，`IdentifierType = int | str | re.Pattern | Literal["<start>", "<return>"] | None`. identifiers这个参数隐含的还支持逻辑与和逻辑或的关系。所以你会看到这个函数支持的功能范围实际上是非常庞大的。
+其中，`IdentifierType = int | str | re.Pattern | Literal["<start>", "<return>"] | None`. identifiers这个参数由于可以是可变参数，因此隐含的还支持逻辑与和逻辑或的关系。所以你会看到这个函数支持的功能范围实际上是非常庞大的。[Appendix](#dowhentrigger) 具体介绍了这个函数的实现。
 
 **通过工厂模式来实现简洁API。** `transformers` 也有简单易记的API，不过他使用更多的工厂模式思路，比如 `AutoModelForCausalLM`、`AutoModelForSequenceClassification` 等等，甚至抽象工厂“pipeline”。只不过这里的区别是，transformers中用户API的参数并没有特别复杂，你不需要特别担心参数之间的相互作用。所以总体上也是易于用户使用和记忆的。
 
-**不可能简洁的情况。** 有些时候，事情无法如我们所愿。如果你去看 `Megatron-LM` 的API，你会发现它的API就非常复杂，`llamafactory`的API也很复杂，还有 `MemOS`。这些库普遍具有实验性质，接口也不可能稳定，因此使用这些库的时候“跑通”是使用中很大一环，API也很难做到简洁。如果API无法简化，那用户一定得去通过某种渠道来了解API。所以我们的重点就在于如何优化这个渠道。
+### 不可能简洁的情况
+
+有些时候，事情无法如我们所愿。如果你去看 `Megatron-LM` 的API，你会发现它的API就非常复杂，`llamafactory`的API也很复杂，还有 `MemOS`。这些库普遍具有实验性质，接口也不可能稳定，因此使用这些库的时候“跑通”是使用中很大一环，API也很难做到简洁。如果API无法简化，那用户一定得去通过某种渠道来了解API。所以我们的重点就在于如何优化这个渠道。
 
 - 对于`Megatron-LM`, 他本身expect用户git clone下来整个包。然后其提供了各类的training templates bash scripts，方便用户直接修改。如果还有定制化的需要，直接去阅读[megatron/training/arguments.py](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/training/arguments.py) 这个把所有参数聚集起来的地方。
 - 对于`llamafactory`，这个也是参数众多，它提供的[文档](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/sft.html#)对每种训练范式都提供详细的参数介绍。另外一个办法是，他直接启用一个gradio的界面，直观的把参数介绍和参数设置的位置统一了起来。
@@ -39,14 +54,16 @@ tags: ["python", "dowhen", "MemOS"]
 
 ## Dependency Management
 
+Python 不如 Rust 或者 NodeJS 那样有官方提供的包管理工具。不过随着Python组织官方对pyproject.toml的逐步规范化 [^pep735] [^pep751]，Python的包管理工具正在逐步走向成熟。
+
+在包管理中，依赖管理实际上是最重要的部分之一，我们在这里也只讨论与依赖有关的事情。
+
 ### 管理工具
 
-Python 不如 Rust 或者 NodeJS 那样有成熟的包管理工具。Python 的包管理工具有很多，但是都不够好。不过随着Python组织官方对pyproject.toml的逐步规范化 [^pep735] [^pep751]，Python的包管理工具正在逐步走向成熟，不过目前Python官方还没有推出统一的工具。
-
-所以业界常用第三方管理工具，包括传统的setuptools，poetry等。我的个人建议是使用 uv，这是打包的未来发展方向。吸引我的是三大好处:
+我们有很多选择，比如setuptools，poetry等。但我的个人建议是使用 uv，这是打包的未来发展方向。我认为他有三大好处:
 
 - 底层是用Rust开发的，速度快 [^uv_rust]。
-- 支持Python官方的pyproject.toml规范。
+- 支持Python官方的pyproject.toml规范，许多schema紧跟Python PEP规范。
 - 支持对pytorch生态的integration [^uv_torch]。
 
 ### 三种不同类型的依赖
@@ -57,9 +74,15 @@ Python 不如 Rust 或者 NodeJS 那样有成熟的包管理工具。Python 的�
 > - `project.optional-dependencies`: Published optional dependencies, or "extras".
 > - `dependency-groups`: Local dependencies for development.
 
-### 延迟导入
+**Published dependencies** 管理 pip install xxx 时安装的依赖。这里应该放置所有核心依赖，即离开这里的任何一个依赖，包的几乎任何代码都无法运行了。不过也不是完全一定，对于torch这类占空间巨大的包，而且又看平台安装的包，我们可以引导用户自行pip install，参考 [# Lazy Imports and Guided Installation](#lazy-imports-and-guided-installation)。
 
-如果IDE提示错误。
+**Published optional dependencies** 管理 pip install xxx[extra] 时安装的依赖。这里应该放置所有可选依赖，即离开这里的任何一个依赖，包的核心代码仍然可以运行，但一个大的功能块无法运行,这就需要我们管理不同的功能块/依赖组，比如，`MemOS`，是按照支持记忆的类型来划分依赖组的，比如 `MemoryOS[tree-mem]`, `MemoryOS[mem-reader]` 等等[^memos_install]；`lm-eval-harness`则是按照支持的benchmarks不同来划分依赖组的，比如 `lm-eval[ifeval]`、`lm-eval[math]` 等等[^lm_eval_install]。
+
+**Local dependencies for development** 管理开发时的依赖。这里应该放置所有开发时需要的依赖，比如测试框架，代码格式化工具，文档生成工具等。TODO
+
+### Lazy Imports and Guided Installation
+
+如果IDE提示错误，我们可以考虑使用延迟导入来减少对某些依赖的即时需求。同时，我们也可以提供引导安装的方式，帮助用户更方便地安装所需的依赖。
 
 ### 依赖组解析
 
@@ -94,7 +117,7 @@ dowhen的核心API就两个，一是负责执行什么的 callback/do，二是�
 
 dowhen的基本使用方法可以参考其官方文档 [^dowhen]。本文会介绍下dowhen的API设计和实现思路。
 
-#### `dowhen` 的 `trigger` 执行流
+#### `dowhen.trigger`
 
 {{<details>}}
 
@@ -182,7 +205,7 @@ def when(
 
 {{</details>}}
 
-#### `dowhen` 的 `callback` 执行流
+#### `dowhen.callback`
 
 {{<details>}}
 
@@ -219,3 +242,9 @@ callback.py::Callback.call_*()  # 回调执行
 [^uv_deps]: https://docs.astral.sh/uv/concepts/projects/dependencies/
 
 [^dowhen]: https://dowhen.readthedocs.io/en/latest/
+
+[^einops]: https://einops.rocks/
+
+[^memos_install]: https://memos-docs.openmem.net/getting_started/installation
+
+[^lm_eval_install]: https://github.com/EleutherAI/lm-evaluation-harness?tab=readme-ov-file#optional-extras
