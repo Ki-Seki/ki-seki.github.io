@@ -1,15 +1,15 @@
 ---
 date: '2025-07-25T23:17:51+08:00'
 title: 'Python Package Design'
-summary: 本文会介绍下Python Package开发中的一些设计思路，主要是我在开发`dowhen`和`MemOS`时的一些思考。
+summary:
 tags: ["python", "package", "API", "dependency", "structure"]
 ---
 
 AI发展愈发猛烈，Python的生态也随之越来越丰富，制作一个良好的Python包能够让自己的工作更具有实用性和影响力。
 
-笔者从2024年10月开始了解Python Package的开发，在这之后，尝试过将自己的工作[IAAR-Shanghai/UHGEval](https://github.com/IAAR-Shanghai/UHGEval)发布为Python包，还参与过[MemTensor/MemOS](https://github.com/MemTensor/MemOS)包的前期架构设计，也深度学习并参与了[gaogaotiantian/dowhen](https://github.com/gaogaotiantian/dowhen)的开发。这些经历让我对Python包的设计有了一些思考，记录在此。
+笔者从2024年10月开始了解Python Package的开发，在这之后，尝试过将自己的工作 {{< github "IAAR-Shanghai/UHGEval" >}} 发布为Python包，还参与过 {{< github "MemTensor/MemOS" >}}包的前期架构设计，也深度学习并参与了 {{< github "gaogaotiantian/dowhen" >}} 的开发。这些经历让我对Python包的设计有了一些思考，因此记录在本文。
 
-此外，在我所参与过的工作当中，`dowhen` 的设计尤其精致，也足够Pythonnic，非常鼓励大家去了解，我也在 [Appendix](#python-package-dowhen) 中为该package进行了更多的介绍。
+此外，在我所参与过的工作当中，{{< github "gaogaotiantian/dowhen" >}} 的设计尤其精致，也足够Pythonnic，非常鼓励大家去深入了解，我也在 [Appendix](#python-package-dowhen) 中为该package进行了扩展介绍。
 
 ## Related Work
 
@@ -17,19 +17,38 @@ AI发展愈发猛烈，Python的生态也随之越来越丰富，制作一个良
 
 - (必读) *Packaging Python Projects*，Python Packaging Authority (PyPa) 提供的官方教程，简明的介绍了Python包的构建和发布流程 [^pypa_packaging].
 - (必读) *Designing Pythonic library APIs*，一篇介绍如何设计Pythonic的API的文章 [^pythonic_api]。
-- *Python Packaging Best Practices*, 一篇介绍Packaging原理的文章 [^packaging_principles]。
+- *Python Packaging Best Practices*, 一篇介绍Packaging原理的文章 [^packaging_principles],包括sdist，wheel，前端/后端工具的简介。
 - *Structuring Your Project*, 一个稍微落后的介绍Python包代码结构的文章 [^structuring_your_project]。
 
 这些文章如果不是内容落后 [^structuring_your_project]，就是缺乏设计哲学的传递 [^pypa_packaging] [^packaging_principles]，又或者是不够全面[^pypa_packaging] [^pythonic_api]，本文则会试图弥补这些缺憾。
 
-## API design
-
-### API是什么？
+## API Design
 
 API 是包的交付物，核心产出产品。
 
 - 只有包的 API 是暴漏给用户去使用的；
 - 其他非API的代码都无需向用户解释，用户也不应该在使用API时去阅读他们（仅开发者在协作时需要去阅读）。
+
+所以，你能看出来API是相当重要的。Ben Hoyt在他的文章 [^pythonic_api] 中提及了许多实用的建议，而且他的文字充满趣味，强烈建议去阅读下，copy 他总结的takeaways在这里：
+
+> - Good API design is very important to users.
+> - When creating a library, start with a good base and iterate.
+> - Try to follow PEP 8 and grok PEP 20. This is the way.
+> - The standard library isn’t always the best example to follow.
+> - Expose a clean API; file structure is an implementation detail.
+> - Flat is better than nested.
+> - Design your library to be used as `import lib ... lib.Thing()` rather than from lib import LibThing ... > - LibThing().
+> - Avoid global configuration; use good defaults and let the user override them.
+> - Avoid global state; use a class instead.
+> - Names should be as short as they can be while still being clear.
+> - Function names should be verbs and classes nouns, but don’t get hung up on this.
+> - Being _private is fine; __extra_privacy is unnecessary.
+> - If an error occurs, raise a custom exception; use built-in exceptions if appropriate.
+> - Only break backwards compatibility if you’re overhauling your API.
+> - Keyword arguments and dynamic typing are great for backwards compatibility.
+> - Use type annotations at least for your public API; your users will thank you.
+> - Use @dataclass for classes which are (mostly) data.
+> - Python’s expressiveness is boundless; don’t use too much of it!
 
 ### API 应该保持稳定且简洁
 
@@ -120,7 +139,7 @@ src/ 之外也会有另外常见的目录：
 
 ### Python Package: `dowhen`
 
-dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev [@gaogaotiantian](https://github.com/gaogaotiantian) 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
+dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev {{<github "gaogaotiantian">}} 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
 
 dowhen的核心API就两个，一是负责执行什么的 callback/do，二是负责什么时候执行的trigger/when。为了把do和when更好的结合起来，比如提供context manager，提供trigger时机的判断等，因此dowhen的底层是一个handler模块；为了使用系统提供的sys.monitoring模块，更底层是一个instrumenter模块。
 
