@@ -85,6 +85,8 @@ Most <mark>salamanders</mark> are nocturnal, and hunt for insects, worms, and ot
 This is a collapsible section. You can put any content here, including text, images, or even other shortcodes. Click the summary to expand or collapse this section.
 {{< /details >}}
 
+## Appendix
+
 ## Citation
 
 ```bibtex
@@ -92,9 +94,3 @@ This is a collapsible section. You can put any content here, including text, ima
 ```
 
 ## References
-
-## Appendix
-
-{{<details "Example Details Section">}}
-This is an example of a details section. You can include any content here, such as text, images, or other shortcodes. Click the summary to expand or collapse this section.
-{{</details>}}
