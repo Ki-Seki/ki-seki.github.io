@@ -9,7 +9,7 @@ AI发展愈发猛烈，Python的生态也随之越来越丰富，制作一个良
 
 笔者从2024年10月开始了解Python Package的开发，在这之后，尝试过将自己的工作[IAAR-Shanghai/UHGEval](https://github.com/IAAR-Shanghai/UHGEval)发布为Python包，还参与过[MemTensor/MemOS](https://github.com/MemTensor/MemOS)包的前期架构设计，也深度学习并参与了[gaogaotiantian/dowhen](https://github.com/gaogaotiantian/dowhen)的开发。这些经历让我对Python包的设计有了一些思考，记录在此。
 
-此外，在我所参与过的工作当中，`dowhen` 的设计尤其精致，也足够Pythonnic，非常鼓励大家去了解，我也在 [Appendix](#dowhen) 中为该package进行了更多的介绍。
+此外，在我所参与过的工作当中，`dowhen` 的设计尤其精致，也足够Pythonnic，非常鼓励大家去了解，我也在 [Appendix](#python-package-dowhen) 中为该package进行了更多的介绍。
 
 ## Related Work
 
@@ -53,7 +53,7 @@ API数量少还有其他的好处。一来方便用户记忆，毕竟数量少�
     ):
 ```
 
-其中，`IdentifierType = int | str | re.Pattern | Literal["<start>", "<return>"] | None`. identifiers这个参数由于可以是可变参数，因此隐含的还支持逻辑与和逻辑或的关系。所以你会看到这个函数支持的功能范围实际上是非常庞大的。[Appendix](#dowhentrigger) 具体介绍了这个函数的实现。
+其中，`IdentifierType = int | str | re.Pattern | Literal["<start>", "<return>"] | None`. identifiers这个参数由于可以是可变参数，因此隐含的还支持逻辑与和逻辑或的关系。所以你会看到这个函数支持的功能范围实际上是非常庞大的。[Appendix](#python-package-dowhen) 具体介绍了这个函数的实现。
 
 **通过工厂模式来实现简洁API。** `transformers` 也有简单易记的API，不过他使用更多的工厂模式思路，比如 `AutoModelForCausalLM`、`AutoModelForSequenceClassification` 等等，甚至抽象工厂“pipeline”。只不过这里的区别是，transformers中用户API的参数并没有特别复杂，你不需要特别担心参数之间的相互作用。所以总体上也是易于用户使用和记忆的。
 
@@ -116,25 +116,17 @@ src/ 之外也会有另外常见的目录：
 
 比如 ci/cd tools. TODO
 
-## Citation
-
-```bibtex
-
-```
-
 ## Appendix
 
-### `dowhen`
+### Python Package: `dowhen`
 
-dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev [gaogaotiantian](https://github.com/gaogaotiantian) 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
+dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev [@gaogaotiantian](https://github.com/gaogaotiantian) 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
 
 dowhen的核心API就两个，一是负责执行什么的 callback/do，二是负责什么时候执行的trigger/when。为了把do和when更好的结合起来，比如提供context manager，提供trigger时机的判断等，因此dowhen的底层是一个handler模块；为了使用系统提供的sys.monitoring模块，更底层是一个instrumenter模块。
 
-dowhen的基本使用方法可以参考其官方文档 [^dowhen]。本文会介绍下dowhen的API设计和实现思路。
+dowhen的基本使用方法可以参考其官方文档 [^dowhen]，这里会介绍下dowhen的API设计和实现思路。
 
-#### `dowhen.trigger`
-
-{{<details>}}
+{{<details "dowhen.trigger">}}
 
 ```python
 @classmethod
@@ -220,9 +212,7 @@ def when(
 
 {{</details>}}
 
-#### `dowhen.callback`
-
-{{<details>}}
+{{<details "dowhen.callback">}}
 
 ```python
 被instrumented的代码行
@@ -243,6 +233,12 @@ callback.py::Callback.call_*()  # 回调执行
 ```
 
 {{</details>}}
+
+## Citation
+
+```bibtex
+
+```
 
 ## References
 
