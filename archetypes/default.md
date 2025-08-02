@@ -87,8 +87,6 @@ This is a collapsible section. You can put any content here, including text, ima
 
 ## Appendix
 
-This is an example of a details section. You can include any content here, such as text, images, or other shortcodes. Click the summary to expand or collapse this section.
-
 ## Citation
 
 ```bibtex
