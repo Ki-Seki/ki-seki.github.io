@@ -1,0 +1,18 @@
+{{- $parts := split (.Get 0) "/" -}}
+{{- $user := index $parts 0 -}}
+{{- $repo := "" -}}
+{{- if ge (len $parts) 2 -}}
+  {{- $repo = index $parts 1 -}}
+{{- end -}}
+
+{{- $url := printf "https://github.com/%s" $user -}}
+{{- $display := $user -}}
+
+{{- if ne $repo "" -}}
+  {{- $url = printf "%s/%s" $url $repo -}}
+  {{- $display = printf "%s/%s" $user $repo -}}
+{{- end -}}
+
+<a href="{{ $url }}" target="_blank" rel="noopener">
+  <i class="fab fa-github"></i> {{ $display }}
+</a>

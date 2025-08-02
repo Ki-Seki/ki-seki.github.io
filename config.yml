@@ -76,6 +76,7 @@ params:
   ShowPageNums: true
   ShowToc: true
   comments: true
+  fontawesome: true
 
   profileMode:
     enabled: false
