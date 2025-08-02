@@ -2,12 +2,25 @@
 date: '2025-07-25T23:17:51+08:00'
 title: 'Python Package Design'
 summary: 本文会介绍下Python Package开发中的一些设计思路，主要是我在开发`dowhen`和`MemOS`时的一些思考。
-tags: ["python", "dowhen", "MemOS"]
+tags: ["python", "package", "API", "dependency", "structure"]
 ---
 
-本文推荐具有AI研究背景的开发者阅读，可能对开发更具有影响力的框架有帮助。
+AI发展愈发猛烈，Python的生态也随之越来越丰富，制作一个良好的Python包能够让自己的工作更具有实用性和影响力。
 
-本文介绍的时候会多以dowhen和MemOS为例，这是笔者深度参与过的相对比较有热度的项目。可以通过 [Appendix](#appendix) 来了解更多。
+笔者从2024年10月开始了解Python Package的开发，在这之后，尝试过将自己的工作[IAAR-Shanghai/UHGEval](https://github.com/IAAR-Shanghai/UHGEval)发布为Python包，还参与过[MemTensor/MemOS](https://github.com/MemTensor/MemOS)包的前期架构设计，也深度学习并参与了[gaogaotiantian/dowhen](https://github.com/gaogaotiantian/dowhen)的开发。这些经历让我对Python包的设计有了一些思考，记录在此。
+
+此外，在我所参与过的工作当中，`dowhen` 的设计尤其精致，也足够Pythonnic，非常鼓励大家去了解，我也在 [Appendix](#dowhen) 中为该package进行了更多的介绍。
+
+## Related Work
+
+对于Python包的构建和设计已经有许多很好的文章/教程。比如说，
+
+- (必读) *Packaging Python Projects*，Python Packaging Authority (PyPa) 提供的官方教程，简明的介绍了Python包的构建和发布流程 [^pypa_packaging].
+- (必读) *Designing Pythonic library APIs*，一篇介绍如何设计Pythonic的API的文章 [^pythonic_api]。
+- *Python Packaging Best Practices*, 一篇介绍Packaging原理的文章 [^packaging_principles]。
+- *Structuring Your Project*, 一个稍微落后的介绍Python包代码结构的文章 [^structuring_your_project]。
+
+这些文章如果不是内容落后 [^structuring_your_project]，就是缺乏设计哲学的传递 [^pypa_packaging] [^packaging_principles]，又或者是不够全面[^pypa_packaging] [^pythonic_api]，本文则会试图弥补这些缺憾。
 
 ## API design
 
@@ -86,9 +99,7 @@ Python 不如 Rust 或者 NodeJS 那样有官方提供的包管理工具。不�
 
 ### 依赖组解析
 
-## CI/CD Design
-
-## Common Utilities
+## Code Structure
 
 包里src/下经常有些常见的工具，你可能想要预先了解下，这样等遇到有需要时，就可以知道有这样的东西。
 
@@ -101,6 +112,10 @@ Python 不如 Rust 或者 NodeJS 那样有官方提供的包管理工具。不�
 - **deprecation management**:
 - **dependency management**:
 
+src/ 之外也会有另外常见的目录：
+
+比如 ci/cd tools. TODO
+
 ## Citation
 
 ```bibtex
@@ -109,9 +124,9 @@ Python 不如 Rust 或者 NodeJS 那样有官方提供的包管理工具。不�
 
 ## Appendix
 
-### 了解 `dowhen`
+### `dowhen`
 
-dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev [@gaogaotiantian](https://github.com/gaogaotiantian) 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
+dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev [gaogaotiantian](https://github.com/gaogaotiantian) 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
 
 dowhen的核心API就两个，一是负责执行什么的 callback/do，二是负责什么时候执行的trigger/when。为了把do和when更好的结合起来，比如提供context manager，提供trigger时机的判断等，因此dowhen的底层是一个handler模块；为了使用系统提供的sys.monitoring模块，更底层是一个instrumenter模块。
 
@@ -248,3 +263,11 @@ callback.py::Callback.call_*()  # 回调执行
 [^memos_install]: https://memos-docs.openmem.net/getting_started/installation
 
 [^lm_eval_install]: https://github.com/EleutherAI/lm-evaluation-harness?tab=readme-ov-file#optional-extras
+
+[^pypa_packaging]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+[^packaging_principles]: https://medium.com/@miqui.ferrer/python-packaging-best-practices-4d6da500da5f
+
+[^structuring_your_project]: https://docs.python-guide.org/writing/structure/
+
+[^pythonic_api]: https://benhoyt.com/writings/python-api-design/
