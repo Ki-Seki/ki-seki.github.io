@@ -107,8 +107,9 @@ params:
     - name: linkedin
       url: https://www.linkedin.com/in/song-sc/
     - name: huggingface
-      title: Hugging Face
       url: https://huggingface.co/Ki-Seki
+    - name: heart
+      url: https://songsc.atomgit.net/us/
 
   editPost:
     URL: "https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content"
