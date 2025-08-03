@@ -373,7 +373,8 @@
     function initAdmonition() {
         // Folding functionality for admonitions
         let peDetails = document.getElementsByClassName('pe-details');
-        for (let element of peDetails) {
+        for (let i = 0; i < peDetails.length; i++) {
+            const element = peDetails[i];
             const summary = element.getElementsByClassName('pe-details-summary')[0];
             if (summary) {
                 summary.addEventListener('click', () => {
