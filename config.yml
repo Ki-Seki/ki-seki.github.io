@@ -102,10 +102,10 @@ params:
       url: https://scholar.google.com/citations?user=6t4_yXMAAAAJ
     - name: github
       url: https://github.com/Ki-Seki
-    - name: huggingface
-      url: https://huggingface.co/Ki-Seki
     - name: X
       url: https://x.com/songsc_
+    - name: huggingface
+      url: https://huggingface.co/Ki-Seki
     - name: linkedin
       url: https://www.linkedin.com/in/song-sc/
     - name: heart
