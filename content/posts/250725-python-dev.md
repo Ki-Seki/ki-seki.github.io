@@ -1,7 +1,6 @@
 ---
 date: '2025-07-25T23:17:51+08:00'
-title: 'Python Package Design'
-summary:
+title: 'Python Package Design: API, Dependency and Code Structure'
 tags: ["python", "package", "API", "dependency", "structure"]
 ---
 
@@ -190,7 +189,7 @@ def require_python_package(
 
 这里列举一个现代的Python Package对应的GitHub仓库中的代码究竟都放些什么，怎么放。
 
-首先在根目录下这些内容可能是最常见的：
+### 仓库根目录
 
 - **README.md**: 包的介绍，使用方法，安装方法等。
 - **LICENSE**: 包的许可证。
@@ -204,7 +203,9 @@ def require_python_package(
 - **.github/**: GitHub 相关配置目录，包含工作流、issue 模板、issue设置、Pr模板等。可以参考 {{< github "MemTensor/MemOS" >}} 中的配置。
 - etc.
 
-包文件夹**src/my_package/**下经常有些常见的代码，{{< github "MemTensor/MemOS" >}}均存在一些示例：
+### 包目录
+
+包文件夹 **src/my_package/** 下常有些这些代码，{{< github "MemTensor/MemOS" >}}均存在一些示例：
 
 - **\_\_init\_\_.py**: 包的初始化文件，把包的核心API暴露给用户。
 - **api**: 包的API代码目录，存放包的核心http API代码。
@@ -216,7 +217,7 @@ def require_python_package(
 - **constants/settings**: 一些包级别的常量，应该少一些，比如debug模式开关等。
 - **deprecation management**: 过时代码管理相关的工具和代码。
 - **dependency management**: 依赖管理相关的工具和代码，比如前文提到的 `require_python_package` decorator。
-- etc.
+- 其他业务相关代码
 
 ## Appendix
 
