@@ -85,6 +85,32 @@ Most <mark>salamanders</mark> are nocturnal, and hunt for insects, worms, and ot
 This is a collapsible section. You can put any content here, including text, images, or even other shortcodes. Click the summary to expand or collapse this section.
 {{< /details >}}
 
+### Admonition Shortcode
+
+{{< admonition type=note title=note open=true >}} content {{< /admonition >}}
+
+{{< admonition type=abstract title=abstract open=true >}} content {{< /admonition >}}
+
+{{< admonition type=info title=info open=true >}} content {{< /admonition >}}
+
+{{< admonition type=tip title=tip open=true >}} content {{< /admonition >}}
+
+{{< admonition type=success title=success open=true >}} content {{< /admonition >}}
+
+{{< admonition type=question title=question open=true >}} content {{< /admonition >}}
+
+{{< admonition type=warning title=warning open=true >}} content {{< /admonition >}}
+
+{{< admonition type=failure title=failure open=true >}} content {{< /admonition >}}
+
+{{< admonition type=danger title=danger open=true >}} content {{< /admonition >}}
+
+{{< admonition type=bug title=bug open=true >}} content {{< /admonition >}}
+
+{{< admonition type=example title=example open=true >}} content {{< /admonition >}}
+
+{{< admonition type=quote title=quote open=true >}} content {{< /admonition >}}
+
 ## Appendix
 
 ## Citation
