@@ -1,8 +1,8 @@
-{{- $title := .Get "title" | default .Page.Title -}}
-{{- $journal := site.Params.journal | default "The Kiseki Log" -}}
-{{- $year := .Get "year" | default (.Page.Date.Format "2006") -}}
-{{- $month := .Get "month" | default (.Page.Date.Format "January") -}}
-{{- $url := .Get "url" | default (.Page.Permalink) -}}
+{{- $title := .Page.Title -}}
+{{- $journal := site.Title -}}
+{{- $year := .Page.Date.Format "2006" -}}
+{{- $month := .Page.Date.Format "January" -}}
+{{- $url := .Page.Permalink -}}
 
 {{- $pageAuthor := "" -}}
 {{- if or .Page.Params.author site.Params.author -}}
