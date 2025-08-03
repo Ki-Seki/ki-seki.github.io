@@ -13,16 +13,7 @@ So, I hope to create cool stuff, write fascinating content, and hopefully catch 
 
 ## Citation
 
-```bibtex
-@article{song2025whyistarted,
-  title = {Why I Started Blogging Again},
-  author = {Song, Shichao},
-  journal = {The Kiseki Log},
-  year = {2025},
-  month = {July},
-  url = "https://ki-seki.github.io/posts/250721-blogging/"
-}
-```
+{{< bibtex >}}
 
 ## References
 
