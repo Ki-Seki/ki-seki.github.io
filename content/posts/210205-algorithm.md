@@ -3524,16 +3524,7 @@ int main()
 
 ## Citation
 
-```bibtex
-@article{song2021algorithm,
-  title = {C/C++ 语言算法与数据结构学习笔记},
-  author = {Song, Shichao},
-  journal = {The Kiseki Log},
-  year = {2021},
-  month = {February},
-  url = "https://ki-seki.github.io/posts/210205-algorithm/"
-}
-```
+{{< bibtex >}}
 
 ## References
 

@@ -1,6 +1,8 @@
 ---
 date: '{{ .Date }}'
 title: '{{ replace .File.ContentBaseName "-" " " | title }}'
+author:
+  - Shichao Song
 summary: ''
 tags: []
 math: true
@@ -89,8 +91,6 @@ This is a collapsible section. You can put any content here, including text, ima
 
 ## Citation
 
-```bibtex
-
-```
+{{< bibtex >}}
 
 ## References
