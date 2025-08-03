@@ -1,0 +1,40 @@
+{{- $journal := "The Kiseki Log" -}}
+{{- $baseURL := "https://ki-seki.github.io" -}}
+
+{{- $title := .Get "title" | default .Page.Title -}}
+{{- $year := .Get "year" | default (.Page.Date.Format "2006") -}}
+{{- $month := .Get "month" | default (.Page.Date.Format "January") -}}
+{{- $url := .Get "url" | default (printf "%s%s" $baseURL .Page.RelPermalink) -}}
+
+{{- $pageAuthor := "" -}}
+{{- if or .Page.Params.author site.Params.author -}}
+{{- $authorData := (.Page.Params.author | default site.Params.author) -}}
+{{- $author_type := (printf "%T" $authorData) -}}
+{{- if (or (eq $author_type "[]string") (eq $author_type "[]interface {}")) -}}
+{{- $pageAuthor = (delimit $authorData " and ") -}}
+{{- else -}}
+{{- $pageAuthor = $authorData -}}
+{{- end -}}
+{{- end -}}
+{{- $author := .Get "author" | default $pageAuthor | default "Shichao Song" -}}
+
+{{- $authorKey := $author | lower | replaceRE "[^a-zA-Z]" "" -}}
+{{- $titleKey := $title | lower | replaceRE "[^a-zA-Z0-9]" "" | truncate 15 "" -}}
+{{- $bib_key := .Get "key" | default (printf "%s%s%s" $authorKey $year $titleKey) -}}
+
+
+<tbody>
+  <tr>
+    <td class="lntd">
+      <pre tabindex="0" class="chroma"><code class="language-bibtex" data-lang="bibtex"><span class="line"><span class="cl"><span class="nc">@article</span><span class="p">{</span><span class="nl">{{ $bib_key }}</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="na">title</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $title }}{{"}"}}</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="na">author</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $author }}{{"}"}}</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="na">journal</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $journal }}{{"}"}}</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="na">year</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $year }}{{"}"}}</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="na">month</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $month }}{{"}"}}</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="na">url</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $url }}{{"}"}}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre>
+    </td>
+  </tr>
+</tbody>
