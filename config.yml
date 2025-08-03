@@ -124,7 +124,7 @@ params:
 
   assets:
     disableHLJS: true
-    favicon: assets/images/icons8-capybara-50.png
+    favicon: assets/images/icons8-capybara-32.png
     favicon16x16: assets/images/icons8-capybara-16.png
     favicon32x32: assets/images/icons8-capybara-32.png
     apple_touch_icon: assets/images/icons8-capybara-50.png
