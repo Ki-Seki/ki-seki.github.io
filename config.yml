@@ -163,7 +163,7 @@ privacy:
     privacyEnhanced: true
   googleAnalytics:
     disable: false
-    respectDoNotTrack: false
+    respectDoNotTrack: true
 
 services:
   instagram:
