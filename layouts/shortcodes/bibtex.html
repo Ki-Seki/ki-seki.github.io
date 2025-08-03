@@ -1,10 +1,8 @@
-{{- $journal := "The Kiseki Log" -}}
-{{- $baseURL := "https://ki-seki.github.io" -}}
-
 {{- $title := .Get "title" | default .Page.Title -}}
+{{- $journal := site.Params.journal | default "The Kiseki Log" -}}
 {{- $year := .Get "year" | default (.Page.Date.Format "2006") -}}
 {{- $month := .Get "month" | default (.Page.Date.Format "January") -}}
-{{- $url := .Get "url" | default (printf "%s%s" $baseURL .Page.RelPermalink) -}}
+{{- $url := .Get "url" | default (.Page.Permalink) -}}
 
 {{- $pageAuthor := "" -}}
 {{- if or .Page.Params.author site.Params.author -}}
@@ -16,7 +14,7 @@
 {{- $pageAuthor = $authorData -}}
 {{- end -}}
 {{- end -}}
-{{- $author := .Get "author" | default $pageAuthor | default "Shichao Song" -}}
+{{- $author := .Get "author" | default $pageAuthor -}}
 
 {{- $authorKey := $author | lower | replaceRE "[^a-zA-Z]" "" -}}
 {{- $titleKey := $title | lower | replaceRE "[^a-zA-Z0-9]" "" | truncate 15 "" -}}
