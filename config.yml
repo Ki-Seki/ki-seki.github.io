@@ -108,6 +108,8 @@ params:
       url: https://huggingface.co/Ki-Seki
     - name: linkedin
       url: https://www.linkedin.com/in/song-sc/
+    - name: rss
+      url: https://ki-seki.github.io/posts/index.xml
     - name: heart
       url: https://songsc.atomgit.net/us/
 
@@ -122,9 +124,11 @@ params:
 
   assets:
     disableHLJS: true
-    favicon: https://img.icons8.com/ios/50/capybara.png
-    apple_touch_icon: https://img.icons8.com/ios/50/capybara.png
-    safari_pinned_tab: https://img.icons8.com/ios/50/capybara.png
+    favicon: assets/images/icons8-capybara-50.png
+    favicon16x16: assets/images/icons8-capybara-16.png
+    favicon32x32: assets/images/icons8-capybara-32.png
+    apple_touch_icon: assets/images/icons8-capybara-50.png
+    safari_pinned_tab: assets/images/icons8-capybara-50.png
 
   fuseOpts:
       isCaseSensitive: false
