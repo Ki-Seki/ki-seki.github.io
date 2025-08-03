@@ -1,5 +1,5 @@
 ---
-date: '2025-07-25T23:17:51+08:00'
+date: '2025-08-03T18:45:17+08:00'
 title: 'Python Package Design: API, Dependency and Code Structure'
 tags: ["python", "package", "API", "dependency", "structure"]
 ---
@@ -379,24 +379,24 @@ User-defined code  # If call_code, user code is executed
 
 ## References
 
-[^pep735]: Rosen, Stephen. PEP 735 – Dependency Groups in pyproject.toml.. Python Enhancement Proposals, 20 Nov. 2023, https://peps.python.org/pep-0735/.
+[^pep735]: Rosen, Stephen. “PEP 735 – Dependency Groups in pyproject.toml.” *Python Enhancement Proposals*, 20 Nov. 2023, https://peps.python.org/pep-0735/. Accessed 3 Aug. 2025.
 
-[^pep751]: Cannon, Brett. PEP 751 – A file format to record Python dependencies for installation reproducibility. Python Enhancement Proposals, 24 July 2024, https://peps.python.org/pep-0751/.
+[^pep751]: Cannon, Brett. “PEP 751 – A file format to record Python dependencies for installation reproducibility.” *Python Enhancement Proposals*, 24 July 2024, https://peps.python.org/pep-0751/. Accessed 3 Aug. 2025.
 
-[^uv_rust]: https://docs.astral.sh/uv/
+[^uv_rust]: Astral. “uv.” *uv Docs*, n.d., https://docs.astral.sh/uv/. Accessed 3 Aug. 2025.
 
-[^uv_torch]: https://docs.astral.sh/uv/guides/integration/pytorch/
+[^uv_torch]: Astral. “Using uv with PyTorch.” *uv Docs*, n.d., https://docs.astral.sh/uv/guides/integration/pytorch/. Accessed 3 Aug. 2025.
 
-[^uv_deps]: https://docs.astral.sh/uv/concepts/projects/dependencies/
+[^uv_deps]: Astral. “Managing dependencies.” *uv Docs*, n.d., https://docs.astral.sh/uv/concepts/projects/dependencies/. Accessed 3 Aug. 2025.
 
-[^dowhen]: https://dowhen.readthedocs.io/en/latest/
+[^dowhen]: Gao, Tian. “dowhen documentation.” *dowhen Docs*, n.d., https://dowhen.readthedocs.io/en/latest/. Accessed 3 Aug. 2025.
 
-[^einops]: https://einops.rocks/
+[^einops]: Rogozhnikov, Alex. “einops.” *einops Docs*, n.d., https://einops.rocks/. Accessed 3 Aug. 2025.
 
-[^pypa_packaging]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+[^pypa_packaging]: Python Packaging Authority. “Packaging Python Projects.” *Packaging Python Projects*, n.d., https://packaging.python.org/en/latest/tutorials/packaging-projects/. Accessed 3 Aug. 2025.
 
-[^packaging_principles]: https://medium.com/@miqui.ferrer/python-packaging-best-practices-4d6da500da5f
+[^packaging_principles]: Ferrer, Miqui. “Python Packaging Best Practices.” *Medium*, n.d., https://medium.com/@miqui.ferrer/python-packaging-best-practices-4d6da500da5f. Accessed 3 Aug. 2025.
 
-[^structuring_your_project]: https://docs.python-guide.org/writing/structure/
+[^structuring_your_project]: Reitz, Kenneth, and Schlusser, Tanya. “Structuring Your Project.” *The Hitchhiker’s Guide to Python*, n.d., https://docs.python-guide.org/writing/structure/. Accessed 3 Aug. 2025.
 
-[^pythonic_api]: https://benhoyt.com/writings/python-api-design/
+[^pythonic_api]: Hoyt, Ben. “Pythonic API Design.” *Ben Hoyt’s blog*, n.d., https://benhoyt.com/writings/python-api-design/. Accessed 3 Aug. 2025.
