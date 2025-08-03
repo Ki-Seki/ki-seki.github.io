@@ -5,9 +5,11 @@
 {{- if or (hasPrefix $src "https://www.youtube.com/") (hasPrefix $src "https://youtu.be/") (hasPrefix $src "http://www.youtube.com/") (hasPrefix $src "http://youtu.be/") -}}
   {{/* YouTube Video */}}
   {{- $videoId := "" -}}
-  {{- if hasPrefix $src "https://youtu.be/" -}}
-    {{- $videoId = replace $src "https://youtu.be/" "" -}}
-    {{- $videoId = index (split $videoId "?") 0 -}}
+  {{- if or (hasPrefix $src "https://youtu.be/") (hasPrefix $src "http://youtu.be/") -}}
+    {{- $videoId = $src -}}
+    {{- $videoId = replace $videoId "https://youtu.be/" "" -}}
+    {{- $videoId = replace $videoId "http://youtu.be/" "" -}}
+    {{- $videoId = replaceRE ".*[?&]v=([a-zA-Z0-9_-]{11})" "$1" $src -}}
   {{- else -}}
     {{- $videoId = replaceRE ".*[?&]v=([^&]*)" "$1" $src -}}
   {{- end -}}
@@ -23,11 +25,11 @@
 {{- else if or (hasSuffix $src ".mp4") (hasSuffix $src ".webm") (hasSuffix $src ".ogg") (hasSuffix $src ".avi") (hasSuffix $src ".mov") -}}
   {{/* Video File */}}
   <video width="100%" controls>
-    <source src="{{ $src }}">
+    <source src="{{ $src }}"{{ if hasSuffix $src ".mp4" }} type="video/mp4"{{ else if hasSuffix $src ".webm" }} type="video/webm"{{ else if hasSuffix $src ".ogg" }} type="video/ogg"{{ else if hasSuffix $src ".avi" }} type="video/x-msvideo"{{ else if hasSuffix $src ".mov" }} type="video/quicktime"{{ end }}>
     Your browser does not support the video tag.
   </video>
 
-{{- else if or (hasPrefix $src "http") (hasPrefix $src "/") -}}
+{{- else if or (hasPrefix $src "https") (hasPrefix $src "/") -}}
   {{/* Image */}}
   <img src="{{ $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
 
