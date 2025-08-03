@@ -118,10 +118,6 @@ params:
     Text: "Suggest Changes" # edit text
     appendFilePath: true # to append file path to Edit link
 
-  analytics:
-      google:
-          SiteVerificationTag: "songsc_blog"
-
   assets:
     disableHLJS: true
     favicon: assets/images/icons8-capybara-32.png
@@ -145,7 +141,7 @@ markup:
       unsafe: true
   highlight:
     noClasses: false
-    anchorLineNos: true
+    anchorLineNos: false
     codeFences: true
     guessSyntax: true
     lineNos: true
@@ -154,23 +150,25 @@ markup:
 privacy:
   vimeo:
     disabled: false
-    simple: true
-
+    simple: false
   x:
     disabled: false
     enableDNT: true
-    simple: true
-
+    simple: false
   instagram:
     disabled: false
-    simple: true
-
+    simple: false
   youtube:
     disabled: false
     privacyEnhanced: true
+  googleAnalytics:
+    disable: false
+    respectDoNotTrack: true
 
 services:
   instagram:
     disableInlineCSS: true
   x:
     disableInlineCSS: true
+  googleAnalytics:
+    id: G-H54SFW213N
