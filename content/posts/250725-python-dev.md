@@ -4,31 +4,31 @@ title: 'Python Package Design: API, Dependency and Code Structure'
 tags: ["python", "package", "API", "dependency", "structure"]
 ---
 
-AI发展愈发猛烈，这也让适合AI领域快速原型验证的语言，Python变得火热。因此，适时制作一个良好的Python包能够让自己的工作更可能落地也更具有影响力。
+Python—a language well-suited for fast prototyping in the AI field—has become increasingly popular these days. Creating a well-designed Python package at the right time can make your work more impactful and more likely to be adopted.
 
-笔者从2024年10月开始了解Python Package的开发，在这之后，尝试过将自己的工作 {{< github "IAAR-Shanghai/UHGEval" >}} 发布为Python包，还参与过 {{< github "MemTensor/MemOS" >}}包的前期架构设计，也深度学习并参与了 {{< github "gaogaotiantian/dowhen" >}} 的开发。这些经历让我对Python包的设计有了一些思考，因此记录在本文。
+Since October 2024, I have been learning about Python package development. Since then, I have published my own work {{< github "IAAR-Shanghai/UHGEval" >}} as a Python package, participated in the early architecture design of {{< github "MemTensor/MemOS" >}}, and deeply studied and contributed to {{< github "gaogaotiantian/dowhen" >}}. These experiences have given me some insights into Python package design, which I document in this post.
 
-此外，在我所参与过的工作当中，{{< github "gaogaotiantian/dowhen" >}} 的设计尤其精致，也足够Pythonnic，非常鼓励大家去深入了解，我也在 [Appendix](#python-package-dowhen) 中为该package进行了扩展介绍。
+Among the projects I've worked on, {{< github "gaogaotiantian/dowhen" >}} stands out for its elegant and truly Pythonic design. I highly encourage you to explore it in depth; I also provide an extended introduction in the [Appendix](#python-package-dowhen).
 
 ## Related Work
 
-对于Python包的构建和设计，网络上已经有许多文章/教程。比如说，
+There are already many articles and tutorials online about building and designing Python packages. For example:
 
-- (必读) *Packaging Python Projects*，Python Packaging Authority (PyPa) 提供的官方教程，简明的介绍了Python包的构建和发布流程 [^pypa_packaging].
-- (必读) *Designing Pythonic library APIs*，一篇介绍如何设计Pythonic的API的文章 [^pythonic_api]。
-- *Python Packaging Best Practices*, 一篇介绍Packaging原理的文章 [^packaging_principles],包括sdist，wheel，前端/后端工具的简介。
-- *Structuring Your Project*, 一个稍微落后的介绍Python包代码结构的文章 [^structuring_your_project]。
+- (Must-read) *Packaging Python Projects*, the official tutorial from the Python Packaging Authority (PyPa), which concisely introduces the process of building and publishing Python packages [^pypa_packaging].
+- (Must-read) *Designing Pythonic library APIs*, an article on how to design Pythonic APIs [^pythonic_api].
+- *Python Packaging Best Practices*, an article explaining packaging principles [^packaging_principles], including sdist, wheel, and an introduction to frontend/backend tools.
+- *Structuring Your Project*, a slightly outdated article on Python package code structure [^structuring_your_project].
 
-这些文章不是内容落后 [^structuring_your_project]，就是缺乏设计哲学的传递 [^pypa_packaging] [^packaging_principles]，又或者是不够全面[^pypa_packaging] [^pythonic_api]，本文则会试图弥补这些缺憾。
+These articles are either outdated [^structuring_your_project], lack a discussion of design philosophy [^pypa_packaging] [^packaging_principles], or are not comprehensive enough [^pypa_packaging] [^pythonic_api]. This post aims to fill those gaps.
 
 ## API Design
 
-API 是包的交付物，核心产出产品。
+The API is the deliverable of your package—the core product.
 
-- 只有包的 API 是暴漏给用户去使用的；
-- 其他非API的代码都无需向用户解释，用户也不应该在使用API时去阅读他们（仅开发者在协作时需要去阅读）。
+- Only the package's API is exposed for users.
+- All other non-API codes do not need to be explained to users, and users should not have to read them when using the API (only developers need to read them).
 
-所以，你能看出来API是相当重要的。Ben Hoyt在他的文章 [^pythonic_api] 中提及了许多实用的建议，而且他的文字充满趣味，强烈建议去阅读下，copy 他总结的takeaways在这里：
+As you can see, API design is extremely important. Ben Hoyt, in his article [^pythonic_api], offers many practical tips, and his writing is quite engaging. I highly recommend reading it. Here are his takeaways:
 
 > - Good API design is very important to users.
 > - When creating a library, start with a good base and iterate.
@@ -49,26 +49,26 @@ API 是包的交付物，核心产出产品。
 > - Use `@dataclass` for classes which are (mostly) data.
 > - Python’s expressiveness is boundless; don’t use too much of it!
 
-除了这些建议，本文简单补充如何实现稳定且简洁的API。
+In addition to these suggestions, this post briefly supplements how to achieve a stable and simple API.
 
-### API 应该保持稳定且简洁
+### APIs Should Remain Stable and Simple
 
-代码应该被不断重构，以适应新情况。但是至少在每个major version（eg. v0.\*.\*, v1.\*.\*都是major versions）内，API应该保持稳定。这也意味着至少在*开发一个包之前*，就应该想好包要提供什么样的核心功能！
+Code should be continuously refactored to adapt to new situations. However, at least within each major version (e.g., v0.\*.\*, v1.\*.\*), the API should remain stable. This means that *before developing a package*, you should already have a clear idea of the core functionality your package will provide!
 
-如果核心功能是逻辑上完备的，那么API就应该是稳定的，同时也能让API保持简洁。例如，增/删/改/查就是一个典型的逻辑上完备的功能集合；再比如Einstein Operation就是一个逻辑上完备的数学运算集合，{{< github "arogozhnikov/einops">}} 只提供三个核心的APIs[^einops]！良好的API设计需要我们从逻辑学，数学来找到启发。
+If the core functionality is logically complete, then the API should be stable and simple. For example, CRUD (Create, Read, Update, Delete) is a typical logically complete set of functions; similarly, Einstein Operations are a logically complete set of mathematical operations—{{< github "arogozhnikov/einops">}} only provides three core APIs[^einops]! Good API design often draws inspiration from logic and mathematics.
 
 {{<media
 src="https://user-images.githubusercontent.com/6318811/177030658-66f0eb5d-e136-44d8-99c9-86ae298ead5b.mp4"
 caption="Video 1: Einstein Operation Introduction"
 >}}
 
-API数量少还有其他的好处。一来方便用户记忆，毕竟数量少；同时也方便开发者撰写文档，因为很明确要对什么函数/类撰写详细的说明，示例讲解，使用场景等；同时也方便我们来编写tests，因为这些API的接口稳定性应当更高。
+Having fewer APIs brings other benefits: it's easier for users to remember, easier for developers to write documentation (since it's clear which functions/classes need detailed explanations, examples, and use cases), and easier to write tests, as these APIs are expected to be more stable.
 
-### 如何实现稳定且简洁的API？
+### How to Achieve a Stable and Simple API?
 
-下面列举两种我认为非常Pythonic的实现方式，以及提供当无法避免复杂性时的做法。
+Here are two Pythonic approaches (I think).
 
-**通过参数多态来实现简洁API。** {{< github "gaogaotiantian/dowhen" >}} 仅设计了 `['bp', 'clear_all', 'do', 'get_source_hash', 'goto', 'when', 'DISABLE']` 七个函数暴露给用户去用，其中 `bp`、`goto` 、 `do` 和 `when` 是最核心的。用户使用什么非常明确。`dowhen` 主要是用参数多态来完成这个目标的。比如制作trigger的when函数，其函数签名是这样的：
+**Achieving simplicity through parameter polymorphism.** {{< github "gaogaotiantian/dowhen" >}} exposes only seven functions to users: `['bp', 'clear_all', 'do', 'get_source_hash', 'goto', 'when', 'DISABLE']`, with `bp`, `goto`, `do`, and `when` being the core ones. It's very clear what users should use. `dowhen` mainly achieves this through parameter polymorphism. For example, the `when` function for creating triggers has the following signature:
 
 ```python
     def when(
@@ -80,61 +80,71 @@ API数量少还有其他的好处。一来方便用户记忆，毕竟数量少�
     ):
 ```
 
-其中，`IdentifierType = int | str | re.Pattern | Literal["<start>", "<return>"] | None`. identifiers这个参数由于可以是可变参数，因此隐含的还支持逻辑与和逻辑或的关系。所以你会看到这个函数支持的功能范围实际上是非常庞大的。[Appendix](#python-package-dowhen) 具体介绍了这个函数的实现。
+Here, `IdentifierType = int | str | re.Pattern | Literal["<start>", "<return>"] | None`. Since `identifiers` is a variadic parameter, it implicitly supports logical AND and OR relationships. As a result, this function supports a very wide range of functionality. See the [Appendix](#python-package-dowhen) for details on its implementation.
 
-**通过工厂模式来实现简洁API。** {{< github "huggingface/transformers" >}} 也有简单易记的API，不过他使用更多的工厂模式思路，比如 `AutoModelForCausalLM`、`AutoModelForSequenceClassification` 等等，甚至抽象工厂“pipeline”。只不过这里的区别是，transformers中用户API的参数并没有特别复杂，你不需要特别担心参数之间的相互作用。所以总体上也是易于用户使用和记忆的。
+**Achieving simplicity through the factory pattern.** {{< github "huggingface/transformers" >}} also has simple and memorable APIs, but relies more on the factory pattern, such as `AutoModelForCausalLM`, `AutoModelForSequenceClassification`, and even the abstract factory `pipeline`. The user-facing API parameters are not particularly complex with the most important one being `model_name_or_path`, so you don't need to worry much about parameter interactions. Overall, it's easy for users to use and remember.
 
-### 不可能简洁的情况
+### When Simplicity Is Impossible
 
-有些时候，事情无法如我们所愿。如果你去看 {{< github "NVIDIA/Megatron-LM" >}} 的API，你会发现它的API就非常复杂，{{< github "hiyouga/LLaMA-Factory" >}}的API也很复杂，还有 {{< github "MemTensor/MemOS" >}}。这些库普遍具有实验性质，接口也不可能稳定，因此使用这些库的时候“跑通”是使用中很大一环，API也很难做到简洁。如果API无法简化，那用户一定得去通过某种渠道来了解API。所以我们的重点就在于如何优化这个渠道。
+Sometimes, things don't go as we wish. If you look at the API of {{< github "NVIDIA/Megatron-LM" >}}, you'll find it very complex; the same goes for {{< github "hiyouga/LLaMA-Factory" >}} and {{< github "MemTensor/MemOS" >}}. These libraries are often experimental, and their interfaces are unlikely to be stable. As a result, "getting things running" is a big part of using them, and their APIs are hard to keep simple. When the API can't be simplified, users must learn about it through some channel. So, our focus shifts to optimizing that channel.
 
-- 对于{{< github "NVIDIA/Megatron-LM" >}}, 他本身expect用户git clone下来整个包。然后其提供了各类的training templates bash scripts，方便用户直接修改。如果还有定制化的需要，直接去阅读[megatron/training/arguments.py](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/training/arguments.py) 这个把所有参数聚集起来的地方。
-- 对于{{< github "hiyouga/LLaMA-Factory" >}}，这个也是参数众多，它提供的[文档](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/sft.html#)对每种训练范式都提供详细的参数介绍。另外一个办法是，他直接启用一个gradio的界面，直观的把参数介绍和参数设置的位置统一了起来。
-- 对于{{< github "MemTensor/MemOS" >}}，这里依赖三个渠道，详细的examples示例，各种cookbooks，用Pydantic来约束用户的input，让报错时候用户知道怎么改。
+- For {{< github "NVIDIA/Megatron-LM" >}}, users are expected to git clone the entire package. It provides various training template bash scripts for easy modification. For further customization, users can directly read [megatron/training/arguments.py](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/training/arguments.py), which aggregates all parameters.
+- For {{< github "hiyouga/LLaMA-Factory" >}}, which also has many parameters, its [documentation](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/sft.html#) provides detailed parameter descriptions for each training paradigm. LLaMA-Factory also launches a Gradio interface, visually unifying parameter descriptions and settings.
+- For {{< github "MemTensor/MemOS" >}}, it relies on three channels: detailed example scripts, various cookbooks, and using Pydantic to constrain user input, so that error messages guide users on how to fix issues.
 
 ## Dependency Management
 
-Python 不如 Rust 或者 NodeJS 那样有官方提供的包管理工具。不过随着Python组织官方对`pyproject.toml`的逐步规范化 [^pep735] [^pep751]，Python的包管理工具正在逐步走向成熟。
+Python does not have an official package management tool like Rust or NodeJS. However, with the gradual standardization of `pyproject.toml` by the Python organization [^pep735] [^pep751], Python's package management tools are maturing.
 
-在包管理中，依赖管理实际上是最重要的部分之一，我们在这里也只讨论与依赖有关的事情。
+In package management, dependency management is one of the most important aspects. Here, we focus only on dependency-related topics including management tools, dependency types, version ranges, and lazy imports tricks.
 
-### 管理工具
+### Management Tools
 
-我们有很多选择，比如{{< github "pypa/setuptools" >}}，{{< github "python-poetry/poetry" >}}等。但我的个人建议是使用{{< github "astral-sh/uv" >}}，这是打包的未来发展方向。我认为他有三大好处:
+There are many options, such as {{< github "pypa/setuptools" >}} and {{< github "python-poetry/poetry" >}}. My personal recommendation is {{< github "astral-sh/uv" >}}, which represents the future direction of packaging. It has three main advantages:
 
-- 底层是用Rust开发的，速度快 [^uv_rust]。
-- 支持Python官方的pyproject.toml规范，许多schema紧跟Python PEP规范。
-- 支持对pytorch生态的integration [^uv_torch]。
+- Written in Rust, so it's fast [^uv_rust].
+- Supports Python's official `pyproject.toml` specification, with many schemas closely following Python PEPs.
+- Supports integration with the PyTorch ecosystem [^uv_torch].
 
-### 三种不同类型的依赖
+### Three Types of Dependencies
 
-正如 uv 官方文档中所讲的，总共有三种不同类型的依赖[^uv_deps]：
+As described in the uv official documentation, there are three types of dependencies[^uv_deps]:
 
 > - `project.dependencies`: Published dependencies.
 > - `project.optional-dependencies`: Published optional dependencies, or "extras".
 > - `dependency-groups`: Local dependencies for development.
 
-**Published dependencies** 管理 pip install xxx 时安装的依赖。这里应该放置所有核心依赖，即离开这里的任何一个依赖，包的几乎任何代码都无法运行了。不过也不是完全一定，对于torch这类占空间巨大的包，而且平台不同安装包也不同，我们就可以引导用户自行install，参考 [# Lazy Imports and Guided Installation](#lazy-imports-and-guided-installation)。
+**Published dependencies** are installed when running `pip install my-package`. These should include all core dependencies—without any of them, almost none of the package's code will run. However, there are exceptions: for packages like `torch`, which are platform-dependent and huge, it's better to guide users to install them themselves (see [# Lazy Imports and Guided Installation](#lazy-imports-and-guided-installation)).
 
-**Published optional dependencies** 管理 pip install xxx[extra] 时安装的依赖。这里应该放置所有可选依赖，即离开这里的任何一个依赖，包的核心代码仍然可以运行，但一个大的功能块无法运行,这就需要我们管理不同的功能块/依赖组，比如，`MemOS`，是按照支持记忆的类型来划分依赖组的，比如 `MemoryOS[tree-mem]`, `MemoryOS[mem-reader]` 等等[^memos_install]；`lm-eval-harness`则是按照支持的benchmarks不同来划分依赖组的，比如 `lm-eval[ifeval]`、`lm-eval[math]` 等等[^lm_eval_install]。
+**Published optional dependencies** are installed with `pip install my-package[extra]`. These should include all optional dependencies—without any of them, the core code still runs, but a major feature block won't. This requires managing different feature/extra groups. For example, {{< github "MemTensor/MemOS" >}} groups dependencies by memory type, such as `MemoryOS[tree-mem]`, `MemoryOS[mem-reader]`; {{< github "EleutherAI/lm-evaluation-harness" >}} groups dependencies by supported benchmarks, such as `lm-eval[ifeval]`, `lm-eval[math]`.
 
-**Local dependencies for development** 管理开发时的依赖。这里应该放置所有开发时需要的依赖，比如测试框架，代码格式化工具，文档生成工具等。他们是在开发的不同阶段会用到的。比如测试相关依赖(`pytest`, `coverage`)，代码格式化相关依赖（`mypy`, `ruff`等）可能仅在CI/CD中会用到；文档生成相关依赖（`sphinx`, `mkdocs`等），可能仅在发布文档时会用到。所以并不是所有的开发依赖都需要在本地安装的，因此设计分组是更合理的。
+**Local dependencies for development** are for development only. These include all dependencies needed during development, such as testing, code formatting, and documentation. They are used at different stages: testing dependencies (`pytest`, `coverage`) and code formatting dependencies (`mypy`, `ruff`) may only be needed in CI/CD; documentation tools (`sphinx`, `mkdocs`) may only be needed when publishing docs. Not all development dependencies need to be installed locally, so grouping them is more reasonable.
 
-### 指定依赖的范围
+### Specifying Dependency Version Ranges
 
-一般来说我们可以假设我们引入的依赖的最新版本兼容性是最好的，因此我们可以选择其最新版本，这个是版本的下限。同时我们还要为依赖选择个上限，一般应当是首位非零的版本号加1，比如说，`>=1.0.0, <2.0.0`，`>=0.2.0, <0.3.0` 等等。
+Generally, we can assume that the latest version of a dependency is the most compatible, so we can set the lower bound to the latest version. We should also set an upper bound, usually the next major version (the first non-zero digit plus one), e.g., `>=1.0.0, <2.0.0`, `>=0.2.0, <0.3.0`.
 
-这样做，是因为首位非0的版本一般代表着一个major version，只要major version不变，我们就可以假设依赖的包的API没有发生break change。
+This is because a non-zero major version usually indicates a major change; as long as the major version doesn't change, we can assume the dependency's API hasn't broken.
 
 ### Lazy Imports and Guided Installation
 
-让我们用最令人头大的例子来说明问题，`torch` 这个包在各种开源仓库中都是很复杂的管理对象，很难把他写到dependency中去，因为他的安装依赖平台相关，且体积巨大。
+In many open-source repositories, `torch` is difficult to manage as a dependency because its installation is platform-dependent and it's huge.
 
-又或者，你或许经常遇到{{< github "huggingface/transformers" >}} 提示，比如`sentencepiece`、`einops`等包没有安装，这些可能是某些特定的模型自己的依赖项。
+When using {{< github "huggingface/transformers" >}}, you may also have encountered issues about missing packages like `sentencepiece` or `einops`, which are dependencies for specific models.
 
-像这些特殊的依赖，我们不希望用户在pip install的时候就安装，我们希望在runtime时，检查有没有安装，如果没有的话，给出提示，引导用户安装即可。下面这个 decorator 可以做到这一点：
+For those special dependencies mentioned above, we don't want users to install them at `pip install` time. Instead, we want to check at runtime whether they're installed, and if not, provide installation guidance. The following decorator achieves this:
+
+{{<details "dependency.py">}}
 
 ```python
+"""
+This utility provides tools for managing dependencies in MemOS.
+"""
+
+import functools
+import importlib
+
+
 def require_python_package(
     import_name: str, install_command: str | None = None, install_link: str | None = None
 ):
@@ -181,55 +191,80 @@ def require_python_package(
     return decorator
 ```
 
-被这个decorator装饰的函数，在运行时会检查是否安装了指定的包，如果没有安装，则会抛出一个`ImportError`，并给出安装命令和安装链接。同时，我们注意应该lazily import这个包，不能把这个包的import放在文件开头，否则可能会出现过多的报错提示。
+{{</details>}}
 
-最后，还需要注意的是，对于开发者来说，我们希望开发的时候我们的包的时候，不用自己等到runtime的时候才安装，那我们就应该把这些依赖放入兜底的 **Published optional dependencies**，即`all` extras group里，在安装 `my-package[all]` 的时候，可以一键安装所有开发时的依赖。
+Functions decorated with this will check at runtime whether the specified package is installed. If not, an `ImportError` is raised with installation instructions. Note that you should lazily import the package inside the function, not at the top of the file, to avoid excessive error messages.
+
+Finally, for developers, we want to avoid waiting until runtime to install these dependencies. So, we should include them in a catch-all optional dependency group, the `all` extras group, so that installing `my-package[all]` will install all development-time dependencies at once:
+
+```toml
+all = [
+    # Exist in the above optional groups
+    "neo4j (>=5.28.1,<6.0.0)",
+    "schedule (>=1.2.2,<2.0.0)",
+    "redis (>=6.2.0,<7.0.0)",
+    "pika (>=1.3.2,<2.0.0)",
+    "chonkie (>=1.0.7,<2.0.0)",
+    "markitdown[docx,pdf,pptx,xls,xlsx] (>=0.1.1,<0.2.0)",
+
+    # NOT exist in the above optional groups
+    # Because they are either huge-size dependencies or infrequently used dependencies.
+    # We kindof don't want users to install them by default.
+    "torch (>=2.7.1,<3.0.0)",
+    "sentence-transformers (>=4.1.0,<5.0.0)",
+    "qdrant-client (>=1.14.2,<2.0.0)",
+    "volcengine-python-sdk (>=4.0.4,<5.0.0)",
+    "chromadb-client (>=1.0.15,<2.0.0)",
+]
+```
 
 ## Code Structure
 
-这里列举一个现代的Python Package对应的GitHub仓库中的代码究竟都放些什么，怎么放。
+Here's what a modern Python package's GitHub repository typically contains and how it's organized.
 
-### 仓库根目录
+### Repository Root Directory
 
-- **README.md**: 包的介绍，使用方法，安装方法等。
-- **LICENSE**: 包的许可证。
-- **pyproject.toml**: 包的元数据，依赖，构建工具，相关tools的设置（mypy，uv，pytest等工具）。
-- **Makefile**: 包的构建脚本，通常是用来构建包的源代码和文档。里面通常会放些常用的命令，可以一键执行`make test`、`make build`、`make clean` 等等。
-- **.gitignore**: Git忽略的文件列表, 比如说编译生成的文件，测试生成的文件等,推荐使用 {{< github "github/gitignore" >}} 中的 Python.gitignore。
-- **.pre-commit-config.yaml**: pre-commit hooks的配置文件，这个可以检查一些代码风格问题，确保代码在提交前符合规范。
-- **src/my_package/** or **my_package/**: 包的源代码目录，用户pip install的就是这里的内容。添加 src/ 这一层的目录有多个好处，包括避免与其他已安装的包名冲突，导致import混淆；还能够实现单个仓库多个Python包的管理，比如`src/my_package/` 和 `src/my_other_package/`可以同时放在一个GitHub仓库中。
-- **tests/**: 包的测试代码目录，推荐用 pytest 来编写测试，因为更简单，也更Pythonic。
-- **docs/**: 包的文档目录。
-- **.github/**: GitHub 相关配置目录，包含工作流、issue 模板、issue设置、Pr模板等。可以参考 {{< github "MemTensor/MemOS" >}} 中的配置。
+- **README.md**: Introduction, usage, installation instructions, etc.
+- **LICENSE**: License file.
+- **pyproject.toml**: Python package metadata, dependencies, build backend, and tool settings (mypy, uv, pytest, etc.).
+- **Makefile**: Contains common commands like `make test`, `make build`, `make clean`, etc.
+- **.gitignore**: Files to ignore in Git, such as build artifacts and test outputs. Recommended: use the `Python.gitignore` from {{< github "github/gitignore" >}}.
+- **.pre-commit-config.yaml**: Pre-commit hook configuration for code style checks before commits.
+- **src/my_package/** or **my_package/**: Source code directory. This is what gets installed via pip. Adding a `src/` layer helps avoid import confusion and allows managing multiple packages in one repo (e.g., `src/my_package/` and `src/my_other_package/`).
+- **tests/**: Test code directory. `Pytest` is recommended for its simplicity and Pythonic style.
+- **docs/**: Documentation directory.
+- **.github/**: GitHub configuration, including CI/CD workflows, issue templates, PR templates, etc. See {{< github "MemTensor/MemOS" >}} for examples.
 - etc.
 
-### 包目录
+### Python Package Directory
 
-包文件夹 **src/my_package/** 下常有些这些代码，{{< github "MemTensor/MemOS" >}}均存在一些示例：
+Inside **src/my_package/** or **my_package/**, you often find the following (all present in {{< github "MemTensor/MemOS" >}}):
 
-- **\_\_init\_\_.py**: 包的初始化文件，把包的核心API暴露给用户。
-- **api**: 包的API代码目录，存放包的核心http API代码。
-- **cli**: 命令行接口代码目录，存放包的命令行接口代码。
-- **configs**: 配置文件目录，存放各种标准化的配置protocols，比如用Pydantic来定义的配置类。
-- **log.py**: 自定义的日志记录handler，通常是基于Python的logging模块。
-- **exceptions.py**: 错误处理相关的工具和代码。
-- **types.py**: 自定义类型定义。
-- **constants/settings**: 一些包级别的常量，应该少一些，比如debug模式开关等。
-- **deprecation management**: 过时代码管理相关的工具和代码。
-- **dependency management**: 依赖管理相关的工具和代码，比如前文提到的 `require_python_package` decorator。
-- 其他业务相关代码
+- **\_\_init\_\_.py**: Package initializer, exposing core APIs.
+- **api**: Core HTTP API code. Recommend using `FastAPI` for its simplicity.
+- **cli**: Command-line interface code. Recommend using `argparse`, `click`, etc.
+- **configs**: Configuration protocols, often using `Pydantic`.
+- **log.py**: Custom logging handlers, usually based on Python's `logging` module.
+- **exceptions.py**: Error handling utilities.
+- **types.py**: Custom type definitions.
+- **constants/settings**: Package-level constants (should be minimal, e.g., `debug` flags).
+- **deprecation management**: Tools for managing deprecated code.
+- **dependency management**: Tools for dependency management, such as the `require_python_package` decorator above.
+- Other business logic.
 
 ## Appendix
 
 ### Python Package: `dowhen`
 
-dowhen 是一个instrumentation的工具，可以用来做测试、调试、软件安全分析等。Python没有内置的instrumentation工具。Python的core dev {{<github "gaogaotiantian">}} 利用 Python3.12引入的新特性 sys.monitoring 开发了这个工具。
+{{< github "gaogaotiantian/dowhen" >}} is an instrumentation tool for testing, debugging, software security analysis, etc. Python does not have a built-in instrumentation tool. Python core developer {{<github "gaogaotiantian">}} developed this tool using the new `sys.monitoring` feature introduced in Python 3.12.
 
-dowhen的核心API就两个，一是负责执行什么的 callback/do，二是负责什么时候执行的trigger/when。为了把do和when更好的结合起来，比如提供context manager，提供trigger时机的判断等，因此dowhen的底层是一个handler模块；为了使用系统提供的sys.monitoring模块，更底层是一个instrumenter模块。
+The core APIs of `dowhen` are just two: one for specifying what to execute (`callback.py`, implementing the `do` part), and one for specifying when to execute (`trigger.py`, implementing the `when` part).
 
-dowhen的基本使用方法可以参考其官方文档 [^dowhen]，这里会介绍下dowhen的API设计和实现思路。
+To better combine `do` and `when` (e.g., providing context managers, trigger timing checks), the underlying layer is a `handler.py` module; to use the system's `sys.monitoring`, there's an lower-level `instrumenter.py` module. These four modules together form the `dowhen` package.
 
-{{<details "dowhen.trigger">}}
+For basic usage, see the official documentation [^dowhen]. Here, I introduce the API design and implementation ideas behind the APIs.
+
+{{<details "Trigger Workflow">}}
 
 ```python
 @classmethod
@@ -240,29 +275,30 @@ def when(
     condition: str | Callable[..., bool | Any] | None = None,
     source_hash: str | None = None,
 ):
-    # 1. 判定 condition 是否是语法可执行的，类型是否正确
+    # 1. Check if condition is executable and of the correct type
 
-    # 2. 根据 source_hash，判定运行时 entity 是否相对于用户提供时发生变化
+    # 2. Use source_hash to check if the runtime entity has changed since provided
 
     events = []
 
-    # 3. breadth-first 展开 entity 中的 code objects
+    # 3. Breadth-first expand code objects from entity
     code_objects = cls._get_code_from_entity(entity)
 
-    # 4. 根据各类条件定义 trigger events
+    # 4. Define trigger events based on conditions
 
-    # 4.1. 如果没有传 identifiers 参数，all-line matching events
+    # 4.1. If no identifiers are provided, all-line matching events
     if not identifiers:
         for code in code_objects:
             events.append(_Event(code, "line", {"line_number": None}))
 
-    # 4.2. 传了 identifiers 参数，普通 events
+    # 4.2. If identifiers are provided, create regular events
     else:
 
-        # 4.2.1. 首先要根据没有展开的entity把相对行号转换为绝对行号，因为展开后再计算就可能导致绝对行号在不同code objects里重复出现
+        # 4.2.1. Convert relative line numbers to absolute before expanding `code_objects`,
+        # as expansion may cause duplicated line events in different code objects
         identifiers = cls.unify_identifiers(entity, *identifiers)
 
-        # 4.2.2. 对于每个 identifier × code object，创建对应的事件，其实也可以用itertools.product来简化
+        # 4.2.2. For each identifier × code object, create corresponding events
         for identifier in identifiers:
 
             # 4.2.2.1. "<start>" × code object
@@ -277,7 +313,7 @@ def when(
             else:
                 for code in code_objects:
 
-                    # 4.2.2.3. 其他标识符 × None
+                    # 4.2.2.3. Other identifiers × None
                     if code is None:
                         # Global event, entity is None
                         events.append(
@@ -288,16 +324,16 @@ def when(
                             )
                         )
 
-                    # 4.2.2.4. 其他标识符 × code object
+                    # 4.2.2.4. Other identifiers × code object
                     else:
 
-                        # 4.2.2.4.1 真正把 identifier 解析为行号，这里要处理各类复杂情形：
-                        # 例如，首行匹配问题，comiple得来的code object问题，
-                        # identifier的逻辑与和逻辑或关系问题，code object 嵌套问题，
-                        # comment等不在co_lines中的语句的trigger问题等
+                        # 4.2.2.4.1. Parse identifier to line numbers, handling:
+                        # first-line matching, compiled code objects, logical
+                        # AND/OR in identifiers, nested code objects, comments
+                        # not in co_lines, etc.
                         line_numbers = get_line_numbers(code, identifier)
 
-                        # 这里得到的 c 是 depth-first 展开的 code objects，确保 trigger 位置正确
+                        # c is depth-first expanded code objects, ensuring correct trigger positions
                         for c, numbers in line_numbers.items():
                             for number in numbers:
                                 events.append(
@@ -309,30 +345,30 @@ def when(
             "Could not set any event based on the entity and identifiers."
         )
 
-    # 5. 返回 Trigger 实例
+    # 5. Return Trigger instance
     return cls(events, condition=condition, is_global=entity is None)
 ```
 
 {{</details>}}
 
-{{<details "dowhen.callback">}}
+{{<details "Callback Workflow">}}
 
 ```python
-被instrumented的代码行
+Instrumented code line
 ↓
-sys.monitoring  # 监听抽象事件以及绑定回调
+sys.monitoring  # Listen for events and bind callbacks
 ↓
-instrumenter.py::Instrumenter().*_callback()  # sys.monitoring 绑定的回调
+instrumenter.py::Instrumenter().*_callback()  # Callback really bound by sys.monitoring
 ↓
-instrumenter.py::Instrumenter()._process_handlers()  # 回调高层包装，添加 sys.monitoring.DISABLE 功能
+instrumenter.py::Instrumenter()._process_handlers()  # High-level callback wrapper, adds sys.monitoring.DISABLE
 ↓
-handler.py::EventHandler().__call__()  # 回调中层包装，添加 event 执行时机判定，has_event 和 should_fire 逻辑
+handler.py::EventHandler().__call__()  # Mid-level callback wrapper, adds event timing checks, has_event and should_fire logic
 ↓
-callback.py::Callback().__call__()  # 回调低层包装，添加到 call_code/call_goto/call_bp 的判定
+callback.py::Callback().__call__()  # Low-level callback wrapper, adds call_code/call_goto/call_bp checks
 ↓
-callback.py::Callback.call_*()  # 回调执行
+callback.py::Callback.call_*()  # Callback execution
 ↓
-用户定义代码  # 如果是 call_code，则执行用户定义的代码
+User-defined code  # If call_code, user code is executed
 ```
 
 {{</details>}}
@@ -356,10 +392,6 @@ callback.py::Callback.call_*()  # 回调执行
 [^dowhen]: https://dowhen.readthedocs.io/en/latest/
 
 [^einops]: https://einops.rocks/
-
-[^memos_install]: https://memos-docs.openmem.net/getting_started/installation
-
-[^lm_eval_install]: https://github.com/EleutherAI/lm-evaluation-harness?tab=readme-ov-file#optional-extras
 
 [^pypa_packaging]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
