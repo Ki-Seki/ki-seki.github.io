@@ -1,0 +1,46 @@
+{{- $src := .Get "src" -}}
+{{- $caption := .Get "caption" -}}
+
+<figure style="text-align: center;">
+{{- if or (hasPrefix $src "https://www.youtube.com/") (hasPrefix $src "https://youtu.be/") (hasPrefix $src "http://www.youtube.com/") (hasPrefix $src "http://youtu.be/") -}}
+  {{/* YouTube Video */}}
+  {{- $videoId := "" -}}
+  {{- if hasPrefix $src "https://youtu.be/" -}}
+    {{- $videoId = replace $src "https://youtu.be/" "" -}}
+    {{- $videoId = index (split $videoId "?") 0 -}}
+  {{- else -}}
+    {{- $videoId = replaceRE ".*[?&]v=([^&]*)" "$1" $src -}}
+  {{- end -}}
+  {{- $shortcode := printf "{{< youtube %s >}}" $videoId -}}
+  {{ .Page.RenderString $shortcode }}
+
+{{- else if or (hasPrefix $src "https://vimeo.com/") (hasPrefix $src "http://vimeo.com/") -}}
+  {{/* Vimeo Video */}}
+  {{- $videoId := replaceRE ".*vimeo.com/([0-9]+)" "$1" $src -}}
+  {{- $shortcode := printf "{{< vimeo %s >}}" $videoId -}}
+  {{ .Page.RenderString $shortcode }}
+
+{{- else if or (hasSuffix $src ".mp4") (hasSuffix $src ".webm") (hasSuffix $src ".ogg") (hasSuffix $src ".avi") (hasSuffix $src ".mov") -}}
+  {{/* Video File */}}
+  <video width="100%" controls>
+    <source src="{{ $src }}">
+    Your browser does not support the video tag.
+  </video>
+
+{{- else if or (hasPrefix $src "http") (hasPrefix $src "/") -}}
+  {{/* Image */}}
+  <img src="{{ $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+
+{{- else -}}
+  {{/* Fallback for other types */}}
+  <div>
+    <p>Unsupported asset type: {{ $src }}</p>
+  </div>
+{{- end -}}
+
+{{- if $caption -}}
+  <figcaption>
+    <p>{{ $caption | markdownify }}</p>
+  </figcaption>
+{{- end -}}
+</figure>

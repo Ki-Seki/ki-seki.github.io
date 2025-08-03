@@ -61,31 +61,41 @@ Most <mark>salamanders</mark> are nocturnal, and hunt for insects, worms, and ot
 
 ## Shortcodes
 
-### Github Gist
-
-{{< gist adityatelange 376cd56ee2c94aaa2e8b93200f2ba8b5 >}}
-
-### Figure Shortcode
-
-{{< figure src="https://images.unsplash.com/photo-1702382930514-9759f4ca5469" attr="Photo by [Aditya Telange](https://unsplash.com/@adityatelange?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash) on [Unsplash](https://unsplash.com/photos/Z0lL0okYjy0?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)" align=center link="https://unsplash.com/photos/a-person-sitting-on-a-rock-wall-looking-out-at-the-ocean-Z0lL0okYjy0" target="_blank" >}}
-
-### YouTube
-
-{{< youtube hjD9jTi_DQ4 >}}
-
 ### X (Twitter) Shortcode
 
 {{< x user="adityatelange" id="1724414854348357922" >}}
 
-### Vimeo Shortcode
+### Github Gist
 
-{{< vimeo 152985022 >}}
+{{< gist adityatelange 376cd56ee2c94aaa2e8b93200f2ba8b5 >}}
 
 ### Details Shortcode
 
 {{< details "Click me">}}
 This is a collapsible section. You can put any content here, including text, images, or even other shortcodes. Click the summary to expand or collapse this section.
 {{< /details >}}
+
+### Media Shortcode
+
+{{< media
+src="https://images.unsplash.com/photo-1702382930514-9759f4ca5469"
+caption="Photo by [Aditya Telange](https://unsplash.com/@adityatelange?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash) on [Unsplash](https://unsplash.com/photos/Z0lL0okYjy0?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)"
+>}}
+
+{{< media
+src="https://www.youtube.com/watch?v=hjD9jTi_DQ4"
+caption="YouTube Video Example"
+>}}
+
+{{< media
+src="https://vimeo.com/152985022"
+caption="Vimeo Video Example"
+>}}
+
+{{< media
+src="https://www.w3schools.com/html/mov_bbb.mp4"
+caption="Basic HTML5 Video Example"
+>}}
 
 ## Appendix
 
