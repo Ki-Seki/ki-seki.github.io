@@ -255,9 +255,7 @@ callback.py::Callback.call_*()  # 回调执行
 
 ## Citation
 
-```bibtex
-
-```
+{{< bibtex >}}
 
 ## References
 
