@@ -111,7 +111,7 @@ params:
     - name: rss
       url: https://ki-seki.github.io/posts/index.xml
     - name: heart
-      url: https://songsc.atomgit.net/us/
+      url: https://song-shichao.github.io/
 
   editPost:
     URL: "https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content"
