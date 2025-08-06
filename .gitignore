@@ -26,8 +26,3 @@ _testmain.go
 .DS_Store
 .hugo_build.lock
 resources/_gen/
-
-# Hugo binaries and temporary files
-hugo.tar.gz
-hugo-latest.tar.gz
-hugo
