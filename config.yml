@@ -140,6 +140,20 @@ markup:
   goldmark:
     renderer:
       unsafe: true
+    extensions:
+      passthrough:
+        delimiters:
+          block:
+            - - '\['
+              - '\]'
+            - - '$$'
+              - '$$'
+          inline:
+            - - '\('
+              - '\)'
+            - - '$'
+              - '$'
+        enable: true
   highlight:
     noClasses: false
     anchorLineNos: false
