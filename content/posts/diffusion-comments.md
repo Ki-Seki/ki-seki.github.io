@@ -6,7 +6,9 @@ math: true
 
 ## Introduction
 
-![Generative Models](../images/Generative_Models.png)
+> GAN, VAE, and Flow-based models
+
+![Generative Models](/images/Generative_Models.png)
 
 - GAN 生成对抗网络：训练两个网络，一个用于生成图像，一个用于判别图像的真伪
 - VAE 变分自编码器模型：通过编码器将输入图像压缩为潜在空间变量，再通过解码器重建图像
