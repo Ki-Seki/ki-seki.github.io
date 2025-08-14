@@ -61,7 +61,30 @@ $$
 
 > isotropic Gaussian distribution
 
-各方向都均匀的高斯噪声，即向量中的每个分量都符合 $\mathcal{N}(0, \mathbf{I})$。
+isotropic Gaussian distribution是指各方向都均匀的高斯分布，即向量中的每个分量都符合 $\mathcal{N}(0, \mathbf{I})$。
+
+而高斯分布（Gaussian distribution）也被称为**正态分布**，其概率密度函数（PDF, Probability Density Function）为：
+
+$$
+f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \; \exp\!\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)
+$$
+
+* $\mu$：均值（mean），决定分布的中心位置
+* $\sigma$：标准差（standard deviation），决定分布的宽度
+* $\sigma^2$：方差（variance）
+* $\exp(\cdot)$：自然指数函数 $e^x$
+
+其累积分布函数（CDF, Cumulative Distribution Function）为：
+
+$$
+F(x) = P(X \le x) = \frac{1}{2} \left[ 1 + \operatorname{erf} \!\left( \frac{x - \mu}{\sigma\sqrt{2}} \right) \right]
+$$
+
+* $\operatorname{erf}(\cdot)$：误差函数（error function），是无法用初等函数表示的积分函数，定义为
+
+$$
+\operatorname{erf}(z) = \frac{2}{\sqrt{\pi}} \int_{0}^{z} e^{-t^2} \, dt
+$$
 
 ---
 
@@ -214,13 +237,23 @@ P(A \vert B) = \frac{P(B \vert A) \cdot P(A)}{P(B)}
 - \(P(B)\)：事件 B 的边际概率（所有可能情况下 B 发生的概率）
 - \(P(A \vert B)\)：在观察到 B 之后，事件 A 的后验概率（更新后的信念）
 
-PS 另一个比较重要的是条件概率公式：
+PS 一些相关概念：
 
-\[
-P(A \vert B) = \frac{P(A, B)}{P(B)}
-\]
+- 联合分布 $P(A, B)$：全景地图（包含所有组合的概率）。
+- 边缘分布 $P(B)$：全景地图投影到某一个轴。
+- 条件分布 $P(A \vert B)$：全景地图切一条线（已知另一变量的值），看这条线上的概率分布。公式为：$P(A \vert B) = \frac{P(A, B)}{P(B)}$
 
 ---
+
+> $$
+\begin{aligned}
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
+&= q(\mathbf{x}_t \vert \mathbf{x}_{t-1}, \mathbf{x}_0) \frac{ q(\mathbf{x}_{t-1} \vert \mathbf{x}_0) }{ q(\mathbf{x}_t \vert \mathbf{x}_0) } \\
+&\propto \exp \Big(-\frac{1}{2} \big(\frac{(\mathbf{x}_t - \sqrt{\alpha_t} \mathbf{x}_{t-1})^2}{\beta_t} + \frac{(\mathbf{x}_{t-1} - \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0)^2}{1-\bar{\alpha}_{t-1}} - \frac{(\mathbf{x}_t - \sqrt{\bar{\alpha}_t} \mathbf{x}_0)^2}{1-\bar{\alpha}_t} \big) \Big) \\
+&= \exp \Big(-\frac{1}{2} \big(\frac{\mathbf{x}_t^2 - 2\sqrt{\alpha_t} \mathbf{x}_t \color{blue}{\mathbf{x}_{t-1}} \color{black}{+ \alpha_t} \color{red}{\mathbf{x}_{t-1}^2} }{\beta_t} + \frac{ \color{red}{\mathbf{x}_{t-1}^2} \color{black}{- 2 \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0} \color{blue}{\mathbf{x}_{t-1}} \color{black}{+ \bar{\alpha}_{t-1} \mathbf{x}_0^2}  }{1-\bar{\alpha}_{t-1}} - \frac{(\mathbf{x}_t - \sqrt{\bar{\alpha}_t} \mathbf{x}_0)^2}{1-\bar{\alpha}_t} \big) \Big) \\
+&= \exp\Big( -\frac{1}{2} \big( \color{red}{(\frac{\alpha_t}{\beta_t} + \frac{1}{1 - \bar{\alpha}_{t-1}})} \mathbf{x}_{t-1}^2 - \color{blue}{(\frac{2\sqrt{\alpha_t}}{\beta_t} \mathbf{x}_t + \frac{2\sqrt{\bar{\alpha}_{t-1}}}{1 - \bar{\alpha}_{t-1}} \mathbf{x}_0)} \mathbf{x}_{t-1} \color{black}{ + C(\mathbf{x}_t, \mathbf{x}_0) \big) \Big)}
+\end{aligned}
+$$
 
 ## References
 
