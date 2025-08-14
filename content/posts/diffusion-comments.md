@@ -176,6 +176,52 @@ Stochastic Gradient Langevin Dynamics（SGLD，随机梯度朗之万动力学）
 
 ### Reverse diffusion process
 
+> Note that if \(\beta_t\) is small enough, \(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t)\) will also be Gaussian.
+
+以下仅为简单理解，非严格证明。当 \(\beta_t\) 很小，意味着每一步加入的噪声很少，那么：
+
+- \(\mathbf{x}_t\) 与 \(\mathbf{x}_{t-1}\) 的关系非常接近线性变换加微小扰动；
+- 高斯分布线性变换仍然保持高斯形式。
+- 这使得反向条件分布也可以近似为高斯分布。
+
+---
+
+> $$
+p_\theta(\mathbf{x}_{0:T}) = p(\mathbf{x}_T) \prod^T_{t=1} p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) \quad
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
+$$
+
+对应了整体的，和单步的Reverse diffusion process。
+
+由于我们不可能知道后验的，单步reverse diffusion process的具体形式，因此需要通过神经网络来学习。
+
+所以这里的高斯分布的两个参数是可学习的参数$\boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)$. 其中 $\theta$ 是神经网络的学习参数。
+
+---
+
+> Bayes’ rule
+
+贝叶斯公式（Bayes’ Rule）是概率论中的一个核心法则，用于在已知条件下更新事件的概率。它的基本形式是：
+
+\[
+P(A \vert B) = \frac{P(B \vert A) \cdot P(A)}{P(B)}
+\]
+
+其中：
+
+- \(P(A)\)：事件 A 的先验概率（在观察 B 之前对 A 的信念）
+- \(P(B \vert A)\)：在 A 发生的前提下，观察到 B 的可能性（似然）
+- \(P(B)\)：事件 B 的边际概率（所有可能情况下 B 发生的概率）
+- \(P(A \vert B)\)：在观察到 B 之后，事件 A 的后验概率（更新后的信念）
+
+PS 另一个比较重要的是条件概率公式：
+
+\[
+P(A \vert B) = \frac{P(A, B)}{P(B)}
+\]
+
+---
+
 ## References
 
 [^diffusion]: Weng, Lilian. “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
