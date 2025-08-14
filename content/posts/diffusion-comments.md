@@ -207,6 +207,13 @@ Stochastic Gradient Langevin Dynamics（SGLD，随机梯度朗之万动力学）
 - 高斯分布线性变换仍然保持高斯形式。
 - 这使得反向条件分布也可以近似为高斯分布。
 
+P.S. 为了避免混淆，这里是一些常见的约定。
+
+| 方向 | 字母                                            | 噪声 | 作用                             | 概率类型 |
+| ---- | ----------------------------------------------- | ---- | -------------------------------- | -------- |
+| 前向 | $q(\mathbf{x}_t \vert \mathbf{x}_{t-1})$        | 加噪 | 构造高斯马尔可夫链，逐步破坏数据 | 真实分布 |
+| 反向 | $p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)$ | 去噪 | 恢复数据，从噪声生成样本         | 近似后验 |
+
 ---
 
 > $$
@@ -219,6 +226,27 @@ $$
 由于我们不可能知道后验的，单步reverse diffusion process的具体形式，因此需要通过神经网络来学习。
 
 所以这里的高斯分布的两个参数是可学习的参数$\boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)$. 其中 $\theta$ 是神经网络的学习参数。
+
+---
+
+> $$
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_{t-1}; \color{blue}{\tilde{\boldsymbol{\mu}}}(\mathbf{x}_t, \mathbf{x}_0), \color{red}{\tilde{\beta}_t} \mathbf{I})
+$$
+
+为了证明上式，需要回顾上面我们得到的closed form的结论：
+
+$$
+q(\mathbf{x}_t \vert \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I})
+$$
+
+$$
+\begin{aligned}
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) &\propto q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) \cdot q(\mathbf{x}_{t-1} \vert \mathbf{x}_0) \\
+&= \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I}) \cdot
+\end{aligned}
+$$
+
+% TODO: 我们有可能不用证明这个，暂时先放着儿
 
 ---
 
@@ -254,6 +282,8 @@ q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
 &= \exp\Big( -\frac{1}{2} \big( \color{red}{(\frac{\alpha_t}{\beta_t} + \frac{1}{1 - \bar{\alpha}_{t-1}})} \mathbf{x}_{t-1}^2 - \color{blue}{(\frac{2\sqrt{\alpha_t}}{\beta_t} \mathbf{x}_t + \frac{2\sqrt{\bar{\alpha}_{t-1}}}{1 - \bar{\alpha}_{t-1}} \mathbf{x}_0)} \mathbf{x}_{t-1} \color{black}{ + C(\mathbf{x}_t, \mathbf{x}_0) \big) \Big)}
 \end{aligned}
 $$
+
+TODO
 
 ## References
 
