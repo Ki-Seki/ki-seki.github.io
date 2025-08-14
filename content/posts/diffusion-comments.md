@@ -80,8 +80,7 @@ $$
 * 如果你有一个随机变量 $z \sim \mathcal{N}(\mu, \sigma^2)$，直接从这个分布采样，梯度无法通过 $\mu, \sigma$ 传播。
 * **重参数化技巧**是把 $z$ 写成可导的形式：$z = \mu + \sigma \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, 1)$。这样梯度可以通过 $\mu$ 和 $\sigma$ 反向传播，只有$\epsilon$ 需要随机采样。
 
-PyTorch代码示例：
-
+{{< details "PyTorch代码示例">}}
 ```python
 import torch
 
@@ -101,6 +100,7 @@ loss.backward()
 print("grad mu:", mu.grad)
 print("grad log_sigma:", log_sigma.grad)
 ```
+{{< /details >}}
 
 ---
 
@@ -142,6 +142,39 @@ $$
 ---
 
 #### Connection with stochastic gradient Langevin dynamics
+
+> $$
+\mathbf{x}_t = \mathbf{x}_{t-1} + \frac{\delta}{2} \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) + \sqrt{\delta} \boldsymbol{\epsilon}_t
+,\quad\text{where }
+\boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
+
+注意：这个联系其实仅学习Diffusion的话，用不到。只是扩展地展示和Langevin dynamics的关联。这里可以类比diffusion model中重参数化后的单步扩散过程。
+
+Langevin dynamics（朗之万动力学）是物理学中用于模拟分子运动的统计方法。它描述了粒子在势能场中运动时受到的随机扰动（比如热噪声），因此常用于建模复杂系统的随机行为。
+
+Stochastic Gradient Langevin Dynamics（SGLD，随机梯度朗之万动力学）是将 Langevin 动力学与机器学习中的随机梯度下降（SGD）结合起来的一种采样方法。它的目标是从某个概率分布 \( p(x) \) 中采样，而不需要知道这个分布的具体形式，只需要知道它的梯度。
+
+上面的采样公式是一个迭代式，他的含义是：“在梯度方向上前进一点，同时加入一些随机扰动，使得最终的样本分布逼近目标分布 \( p(x) \)。” 相关符号含义：
+
+- \( \mathbf{x}_t \)：第 \( t \) 步的样本
+- \( \frac{\delta}{2} \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) \): 漂移项，根据目标分布的梯度移动，类似受力牵引。
+  - \( p(x) \)：目标分布的概率密度函数
+  - \( \log p(x) \)：对数概率密度，便于计算和优化
+  - \( \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) \)：对数概率密度的梯度，也叫 score function，表示当前点的“上升方向”
+- \( \sqrt{\delta} \boldsymbol{\epsilon}_t \): 扩散项，像布朗运动的分子碰撞
+  - \( \sqrt{\delta} \)：步长（step size），控制每次更新的幅度
+  - \( \epsilon_t \sim \mathcal{N}(0, I) \)：标准正态分布的随机噪声，加入随机性以避免陷入局部最优
+
+扩散模型的反向过程（从噪声恢复数据）可以看作是一个马尔可夫链，每一步都在做“去噪 + 随机扰动”，这与 SGLD 的更新方式非常相似：
+
+- 都使用了 **score function**（即梯度）
+- 都在每一步加入了 **高斯噪声**
+- 都是为了从一个复杂的分布中采样
+
+因此，扩散模型的reverse diffusion process可以被理解为一种特殊形式的 Langevin dynamics。
+
+### Reverse diffusion process
 
 ## References
 
