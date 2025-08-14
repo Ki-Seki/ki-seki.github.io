@@ -1,4 +1,11 @@
-# 好的研究
+---
+date: '2025-08-08T01:41:53+08:00'
+title: '好的研究'
+author:
+  - Shichao Song
+summary: ''
+tags: []
+---
 
 孔雨晴老师在她的博客 http://1844mcintyre.com/blog/blog.html 《汉字加减的“魔法”》一文中提到很有意思的和embedding相关的问题。
 
