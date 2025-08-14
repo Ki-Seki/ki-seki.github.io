@@ -4,7 +4,7 @@ math: true
 
 <!-- TODO：记得email给lilian about this article -->
 
-本文致力于几乎零数学背景知识和零生成模型的情况下对Lilian Weng的《What are Diffusion Models?》 [^diffusion]进行完善的注释。
+本文致力于在几乎零数学背景知识和零生成模型知识的情况下，对Lilian Weng的《What are Diffusion Models?》 [^lilian_diffusion] 进行完善的注释导读。
 
 ## Introduction
 
@@ -57,6 +57,25 @@ $$
 
 整体扩散过程只是使用马尔可夫过程性质（每一步只依赖前一步）来连乘而已。实践中因为可以使用更简单的计算方式，该公式也不常用到。
 
+PS.
+
+写法上，
+
+$$
+q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})
+$$
+
+等价于
+
+$$
+\begin{align}
+\mathbf{x}_t &\sim \mathcal{N}(\sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I}) \\
+q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) &= \text{Gaussian Probability Density Function}
+\end{align}
+$$
+
+前者是扩散模型学术界常见的写法
+
 ---
 
 > isotropic Gaussian distribution
@@ -96,12 +115,17 @@ $$
 
 > reparameterization trick
 
-重参数化**将随机变量从不可导的采样操作中解耦出来**的方法，让采样操作可以参与梯度下降优化。他没有消除随机采样，只是将随机采样对梯度传播的影响降到了最低。
+定义：重参数化**将随机变量从不可导的采样操作中解耦出来**的方法，让采样操作可以参与梯度下降优化。
 
-简单说：
+原理：他没有消除随机采样，只是将随机采样对梯度传播的影响降到了最低.
 
-* 如果你有一个随机变量 $z \sim \mathcal{N}(\mu, \sigma^2)$，直接从这个分布采样，梯度无法通过 $\mu, \sigma$ 传播。
-* **重参数化技巧**是把 $z$ 写成可导的形式：$z = \mu + \sigma \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, 1)$。这样梯度可以通过 $\mu$ 和 $\sigma$ 反向传播，只有$\epsilon$ 需要随机采样。
+举例：如果你有一个随机变量 $z \sim \mathcal{N}(\mu, \sigma^2)$，直接从这个分布采样，梯度无法通过 $\mu, \sigma$ 传播。那就可以按照下式从随机采样 $z$ 转换为随机采样 $\epsilon$。
+
+$$
+\mathcal{N}(z; \mu, \sigma^2)
+= \mu + \mathcal{N}(\epsilon'; 0, \sigma^2)
+= \mu + \sigma \cdot \mathcal{N}(\epsilon; 0, 1)
+$$
 
 {{< details "PyTorch代码示例">}}
 ```python
@@ -139,7 +163,7 @@ q(\mathbf{x}_t \vert \mathbf{x}_0) &= \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alph
 \end{aligned}
 $$
 
-最初的时候，根据单步扩散过程$q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$，以及重参数化技巧 $z = \mu + \sigma \cdot \epsilon$，我们可以重写单步扩散过程为：
+根据单步扩散过程$q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$，以及重参数化技巧 $z = \mu + \sigma \cdot \epsilon$，我们可以重写单步扩散过程为：
 
 $$\mathbf{x}_t = \sqrt{1 - \beta_t}\mathbf{x}_{t-1} + \sqrt{\beta_t}\boldsymbol{\epsilon}_{t-1}$$
 
@@ -283,8 +307,46 @@ q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
 \end{aligned}
 $$
 
-TODO
+让我们把这里的推理步骤写完善点：
+
+$$
+\begin{aligned}
+&q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \\
+%
+&= \frac{ q(\mathbf{x}_{t-1}, \mathbf{x}_t \vert \mathbf{x}_0) }{ q(\mathbf{x}_t \vert \mathbf{x}_0) } \\
+%
+&= q(\mathbf{x}_t \vert \mathbf{x}_{t-1}, \mathbf{x}_0) \frac{ q(\mathbf{x}_{t-1} \vert \mathbf{x}_0) }{ q(\mathbf{x}_t \vert \mathbf{x}_0) }
+\quad\text{;where}\quad (*) \\
+%
+&\propto \exp \Big(-\frac{1}{2} \big(\frac{(\mathbf{x}_t - \sqrt{\alpha_t} \mathbf{x}_{t-1})^2}{\beta_t} + \frac{(\mathbf{x}_{t-1} - \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0)^2}{1-\bar{\alpha}_{t-1}} - \frac{(\mathbf{x}_t - \sqrt{\bar{\alpha}_t} \mathbf{x}_0)^2}{1-\bar{\alpha}_t} \big) \Big)
+\quad\text{;where}\quad (**) \\
+%
+&= \exp \Big(-\frac{1}{2} \big(\frac{\mathbf{x}_t^2 - 2\sqrt{\alpha_t} \mathbf{x}_t \color{blue}{\mathbf{x}_{t-1}} \color{black}{+ \alpha_t} \color{red}{\mathbf{x}_{t-1}^2} }{\beta_t} + \frac{ \color{red}{\mathbf{x}_{t-1}^2} \color{black}{- 2 \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0} \color{blue}{\mathbf{x}_{t-1}} \color{black}{+ \bar{\alpha}_{t-1} \mathbf{x}_0^2}  }{1-\bar{\alpha}_{t-1}} - \frac{(\mathbf{x}_t - \sqrt{\bar{\alpha}_t} \mathbf{x}_0)^2}{1-\bar{\alpha}_t} \big) \Big) \\
+%
+&= \exp\Big( -\frac{1}{2} \big( \color{red}{(\frac{\alpha_t}{\beta_t} + \frac{1}{1 - \bar{\alpha}_{t-1}})} \mathbf{x}_{t-1}^2 - \color{blue}{(\frac{2\sqrt{\alpha_t}}{\beta_t} \mathbf{x}_t + \frac{2\sqrt{\bar{\alpha}_{t-1}}}{1 - \bar{\alpha}_{t-1}} \mathbf{x}_0)} \mathbf{x}_{t-1} \color{black}{ + C(\mathbf{x}_t, \mathbf{x}_0) \big) \Big)}
+\end{aligned}
+$$
+
+(*) 根据先前推导出的closed form 扩散表达式以及单步扩散表达式，可以有
+
+$$
+\begin{align}
+q(\mathbf{x}_t \vert \mathbf{x}_{t-1}, \mathbf{x}_0) &\sim \mathcal{N}(\mathbf{x}_t; \sqrt{{\alpha}_t} \mathbf{x}_{t-1}, (1 - {\alpha}_t)\mathbf{I}) \\
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_0) &\sim \mathcal{N}(\mathbf{x}_{t-1}; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I}) \\
+q(\mathbf{x}_t \vert \mathbf{x}_0) &\sim \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I})
+\end{align}
+$$
+
+(**) 根据高斯概率密度函数可以进行线性简化
+
+$$
+\begin{align}
+& x \sim \mathcal{N}(\mu, \sigma^2) \\
+& \to p(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \; \exp\!\left( -\frac{(x - \mu)^2}{2\sigma^2} \right) \\
+& \to p(x) \propto \exp\!\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)
+\end{align}
+$$
 
 ## References
 
-[^diffusion]: Weng, Lilian. “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
+[^lilian_diffusion]: Weng, Lilian. “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
