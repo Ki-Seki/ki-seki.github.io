@@ -239,10 +239,24 @@ Stochastic Gradient Langevin Dynamics（SGLD，随机梯度朗之万动力学）
 
 P.S. 为了避免混淆，这里是一些常见的约定。
 
-| 方向 | 字母                                            | 噪声 | 作用                             | 概率类型 |
+| 方向 | 概率密度                                        | 噪声 | 作用                             | 概率类型 |
 | ---- | ----------------------------------------------- | ---- | -------------------------------- | -------- |
 | 前向 | $q(\mathbf{x}_t \vert \mathbf{x}_{t-1})$        | 加噪 | 构造高斯马尔可夫链，逐步破坏数据 | 真实分布 |
-| 反向 | $p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)$ | 去噪 | 恢复数据，从噪声生成样本         | 近似后验 |
+| 反向 | $p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)$ | 去噪 | 恢复数据，从噪声生成样本         | 后验     |
+
+P.P.S. 先验，似然，与后验
+
+| 概念 | 类比解释                 | 在扩散模型中的类比                                     |
+| ---- | ------------------------ | ------------------------------------------------------ |
+| 先验 | 你原本的信念             | $q(\mathbf{x}_T) \sim \mathcal{N}(0, I)$               |
+| 似然 | 某假设下观察到数据的概率 | $p(\mathbf{x}_t \vert \mathbf{x}_{t-1})$               |
+| 后验 | 看到数据后的更新判断     | $p(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)$ |
+
+\[
+\text{后验} = \frac{\text{似然} \times \text{先验}}{\text{证据}}
+\quad\leftrightarrow\quad
+p(\text{参数} | \text{数据}) = \frac{p(\text{数据} | \text{参数}) \cdot p(\text{参数})}{p(\text{数据})}
+\]
 
 ---
 
@@ -384,6 +398,16 @@ TODO: C(x_t, x_0) 还没有处理呢
 
 ---
 
+> $\mathbf{x}_0 = \frac{1}{\sqrt{\bar{\alpha}_t}}(\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t)$
+
+Recall 我们推导出的closed form的前向扩散过程，就易证了：
+
+$$
+\mathbf{x}_t = \sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon} \\
+$$
+
+---
+
 > $$
 \begin{aligned}
 \tilde{\boldsymbol{\mu}}_t
@@ -405,6 +429,45 @@ $$
 &= \color{cyan}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)}
 \end{aligned}
 $$
+
+---
+
+> $D_{KL}(... \parallel ...)$
+
+这个是 KL 散度（Kullback–Leibler Divergence），也叫相对熵（Relative Entropy），它用来衡量 **两个概率分布之间差异** 的一种信息论度量。
+
+$$
+\begin{align}
+\text{对于离散分布:}\quad & D_{\mathrm{KL}}(P \,\|\, Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)} \\
+\text{对于连续分布:}\quad & D_{\mathrm{KL}}(P \,\|\, Q) = \int P(x) \log \frac{P(x)}{Q(x)} \, dx
+\end{align}
+$$
+
+这里：
+
+- $P$ 是“真实”分布（或目标分布）。
+- $Q$ 是用来近似 $P$ 的分布。
+- $\log$ 的底通常取自然对数（信息单位为 nats），取 2 则单位为 bits。
+
+直观理解:
+
+- 如果你用 $Q$ 作为编码策略去编码实际上来自 $P$ 的数据，那么平均每个样本会多花 $D_{\mathrm{KL}}(P\|Q)$ 个信息单位（nats/bits）。
+- KL 散度表示使用分布 $Q$ 来替代 $P$ 时丢失的信息量。
+- 公式里的 $\log \frac{P(x)}{Q(x)}$ 是 **对数概率比**，乘上 $P(x)$ 并取期望，就是平均的概率比差异。
+
+性质:
+
+- **非负性**: $D_{\mathrm{KL}}(P \,\|\, Q) \ge 0$
+- **非对称性**: $D_{\mathrm{KL}}(P \,\|\, Q) \neq D_{\mathrm{KL}}(Q \,\|\, P)$
+- **相对熵=交叉熵-香农熵**: $D_{\mathrm{KL}}(P \,\|\, Q) = H(P, Q) - H(P)$
+
+P.S. 几个重要的熵
+
+| 熵类型     | 公式                                                      | 解释                                   |
+| ---------- | --------------------------------------------------------- | -------------------------------------- |
+| **香农熵** | $H(p) = -\sum_i p(x_i) \log p(x_i)$                       | 衡量分布 $p$ 的不确定性                |
+| **交叉熵** | $H(p,q) = -\sum_i p(x_i) \log q(x_i)$                     | 衡量用 $q$ 表示 $p$ 的平均信息量       |
+| **相对熵** | $D_{KL}(p\|q) = \sum_i p(x_i) \log \frac{p(x_i)}{q(x_i)}$ | 衡量 $p$ 和 $q$ 的差异，多付出的信息量 |
 
 ## References
 
