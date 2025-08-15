@@ -14,3 +14,11 @@
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
 {{ end }}
+
+{{- /* Load Font Awesome for admonition icons */ -}}
+{{- $fontAwesome := resources.Get "lib/fontawesome-free/css/all.min.css" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+{{- /* Load admonition JavaScript */ -}}
+{{- $admonitionJS := resources.Get "js/admonition.js" | minify }}
+<script src="{{ $admonitionJS.RelPermalink }}"></script>

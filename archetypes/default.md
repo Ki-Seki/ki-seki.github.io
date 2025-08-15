@@ -97,6 +97,56 @@ src="https://www.w3schools.com/html/mov_bbb.mp4"
 caption="Basic HTML5 Video Example"
 >}}
 
+### Admonition Shortcode
+
+{{< admonition type=note title="Note Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=abstract title="Abstract Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=info title="Info Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=tip title="Tip Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=success title="Success Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=question title="Question Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=warning title="Warning Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=failure title="Failure Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=danger title="Danger Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=bug title="Bug Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=example title="Example Title" open=false >}}
+Content
+{{< /admonition >}}
+
+{{< admonition type=quote title="Quote Title" open=false >}}
+Content
+{{< /admonition >}}
+
 ## Appendix
 
 ## Citation
