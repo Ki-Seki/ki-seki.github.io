@@ -500,6 +500,6 @@ P.S. 几个重要的熵
 
 ## References
 
-[^lilian_diffusion]: Weng, Lilian. “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
+[^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
-[^ddpm]: Jascha Sohl-Dickstein, et al. “Deep Unsupervised Learning Using Nonequilibrium Thermodynamics.” _PMLR_, June 2015, pp. 2256–2265, proceedings.mlr.press/v37/sohl-dickstein15.html. Accessed 16 Aug. 2025.
+[^ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** “Denoising Diffusion Probabilistic Models.” _Advances in Neural Information Processing Systems_, edited by H. Larochelle et al., vol. 33, Curran Associates, Inc., 2020, pp. 6840–6851. https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
