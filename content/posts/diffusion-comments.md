@@ -459,6 +459,49 @@ $$
 
 这和原文不符合，其实也和原始的DDPM论文[^ddpm]中的计算也不符。我暂时认为我是对的。
 
+<!-- TODO: 最后回来再看看有什么其他理解的办法没有 -->
+
+---
+
+> VAE
+
+VAE（变分自编码器）的前身是AE（自编码器），就是一个具有编码器和解码器的神经网络，目的是通过让解码器的值和原始值尽可能相似，而学习一个压缩了的潜在变量，用于表示学习和降维。
+
+VAE和AE在结构上非常相似，但在理论基础和目标函数上有本质区别。
+
+| 特性                 | 自编码器（AE）                  | 变分自编码器（VAE）                                            |
+| -------------------- | ------------------------------- | -------------------------------------------------------------- |
+| 编码器输出           | 一个确定性的向量 \( z = f(x) \) | 一个分布 \( q(z \vert x) = \mathcal{N}(\mu(x), \sigma^2(x)) \) |
+| 解码器输入           | 固定向量 \( z \)                | 从分布中采样的 \( z \sim q(z \vert x) \)                       |
+| 训练目标             | 最小化重构误差（如 MSE）        | 最大化变分下界（ELBO）                                         |
+| 是否为生成模型       | 否                              | 是                                                             |
+| 是否有概率建模       | 否                              | 有（对潜在变量建模）                                           |
+| 是否可采样生成新数据 | 否                              | 可从先验 \( p(z) \) 采样生成数据                               |
+| 是否使用KL散度       | 否                              | 用于正则化潜在分布                                             |
+
+---
+
+> variational lower bound
+
+可以不用细究该下界的方方面面。大概明白：
+
+1. 对数边际似然, $\log p_\theta(\mathbf{x}_0)$ , 很难直接算，你不能对潜变量分布中的所有情况都进行直接积分计算。所以要找替代的优化下界，优化该下界就相当于优化对数边际似然
+
+2. 推导过程中应用了 [Jensen 不等式](https://en.wikipedia.org/wiki/Jensen%27s_inequality) ：设 \( \phi \) 是一个[concave function](https://en.wikipedia.org/wiki/Concave_function)，\( X \) 是一个可积的随机变量，则有
+  \[
+  \phi\left( \mathbb{E}[X] \right) \geq \mathbb{E}\left[ \phi(X) \right]
+  \]
+  对应于ddpm，RHS即为variational lower bound / ELBO：
+  $$
+  \log p_\theta(x) 
+  \geq \mathbb{E}_{q(z \mid x)} \left[ \log \frac{p_\theta(x, z)}{q(z \mid x)} \right]
+  $$
+  其中，$log()$ is a concave function
+
+3. 即便不懂这个也不影响后续的理解。博文后续给出了不依赖于该背景知识的推导办法。
+
+4. 如果想要完全读懂该部分内容，强烈建议阅读 Lilian Weng 的另一篇文章 From Autoencoder to Beta-VAE [^lilian_ae] 中的 [章节 VAE: Variational Autoencoder](https://lilianweng.github.io/posts/2018-08-12-vae/#vae-variational-autoencoder)。
+
 ---
 
 > $D_{KL}(... \parallel ...)$
@@ -498,8 +541,44 @@ P.S. 几个重要的熵
 | **交叉熵** | $H(p,q) = -\sum_i p(x_i) \log q(x_i)$                     | 衡量用 $q$ 表示 $p$ 的平均信息量       |
 | **相对熵** | $D_{KL}(p\|q) = \sum_i p(x_i) \log \frac{p(x_i)}{q(x_i)}$ | 衡量 $p$ 和 $q$ 的差异，多付出的信息量 |
 
+---
+
+> $$
+\begin{aligned}
+\mathord{-} \log p_\theta(\mathbf{x}_0) 
+&\leq - \log p_\theta(\mathbf{x}_0) + D_\text{KL}(q(\mathbf{x}_{1:T}\vert\mathbf{x}_0) \| p_\theta(\mathbf{x}_{1:T}\vert\mathbf{x}_0) ) & \small{\text{; KL is non-negative}}\\
+&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T}) / p_\theta(\mathbf{x}_0)} \Big] \\
+&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} + \log p_\theta(\mathbf{x}_0) \Big] \\
+&= \mathbb{E}_q \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+\text{Let }L_\text{VLB} 
+&= \mathbb{E}_{q(\mathbf{x}_{0:T})} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \geq - \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0)
+\end{aligned}
+$$
+
+我们已经知道了对数边际似然, $\log p_\theta(\mathbf{x}_0)$ 无法计算，Lilian这里给出了从零推导出 varational lower bound 的过程。这里推导比较清晰，不再展开。
+
+---
+
+> $$
+\begin{aligned}
+L_\text{CE}
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0) \\
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \int p_\theta(\mathbf{x}_{0:T}) d\mathbf{x}_{1:T} \Big) \\
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \int q(\mathbf{x}_{1:T} \vert \mathbf{x}_0) \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} d\mathbf{x}_{1:T} \Big) \\
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \mathbb{E}_{q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} \Big) \\
+&\leq - \mathbb{E}_{q(\mathbf{x}_{0:T})} \log \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} \\
+&= \mathbb{E}_{q(\mathbf{x}_{0:T})}\Big[\log \frac{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})}{p_\theta(\mathbf{x}_{0:T})} \Big] = L_\text{VLB}
+\end{aligned}
+$$
+
+这个是另外一个推导VLB的方式，直接用了Jensen不等式。推导也非常直观，不过让我们对部分符号进行解释。
+
+<!-- TODO -->
+
 ## References
 
 [^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
 [^ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** “Denoising Diffusion Probabilistic Models.” _Advances in Neural Information Processing Systems_, edited by H. Larochelle et al., vol. 33, Curran Associates, Inc., 2020, pp. 6840–6851. https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
+
+[^lilian_ae]: **Weng, Lilian.** “From Autoencoder to Beta-VAE.” _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
