@@ -1,0 +1,97 @@
+{
+  "Hugo Admonition (named params, markdown content)": {
+    "prefix": "admon",
+    "scope": "markdown",
+    "body": [
+      "{{% admonition type=\"${1|note,abstract,info,tip,success,question,warning,failure,danger,bug,example,quote|}\" title=\"${2:Title}\" open=${3|true,false|} %}}",
+      "${0:Inner content...}",
+      "{{% /admonition %}}"
+    ],
+    "description": "Insert Hugo admonition shortcode with named params"
+  },
+  "Hugo Blockquote with Attribution": {
+    "prefix": "bqattr",
+    "scope": "markdown",
+    "body": [
+      "> ${1:Quote text}",
+      ">",
+      "> — <cite>${2:Author} [^${3:1}]</cite>",
+      "",
+      "[^${3:1}]: ${0:Citation reference}"
+    ],
+    "description": "Insert blockquote with attribution and footnote"
+  },
+  "Hugo Code Block with Options": {
+    "prefix": "codeblock",
+    "scope": "markdown",
+    "body": [
+      "```${1:language} {linenos=true,hl_lines=[${2:2,8}]}",
+      "${0:code}",
+      "```"
+    ],
+    "description": "Insert code block with line numbers and highlighting"
+  },
+  "Hugo Keyboard Shortcut": {
+    "prefix": "kbd",
+    "scope": "markdown",
+    "body": [
+      "<kbd><kbd>${1:CTRL}</kbd>+<kbd>${2:ALT}</kbd>+<kbd>${3:Delete}</kbd></kbd>"
+    ],
+    "description": "Insert keyboard shortcut"
+  },
+  "Hugo Mark/Highlight": {
+    "prefix": "mark",
+    "scope": "markdown",
+    "body": [
+      "<mark>${1:highlighted text}</mark>"
+    ],
+    "description": "Insert marked/highlighted text"
+  },
+  "Hugo X (Twitter) Shortcode": {
+    "prefix": "twitter",
+    "scope": "markdown",
+    "body": [
+      "{{< x user=\"${1:username}\" id=\"${2:tweet_id}\" >}}"
+    ],
+    "description": "Insert X (Twitter) shortcode"
+  },
+  "Hugo GitHub Gist": {
+    "prefix": "gist",
+    "scope": "markdown",
+    "body": [
+      "{{< gist ${1:username} ${2:gist_id} >}}"
+    ],
+    "description": "Insert GitHub Gist shortcode"
+  },
+  "Hugo Details Shortcode": {
+    "prefix": "details",
+    "scope": "markdown",
+    "body": [
+      "{{< details \"${1:Click me}\">}}",
+      "${0:This is a collapsible section.}",
+      "{{< /details >}}"
+    ],
+    "description": "Insert collapsible details shortcode"
+  },
+  "Hugo Media Shortcode": {
+    "prefix": "media",
+    "scope": "markdown",
+    "body": [
+      "{{< media",
+      "src=\"${1:https://example.com/media.jpg}\"",
+      "caption=\"${2:Caption text}\"",
+      ">}}"
+    ],
+    "description": "Insert media shortcode"
+  },
+  "Hugo BibTeX Citation": {
+    "prefix": "bibtex",
+    "scope": "markdown",
+    "body": [
+      "## Citation",
+      "",
+      "{{< bibtex >}}"
+    ],
+    "description": "Insert BibTeX citation shortcode"
+  }
+}
