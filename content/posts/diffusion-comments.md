@@ -352,6 +352,402 @@ $$
 
 推导也非常直观，不过让我们对部分符号进行解释。 <!-- TODO -->
 
+{{< admonition type="quote" title="展开" >}}
+$$
+\begin{aligned}
+L_\text{VLB} 
+&= \mathbb{E}_{q(\mathbf{x}_{0:T})} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+&= \mathbb{E}_q \Big[ \log\frac{\prod_{t=1}^T q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{ p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t) } \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=1}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \Big( \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)}\cdot \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1}\vert\mathbf{x}_0)} \Big) + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1} \vert \mathbf{x}_0)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{q(\mathbf{x}_1 \vert \mathbf{x}_0)} + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]\\
+&= \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \Big] \\
+&= \mathbb{E}_q [\underbrace{D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))}_{L_T} + \sum_{t=2}^T \underbrace{D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t))}_{L_{t-1}} \underbrace{- \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)}_{L_0} ]
+\end{aligned}
+$$
+{{< /admonition>}}
+
+![alt text](/posts/image.png)
+
+上面这个图来自DDPM论文，可以把相关内容加进去
+
+这个是目标函数，而不是loss
+
+这组推导是对扩散模型（Diffusion Models）中的变分下界（Variational Lower Bound, VLB）或证据下界（Evidence Lower Bound, ELBO）进行逐步展开与重构的过程。它的目的，是将训练目标从一个难以直接优化的对数似然函数，转化为一组可计算的 KL 散度项与重构项，从而指导神经网络学习如何从噪声中恢复原始数据。
+
+---
+
+为什么要推导这个公式？
+
+扩散模型的训练目标是最大化数据的对数似然 \( \log p_\theta(\mathbf{x}_0) \)，但由于这个目标涉及对高维隐变量的积分，无法直接计算。因此我们引入一个近似分布 \( q(\mathbf{x}_{1:T} \vert \mathbf{x}_0) \)，并通过 Jensen 不等式构造一个下界：
+
+\[
+\log p_\theta(\mathbf{x}_0) \geq \mathbb{E}_{q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \left[ \log \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \right] = -L_\text{VLB}
+\]
+
+这个下界就是我们训练时要最小化的损失函数。
+
+---
+
+用了哪些技巧？
+
+1. **马尔可夫链展开**
+利用正向过程的马尔可夫性质：
+\[
+q(\mathbf{x}_{1:T} \vert \mathbf{x}_0) = \prod_{t=1}^T q(\mathbf{x}_t \vert \mathbf{x}_{t-1})
+\]
+以及逆向过程的建模：
+\[
+p_\theta(\mathbf{x}_{0:T}) = p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)
+\]
+
+1. **KL 散度重构**
+将对数比值转化为 KL 散度形式：
+\[
+D_\text{KL}(q \parallel p) = \mathbb{E}_q \left[ \log \frac{q}{p} \right]
+\]
+从而将损失函数拆解为三部分：
+- \( L_T \): 终点分布匹配（高斯先验）
+- \( L_{t-1} \): 每一步的去噪匹配
+- \( L_0 \): 最终重构项
+
+1. **后验重构技巧**
+利用：
+\[
+\frac{q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) q(\mathbf{x}_{t-1} \vert \mathbf{x}_0)}{q(\mathbf{x}_t \vert \mathbf{x}_0)} = q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
+\]
+这个技巧是关键，它允许我们将不可直接采样的后验 \( q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \) 显式表达为高斯分布，从而计算 KL 散度。
+
+---
+
+🔍 推导的意义是什么？
+
+这套推导的意义在于：
+
+- **理论清晰化**：将训练目标从抽象的似然最大化，转化为具体的 KL 散度项与重构项。
+- **可计算性**：每一项都可以通过 Monte Carlo 采样估计，适合梯度下降优化。
+- **模型设计指导**：明确了神经网络要学习的是从 \( \mathbf{x}_t \) 预测 \( \mathbf{x}_0 \) 或噪声 \( \boldsymbol{\varepsilon}_t \)，从而构建 \( p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) \)。
+
+你说得非常对，KL 散度的定义确实是：
+
+\[
+D_{\text{KL}}(q(x) \parallel p(x)) = \mathbb{E}_{q(x)} \left[ \log \frac{q(x)}{p(x)} \right]
+\]
+
+也就是说，**log 比值外面必须乘上一个期望**，而不是直接写成 log 比值本身。你指出的这个问题，正是这类推导中最容易混淆的地方之一。
+
+---
+
+✅ 那么原推导为什么看起来“少乘了一个期望”？
+
+其实没有少。我们来还原一下最后一行：
+
+\[
+L_\text{VLB} = \mathbb{E}_q \left[ \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \right]
+\]
+
+这其实是对每一项都在 **\( \mathbb{E}_{q(\mathbf{x}_{0:T})} \)** 下取期望的写法。也就是说：
+
+- 第一项是 \( \mathbb{E}_{q(\mathbf{x}_T \vert \mathbf{x}_0)} \left[ \log \frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} \right] \)，即 KL 散度项 \( D_{\text{KL}}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \)
+- 第二项是对每个 \( t \) 的 KL 散度项 \( D_{\text{KL}}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)) \)
+- 第三项是重构项 \( -\mathbb{E}_{q(\mathbf{x}_1 \vert \mathbf{x}_0)} \left[ \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \right] \)
+
+所以虽然表面上看是 log 比值，实际上每一项都隐含了在对应的 \( q \) 分布下的期望。
+
+---
+
+🧠 为什么这么写？
+
+这是为了简洁地表达整个损失函数的结构。在实际实现中，每一项都会通过采样 \( \mathbf{x}_t \sim q(\cdot \vert \mathbf{x}_0) \) 来估计期望值。比如：
+
+- \( \mathbf{x}_T \sim q(\mathbf{x}_T \vert \mathbf{x}_0) \)，用于估计 prior matching KL
+- \( \mathbf{x}_{t-1} \sim q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \)，用于估计 denoising KL
+- \( \mathbf{x}_1 \sim q(\mathbf{x}_1 \vert \mathbf{x}_0) \)，用于估计重构项
+
+{{< admonition type="quote" >}}
+$$
+\begin{aligned}
+L_\text{VLB} &= L_T + L_{T-1} + \dots + L_0 \\
+\text{where } L_T &= D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \\
+L_t &= D_\text{KL}(q(\mathbf{x}_t \vert \mathbf{x}_{t+1}, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_t \vert\mathbf{x}_{t+1})) \text{ for }1 \leq t \leq T-1 \\
+L_0 &= - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+\end{aligned}
+$$
+{{< /admonition >}}
+
+LT 和 L0 不用计算
+
+你问得非常到位：**为什么 \( L_T \) 和 \( L_0 \) 在训练中可以不用计算？**这其实是扩散模型训练过程中的一个重要简化策略。我们来逐项分析：
+
+---
+
+🧊 为什么 \( L_T = D_{\text{KL}}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \) 可以不计算？
+
+✅ 原因一：它是一个常数项
+- \( q(\mathbf{x}_T \vert \mathbf{x}_0) \) 是一个高斯分布，其均值和方差是固定的（由噪声调度决定）。
+- \( p_\theta(\mathbf{x}_T) \) 是标准高斯 \( \mathcal{N}(0, I) \)，也不依赖模型参数。
+- 所以它们之间的 KL 散度是一个 **解析可计算的常数**，不影响梯度优化。
+
+> 📌 结论：**不依赖模型参数 \( \theta \)**，所以可以在训练时忽略。
+
+---
+
+🎯 为什么 \( L_0 = -\log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \) 可以不计算？
+
+✅ 原因一：它被近似为 t=1 时的 denoising loss
+- 原始的重构项 \( L_0 \) 是从 \( \mathbf{x}_1 \) 预测 \( \mathbf{x}_0 \)，但这项在训练中会带来较高的方差。
+- 所以很多实现（如 DDPM）将其近似为：
+  \[
+  L_0 \approx D_{\text{KL}}(q(\mathbf{x}_0 \vert \mathbf{x}_1) \parallel p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1))
+  \]
+  或直接用 t=1 的 denoising KL 来代替。
+
+✅ 原因二：它可以合并进统一的 denoising loss 框架
+- 在实际训练中，我们从 \( t \sim \text{Uniform}(1, T) \) 采样一个时间步，然后优化：
+  \[
+  \mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}} \left[ \left\| \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \right\|^2 \right]
+  \]
+- 这个统一的损失已经隐含了对所有时间步（包括 t=1）的优化。
+
+> 📌 结论：**它被包含在统一的训练损失中，不需要单独计算。**
+
+---
+
+🧠 总结表格
+
+| 项目 | 是否依赖模型参数 | 是否需要训练时计算 | 原因 |
+|------|------------------|---------------------|------|
+| \( L_T \) | ❌ 否 | ❌ 不需要 | 是常数项 |
+| \( L_0 \) | ✅ 是 | ❌ 不需要单独计算 | 被包含在 t=1 的 denoising loss 中 |
+
+---
+
+如果你想，我可以带你推导一下 \( L_T \) 的具体值，或者看看如何从 \( L_0 \) 推出噪声预测损失。要不要继续深入？
+
+### Parameterization of $L_t$ for Training Loss
+
+{{< admonition type="quote" >}}
+$$
+\begin{aligned}
+\boldsymbol{\mu}_\theta(\mathbf{x}_t, t) &= \color{cyan}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \Big)} \\
+\text{Thus }\mathbf{x}_{t-1} &= \mathcal{N}(\mathbf{x}_{t-1}; \frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \Big), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
+\end{aligned}
+$$
+{{< /admonition >}}
+
+这是为了预测 \mu 的，定义下 \mu 这块的神经网络。
+
+{{< admonition type="quote" title="Title" open=true >}}
+$$
+\begin{aligned}
+L_t 
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{1}{2 \| \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) \|^2_2} \| \color{blue}{\tilde{\boldsymbol{\mu}}_t(\mathbf{x}_t, \mathbf{x}_0)} - \color{green}{\boldsymbol{\mu}_\theta(\mathbf{x}_t, t)} \|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{1}{2  \|\boldsymbol{\Sigma}_\theta \|^2_2} \| \color{blue}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)} - \color{green}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t) \Big)} \|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_\theta \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_\theta \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] 
+\end{aligned}
+$$
+{{< /admonition >}}
+
+典型的mse error：$\text{MSE}=?$
+
+\epsilon_\theta 符合均值为 x_t 方差为t的gaossian 分布。
+
+最后又调用了封闭形式的forward diffusion，完整的展示了如何从原始数据产生出一个loss。
+
+{{% admonition type="quote" title="Title" open=true %}}
+$$
+\begin{aligned}
+L_t^\text{simple}
+&= \mathbb{E}_{t \sim [1, T], \mathbf{x}_0, \boldsymbol{\epsilon}_t} \Big[\|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\|^2 \Big] \\
+&= \mathbb{E}_{t \sim [1, T], \mathbf{x}_0, \boldsymbol{\epsilon}_t} \Big[\|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big]
+\end{aligned}
+$$
+{{% /admonition %}}
+
+注意下标处，这里是取三个变量的联合分布。
+
+这里就非常接近真实训练模型时候的样子了。
+
+{{% admonition type="quote" title="Title" open=true %}}
+![DDPM Algorithm](/images/DDPM_Algo.png)
+{{% /admonition %}}
+
+左边是训练，右边是推理时的。
+
+{{% admonition type="quote" title="Title" open=true %}}
+Connection with noise-conditioned score networks (NCSN)
+
+...
+{{% /admonition %}}
+
+你问的这段关于 Noise-Conditioned Score Networks (NCSN) 的内容确实挺密的，咱们来一步步拆解一下它的核心逻辑和数学含义：
+
+---
+
+🧠 背景：Score-Based Generative Modeling 是什么？
+
+Score-based 模型的目标是估计数据分布的梯度（score），即：
+\[
+\nabla_x \log p(x)
+\]
+这个梯度可以用来通过 Langevin dynamics 采样出新的数据点：
+\[
+x_{t+1} = x_t + \frac{\delta}{2} \nabla_x \log p(x_t) + \sqrt{\delta} \cdot \epsilon_t
+\]
+其中 \(\epsilon_t \sim \mathcal{N}(0, I)\)，这是一种“带噪梯度上升”的方式。
+
+---
+
+🧊 问题：数据集中在低维流形上怎么办？
+
+根据 manifold hypothesis，真实数据 \(x\) 虽然在高维空间中，但其实集中在一个低维子空间上。这导致：
+- 在数据密度低的区域，score 估计不准。
+- Langevin dynamics 可能会“走偏”，因为梯度估计不可靠。
+
+---
+
+💡 解决方案：加入噪声 + 多尺度训练
+
+Song & Ermon 提出：
+1. **加入不同强度的高斯噪声**：让数据分布变得更“满”，覆盖整个空间。
+2. **训练一个 Noise-Conditioned Score Network**：记作 \(s_\theta(x, \sigma)\)，它能估计不同噪声水平下的 score：
+   \[
+   s_\theta(x, \sigma) \approx \nabla_x \log p_\sigma(x)
+   \]
+   其中 \(p_\sigma(x)\) 是加入噪声后的数据分布。
+
+---
+
+🔁 与扩散模型的联系：Forward Process 类似加噪过程
+
+这个“逐步加噪”的过程和扩散模型中的 forward diffusion 是一样的：
+\[
+q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} x_{t-1}, \beta_t I)
+\]
+最终 \(x_T\) 会变成一个纯高斯噪声。
+
+---
+
+📐 Score 与高斯分布的梯度关系
+
+对于高斯分布：
+\[
+p(x) = \mathcal{N}(x; \mu, \sigma^2 I)
+\]
+其 score 是：
+\[
+\nabla_x \log p(x) = -\frac{1}{\sigma^2}(x - \mu)
+\]
+所以在扩散模型中，score network 其实是在估计：
+\[
+\nabla_x \log p_\sigma(x) = -\frac{x - \mu}{\sigma^2}
+\]
+而这个 \(\mu\) 可以是原始数据 \(x_0\)，也可以是神经网络预测的值。
+
+---
+
+🧪 总结一下这段话的意思：
+
+- 原始 score-based 模型用 Langevin dynamics 来采样，但在高维空间中不稳定。
+- 加入噪声后训练 score network 更稳定。
+- 多尺度噪声训练（noise-conditioned）让模型能适应不同的噪声水平。
+- 这个过程和扩散模型的 forward diffusion 是一致的。
+- 最终，score network 估计的是加入噪声后的数据分布的梯度。
+
+---
+
+如果你想，我可以把这部分用图示或公式推导再展开一层，或者对比一下 DDPM 和 NCSN 的异同。你更想深入哪一块？
+
+你的问题非常好，我们来逐个解释这些概念和公式，帮助你建立清晰的直觉：
+
+---
+
+🧭 什么是 \(\mathbb{R}^D\) 空间？
+
+这是一个 **D维欧几里得空间**，也就是所有长度为 \(D\) 的实数向量组成的空间。比如：
+- \(\mathbb{R}^2\)：二维平面
+- \(\mathbb{R}^3\)：三维空间
+- \(\mathbb{R}^{512}\)：比如图像的潜在表示空间
+
+在扩散模型中，数据（如图像）被表示为高维向量，通常就在 \(\mathbb{R}^D\) 中。
+
+---
+
+🧮 为什么要计算梯度 \(\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)\)？
+
+这是所谓的 **score function**，表示在某个点 \(\mathbf{x}_t\) 上，数据分布的对数密度的梯度。它的作用是：
+- 指出“数据分布上升最快的方向”
+- 可以用来进行 **Langevin dynamics** 采样
+- 在扩散模型中，它帮助我们从噪声中“走回”真实数据分布
+
+---
+
+🔁 要不要算 \(\mathbf{x}_{t-1}\)？
+
+是的，扩散模型的目标就是从一个高斯噪声 \(\mathbf{x}_T\) 开始，逐步去噪得到 \(\mathbf{x}_0\)。每一步都要估计：
+\[
+p_\theta(\mathbf{x}_{t-1} | \mathbf{x}_t)
+\]
+这个分布通常建模为高斯分布，其均值由神经网络预测。
+
+---
+
+📦 什么是 \(q(\tilde{\mathbf{x}} \vert \mathbf{x})\)？
+
+这是一个 **加噪过程的条件分布**，表示在原始数据 \(\mathbf{x}\) 上加噪后得到 \(\tilde{\mathbf{x}}\) 的概率。比如：
+\[
+q(\tilde{\mathbf{x}} \vert \mathbf{x}) = \mathcal{N}(\tilde{\mathbf{x}}; \mathbf{x}, \sigma^2 I)
+\]
+在 NCSN 中，这个分布用于训练 score network 来估计加噪数据的 score。
+
+---
+
+📐 这个公式是 score function 的定义吗？
+
+你写的这组公式：
+
+\[
+\mathbf{s}_\theta(\mathbf{x}_t, t) 
+\approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
+= \mathbb{E}_{q(\mathbf{x}_0)} [\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x}_0)]
+= \mathbb{E}_{q(\mathbf{x}_0)} \Big[ - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}} \Big]
+= - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
+\]
+
+是 **扩散模型中 score function 的近似表达式**，其中：
+- \(\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\) 是神经网络预测的噪声
+- \(\bar{\alpha}_t = \prod_{s=1}^t \alpha_s\)，是前向过程的累计衰减因子
+- 最后一行是因为我们用 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\) 来生成 \(\mathbf{x}_t\)，所以可以反推 score
+
+---
+
+🧪 那训练时怎么训练？真实的 score 有吗？
+
+关键点是：**真实的 score 没有显式表达式**，但我们可以通过构造损失函数来间接训练 score network。
+
+在 DDPM 或 NCSN 中，训练目标是：
+\[
+\mathcal{L}_{\text{simple}} = \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}, t} \left[ \left\| \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \right\|^2 \right]
+\]
+也就是说：
+- 我们知道 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\)
+- 所以我们知道真实的 \(\boldsymbol{\epsilon}\)
+- 训练目标就是让网络预测的 \(\boldsymbol{\epsilon}_\theta\) 尽量接近真实的 \(\boldsymbol{\epsilon}\)
+
+这就间接地训练了 score function，因为：
+\[
+\mathbf{s}_\theta(\mathbf{x}_t, t) \approx - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
+\]
+
+---
+
+如果你想，我可以把这个过程画成图，或者用代码形式展示训练过程。你更想看哪种形式？
+
+### Parameterization of $\beta_t$
+
 ## Appendix
 
 这里汇总了要想更完整了解整个diffusion models的内容需要的小的基础知识点。
@@ -437,7 +833,7 @@ $$
 
 > In mathematics, an expression or formula (including equations and inequalities) is in closed form if it is formed with constants, variables, and a set of functions considered as basic and connected by arithmetic operations (+, −, ×, /, and integer powers) and function composition.
 >
-> -- Wikipedia
+> — <cite>Wikipedia [^wiki_closed]</cite>
 
 简单来说，就是可以用有限的、明确的数学表达式直接写出来解，不需要迭代、数值近似或求解方程。
 
@@ -532,6 +928,8 @@ $$
 \end{align}
 $$
 
+TODO：添加个转换为期望形式的表达方式
+
 这里：
 
 - $P$ 是“真实”分布（或目标分布）。
@@ -569,3 +967,5 @@ $$
 [^ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** “Denoising Diffusion Probabilistic Models.” _Advances in Neural Information Processing Systems_, edited by H. Larochelle et al., vol. 33, Curran Associates, Inc., 2020, pp. 6840–6851. https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
 
 [^lilian_ae]: **Weng, Lilian.** “From Autoencoder to Beta-VAE.” _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
+
+[^wiki_closed]: “Closed-form Expression.” _Wikipedia_, Wikimedia Foundation, https://en.wikipedia.org/wiki/Closed-form_expression.
