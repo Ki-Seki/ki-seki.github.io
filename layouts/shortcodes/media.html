@@ -33,11 +33,7 @@
   {{/* Image */}}
   <img src="{{ $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
 
-{{- else -}}
-  {{/* Fallback for other types */}}
-  <div>
-    <p>Unsupported asset type: {{ $src }}</p>
-  </div>
+
 {{- end -}}
 
 {{- if $caption -}}
