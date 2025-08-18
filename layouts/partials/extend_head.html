@@ -21,3 +21,11 @@
 {{- /* Load admonition JavaScript */ -}}
 {{- $admonitionJS := resources.Get "js/admonition.js" | minify }}
 <script src="{{ $admonitionJS.RelPermalink }}"></script>
+
+{{- /* Load Mermaid for diagrams */ -}}
+{{ if .Page.Store.Get "hasMermaid" }}
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+</script>
+{{ end }}
