@@ -7,7 +7,7 @@ summary: ''
 tags: ["Life", "Philosophy"]
 ---
 
-{{< media 
+{{< media
 src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Maslow%27s_Hierarchy_of_Needs_Diagram.png"
 caption="马斯洛需求层次理论图示 from [wikipedia](https://en.wikipedia.org/wiki/Maslow%27s_hierarchy_of_needs)"
 >}}
@@ -66,7 +66,6 @@ AI 时代机会太多了，每天都能诞生无数的新点子。但是生命�
 - 先知后行，知行合一。平时记录自认为不正确的习惯。对于每一个记录，克服三次即算作成功。
 - 正视自己想要什么，不想要什么，把原因直接写下来，确保自己顺利实施。尽量不找借口，但不说借口就没有办法顺遂内心时，便顺势而为。
 
-
 ## 自我实现的底层逻辑
 
 - 第一性原则。不需要刻意寻求保研，想清楚自己这辈子到底想做什么。我想有一个不那么累又可以赚到差不多工资的开发管理岗。研究生是我的跳板，不要把工具当做目的。从我的人生规划，入党动机，基层党组织的工作内容上来看，我并不适合入党。
@@ -96,6 +95,6 @@ AI 时代机会太多了，每天都能诞生无数的新点子。但是生命�
 
 ## References
 
-[^xue]: **薛兆丰.** _薛兆丰经济学讲义_. 中信出版社, 2018.
+[^xue]: **薛兆丰.** *薛兆丰经济学讲义*. 中信出版社, 2018.
 
-[^kong]: **孔雨晴**. “汉字加减的‘魔法’：青+玉=？疼-痛=？” _麦金太尔街1844号_, 2 June 2025, http://1844mcintyre.com/blog/blog.html. Accessed 17 Aug. 2025.
+[^kong]: **孔雨晴**. “汉字加减的‘魔法’：青+玉=？疼-痛=？” *麦金太尔街1844号*, 2 June 2025, http://1844mcintyre.com/blog/blog.html. Accessed 17 Aug. 2025.

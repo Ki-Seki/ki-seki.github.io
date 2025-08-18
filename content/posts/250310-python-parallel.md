@@ -29,7 +29,7 @@ graph TD
     C1 --> C1_2[协程 Coroutine]
     C1 --> C1_3[事件循环 Event Loop]
     C1 --> C1_4[任务 Task]
-    
+
     C1_1 --> C1_1_note["任务执行时不会阻塞线程，可以继续处理其他任务"]
     C1_2 --> C1_2_note["轻量级线程，由程序自身调度，通常在单线程内实现异步并发"]
     C1_3 --> C1_3_note["调度异步任务的循环机制，例如 Python 的 asyncio"]
@@ -40,7 +40,7 @@ graph TD
     C2 --> C2_1[多线程 Thread]
     C2 --> C2_2[多进程 Process]
     C2 --> C2_3[CPU核心 Core]
-    
+
     C2_1 --> C2_1_note["同一进程内的多个执行单元"]
     C2_2 --> C2_2_note["操作系统分配资源的基本单位，每个进程独立"]
     C2_3 --> C2_3_note["并行执行能力通常受 CPU 核心数量限制"]
@@ -65,6 +65,7 @@ graph TD
      ```text
      A -> B -> A 等待 B 完成
      ```
+
    * **异步**：调用方发出请求后可以继续执行，不必等待操作完成；完成后会有回调或通知。
 
      ```text
@@ -75,12 +76,13 @@ graph TD
 
    * **串行**：任务按顺序执行，一次只做一个任务。
 
-     ```
+     ```text
      任务1 → 任务2 → 任务3
      ```
+
    * **并发**：在同一个时间段内处理多个任务，但不一定是同时执行，多任务交替进行（时间片切换）。
 
-     ```
+     ```text
      任务1 |----|
      任务2   |----|
      ```
@@ -88,7 +90,7 @@ graph TD
      并发强调“同时进行”概念，但在单核 CPU 上实际上是交替执行。
    * **并行**：多任务在同一时间点真正同时执行，需要多核或多 CPU 支持。
 
-     ```
+     ```text
      核心1: 任务1
      核心2: 任务2
      ```
@@ -123,7 +125,7 @@ graph TD
 
 ## 3️⃣ 包含关系（层次图）
 
-```
+```text
 执行单位:
     进程(Process)
         └── 线程(Thread)
@@ -133,7 +135,7 @@ graph TD
     串行(Serial)
     并发(Concurrent)
         └── 并行(Parallel)   # 并行是并发的一种特殊情况
-     
+
 调用模式:
     同步(Synchronous)
     异步(Asynchronous)
@@ -161,7 +163,6 @@ graph TD
 如果你愿意，我可以帮你画一个**一张图把这些概念和包含关系全部可视化**，一眼就能看懂它们的层次和交叉关系。
 
 你希望我画吗？
-
 
 ## 高层抽象与基本任务启动
 
@@ -346,22 +347,22 @@ time.sleep(5)
 
 ### 池模型
 
-- 应用：线程池与进程池 (如上例 ThreadPoolExecutor / ProcessPoolExecutor)
-- 优点：自动管理工作者线程/进程，调控并发数量
+* 应用：线程池与进程池 (如上例 ThreadPoolExecutor / ProcessPoolExecutor)
+* 优点：自动管理工作者线程/进程，调控并发数量
 
 ### 锁模型
 
-- 应用：线程或进程间对共享资源的访问控制
-- 同步工具：Lock, RLock, Semaphore, Condition
+* 应用：线程或进程间对共享资源的访问控制
+* 同步工具：Lock, RLock, Semaphore, Condition
 
 ### 生产者-消费者模型
 
-- 应用：任务调度，资源分配等场景 (参见上面的 producer_consumer 示例)
+* 应用：任务调度，资源分配等场景 (参见上面的 producer_consumer 示例)
 
 ### 事件通知模型
 
-- 应用：线程之间的等待与通知
-- 工具：Event, Condition
+* 应用：线程之间的等待与通知
+* 工具：Event, Condition
 
 ```python
 import threading
@@ -385,7 +386,7 @@ thread.join()
 
 ### 管道通信模型（适用于 multiprocessing）
 
-- 管道与队列在多进程间传递数据
+* 管道与队列在多进程间传递数据
 
 ```python
 from multiprocessing import Process, Pipe
@@ -410,7 +411,7 @@ if __name__ == "__main__":
 
 ### 共享内存模型（适用于 multiprocessing）
 
-- 使用 `multiprocessing.Value` 与 `multiprocessing.Array` 来分享内存数据
+* 使用 `multiprocessing.Value` 与 `multiprocessing.Array` 来分享内存数据
 
 ```python
 from multiprocessing import Process, Value, Array
@@ -435,10 +436,10 @@ if __name__ == "__main__":
 
 本教程对 Python 多线程与多进程编程进行了快速入门和常见问题的讨论，主要涵盖了：
 
-- 如何直接启动线程与进程
-- 线程池与进程池模型的使用（`submit` 与 `map` 等方法）
-- 竞态条件、死锁和饥饿现象的解决方案
-- 典型模型，包括池模型、锁模型、生产者-消费者、事件通知、管道通信以及共享内存
+* 如何直接启动线程与进程
+* 线程池与进程池模型的使用（`submit` 与 `map` 等方法）
+* 竞态条件、死锁和饥饿现象的解决方案
+* 典型模型，包括池模型、锁模型、生产者-消费者、事件通知、管道通信以及共享内存
 
 “线程安全”（**thread-safe**）指的是一个函数或代码片段在 **多线程环境下被同时调用时仍能正确工作**，不会出现数据混乱、状态错乱或不可预测的行为。
 

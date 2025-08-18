@@ -191,7 +191,7 @@ $$
 
 $$
 \begin{align}
-p(x) 
+p(x)
 & = \mathcal{N}(x; \mu, \sigma^2) \\
 & = \frac{1}{\sqrt{2\pi\sigma^2}} \; \exp\!\left( -\frac{(x - \mu)^2}{2\sigma^2} \right) \\
 & \propto \exp\!\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)
@@ -301,12 +301,12 @@ $$
 {{< admonition type=quote title="从零推导 varational lower bound">}}
 $$
 \begin{aligned}
-\mathord{-} \log p_\theta(\mathbf{x}_0) 
+\mathord{-} \log p_\theta(\mathbf{x}_0)
 &\leq - \log p_\theta(\mathbf{x}_0) + D_\text{KL}(q(\mathbf{x}_{1:T}\vert\mathbf{x}_0) \| p_\theta(\mathbf{x}_{1:T}\vert\mathbf{x}_0) ) & \small{\text{; KL is non-negative}}\\
 &= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T}) / p_\theta(\mathbf{x}_0)} \Big] \\
 &= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} + \log p_\theta(\mathbf{x}_0) \Big] \\
 &= \mathbb{E}_q \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
-\text{Let }L_\text{VLB} 
+\text{Let }L_\text{VLB}
 &= \mathbb{E}_{q(\mathbf{x}_{0:T})} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \geq - \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0)
 \end{aligned}
 $$
@@ -344,7 +344,7 @@ $$
 对应于ddpm，RHS即为variational lower bound / ELBO：
 
 $$
-\log p_\theta(x) 
+\log p_\theta(x)
 \geq \mathbb{E}_{q(z \mid x)} \left[ \log \frac{p_\theta(x, z)}{q(z \mid x)} \right]
 $$
 
@@ -355,7 +355,7 @@ $$
 {{< admonition type="quote" title="展开" >}}
 $$
 \begin{aligned}
-L_\text{VLB} 
+L_\text{VLB}
 &= \mathbb{E}_{q(\mathbf{x}_{0:T})} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
 &= \mathbb{E}_q \Big[ \log\frac{\prod_{t=1}^T q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{ p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t) } \Big] \\
 &= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=1}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} \Big] \\
@@ -409,6 +409,7 @@ p_\theta(\mathbf{x}_{0:T}) = p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\math
 D_\text{KL}(q \parallel p) = \mathbb{E}_q \left[ \log \frac{q}{p} \right]
 \]
 从而将损失函数拆解为三部分：
+
 - \( L_T \): 终点分布匹配（高斯先验）
 - \( L_{t-1} \): 每一步的去噪匹配
 - \( L_0 \): 最终重构项
@@ -488,7 +489,6 @@ VLB 被拆成三部分：
    \]
    约束最终生成结果与原始图像接近。
 
-
 {{< admonition type="quote" >}}
 $$
 \begin{aligned}
@@ -509,6 +509,7 @@ LT 和 L0 不用计算
 🧊 为什么 \( L_T = D_{\text{KL}}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \) 可以不计算？
 
 ✅ 原因一：它是一个常数项
+
 - \( q(\mathbf{x}_T \vert \mathbf{x}_0) \) 是一个高斯分布，其均值和方差是固定的（由噪声调度决定）。
 - \( p_\theta(\mathbf{x}_T) \) 是标准高斯 \( \mathcal{N}(0, I) \)，也不依赖模型参数。
 - 所以它们之间的 KL 散度是一个 **解析可计算的常数**，不影响梯度优化。
@@ -520,6 +521,7 @@ LT 和 L0 不用计算
 🎯 为什么 \( L_0 = -\log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \) 可以不计算？
 
 ✅ 原因一：它被近似为 t=1 时的 denoising loss
+
 - 原始的重构项 \( L_0 \) 是从 \( \mathbf{x}_1 \) 预测 \( \mathbf{x}_0 \)，但这项在训练中会带来较高的方差。
 - 所以很多实现（如 DDPM）将其近似为：
   \[
@@ -528,6 +530,7 @@ LT 和 L0 不用计算
   或直接用 t=1 的 denoising KL 来代替。
 
 ✅ 原因二：它可以合并进统一的 denoising loss 框架
+
 - 在实际训练中，我们从 \( t \sim \text{Uniform}(1, T) \) 采样一个时间步，然后优化：
   \[
   \mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}} \left[ \left\| \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \right\|^2 \right]
@@ -565,11 +568,11 @@ $$
 {{< admonition type="quote" title="Title" open=true >}}
 $$
 \begin{aligned}
-L_t 
+L_t
 &= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{1}{2 \| \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) \|^2_2} \| \color{blue}{\tilde{\boldsymbol{\mu}}_t(\mathbf{x}_t, \mathbf{x}_0)} - \color{green}{\boldsymbol{\mu}_\theta(\mathbf{x}_t, t)} \|^2 \Big] \\
 &= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{1}{2  \|\boldsymbol{\Sigma}_\theta \|^2_2} \| \color{blue}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)} - \color{green}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t) \Big)} \|^2 \Big] \\
 &= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_\theta \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\|^2 \Big] \\
-&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_\theta \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] 
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_\theta \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big]
 \end{aligned}
 $$
 {{< /admonition >}}
@@ -589,7 +592,6 @@ $$
 L_t = \frac{1}{2} \left[ \log \frac{|\Sigma_q|}{|\Sigma_q|} - d + \text{tr}(\Sigma_q^{-1} \Sigma_q) + (\mu_q - \mu_\theta)^T \Sigma_q^{-1} (\mu_q - \mu_\theta) \right]
 = \frac{1}{2 \sigma_q^2} \|\mu_q - \mu_\theta\|^2
 \]
-
 
 展开后其实刚好还是典型的mse error：$\text{MSE}=?$
 
@@ -624,7 +626,7 @@ $$
 ...
 
 $$
-\mathbf{s}_\theta(\mathbf{x}_t, t) 
+\mathbf{s}_\theta(\mathbf{x}_t, t)
 \approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
 = \mathbb{E}_{q(\mathbf{x}_0)} [\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x}_0)]
 = \mathbb{E}_{q(\mathbf{x}_0)} \Big[ - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}} \Big]
@@ -655,6 +657,7 @@ x_{t+1} = x_t + \frac{\delta}{2} \nabla_x \log p(x_t) + \sqrt{\delta} \cdot \eps
 🧊 问题：数据集中在低维流形上怎么办？
 
 根据 manifold hypothesis，真实数据 \(x\) 虽然在高维空间中，但其实集中在一个低维子空间上。这导致：
+
 - 在数据密度低的区域，score 估计不准。
 - Langevin dynamics 可能会“走偏”，因为梯度估计不可靠。
 
@@ -663,6 +666,7 @@ x_{t+1} = x_t + \frac{\delta}{2} \nabla_x \log p(x_t) + \sqrt{\delta} \cdot \eps
 💡 解决方案：加入噪声 + 多尺度训练
 
 Song & Ermon 提出：
+
 1. **加入不同强度的高斯噪声**：让数据分布变得更“满”，覆盖整个空间。
 2. **训练一个 Noise-Conditioned Score Network**：记作 \(s_\theta(x, \sigma)\)，它能估计不同噪声水平下的 score：
    \[
@@ -719,6 +723,7 @@ p(x) = \mathcal{N}(x; \mu, \sigma^2 I)
 🧭 什么是 \(\mathbb{R}^D\) 空间？
 
 这是一个 **D维欧几里得空间**，也就是所有长度为 \(D\) 的实数向量组成的空间。比如：
+
 - \(\mathbb{R}^2\)：二维平面
 - \(\mathbb{R}^3\)：三维空间
 - \(\mathbb{R}^{512}\)：比如图像的潜在表示空间
@@ -730,6 +735,7 @@ p(x) = \mathcal{N}(x; \mu, \sigma^2 I)
 🧮 为什么要计算梯度 \(\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)\)？
 
 这是所谓的 **score function**，表示在某个点 \(\mathbf{x}_t\) 上，数据分布的对数密度的梯度。它的作用是：
+
 - 指出“数据分布上升最快的方向”
 - 可以用来进行 **Langevin dynamics** 采样
 - 在扩散模型中，它帮助我们从噪声中“走回”真实数据分布
@@ -761,7 +767,7 @@ q(\tilde{\mathbf{x}} \vert \mathbf{x}) = \mathcal{N}(\tilde{\mathbf{x}}; \mathbf
 你写的这组公式：
 
 \[
-\mathbf{s}_\theta(\mathbf{x}_t, t) 
+\mathbf{s}_\theta(\mathbf{x}_t, t)
 \approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
 = \mathbb{E}_{q(\mathbf{x}_0)} [\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x}_0)]
 = \mathbb{E}_{q(\mathbf{x}_0)} \Big[ - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}} \Big]
@@ -769,6 +775,7 @@ q(\tilde{\mathbf{x}} \vert \mathbf{x}) = \mathcal{N}(\tilde{\mathbf{x}}; \mathbf
 \]
 
 是 **扩散模型中 score function 的近似表达式**，其中：
+
 - \(\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\) 是神经网络预测的噪声
 - \(\bar{\alpha}_t = \prod_{s=1}^t \alpha_s\)，是前向过程的累计衰减因子
 - 最后一行是因为我们用 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\) 来生成 \(\mathbf{x}_t\)，所以可以反推 score
@@ -784,6 +791,7 @@ q(\tilde{\mathbf{x}} \vert \mathbf{x}) = \mathcal{N}(\tilde{\mathbf{x}}; \mathbf
 \mathcal{L}_{\text{simple}} = \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}, t} \left[ \left\| \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \right\|^2 \right]
 \]
 也就是说：
+
 - 我们知道 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\)
 - 所以我们知道真实的 \(\boldsymbol{\epsilon}\)
 - 训练目标就是让网络预测的 \(\boldsymbol{\epsilon}_\theta\) 尽量接近真实的 \(\boldsymbol{\epsilon}\)
@@ -815,7 +823,7 @@ Diffusion models in their experiments showed high-quality samples but still coul
 
 这是对最终加噪结果是否接近标准高斯的约束。
 
-- **计算方式**：  
+- **计算方式**：
  由于 \( q(x_T | x_0) \sim \mathcal{N}(\sqrt{\bar{\alpha}_T} x_0, (1 - \bar{\alpha}_T) I) \)，而 \( p(x_T) \sim \mathcal{N}(0, I) \)，两个都是高斯分布，KL 散度可以解析计算：
 
   \[
@@ -879,7 +887,7 @@ Diffusion models in their experiments showed high-quality samples but still coul
 如果你想我帮你写出 PyTorch 代码来估计这三项，或者推导某一项的 KL 散度公式，我可以继续展开。你对哪一项最感兴趣？
 
 {{% admonition type="quote" title="Comparison of linear and cosine-based scheduling of $\beta_t$ during training" open=true %}}
-![](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/diffusion-beta.png)
+![Comparison](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/diffusion-beta.png)
 {{% /admonition %}}
 
 在 **linear variance schedule** 中，我们定义每一步的噪声强度为：
@@ -889,6 +897,7 @@ Diffusion models in their experiments showed high-quality samples but still coul
 \]
 
 其中：
+
 - \( \beta_{\text{min}} \) 和 \( \beta_{\text{max}} \) 是预设的最小和最大噪声值（例如 0.0001 和 0.02）
 - \( T \) 是总的扩散步数（例如 1000）
 
@@ -993,7 +1002,6 @@ time-averaging smoothed version of $L_\text{VLB}$ with importance sampling.
 {{% /admonition %}}
 
 根据Improved DDPM [^nichol_improved_ddpm]，这里的公式是：
-
 
 ![alt text](/posts/image-1.png)
 
@@ -1100,10 +1108,10 @@ $$
 f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \; \exp\!\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)
 $$
 
-* $\mu$：均值（mean），决定分布的中心位置
-* $\sigma$：标准差（standard deviation），决定分布的宽度
-* $\sigma^2$：方差（variance）
-* $\exp(\cdot)$：自然指数函数 $e^x$
+- $\mu$：均值（mean），决定分布的中心位置
+- $\sigma$：标准差（standard deviation），决定分布的宽度
+- $\sigma^2$：方差（variance）
+- $\exp(\cdot)$：自然指数函数 $e^x$
 
 其累积分布函数（CDF, Cumulative Distribution Function）为：
 
@@ -1111,7 +1119,7 @@ $$
 F(x) = P(X \le x) = \frac{1}{2} \left[ 1 + \operatorname{erf} \!\left( \frac{x - \mu}{\sigma\sqrt{2}} \right) \right]
 $$
 
-* $\operatorname{erf}(\cdot)$：误差函数（error function），是无法用初等函数表示的积分函数，定义为
+- $\operatorname{erf}(\cdot)$：误差函数（error function），是无法用初等函数表示的积分函数，定义为
 
 $$
 \operatorname{erf}(z) = \frac{2}{\sqrt{\pi}} \int_{0}^{z} e^{-t^2} \, dt
@@ -1132,7 +1140,7 @@ $$
 $$
 \begin{align}
 \mathbf{x}_t &\sim \mathcal{N}(\sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I}) \\
-q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) &= f(\mathbf{x}_t) 
+q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) &= f(\mathbf{x}_t)
 \end{align}
 $$
 
@@ -1161,6 +1169,7 @@ $$
 $$
 
 {{< details "PyTorch代码示例">}}
+
 ```python
 import torch
 
@@ -1180,6 +1189,7 @@ loss.backward()
 print("grad mu:", mu.grad)
 print("grad log_sigma:", log_sigma.grad)
 ```
+
 {{< /details >}}
 
 ### 扩散模型前向和反向的记法
