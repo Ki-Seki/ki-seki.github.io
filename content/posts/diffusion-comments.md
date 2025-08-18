@@ -942,16 +942,70 @@ Diffusion models in their experiments showed high-quality samples but still coul
 ### Parameterization of reverse process variance $\boldsymbol{\Sigma}_\theta$
 
 {{% admonition type="quote" title="Title" open=true %}}
+$$
 \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) = \exp(\mathbf{v} \log \beta_t + (1-\mathbf{v}) \log \tilde{\beta}_t)
+$$
 {{% /admonition %}}
 
 recall 之前计算simplification of L_VLB的时候，DDPM原论文 [^ho_ddpm] 是把这个weight 系数丢掉了，这里，OpenAI的Nichol 的论文 [^nichol_improved_ddpm] 对这里再次改进，既不去掉这个，仍然参与优化。
+
+你的问题非常好，咱们来逐步拆解这个公式：
+
+🧠 公式回顾
+
+你提到的是：
+
+$$
+\boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) = \exp(\mathbf{v} \log \beta_t + (1-\mathbf{v}) \log \tilde{\beta}_t)
+$$
+
+这是在 DDPM 的改进版本中（如 Nichol & Dhariwal 2021）用于建模反向过程的协方差矩阵（对角形式）的参数化方式。
+
+---
+
+❓ 为什么是 vector？
+
+- 这里的 **$\mathbf{v}$ 是一个向量**，通常是模型输出的一个“mixing coefficient”，用于在 $\log \beta_t$ 和 $\log \tilde{\beta}_t$ 之间做逐元素插值。
+- 也就是说，模型不是输出一个标量，而是输出一个和图像维度一样的向量（比如每个像素一个值），来控制每个维度上的方差大小。
+
+这是一种 **learned per-dimension variance interpolation**，比直接用 $\beta_t$ 或 $\tilde{\beta}_t$ 更灵活。
+
+---
+
+🔍 为什么用 exp？
+
+- 因为 $\log \beta_t$ 和 $\log \tilde{\beta}_t$ 是在 log-space 做插值，最后要回到原始空间（即方差空间），所以需要用 $\exp$。
+- 这是一个常见的技巧：在 log-space 插值可以避免数值不稳定（比如 $\beta_t$ 很小），而 exp 可以恢复原始尺度。
+
+---
+
+📉 $\beta_t$ 是不是向量？
+
+- **不是**，$\beta_t$ 和 $\tilde{\beta}_t$ 都是标量（每个时间步一个值）。
+- 但由于 $\mathbf{v}$ 是一个向量，插值结果是一个向量，所以 $\boldsymbol{\Sigma}_\theta$ 最终也是一个向量（表示对角协方差矩阵的每个元素）。
+
+---
+
+🧩 总结一下：
+
+| 项目 | 类型 | 含义 |
+|------|------|------|
+| $\beta_t$ | scalar | forward noise schedule |
+| $\tilde{\beta}_t$ | scalar | posterior variance |
+| $\mathbf{v}$ | vector | 模型输出的 mixing coefficient |
+| $\boldsymbol{\Sigma}_\theta$ | vector | 每个维度的预测方差（对角协方差） |
+
+这个设计的好处是：**既保留了 $\beta_t$ 和 $\tilde{\beta}_t$ 的物理意义，又允许模型在每个维度上灵活调整方差，从而提升生成质量。**
+
+---
+
+如果你想深入探讨 $\mathbf{v}$ 的训练方式、它的分布、或者它在 U-Net 中是怎么被预测出来的，我可以继续展开。你也可以问我它和 $\epsilon_\theta$ 的关系，或者它在 loss function 中是否有梯度传播。你想继续往哪个方向挖掘？
 
 {{% admonition type="quote" title="Title" open=true %}}
 noisy gradients
 {{% /admonition %}}
 
-这是出自openai的论文 An Empirical Model of Large-Batch Training[^mccandlish_grad_noise] 提出的一个指标
+这是出自openai的论文 An Empirical Model of Large-Batch Training[^mc_candlish_grad_noise] 提出的一个指标
 
 Gradient Noise Scale（梯度噪声尺度）是一个用于衡量优化过程中梯度稳定性的统计指标，尤其在深度学习中用于估计**最优批量大小（optimal batch size）**。
 
@@ -1009,6 +1063,74 @@ time-averaging smoothed version of $L_\text{VLB}$ with importance sampling.
 
 ![alt text](/posts/image-2.png)
 
+{{% admonition type="quote" title="Title" open=true %}}
+Comparison of negative log-likelihood of improved DDPM with other **likelihood-based generative models**
+{{% /admonition %}}
+
+你的理解已经非常接近了，我们来系统地梳理一下：
+
+📚 什么是“基于似然的生成模型”？
+
+所谓 **likelihood-based generative models**，指的是那些通过最大化数据的 **log-likelihood（对数似然）** 来训练的生成模型。也就是说，它们直接建模并优化：
+
+$$
+\log p_\theta(\mathbf{x})
+$$
+
+其中 $\mathbf{x}$ 是真实数据，$p_\theta$ 是模型定义的概率分布。
+
+---
+
+✅ 判断标准：是否优化 log-likelihood？
+
+你问得很关键：是不是只要优化方向是 log probability 的深度学习模型就算是“基于似然”的？
+
+答案是：
+
+- **基本是的**，但要注意：
+  - 模型必须显式地定义了一个概率分布 $p_\theta(\mathbf{x})$
+  - 并且训练目标是最大化这个分布对真实数据的 log-likelihood
+
+---
+
+🔍 举例说明
+
+| 模型类型 | 是否是 likelihood-based | 说明 |
+|----------|--------------------------|------|
+| **VAE** | ✅ 是 | 优化 ELBO，下界是 log-likelihood |
+| **Flow-based models** | ✅ 是 | 显式建模 $p_\theta(\mathbf{x})$，可精确计算 log-likelihood |
+| **Diffusion models** | ✅ 是 | 优化变分下界（VLB），近似最大化 log-likelihood |
+| **GANs** | ❌ 否 | 没有定义 $p_\theta(\mathbf{x})$，优化的是判别器 loss，不是 log-likelihood |
+| **Score-based models** | ✅ 是 | 虽然不直接建模 $p_\theta(\mathbf{x})$，但通过 score function $\nabla_x \log p(x)$ 间接建模 |
+
+---
+
+🧠 衍生理解：score-based 也是似然的一种
+
+Score-based models（如 NCSN、SDE-based diffusion）虽然不直接建模 $p(x)$，但它们建模的是：
+
+$$
+s_\theta(x) \approx \nabla_x \log p(x)
+$$
+
+这其实是对 log-likelihood 的梯度建模，也属于一种“基于似然”的方式，只不过是通过 score matching 来实现。
+
+---
+
+🧩 总结定义
+
+> **基于似然的生成模型**是指那些通过最大化或近似最大化数据的 log-likelihood 来训练的模型。它们通常显式或隐式地定义了一个概率分布，并以此为基础进行采样和优化。
+
+---
+
+如果你想进一步探讨：
+
+- 为什么 GAN 不属于这类模型？
+- 为什么 score function 能代表概率分布？
+- 或者 VAE 的 ELBO 和真实 log-likelihood 有什么差异？
+
+我可以继续展开。你想从哪个角度深入？
+
 ## Conditioned Generation
 
 {{% admonition type="quote" title="Title" open=true %}}
@@ -1018,6 +1140,217 @@ While training generative models on images with conditioning information such as
 其实就是今天我们常说的，文生图任务，之前的叫法很有学术味儿。
 
 ### Classifier Guided Diffusion
+
+{{% admonition type="quote" title="Title" open=true %}}
+$$
+\begin{aligned}
+\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t, y)
+&= \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t) + \nabla_{\mathbf{x}_t} \log q(y \vert \mathbf{x}_t) \\
+&\approx - \frac{1}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) + \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t) \\
+&= - \frac{1}{\sqrt{1 - \bar{\alpha}_t}} (\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) - \sqrt{1 - \bar{\alpha}_t} \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t))
+\end{aligned}
+$$
+{{% /admonition %}}
+
+这个是优化目标，就相当于在原本的ddpm网络头上加了一个分类器。
+
+第一行其实就是既要训练从噪声开始到真实图像的生成能力，还要加上从条件/类别到噪声的能力。
+
+第二行把他们都转换为了含learnable参数的形式。
+
+这个公式就是ADM-G。
+
+### Classifier-Free Guidance
+
+{{% admonition type="quote" title="Title" open=true %}}
+Inner content...
+{{% /admonition %}}
+
+🧠 Classifier-Free Guidance 全面总结
+
+1️⃣ 背景与动机
+
+传统的扩散模型引导方法（如 Classifier Guidance）依赖一个额外的分类器 \( f_\phi(y|x_t) \)，通过其梯度来引导生成过程。但这种方法存在：
+
+- 分类器容易被 adversarial prompt 误导；
+- 增加训练和推理复杂度；
+- 需要额外模型参数。
+
+**Classifier-Free Guidance** 提供了一种无需独立分类器的替代方案。
+
+---
+
+2️⃣ 核心思想
+
+使用一个统一的模型 \( \epsilon_\theta(x_t, t, y) \)，通过训练时随机丢弃条件 \( y \)，让模型同时学会：
+
+- 有条件生成：输入 \( y \)
+- 无条件生成：输入 \( y = \emptyset \)
+
+然后在推理时通过两种 score 的差值来模拟分类器梯度：
+
+\[
+\nabla_{x_t} \log p(y | x_t) = \nabla_{x_t} \log p(x_t | y) - \nabla_{x_t} \log p(x_t)
+\]
+
+近似为：
+
+\[
+\nabla_{x_t} \log p(y | x_t) \approx -\frac{1}{1 - \bar{\alpha}_t} \left( \epsilon_\theta(x_t, t, y) - \epsilon_\theta(x_t, t) \right)
+\]
+
+最终构造引导后的 score：
+
+\[
+\bar{\epsilon}_\theta(x_t, t, y) = (1 + w) \cdot \epsilon_\theta(x_t, t, y) - w \cdot \epsilon_\theta(x_t, t)
+\]
+
+其中 \( w \) 是引导强度。
+
+---
+
+3️⃣ 贝叶斯公式推导细节
+
+你指出的非常关键的一点：
+
+\[
+\log p(y | x_t) = \log p(x_t | y) + \log p(y) - \log p(x_t)
+\]
+
+对 \( x_t \) 求导后：
+
+\[
+\nabla_{x_t} \log p(y | x_t) = \nabla_{x_t} \log p(x_t | y) - \nabla_{x_t} \log p(x_t)
+\]
+
+其中 \( \nabla_{x_t} \log p(y) = 0 \)，因为 \( y \) 与 \( x_t \) 无关，是常数项。因此原文的推导是合理的。
+
+---
+
+4️⃣ 模型结构与参数共享
+
+- ✅ 只使用一个模型（一个参数集）
+- ✅ 条件信息 \( y \) 通过输入控制是否存在
+- ✅ 无需保留两套参数
+- ✅ 节省计算资源，简化部署
+
+训练时的策略：
+
+- 每个 batch 中，以一定概率将 \( y \) 替换为特殊 token（如空字符串或全零向量）
+- 模型学会在 \( y \) 存在与缺失两种情况下都能预测噪声
+
+---
+
+5️⃣ 条件输入的处理方式
+
+- \( y = \emptyset \) 并不是“随便输入点内容”，而是明确输入一个“空条件”标记；
+- 在文本任务中可以是空字符串、特殊 token；
+- 在图像任务中可以是全零 embedding；
+- 模型内部 embedding 层会处理这种情况。
+
+---
+
+ 6️⃣ 条件类型的多样性
+
+你问到是否只能训练在一种 \( y \) 上，答案是：
+
+- ❌ 不限于一种条件；
+- ✅ 可以训练在多种类别标签、文本描述、语义图等；
+- 只要训练数据覆盖充分，模型就能学会在整个 \( p(y) \) 分布上进行条件生成。
+
+---
+
+7️⃣ 实验验证与优势
+
+- GLIDE 模型对比了 CLIP Guidance 与 Classifier-Free Guidance；
+- 发现后者更稳定，图像质量与语义一致性更好；
+- 原因是 CLIP Guidance 容易被 adversarial prompt 误导，而 Classifier-Free Guidance 是从数据分布中直接建模。
+
+---
+
+✅ 总结表格
+
+| 项目 | Classifier-Free Guidance |
+|------|---------------------------|
+| 是否需要额外分类器 | ❌ 不需要 |
+| 参数数量 | ✅ 一套共享参数 |
+| 条件输入处理 | ✅ 随机丢弃条件训练 |
+| 是否支持多种条件类型 | ✅ 支持 |
+| 推理时引导方式 | ✅ 条件与无条件 score 差值 |
+| 贝叶斯公式是否完整 | ✅ 忽略常数项后是合理的 |
+| 实验效果 | ✅ FID 与 IS 平衡良好 |
+| 实践模型 | GLIDE、Imagen 等均采用 |
+
+{{% admonition type="quote" title="Title" open=true %}}
+Their experiments showed that classifier-free guidance can achieve a good balance between FID (distinguish between synthetic and generated images) and IS (quality and diversity).
+{{% /admonition %}}
+
+📊 FID（Fréchet Inception Distance）【论文：https://arxiv.org/abs/1706.08500】
+✅ 定义：
+FID 衡量的是生成图像与真实图像在特征空间中的分布差异。它使用 Inception 网络提取图像特征，然后计算两个高维高斯分布之间的 Fréchet 距离。
+
+✅ 公式：
+\[
+\text{FID} = \|\mu_r - \mu_g\|^2 + \text{Tr}(\Sigma_r + \Sigma_g - 2(\Sigma_r \Sigma_g)^{1/2})
+\]
+其中：
+
+- \( \mu_r, \Sigma_r \)：真实图像的均值和协方差
+- \( \mu_g, \Sigma_g \)：生成图像的均值和协方差
+✅ 解读：
+- FID 越低，表示生成图像与真实图像越接近；
+- 既考虑图像质量，也考虑分布一致性；
+- 对图像模糊、失真、模式崩溃（mode collapse）都很敏感。
+
+🌈 IS（Inception Score）【论文：https://arxiv.org/abs/1606.03498】
+
+✅ 定义：
+IS 衡量的是生成图像的“清晰度”和“多样性”。它使用 Inception 网络预测图像类别分布，然后计算预测分布的 KL 散度。
+
+✅ 公式：
+\[
+\text{IS} = \exp\left( \mathbb{E}_{x \sim p_g} \left[ D_{\text{KL}}(p(y|x) \| p(y)) \right] \right)
+\]
+其中：
+
+- \( p(y|x) \)：Inception 网络对生成图像的预测分布
+- \( p(y) \)：所有生成图像的平均预测分布
+
+ ✅ 解读：
+
+- IS 越高，表示图像清晰（预测分布熵低）且多样性高（平均分布熵高）；
+- 适合评估图像的“语义清晰度”和“类别覆盖度”；
+- 对图像模糊或重复生成同一类别非常敏感。
+
+🧪 在 Classifier-Free Guidance 中的作用
+
+- 实验表明，**适当的 guidance scale \( w \)** 可以在 FID 和 IS 之间取得良好平衡；
+- 太小的 \( w \)：图像多样性高但质量差（FID 高，IS 低）；
+- 太大的 \( w \)：图像质量高但容易模式崩溃（FID 低，IS 下降）；
+- 所以 Classifier-Free Guidance 的优势之一就是可以**灵活调节 \( w \)** 来控制这个 trade-off。
+
+{{% admonition type="quote" title="Title" open=true %}}
+The guided diffusion model, GLIDE ([Nichol, Dhariwal & Ramesh, et al. 2022](https://arxiv.org/abs/2112.10741)), explored both guiding strategies, CLIP guidance and classifier-free guidance, and found that the latter is more preferred. They hypothesized that it is because CLIP guidance exploits the model with adversarial examples towards the CLIP model, rather than optimize the better matched images generation.
+{{% /admonition %}}
+
+GLIDE 是一种引导式扩散模型（guided diffusion model），由 Nichol、Dhariwal 和 Ramesh 等人在 2022 年提出。它尝试了两种图像生成的引导策略：
+
+1. **CLIP guidance（CLIP 引导）**：利用 CLIP 模型的图文匹配能力来引导图像生成过程。
+2. **Classifier-free guidance（无分类器引导）**：不依赖外部分类器，而是通过训练一个模型同时学习有条件和无条件的图像生成，从而实现引导。
+
+GLIDE 的实验发现，**无分类器引导比 CLIP 引导更受欢迎**。他们的解释是：CLIP 引导可能会让生成模型“过度迎合”CLIP 模型的判断标准，甚至生成一些对 CLIP 模型“看起来很好”但实际上并不真实或合理的图像（这类图像可以被视为对 CLIP 的“对抗样本”）。换句话说，CLIP guidance 更像是在“讨好”CLIP 模型，而不是在真正优化图像与文本之间的匹配质量。
+
+🔍 简化理解：
+
+- 无分类器引导：模型自己学会怎么生成图像，不依赖外部判断。
+- CLIP 引导：模型依赖 CLIP 的评分，但可能会“作弊”去骗过 CLIP。
+- GLIDE 更偏好前者，因为它更自然、更稳健。
+
+## Speed up Diffusion Models
+
+### Fewer Sampling Steps & Distillation
+
+### Latent Variable Space
 
 ## Appendix
 
@@ -1275,6 +1608,45 @@ TODO：添加个转换为期望形式的表达方式
 | **交叉熵** | $H(p,q) = -\sum_i p(x_i) \log q(x_i)$                     | 衡量用 $q$ 表示 $p$ 的平均信息量       |
 | **相对熵** | $D_{KL}(p\|q) = \sum_i p(x_i) \log \frac{p(x_i)}{q(x_i)}$ | 衡量 $p$ 和 $q$ 的差异，多付出的信息量 |
 
+### Stein Score / Score Function
+
+这里我们用的是概率论中的概念
+
+“score function”（也叫 **Stein score function** 或简称 **score**）的提出最早可以追溯到统计学里的 **Fisher (1920s)**。
+
+具体脉络是这样的：
+
+- **Score function（得分函数）**
+  最经典的定义是统计学里对对数似然的梯度：
+
+  $$
+  s_\theta(x) = \nabla_\theta \log p_\theta(x)
+  $$
+
+  这个概念最早见于 **R.A. Fisher** 的极大似然估计理论中，大约 **1922 年 Fisher 发表的《On the Mathematical Foundations of Theoretical Statistics》** 就已经在用。
+  所以严格来说，**score function 是 Fisher 提出来的**。
+
+- **Stein score / Stein’s identity**
+  在概率论与函数分析中，后来 **Charles Stein** 在 1970 年代发展了 **Stein’s method**（1972 年论文《A bound for the error in the normal approximation to the distribution of a sum of dependent random variables》），提出了现在常用的“Stein identity”：
+
+  $$
+  \mathbb{E}_{p(x)}[\nabla_x \log p(x) f(x)] = - \mathbb{E}_{p(x)}[\nabla_x f(x)]
+  $$
+
+  其中的 $\nabla_x \log p(x)$ 就是所谓的 **Stein score function**。
+
+🔹 总结：
+
+- **Score function**（对数似然的梯度） → Fisher, 1922。
+- **Stein score / Stein’s identity**（基于分布的梯度特征） → Stein, 1972。
+
+要看你问的是哪一个语境：
+
+- 如果是统计学 MLE 里的 **score function**，源头是 **Fisher (1922)**。
+- 如果是概率论里用在 Stein’s method / score matching 的 **Stein score function**，源头是 **Stein (1972)**。
+
+要不要我帮你整理一条时间线（从 Fisher → Stein → Hyvärinen 的 score matching）？
+
 ## Citation
 
 {{< bibtex >}}
@@ -1285,7 +1657,7 @@ TODO：添加个转换为期望形式的表达方式
 
 [^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** “Improved Denoising Diffusion Probabilistic Models.” _Proceedings of the 38th International Conference on Machine Learning_, edited by Marina Meila and Tong Zhang, vol. 139, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. PMLR. https://proceedings.mlr.press/v139/nichol21a.html.
 
-[^mccandlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
+[^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
 
 [^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
