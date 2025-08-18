@@ -294,7 +294,7 @@ $$
 \end{aligned}
 $$
 
-这和原文不符合，其实也和原始的DDPM论文[^ddpm]中的计算也不符。我暂时认为我是对的。
+这和原文不符合，其实也和原始的DDPM论文[^ho_ddpm]中的计算也不符。我暂时认为我是对的。
 
 <!-- TODO: 最后回来再看看有什么其他理解的办法没有 -->
 
@@ -466,6 +466,29 @@ L_\text{VLB} = \mathbb{E}_q \left[ \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}
 - \( \mathbf{x}_{t-1} \sim q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \)，用于估计 denoising KL
 - \( \mathbf{x}_1 \sim q(\mathbf{x}_1 \vert \mathbf{x}_0) \)，用于估计重构项
 
+🔍 VLB 的具体拆解（参考 Ho et al. 2020 和 Nichol & Dhariwal 2021）
+
+VLB 被拆成三部分：
+
+1. **Prior Matching Term**：
+   \[
+   D_{\text{KL}}(q(x_T | x_0) \| p(x_T))
+   \]
+   约束最终加噪结果接近标准高斯。
+
+2. **Denoising Matching Term**：
+   \[
+   \sum_{t=2}^{T} D_{\text{KL}}(q(x_{t-1} | x_t, x_0) \| p_\theta(x_{t-1} | x_t))
+   \]
+   约束每一步的逆向去噪分布拟合真实分布。
+
+3. **Reconstruction Term**：
+   \[
+   -\mathbb{E}_{q(x_1 | x_0)}[\log p_\theta(x_0 | x_1)]
+   \]
+   约束最终生成结果与原始图像接近。
+
+
 {{< admonition type="quote" >}}
 $$
 \begin{aligned}
@@ -551,7 +574,24 @@ L_t
 $$
 {{< /admonition >}}
 
-典型的mse error：$\text{MSE}=?$
+这个公式的第一步，需要recall下KL散度中对两个分布的计算，相当于转换成了
+
+🔍 KL 散度展开（两高斯分布）
+
+假设两者都是高斯分布：
+
+- 真实后验：\( q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mu_q, \Sigma_q) \)
+- 模型估计：\( p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) = \mathcal{N}(\mu_\theta, \Sigma_q) \)
+
+那么 KL 散度为：
+
+\[
+L_t = \frac{1}{2} \left[ \log \frac{|\Sigma_q|}{|\Sigma_q|} - d + \text{tr}(\Sigma_q^{-1} \Sigma_q) + (\mu_q - \mu_\theta)^T \Sigma_q^{-1} (\mu_q - \mu_\theta) \right]
+= \frac{1}{2 \sigma_q^2} \|\mu_q - \mu_\theta\|^2
+\]
+
+
+展开后其实刚好还是典型的mse error：$\text{MSE}=?$
 
 \epsilon_\theta 符合均值为 x_t 方差为t的gaossian 分布。
 
@@ -577,11 +617,22 @@ $$
 
 左边是训练，右边是推理时的。
 
-{{% admonition type="quote" title="Title" open=true %}}
-Connection with noise-conditioned score networks (NCSN)
+{{% admonition type="quote" title="Connection with noise-conditioned score networks (NCSN)" open=true %}}
+
+[Song & Ermon (2019)](https://arxiv.org/abs/1907.05600) proposed a score-based generative modeling method where samples are produced via [Langevin dynamics](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#connection-with-stochastic-gradient-langevin-dynamics) using gradients of the data distribution estimated with score matching.
 
 ...
+
+$$
+\mathbf{s}_\theta(\mathbf{x}_t, t) 
+\approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
+= \mathbb{E}_{q(\mathbf{x}_0)} [\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x}_0)]
+= \mathbb{E}_{q(\mathbf{x}_0)} \Big[ - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}} \Big]
+= - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
+$$
 {{% /admonition %}}
+
+目的上来看，就是用求梯度的方式，来建模 $\mu_\theta$
 
 你问的这段关于 Noise-Conditioned Score Networks (NCSN) 的内容确实挺密的，咱们来一步步拆解一下它的核心逻辑和数学含义：
 
@@ -748,9 +799,267 @@ q(\tilde{\mathbf{x}} \vert \mathbf{x}) = \mathcal{N}(\tilde{\mathbf{x}}; \mathbf
 
 ### Parameterization of $\beta_t$
 
+{{% admonition type="quote" title="Title" open=true %}}
+Diffusion models in their experiments showed high-quality samples but still could not achieve competitive **model log-likelihood** as other generative models.
+
+[Nichol & Dhariwal (2021)](https://arxiv.org/abs/2102.09672) proposed several improvement techniques to help diffusion models to obtain lower **NLL**.
+{{% /admonition %}}
+
+这里提到的“model log-likelihood”（正方向目标），“NLL”（负方向目标）实际上就是我们想要优化的目标。
+
+其计算就是靠刚刚我们见到的的L_VLB。然后计算和训练的时候的采样一样，同样需要多次进行采样，来估计NLL，大致如下：
+
+当然，我们来逐项讲清楚扩散模型中三项 VLB 的 Monte Carlo 估计方式：
+
+1️⃣ Prior Matching Term：KL(q(x_T | x₀) || p(x_T))
+
+这是对最终加噪结果是否接近标准高斯的约束。
+
+- **计算方式**：  
+ 由于 \( q(x_T | x_0) \sim \mathcal{N}(\sqrt{\bar{\alpha}_T} x_0, (1 - \bar{\alpha}_T) I) \)，而 \( p(x_T) \sim \mathcal{N}(0, I) \)，两个都是高斯分布，KL 散度可以解析计算：
+
+  \[
+  D_{\text{KL}} = \frac{1}{2} \left[ \text{tr}(\Sigma_p^{-1} \Sigma_q) + (\mu_p - \mu_q)^T \Sigma_p^{-1} (\mu_p - \mu_q) - d + \log \frac{|\Sigma_p|}{|\Sigma_q|} \right]
+  \]
+
+  实际中直接代入均值和方差即可，不需要采样。
+
+2️⃣ Denoising Matching Term：KL(q(x_{t-1} | x_t, x₀) || p_θ(x_{t-1} | x_t))
+
+这是最核心的一项，约束模型预测的去噪分布是否接近真实分布。
+
+- **计算方式**：
+  对每个时间步 \( t \)，我们采样：
+
+  \[
+  x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)
+  \]
+
+  然后模型预测 \( \hat{\epsilon}_\theta(x_t, t) \)，我们用它恢复出模型的均值：
+
+  \[
+  \mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \hat{\epsilon}_\theta \right)
+  \]
+
+  而真实均值是：
+
+  \[
+  \mu_q(x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon \right)
+  \]
+
+  两者之间的 KL 散度简化为均值差的平方除以方差：
+
+  \[
+  \mathcal{L}_t = \frac{1}{2 \sigma_t^2} \| \mu_q - \mu_\theta \|^2 \propto \| \epsilon - \hat{\epsilon}_\theta(x_t, t) \|^2
+  \]
+
+  所以训练时只需采样 \( x_t \)，计算模型预测的噪声与真实噪声之间的 MSE。
+
+3️⃣ Reconstruction Term：−E_{q(x₁ | x₀)} [log p_θ(x₀ | x₁)]
+
+这是对最终生成结果是否接近原图的约束。
+
+- **计算方式**：
+  采样 \( x_1 \sim q(x_1 | x_0) \)，然后模型预测 \( p_\theta(x_0 | x_1) \)，通常建模为高斯分布：
+
+  \[
+  p_\theta(x_0 | x_1) = \mathcal{N}(x_0; \mu_\theta(x_1), \sigma^2 I)
+  \]
+
+  然后计算 log-likelihood：
+
+  \[
+  \mathcal{L}_0 = -\log p_\theta(x_0 | x_1) \propto \| x_0 - \mu_\theta(x_1) \|^2
+  \]
+
+  实践中这项可以近似为 t=1 时的 MSE 损失。
+
+---
+
+如果你想我帮你写出 PyTorch 代码来估计这三项，或者推导某一项的 KL 散度公式，我可以继续展开。你对哪一项最感兴趣？
+
+{{% admonition type="quote" title="Comparison of linear and cosine-based scheduling of $\beta_t$ during training" open=true %}}
+![](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/diffusion-beta.png)
+{{% /admonition %}}
+
+在 **linear variance schedule** 中，我们定义每一步的噪声强度为：
+
+\[
+\beta_t = \beta_{\text{min}} + \frac{t - 1}{T - 1} (\beta_{\text{max}} - \beta_{\text{min}})
+\]
+
+其中：
+- \( \beta_{\text{min}} \) 和 \( \beta_{\text{max}} \) 是预设的最小和最大噪声值（例如 0.0001 和 0.02）
+- \( T \) 是总的扩散步数（例如 1000）
+
+---
+
+🔁 闭式形式的 \( \bar{\alpha}_t \)
+
+我们定义：
+
+\[
+\alpha_t = 1 - \beta_t
+\quad \text{and} \quad
+\bar{\alpha}_t = \prod_{s=1}^t \alpha_s
+\]
+
+由于 \( \beta_t \) 是线性递增的，\( \alpha_t \) 是线性递减的，因此 \( \bar{\alpha}_t \) 是一连串乘积，虽然不能简化为一个完全闭式表达，但可以写成：
+
+\[
+\bar{\alpha}_t = \prod_{s=1}^t \left(1 - \beta_{\text{min}} - \frac{s - 1}{T - 1} (\beta_{\text{max}} - \beta_{\text{min}})\right)
+\]
+
+这个表达式是 **显式的 closed-form**，但仍然是一个乘积形式。在实际实现中，通常会预先计算所有 \( \bar{\alpha}_t \) 并缓存下来。
+
+---
+
+🧠 进一步简化（近似）
+
+如果你希望得到一个近似闭式表达，可以考虑将乘积转换为指数形式：
+
+\[
+\log \bar{\alpha}_t = \sum_{s=1}^t \log \alpha_s
+\quad \Rightarrow \quad
+\bar{\alpha}_t = \exp\left( \sum_{s=1}^t \log(1 - \beta_s) \right)
+\]
+
+这在数值计算中更稳定，也更容易处理。
+
+---
+
+如果你想我帮你用 Python 或 PyTorch 写出这个 linear schedule 的初始化代码，我可以直接给你模板。或者你想比较它和 cosine schedule 的图像，我也可以画出来。你想继续哪一方向？
+
+### Parameterization of reverse process variance $\boldsymbol{\Sigma}_\theta$
+
+{{% admonition type="quote" title="Title" open=true %}}
+\boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) = \exp(\mathbf{v} \log \beta_t + (1-\mathbf{v}) \log \tilde{\beta}_t)
+{{% /admonition %}}
+
+recall 之前计算simplification of L_VLB的时候，DDPM原论文 [^ho_ddpm] 是把这个weight 系数丢掉了，这里，OpenAI的Nichol 的论文 [^nichol_improved_ddpm] 对这里再次改进，既不去掉这个，仍然参与优化。
+
+{{% admonition type="quote" title="Title" open=true %}}
+noisy gradients
+{{% /admonition %}}
+
+这是出自openai的论文 An Empirical Model of Large-Batch Training[^mccandlish_grad_noise] 提出的一个指标
+
+Gradient Noise Scale（梯度噪声尺度）是一个用于衡量优化过程中梯度稳定性的统计指标，尤其在深度学习中用于估计**最优批量大小（optimal batch size）**。
+
+---
+
+🌪️ 定义与直觉
+
+在随机梯度下降（SGD）中，我们不是用整个数据集计算梯度，而是用一个小批量（mini-batch）。这会引入噪声，因为不同批次的梯度可能差异很大。
+
+**Gradient Noise Scale**衡量的就是这种梯度的波动性。它的核心思想是：
+
+> 如果梯度在不同批次之间变化很大（噪声高），我们需要更大的批量来获得更稳定的更新。
+
+---
+
+📐 数学表达
+
+在简化假设下（如 Hessian 是单位矩阵的倍数），Gradient Noise Scale 可以表示为：
+
+\[
+B_{\text{simple}} = \frac{\text{tr}(\Sigma)}{|G|^2}
+\]
+
+其中：
+
+- \(\text{tr}(\Sigma)\)：梯度协方差矩阵的迹，即所有梯度分量的方差之和。
+- \(|G|^2\)：梯度的平方范数（global gradient norm）。
+
+这个比值表示：**梯度的噪声强度相对于其平均强度的比例**。
+
+---
+
+🧠 实际意义
+
+- 如果 \(B_{\text{simple}}\) 很大，说明梯度噪声很强，建议使用更大的 batch size。
+- 如果它很小，说明梯度稳定，可以用较小的 batch size，加快训练。
+
+---
+
+🔍 应用场景
+
+- 自动调整 batch size（如在 Torch-Foresight 中使用）
+- 分析数据集复杂度：高噪声可能意味着数据分布复杂或模型不稳定
+- 优化训练效率：在资源受限时找到最合适的 batch size
+
+{{% admonition type="quote" title="Title" open=true %}}
+time-averaging smoothed version of $L_\text{VLB}$ with importance sampling.
+{{% /admonition %}}
+
+根据Improved DDPM [^nichol_improved_ddpm]，这里的公式是：
+
+
+![alt text](/posts/image-1.png)
+
+核心动机就是不同的t对应的L贡献度不同，想要消解掉magnitude的差异。
+
+![alt text](/posts/image-2.png)
+
+## Conditioned Generation
+
+{{% admonition type="quote" title="Title" open=true %}}
+While training generative models on images with conditioning information such as ImageNet dataset, it is common to generate samples conditioned on class labels or a piece of descriptive text.
+{{% /admonition %}}
+
+其实就是今天我们常说的，文生图任务，之前的叫法很有学术味儿。
+
+### Classifier Guided Diffusion
+
 ## Appendix
 
 这里汇总了要想更完整了解整个diffusion models的内容需要的小的基础知识点。
+
+### Notations
+
+- $\beta_t$ 是Noise variance schedule parameter，他对应一个variance schedule，$\{\beta_t \in (0, 1)\}_{t=1}^T$，和学习率调度是类似的.
+
+### 重要的diffusion相关的论文
+
+[1] Jascha Sohl-Dickstein et al. “Deep Unsupervised Learning using Nonequilibrium Thermodynamics.” ICML 2015.
+
+[2] Max Welling & Yee Whye Teh. “Bayesian learning via stochastic gradient langevin dynamics.” ICML 2011.
+
+[3] Yang Song & Stefano Ermon. “Generative modeling by estimating gradients of the data distribution.” NeurIPS 2019.
+
+[4] Yang Song & Stefano Ermon. “Improved techniques for training score-based generative models.” NeuriPS 2020.
+
+[5] Jonathan Ho et al. “Denoising diffusion probabilistic models.” arxiv Preprint arxiv:2006.11239 (2020). [code]
+
+[6] Jiaming Song et al. “Denoising diffusion implicit models.” arxiv Preprint arxiv:2010.02502 (2020). [code]
+
+[7] Alex Nichol & Prafulla Dhariwal. “Improved denoising diffusion probabilistic models” arxiv Preprint arxiv:2102.09672 (2021). [code]
+
+[8] Prafula Dhariwal & Alex Nichol. “Diffusion Models Beat GANs on Image Synthesis.” arxiv Preprint arxiv:2105.05233 (2021). [code]
+
+[9] Jonathan Ho & Tim Salimans. “Classifier-Free Diffusion Guidance.” NeurIPS 2021 Workshop on Deep Generative Models and Downstream Applications.
+
+[10] Yang Song, et al. “Score-Based Generative Modeling through Stochastic Differential Equations.” ICLR 2021.
+
+[11] Alex Nichol, Prafulla Dhariwal & Aditya Ramesh, et al. “GLIDE: Towards Photorealistic Image Generation and Editing with Text-Guided Diffusion Models.” ICML 2022.
+
+[12] Jonathan Ho, et al. “Cascaded diffusion models for high fidelity image generation.” J. Mach. Learn. Res. 23 (2022): 47-1.
+
+[13] Aditya Ramesh et al. “Hierarchical Text-Conditional Image Generation with CLIP Latents.” arxiv Preprint arxiv:2204.06125 (2022).
+
+[14] Chitwan Saharia & William Chan, et al. “Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding.” arxiv Preprint arxiv:2205.11487 (2022).
+
+[15] Rombach & Blattmann, et al. “High-Resolution Image Synthesis with Latent Diffusion Models.” CVPR 2022.code
+
+[16] Song et al. “Consistency Models” arxiv Preprint arxiv:2303.01469 (2023)
+
+[17] Salimans & Ho. “Progressive Distillation for Fast Sampling of Diffusion Models” ICLR 2022.
+
+[18] Ronneberger, et al. “U-Net: Convolutional Networks for Biomedical Image Segmentation” MICCAI 2015.
+
+[19] Peebles & Xie. “Scalable diffusion models with transformers.” ICCV 2023.
+
+[20] Zhang et al. “Adding Conditional Control to Text-to-Image Diffusion Models.” arxiv Preprint arxiv:2302.05543 (2023).
 
 ### GAN, VAE, and Flow-based models 是什么
 
@@ -962,9 +1271,13 @@ TODO：添加个转换为期望形式的表达方式
 
 ## References
 
-[^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
+[^ho_ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** “Denoising Diffusion Probabilistic Models.” _Advances in Neural Information Processing Systems_, edited by H. Larochelle et al., vol. 33, Curran Associates, Inc., 2020, pp. 6840–6851. https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
 
-[^ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** “Denoising Diffusion Probabilistic Models.” _Advances in Neural Information Processing Systems_, edited by H. Larochelle et al., vol. 33, Curran Associates, Inc., 2020, pp. 6840–6851. https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
+[^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** “Improved Denoising Diffusion Probabilistic Models.” _Proceedings of the 38th International Conference on Machine Learning_, edited by Marina Meila and Tong Zhang, vol. 139, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. PMLR. https://proceedings.mlr.press/v139/nichol21a.html.
+
+[^mccandlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
+
+[^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
 [^lilian_ae]: **Weng, Lilian.** “From Autoencoder to Beta-VAE.” _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
 
