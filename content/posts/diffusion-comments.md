@@ -275,42 +275,26 @@ p(\text{参数} | \text{数据}) = \frac{p(\text{数据} | \text{参数}) \cdot 
 \]
 
 
-#### Stein Score / Score Function
+#### Score Function
 
-这里我们用的是概率论中的概念
+在概率论和统计学中，**score function** 原本的定义是：
 
-“score function”（也叫 **Stein score function** 或简称 **score**）的提出最早可以追溯到统计学里的 **Fisher (1920s)**。
+$$
+s_\theta(x) = \nabla_\theta \log p_\theta(x)
+$$
 
-具体脉络是这样的：
+* 这是对**参数 θ 的对数似然函数**的梯度。
+* 在经典统计中，它用来做 **最大似然估计** 或 **Fisher 信息量计算**。
+* 直觉上，它告诉你“如果想让观测数据 x 更可能，应该如何调整模型参数 θ”。
 
-- **Score function（得分函数）**
-  最经典的定义是统计学里对对数似然的梯度：
+但是在 **diffusion 模型 / score-based generative model** 中，score function 被扩展为：
 
-  $$
-  s_\theta(x) = \nabla_\theta \log p_\theta(x)
-  $$
+$$
+s(x) = \nabla_x \log p(x)
+$$
 
-  这个概念最早见于 **R.A. Fisher** 的极大似然估计理论中，大约 **1922 年 Fisher 发表的《On the Mathematical Foundations of Theoretical Statistics》** 就已经在用。
-  所以严格来说，**score function 是 Fisher 提出来的**。
-
-- **Stein score / Stein’s identity**
-  在概率论与函数分析中，后来 **Charles Stein** 在 1970 年代发展了 **Stein’s method**（1972 年论文《A bound for the error in the normal approximation to the distribution of a sum of dependent random variables》），提出了现在常用的“Stein identity”：
-
-  $$
-  \mathbb{E}_{p(x)}[\nabla_x \log p(x) f(x)] = - \mathbb{E}_{p(x)}[\nabla_x f(x)]
-  $$
-
-  其中的 $\nabla_x \log p(x)$ 就是所谓的 **Stein score function**。
-
-🔹 总结：
-
-- **Score function**（对数似然的梯度） → Fisher, 1922。
-- **Stein score / Stein’s identity**（基于分布的梯度特征） → Stein, 1972。
-
-要看你问的是哪一个语境：
-
-- 如果是统计学 MLE 里的 **score function**，源头是 **Fisher (1922)**。
-- 如果是概率论里用在 Stein’s method / score matching 的 **Stein score function**，源头是 **Stein (1972)**。
+* 这里是对 **数据本身 x 的对数密度**求梯度。
+* 它告诉你**数据分布的上升方向**，也就是“哪里数据更可能出现”。
 
 ### 信息论
 
