@@ -31,7 +31,7 @@ math: true
 | $\bar{\alpha}_t$                                                                                                             | $\bar{\alpha}_t = \prod_{i=1}^t \alpha_i$，是为了公式书写方便而做的符号。                                                                                                                                                                                |
 | **Diffusion 过程**                                                                                                           |                                                                                                                                                                                                                                                          |
 | $q(\mathbf{x}_t \vert \mathbf{x}_{t-1})$                                                                                     | Forward diffusion process。构造高斯马尔可夫链，逐步加噪，破坏数据。                                                                                                                                                                                      |
-| $p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)$                                                                              | Reverse diffusion process。通过训练得到的模型恢复数据，从噪声中生成样本。即近似后验。                                                                                                                                                                    |
+| $p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)$                                                                              | Reverse diffusion process。通过训练得到的模型$\theta$恢复数据，从噪声中生成样本。即近似后验。                                                                                                                                                                    |
 
 ## What are Diffusion Models?
 
@@ -155,7 +155,7 @@ $$
 = \mu + \sigma \cdot \mathcal{N}(\epsilon; 0, 1)
 $$
 
-{{< details "PyTorch代码示例">}}
+PyTorch 代码示例：
 
 ```python
 import torch
@@ -177,7 +177,6 @@ print("grad mu:", mu.grad)
 print("grad log_sigma:", log_sigma.grad)
 ```
 
-{{< /details >}}
 
 #### 重要的diffusion相关的论文
 
@@ -275,6 +274,43 @@ P(A \vert B) = \frac{P(B \vert A) \cdot P(A)}{P(B)}
 p(\text{参数} | \text{数据}) = \frac{p(\text{数据} | \text{参数}) \cdot p(\text{参数})}{p(\text{数据})}
 \]
 
+
+#### Stein Score / Score Function
+
+这里我们用的是概率论中的概念
+
+“score function”（也叫 **Stein score function** 或简称 **score**）的提出最早可以追溯到统计学里的 **Fisher (1920s)**。
+
+具体脉络是这样的：
+
+- **Score function（得分函数）**
+  最经典的定义是统计学里对对数似然的梯度：
+
+  $$
+  s_\theta(x) = \nabla_\theta \log p_\theta(x)
+  $$
+
+  这个概念最早见于 **R.A. Fisher** 的极大似然估计理论中，大约 **1922 年 Fisher 发表的《On the Mathematical Foundations of Theoretical Statistics》** 就已经在用。
+  所以严格来说，**score function 是 Fisher 提出来的**。
+
+- **Stein score / Stein’s identity**
+  在概率论与函数分析中，后来 **Charles Stein** 在 1970 年代发展了 **Stein’s method**（1972 年论文《A bound for the error in the normal approximation to the distribution of a sum of dependent random variables》），提出了现在常用的“Stein identity”：
+
+  $$
+  \mathbb{E}_{p(x)}[\nabla_x \log p(x) f(x)] = - \mathbb{E}_{p(x)}[\nabla_x f(x)]
+  $$
+
+  其中的 $\nabla_x \log p(x)$ 就是所谓的 **Stein score function**。
+
+🔹 总结：
+
+- **Score function**（对数似然的梯度） → Fisher, 1922。
+- **Stein score / Stein’s identity**（基于分布的梯度特征） → Stein, 1972。
+
+要看你问的是哪一个语境：
+
+- 如果是统计学 MLE 里的 **score function**，源头是 **Fisher (1922)**。
+- 如果是概率论里用在 Stein’s method / score matching 的 **Stein score function**，源头是 **Stein (1972)**。
 
 ### 信息论
 
