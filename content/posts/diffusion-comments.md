@@ -18,21 +18,25 @@ math: true
 
 ### Notations
 
-| Category / Symbol                                                                                                            | Meaning                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **样本与分布**                                                                                                               |                                                                                                                                                                                                                                                          |
-| $\mathbf{x}_0$                                                                                                               | 一个真实数据样本，比如图像、语音或文本。是一个向量（例如图像的像素向量、文本的嵌入向量等），维度可能是几百甚至几千.                                                                                                                                      |
-| $\mathbf{x}_t, \, t = 1, 2, ..., T$                                                                                          | 对数据样本 $\mathbf{x}_0$ 进行逐步的加噪之后的结果，最终我们得到的 $\mathbf{x}_T$ 是一个纯噪声样本                                                                                                                                                       |
-| $q(\mathbf{x})$                                                                                                              | 在Diffusion相关论文中，为了表示方便，$q(\mathbf{x})$ 既可以表示概率密度函数（PDF），也可以是该PDF对应的分布。这里，$q(\mathbf{x})$ 是真实数据的分布，也叫经验分布，比如训练集中的图像分布。                                                              |
-| $\mathbf{x}_0 \sim q(\mathbf{x})$                                                                                            | 从真实数据分布 $q(\mathbf{x})$ 中采样得到的样本 $\mathbf{x}_0$                                                                                                                                                                                           |
-| $q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$ | 这里的$q(\mathbf{x}_t \vert \mathbf{x}_{t-1})$ 是概率密度函数. $\mathbf{x}_t \sim \mathcal{N}(\sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$  的正态分布， $q(\mathbf{x}_t \vert \mathbf{x}_{t-1})=f(\mathbf{x}_t)$，$f(\cdot)$ 是概率密度函数 |
-| **噪声超参数**                                                                                                               |                                                                                                                                                                                                                                                          |
-| $\beta_t$                                                                                                                    | Noise variance schedule parameter。超参数，他对应一个variance schedule，$\{\beta_t \in (0, 1)\}_{t=1}^T$，和学习率调度是类似的.                                                                                                                          |
-| $\alpha_t$                                                                                                                   | $\alpha_t = 1 - \beta_t$,是为了公式书写方便而做的符号。                                                                                                                                                                                                  |
-| $\bar{\alpha}_t$                                                                                                             | $\bar{\alpha}_t = \prod_{i=1}^t \alpha_i$，是为了公式书写方便而做的符号。                                                                                                                                                                                |
-| **Diffusion 过程**                                                                                                           |                                                                                                                                                                                                                                                          |
-| $q(\mathbf{x}_t \vert \mathbf{x}_{t-1})$                                                                                     | Forward diffusion process。构造高斯马尔可夫链，逐步加噪，破坏数据。                                                                                                                                                                                      |
-| $p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)$                                                                              | Reverse diffusion process。通过训练得到的模型$\theta$恢复数据，从噪声中生成样本。即近似后验。                                                                                                                                                            |
+| Category / Symbol                                                                                                                                                       | Meaning                                                                                                                                                                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **样本与分布**                                                                                                                                                          |                                                                                                                                                                                                                                                          |
+| $\mathbf{x}_0$                                                                                                                                                          | 一个真实数据样本，比如图像、语音或文本。是一个向量（例如图像的像素向量、文本的嵌入向量等），维度可能是几百甚至几千.                                                                                                                                      |
+| $\mathbf{x}_t, \, t = 1, 2, ..., T$                                                                                                                                     | 对数据样本 $\mathbf{x}_0$ 进行逐步的加噪之后的结果，最终我们得到的 $\mathbf{x}_T$ 是一个纯噪声样本                                                                                                                                                       |
+| $q(\mathbf{x})$                                                                                                                                                         | 在Diffusion相关论文中，为了表示方便，$q(\mathbf{x})$ 既可以表示概率密度函数（PDF），也可以是该PDF对应的分布。这里，$q(\mathbf{x})$ 是真实数据的分布，也叫经验分布，比如训练集中的图像分布。                                                              |
+| $\mathbf{x}_0 \sim q(\mathbf{x})$                                                                                                                                       | 从真实数据分布 $q(\mathbf{x})$ 中采样得到的样本 $\mathbf{x}_0$                                                                                                                                                                                           |
+| $q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$                                            | 这里的$q(\mathbf{x}_t \vert \mathbf{x}_{t-1})$ 是概率密度函数. $\mathbf{x}_t \sim \mathcal{N}(\sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$  的正态分布， $q(\mathbf{x}_t \vert \mathbf{x}_{t-1})=f(\mathbf{x}_t)$，$f(\cdot)$ 是概率密度函数 |
+| **噪声超参数**                                                                                                                                                          |                                                                                                                                                                                                                                                          |
+| $\beta_t$                                                                                                                                                               | Noise variance schedule parameter。超参数，他对应一个variance schedule，$\{\beta_t \in (0, 1)\}_{t=1}^T$，和学习率调度是类似的.                                                                                                                          |
+| $\alpha_t$                                                                                                                                                              | $\alpha_t = 1 - \beta_t$,是为了公式书写方便而做的符号。                                                                                                                                                                                                  |
+| $\bar{\alpha}_t$                                                                                                                                                        | $\bar{\alpha}_t = \prod_{i=1}^t \alpha_i$，是为了公式书写方便而做的符号。                                                                                                                                                                                |
+| **Diffusion 过程**                                                                                                                                                      |                                                                                                                                                                                                                                                          |
+| $q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$                                            | **Forward diffusion process 递推式**。构造高斯马尔可夫链，逐步加噪，破坏数据。                                                                                                                                                                           |
+| $q(\mathbf{x}_t \mid \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I})$                                     | **forward diffusion closed-form**，直接从数据一步得到噪声样本                                                                                                                                                                                            |
+| $q(\mathbf{x}_{t-1} \mid \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I})$ | **reverse diffusion 后验**，用于定义训练目标，约等于golden truth                                                                                                                                                                                         |
+| $p_\theta(\mathbf{x}_{t-1} \mid \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))$   | **reverse diffusion 似然**，通过训练模型去拟合上面的后验                                                                                                                                                                                                 |
+| $q(\mathbf{x}_T) = \mathcal{N}(\mathbf{x}_T; 0, I)$                                                                                                                     | **先验**，固定为高斯分布 $\mathcal{N}(0, I)$，推理时直接采样作为起点。                                                                                                                                                                                   |
+
 
 ## What are Diffusion Models?
 
@@ -155,7 +159,7 @@ $$
 - 高斯分布线性变换仍然保持高斯形式。
 - 这使得反向条件分布也可以近似为高斯分布，所以我们通常用高斯来建模反向过程。
 
-{{< admonition type=quote title="Reverse diffusion process 似然" >}}
+{{< admonition type=quote title="建模似然" >}}
 $$
 p_\theta(\mathbf{x}_{0:T}) = p(\mathbf{x}_T) \prod^T_{t=1} p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) \quad
 p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
@@ -167,15 +171,20 @@ $$
 由于我们把reverse diffusion process建模为了高斯分布，
 因此其可学习的参数就是高斯的均值和方差，$\boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)$. 
 
-让我们回顾下diffusion模型训练推理中涉及到的三个重要的分布。forward diffusion 生成噪声；后验产生神经网络的训练目标，即每一步reverse diffusion神经网络要学什么；reverse diffusion 似然就是真正用于拟合后验的，同时这个似然也是在模型推理时生成图片的过程。
+让我们看下diffusion模型训练推理中涉及到的四个重要的分布。
+forward diffusion 生成噪声；
+后验产生神经网络的训练目标，即每一步reverse diffusion神经网络要学什么；
+reverse diffusion 似然就是真正用于拟合后验的。
+根据先验，生成纯符合标准正态分布的噪声，交给拟合的reverse diffusion去噪，生成图像。
 
-| 分布                                                  | 作用                                                                             |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------- |
-| $q(\mathbf{x}_t \mid \mathbf{x}_0)$                   | **forward diffusion closed-form**，直接从数据加噪得到训练样本                    |
-| $q(\mathbf{x}_{t-1} \mid \mathbf{x}_t, \mathbf{x}_0)$ | **reverse diffusion 后验**，用于定义训练目标，约等于golden truth |
-| $p_\theta(\mathbf{x}_{t-1} \mid \mathbf{x}_t)$        | **reverse diffusion 似然**，通过训练模型去拟合上面的后验                     |
+| 分布                                                  | 作用                                                                   |
+| ----------------------------------------------------- | ---------------------------------------------------------------------- |
+| $q(\mathbf{x}_t \mid \mathbf{x}_0)$                   | **forward diffusion closed-form**，直接从数据加噪得到训练样本          |
+| $q(\mathbf{x}_{t-1} \mid \mathbf{x}_t, \mathbf{x}_0)$ | **reverse diffusion 后验**，用于定义训练目标，约等于golden truth       |
+| $p_\theta(\mathbf{x}_{t-1} \mid \mathbf{x}_t)$        | **reverse diffusion 似然**，通过训练模型去拟合上面的后验               |
+| $q(\mathbf{x}_T)$                                     | **先验**，固定为高斯分布 $\mathcal{N}(0, I)$，推理时直接采样作为起点。 |
 
-{{< admonition type=quote title="reverse diffusion process 后验" >}}
+{{< admonition type=quote title="建模后验" >}}
 $$
 q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_{t-1}; \color{blue}{\tilde{\boldsymbol{\mu}}}(\mathbf{x}_t, \mathbf{x}_0), \color{red}{\tilde{\beta}_t} \mathbf{I})
 $$
@@ -183,7 +192,7 @@ $$
 
 仍然由于我们把 reverse diffusion process建模为了高斯分布，所以我们可以先定义后验的公式为上面的形式。
 那么接下来问题就转换为了如何凑出这个 ${\tilde{\boldsymbol{\mu}}_t}(\mathbf{x}_t, \mathbf{x}_0)$ and $\tilde{\beta}_t$ 。
-我们后面会推导出来，他们的具体形式是：
+我们后面会用两个步骤将他们推导出来，他们的具体形式是：
 
 $$
 \begin{align}
@@ -192,7 +201,7 @@ $$
 \end{align}
 $$
 
-{{< admonition type=quote title="reverse diffusion process 后验推导步骤一：按bayes公式和Gaussian公式展开" >}}
+{{< admonition type=quote title="后验推导步骤一：按bayes公式和Gaussian公式展开" >}}
 $$
 \begin{aligned}
 q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
@@ -250,7 +259,7 @@ $$
 最后，当我们把它拿出来计算最终的loss时，由于是在KL散度里的，它一定在log里，那么就可以提出来作为单独的常数项。
 常数项求梯度是0，因此这里可以忽略掉。
 
-{{< admonition type=quote title="后验closed form推导步骤二：凑出新的高斯分布" >}}
+{{< admonition type=quote title="后验推导步骤二：凑出新的高斯分布" >}}
 $$\begin{aligned}
 \tilde{\beta}_t
 &= 1/(\frac{\alpha_t}{\beta_t} + \frac{1}{1 - \bar{\alpha}_{t-1}})
@@ -308,7 +317,8 @@ $$
 \cdot
 \exp\Big( -\frac{1}{2} \big( C(\mathbf{x}_t, \mathbf{x}_0) - \frac{\tilde{\boldsymbol{\mu}}_t^2}{\tilde{\beta}_t} \big) \Big) \\
 %
-& \propto \exp\Big( -\frac{1}{2} \big( \color{red}{\frac{1}{\tilde{\beta}_t}} \mathbf{x}_{t-1}^2 \color{blue}{- \frac{2\tilde{\boldsymbol{\mu}}_t}{\tilde{\beta}_t}} \mathbf{x}_{t-1} \color{black}{ + \frac{\tilde{\boldsymbol{\mu}}_t^2}{\tilde{\beta}_t} \big) \Big)} \\
+& \propto \exp\Big( -\frac{1}{2} \big( \color{red}{\frac{1}{\tilde{\beta}_t}} \mathbf{x}_{t-1}^2 \color{blue}{- \frac{2\tilde{\boldsymbol{\mu}}_t}{\tilde{\beta}_t}} \mathbf{x}_{t-1} \color{black}{ + \frac{\tilde{\boldsymbol{\mu}}_t^2}{\tilde{\beta}_t} \big) \Big)} 
+\quad\text{;where}\quad (*) \\
 %
 & = \mathcal{N}(\mathbf{x}_{t-1}; \color{blue}{\tilde{\boldsymbol{\mu}_t}}(\mathbf{x}_t, \mathbf{x}_0), \color{red}{\tilde{\beta}_t} \mathbf{I})
 \end{align}
@@ -316,10 +326,45 @@ $$
 
 得证。
 
+(*) 这里可以忽略系数项，就是因为前面所说的：系数项最终会转换为loss中的常数项，常数于求导无意义，因此可以忽略。
 
+{{< admonition type=quote title="化简后验" >}}
+Thanks to the nice property, we can represent $\mathbf{x}_0 = \frac{1}{\sqrt{\bar{\alpha}_t}}(\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t)$ and plug it into the above equation and obtain:
 
+$$
+\begin{aligned}
+\tilde{\boldsymbol{\mu}}_t
+&= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} \frac{1}{\sqrt{\bar{\alpha}_t}}(\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t) \\
+&= \color{cyan}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)}
+\end{aligned}
+$$
+{{< /admonition >}}
 
+这一步的意义是，让计算完全依赖于噪声，而不依赖于真实数据，这样可以直接从任意噪声中恢复出真实数据。
 
+其中提到的nice property就是closed form的前向扩散表达式：$\mathbf{x}_t = \sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}$
+
+让我们把化简步骤写的更完整些：
+
+$$
+\begin{aligned}
+\tilde{\boldsymbol{\mu}}_t
+%
+&= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} \frac{1}{\sqrt{\bar{\alpha}_t}}(\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t) \\
+%
+&= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_t / \alpha_t)}{1 - \bar{\alpha}_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_t / \alpha_t} (1-\alpha_t)}{1 - \bar{\alpha}_t} \frac{1}{\sqrt{\bar{\alpha}_t}}(\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t) \\
+%
+&= \frac{\alpha_t(1 - \bar{\alpha}_t / \alpha_t)}{\sqrt{\alpha_t} (1 - \bar{\alpha}_t)} \mathbf{x}_t + \frac{1-\alpha_t}{\sqrt{\alpha_t} (1 - \bar{\alpha}_t)} (\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t) \\
+%
+&= \frac{1}{\sqrt{\alpha_t}} \left( \frac{\alpha_t - \bar{\alpha}_t}{1 - \bar{\alpha}_t} \mathbf{x}_t + \frac{1-\alpha_t}{1 - \bar{\alpha}_t} \mathbf{x}_t - \frac{1-\alpha_t}{1 - \bar{\alpha}_t} \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t \right) \\
+%
+&= \frac{1}{\sqrt{\alpha_t}} \left( \frac{\alpha_t - \bar{\alpha}_t + 1-\alpha_t}{1 - \bar{\alpha}_t} \mathbf{x}_t - \frac{1-\alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \right) \\
+%
+&= \color{cyan}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)}
+\end{aligned}
+$$
+
+得证。
 
 
 
