@@ -366,6 +366,104 @@ $$
 
 得证。
 
+{{< admonition type=quote title="varational lower bound：从零推导">}}
+$$
+\begin{aligned}
+\mathord{-} \log p_\theta(\mathbf{x}_0)
+&\leq - \log p_\theta(\mathbf{x}_0) + D_\text{KL}(q(\mathbf{x}_{1:T}\vert\mathbf{x}_0) \| p_\theta(\mathbf{x}_{1:T}\vert\mathbf{x}_0) ) & \small{\text{; KL is non-negative}}\\
+&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T}) / p_\theta(\mathbf{x}_0)} \Big] \\
+&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} + \log p_\theta(\mathbf{x}_0) \Big] \\
+&= \mathbb{E}_q \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+\text{Let }L_\text{VLB}
+&= \mathbb{E}_{q(\mathbf{x}_{0:T})} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \geq - \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0)
+\end{aligned}
+$$
+{{< /admonition >}}
+
+刚刚已经后验的公式都推证完了，这样我们就有了golden truth 了，即神经网络要模仿的对象。那么如何建模golden truth和模型之间的关联呢。这就要用到变分推断（Variational Inference）了，或者叫做ELBO（Evidence Lower Bound）。
+
+这里可以大致了解下 variational lower bound是什么：
+
+1. 对数边际似然, $\log p_\theta(\mathbf{x}_0)$ 是我们期望模型的，即希望模型更有概率生成真实的图片
+2. 然而他很难直接算，因为无法对潜变量分布中的所有情况都进行直接积分计算。
+3. 所以要找替代的优化下界，优化该下界就相当于优化对数边际似然
+4. 如果想要完全了解相关概念，强烈建议阅读 Lilian Weng 的另一篇文章 From Autoencoder to Beta-VAE [^lilian_ae] 中的 [章节 VAE: Variational Autoencoder](https://lilianweng.github.io/posts/2018-08-12-vae/#vae-variational-autoencoder)。
+
+
+$$
+\begin{aligned}
+\mathord{-} \log p_\theta(\mathbf{x}_0)
+&\leq - \log p_\theta(\mathbf{x}_0) + D_\text{KL}(q(\mathbf{x}_{1:T}\vert\mathbf{x}_0) \| p_\theta(\mathbf{x}_{1:T}\vert\mathbf{x}_0) ) & \small{\text{; KL is non-negative}}\\
+&= - \log p_\theta(\mathbf{x}_0) + \sum_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ q(\mathbf{x}_{1:T}\vert\mathbf{x}_0) \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{1:T}\vert\mathbf{x}_0)} \Big] \\
+&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T}) / p_\theta(\mathbf{x}_0)} \Big] \\
+&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} + \log p_\theta(\mathbf{x}_0) \Big] \\
+&= \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+\end{aligned}
+$$
+
+到这里，我们已经将难以计算的对数边际似然转换为了含有 $q(\mathbf{x}_{1:T} | \mathbf{x}_0)$ 和 $p_\theta(\mathbf{x}_{0:T})$.前者通过我们先前推导的后验公式可以直接计算，而后者就是由神经网络定义的，可以分解为每一步的条件概率。
+
+为了训练，我们不能只在一个图片 $\mathbf{x}_0$ 上跑模型，还需要通过蒙特卡洛的方式进行采样，因此我们有：
+
+$$
+\begin{align}- \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0)
+&\leq - \mathbb{E}_{q(\mathbf{x}_0)} \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+&= - \mathbb{E}_{\mathbf{x}_0 \sim q(\mathbf{x}_0), \, \mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+&= - \mathbb{E}_{\mathbf{x}_{0, 1, ..., T}\sim q(\mathbf{x}_0) q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+&= \mathbb{E}_{\mathbf{x}_{0:T} \sim q(\mathbf{x}_{0:T})} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+&\triangleq L_\text{VLB}
+\end{align}
+$$
+
+得证。
+
+{{< admonition type=quote title="varational lower bound: 用Jensen不等式">}}
+$$
+\begin{aligned}
+L_\text{CE}
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0) \\
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \int p_\theta(\mathbf{x}_{0:T}) d\mathbf{x}_{1:T} \Big) \\
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \int q(\mathbf{x}_{1:T} \vert \mathbf{x}_0) \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} d\mathbf{x}_{1:T} \Big) \\
+&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \mathbb{E}_{q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} \Big) \\
+&\leq - \mathbb{E}_{q(\mathbf{x}_{0:T})} \log \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} \\
+&= \mathbb{E}_{q(\mathbf{x}_{0:T})}\Big[\log \frac{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})}{p_\theta(\mathbf{x}_{0:T})} \Big] = L_\text{VLB}
+\end{aligned}
+$$
+{{< /admonition >}}
+
+这里推导主要用到了概率论中的边际化以及Jensen 不等式。
+
+对$\mathbf{x}_{1:T}$边际化即:
+
+$$
+\begin{align}
+p_\theta(\mathbf{x}_0) 
+&= \int \Big[ p_\theta(\mathbf{x}_0 | \mathbf{x}_{1:T}) p_\theta(\mathbf{x}_{1:T}) \Big] d\mathbf{x}_{1:T} \\
+&= \int p_\theta(\mathbf{x}_{0:T}) d\mathbf{x}_{1:T}
+\end{align}
+$$
+
+[Jensen 不等式](https://en.wikipedia.org/wiki/Jensen%27s_inequality), 是指设 \( \phi \) 是一个[concave function](https://en.wikipedia.org/wiki/Concave_function)，\( X \) 是一个可积的随机变量，则有不等式: 
+
+\[
+\phi\left( \mathbb{E}[X] \right) \geq \mathbb{E}\left[ \phi(X) \right]
+\]
+
+
+例如，$-log(\cdot)$ is a concave function。
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -484,12 +582,6 @@ print("grad log_sigma:", log_sigma.grad)
 
 ### 概率论
 
-#### 联合分布，边缘分布和条件分布
-
-- 联合分布 $P(A, B)$：全景地图（包含所有组合的概率）。
-- 边缘分布 $P(B)$：全景地图投影到某一个轴。
-- 条件分布 $P(A \vert B)$：全景地图切一条线（已知另一变量的值），看这条线上的概率分布。公式为：$P(A \vert B) = \frac{P(A, B)}{P(B)}$
-
 #### Gaussian distribution
 
 高斯分布（Gaussian distribution）也被称为**正态分布**，$\mathcal{N}(\mu, \sigma)$，其概率密度函数（PDF, Probability Density Function）为：
@@ -503,19 +595,27 @@ $$
 - $\sigma^2$：方差（variance）
 - $\exp(\cdot)$：自然指数函数 $e^x$
 
-其累积分布函数（CDF, Cumulative Distribution Function）为：
+#### 联合分布，边缘分布和条件分布
 
-$$
-F(x) = P(X \le x) = \frac{1}{2} \left[ 1 + \operatorname{erf} \!\left( \frac{x - \mu}{\sigma\sqrt{2}} \right) \right]
-$$
+- 联合分布 $P(A, B)$：全景地图（包含所有组合的概率）。
+- 边缘分布 $P(B)$：全景地图投影到某一个轴。
+- 条件分布 $P(A \vert B)$：全景地图切一条线（已知另一变量的值），看这条线上的概率分布。公式为：$P(A \vert B) = \frac{P(A, B)}{P(B)}$
 
-- $\operatorname{erf}(\cdot)$：误差函数（error function），是无法用初等函数表示的积分函数，定义为
+#### 先验，似然，与后验
 
-$$
-\operatorname{erf}(z) = \frac{2}{\sqrt{\pi}} \int_{0}^{z} e^{-t^2} \, dt
-$$
+| 概念 | 类比解释                 | 在扩散模型中的类比                                     |
+| ---- | ------------------------ | ------------------------------------------------------ |
+| 先验 | 在观察任何数据之前对变量的假设分布             | $q(\mathbf{x}_t) \sim \mathcal{N}(0, I)$               |
+| 似然 | 某假设/模型参数下，观测数据出现的概率 | $p_\theta(\mathbf{x}_{t-1}\mid \mathbf{x}_t)$               |
+| 后验 | 结合先验与观测数据之后对潜在变量的更新分布     | $q(\mathbf{x}_{t-1}\mid \mathbf{x}_t, \mathbf{x}_0)$ |
 
-此外，isotropic Gaussian distribution是指各方向都均匀的高斯分布，即向量中的每个分量都符合 $\mathcal{N}(0, \mathbf{I})$。
+三者之间的关系是：
+
+\[
+\text{后验} = \frac{\text{似然} \times \text{先验}}{\text{证据}}
+\quad\leftrightarrow\quad
+P(\text{参数} | \text{数据}) = \frac{P(\text{数据} | \text{参数}) \cdot P(\text{参数})}{P(\text{数据})}
+\]
 
 #### Bayes’ rule
 
@@ -532,24 +632,37 @@ P(A \vert B) = \frac{P(B \vert A) \cdot P(A)}{P(B)}
 - \(P(B)\)：事件 B 的边际概率（所有可能情况下 B 发生的概率）
 - \(P(A \vert B)\)：在观察到 B 之后，事件 A 的后验概率（更新后的信念）
 
+#### Law of Total Probability
 
+全概率公式用于**计算一个事件的概率**，当这个事件的概率不容易直接计算时，可以通过将其**分解为若干互斥情形下的条件概率之和**来求解。
 
-#### 先验，似然，与后验
+设事件 \( B_1, B_2, \dots, B_n \) 构成样本空间的一个**完备事件组**（即它们互斥且并集为全集），即：
 
-| 概念 | 类比解释                 | 在扩散模型中的类比                                     |
-| ---- | ------------------------ | ------------------------------------------------------ |
-| 先验 | 在观察任何数据之前对变量的假设分布             | $q(\mathbf{x}_t) \sim \mathcal{N}(0, I)$               |
-| 似然 | 某假设/模型参数下，观测数据出现的概率 | $p_\theta(\mathbf{x}_{t-1}\mid \mathbf{x}_t)$               |
-| 后验 | 结合先验与观测数据之后对潜在变量的更新分布     | $q(\mathbf{x}_{t-1}\mid \mathbf{x}_t, \mathbf{x}_0)$ |
+- \( B_i \cap B_j = \emptyset \)（互斥）
+- \( \bigcup_{i=1}^n B_i = \Omega \)（穷尽）
 
-三者之间的关系是：
+那么对于任意事件 \( A \)，有：
 
 \[
-\text{后验} = \frac{\text{似然} \times \text{先验}}{\text{证据}}
-\quad\leftrightarrow\quad
-p(\text{参数} | \text{数据}) = \frac{p(\text{数据} | \text{参数}) \cdot p(\text{参数})}{p(\text{数据})}
+P(A) = \sum_{i=1}^n P(A \mid B_i) P(B_i)
 \]
 
+#### 边际化（Marginalization）
+
+边际化是指：**从联合概率分布中，通过“对某些变量求和（或积分）”来得到另一个变量的概率分布**。
+
+比如，已知两个随机变量 \( X \) 和 \( Y \) 的联合分布 \( P(X, Y) \)，我们想得到 \( X \) 的分布 \( P(X) \)，就需要对 \( Y \) 所有可能的取值进行“边缘化”：
+
+$$
+\begin{align}
+&\text{离散情况: } P(X = x) = \sum_{y} P(X = x, Y = y) \\
+&\text{连续情况: } P(X = x) = \int_{-\infty}^{\infty} P(X = x, Y = y) \, dy
+\end{align}
+$$
+
+此外，我们还可以把全概率公式看作是边际化的应用：
+
+$$P(X) = \sum_{y} P(X, Y = y) = \sum_{y} P(X | Y = y) P(Y = y)$$
 
 #### Score Function
 
@@ -574,46 +687,65 @@ $$
 
 ### 信息论
 
-信息论用事件及其发生概率来衡量事件本身的不确定性，不确定性越高，信息量越大。
+下面用一个场景来讲解信息论中最重要的四个公式：你要发送一系列消息（比如字母），每个字母出现的概率不尽相同，为了节省带宽，你需要用最短的二进制编码来发送它们......
 
-#### 信息量，香农熵，交叉熵与相对熵
+#### 信息量 $I(x) = -\log p(x)$
 
-| 熵类型     | 公式                                                      | 解释                                   |
-| ---------- | --------------------------------------------------------- | -------------------------------------- |
-| **信息量** | $I(x) = -\log p(x)$                                       | 衡量单个事件 $x$ 的不确定性            |
-| **香农熵** | $H(p) = -\sum_i p(x_i) \log p(x_i)$                       | 衡量分布 $p$ 的不确定性                |
-| **交叉熵** | $H(p,q) = -\sum_i p(x_i) \log q(x_i)$                     | 衡量用 $q$ 表示 $p$ 的平均信息量       |
-| **相对熵** | $D_{KL}(p\|q) = \sum_i p(x_i) \log \frac{p(x_i)}{q(x_i)}$ | 衡量 $p$ 和 $q$ 的差异，多付出的信息量 |
+- 直觉：一个事件包含的信息多少，和它发生的意外程度有关。越不可能发生的事，一旦发生，带来的信息量就越大。
+  - “太阳从东边升起” (概率~1)：几乎不带来信息，信息量极少。
+  - “明天会下雨” (概率0.3)：带来一些信息。
+  - “北京明天下了钻石雨” (概率几乎为0)：如果发生，信息量是爆炸性的。
+- 为什么是 $-\log p(x)$？
+  - 编码角度：为了最优地编码一个事件，我们应该给出现概率高的事件分配短的码字，给出现概率低的事件分配长的码字。这样平均编码长度最短。
+  - 最优编码长度：一个事件 $x$ 的最优编码长度就是 $-\log p(x)$。概率 $p(x)$ 越小，编码长度 $-\log p(x)$ 就越大，这完美对应了“意外程度”。
+  - 为什么用log：使用对数可以将概率的相乘关系（独立事件联合概率）转为编码长度的相加关系，非常方便。
+- 结论：信息量 $I(x)$ 就是事件 $x$ 的最优编码长度。
 
-#### KL 散度
+#### 香农熵 $H(p) = -\sum_i p(x_i) \log p(x_i)$
 
-KL 散度（Kullback–Leibler Divergence），也叫相对熵（Relative Entropy），它用来衡量 **两个概率分布之间差异** 的一种信息论度量。
+- 直觉：对于一个概率分布 $p$，我们对其中的事件进行编码，平均每个事件需要的最短编码长度是多少？ 这个“平均最低成本”就是分布的不确定性。
+  - 一个分布越均匀（比如公平骰子），你越难猜中下一个结果，它的不确定性就越高，平均编码长度也越长。
+  - 一个分布越集中（比如偏袒的骰子），你很容易猜中下一个结果，它的不确定性就低，平均编码长度也短。
+- 为什么是 $-\sum_i p(x_i) \log p(x_i)$？
+  - 这就是信息量的期望值：$\mathbb{E}_{x \sim p}[I(x)] = \mathbb{E}_{x \sim p}[-\log p(x)]$。
+  - 每个事件 $x_i$ 都有自己的最优编码长度 $-\log p(x_i)$。我们用该事件发生的概率 $p(x_i)$ 作为权重，对所有可能的编码长度求平均，就得到了整个分布的平均最优编码长度。
+- 结论：香农熵 $H(p)$ 就是用分布 $p$ 本身的最优编码方案时，所需的平均编码长度。它衡量了分布 $p$ 固有的不确定性。
+
+#### 交叉熵 $H(p, q) = -\sum_i p(x_i) \log q(x_i)$
+
+- 直觉：现在情况变了。数据的真实分布是 $p$，但你误以为分布是 $q$，并采用了为 $q$ 设计的最优编码方案（即给事件 $x_i$ 分配了长度为 $-\log q(x_i)$ 的码字）。用这个错的方案去编码真实的数据，平均需要多长的码字？
+- 为什么是 $-\sum_i p(x_i) \log q(x_i)$？
+  - 真实数据中，事件 $x_i$ 出现的概率是 $p(x_i)$。
+  - 你为它分配的码字长度是 $-\log q(x_i)$。
+  - 所以，整体的平均编码长度就是 $\mathbb{E}_{x \sim p}[-\log q(x)]$。
+- 结论：交叉熵 $H(p, q)$ 就是用为 $q$ 设计的最优编码去表示来自 $p$ 的数据时，所需的平均编码长度。
+
+#### 相对熵 (KL散度) $D_{KL}(p\|q) = \sum_i p(x_i) \log \frac{p(x_i)}{q(x_i)}$
+
+- 直觉：承接交叉熵的概念。既然用错误的方案 q 编码会比用正确的方案 p 编码要长，那么平均每个样本，我们多浪费了多少编码长度？ 这个“多浪费的长度”就是两个分布之间的差异。
+- 为什么是 $\sum_i p(x_i) \log \frac{p(x_i)}{q(x_i)}$？
+  - 对于事件 $x_i$，使用错误方案的长度是 $-\log q(x_i)$，使用正确方案的长度是 $-\log p(x_i)$。
+  - 多浪费的长度就是：$(-\log q(x_i)) - (-\log p(x_i)) = \log \frac{p(x_i)}{q(x_i)}$。
+  - 我们用真实概率 $p(x_i)$ 对这个“浪费”求平均，就得到了平均浪费的长度：$\mathbb{E}_{x \sim p}[\log \frac{p(x)}{q(x)}]$。
+- 结论：KL散度 $D_{KL}(p\|q)$ 衡量了因为使用近似分布 $q$ 而不是真实分布 $p$ 所带来的额外的平均编码长度。它直接衡量了两个分布的差异。
+
+#### 关系 $D_{KL}(p\|q) = H(p, q) - H(p) \geq 0$
+
+让我们进行完整的推导：
 
 $$
 \begin{align}
-& D_{\mathrm{KL}}(P \,\|\, Q) = \mathbb{E}_{X \sim P(X)} \left[ \log \frac{P(X)}{Q(X)} \right] \\
-\text{离散分布，可展开为:}\quad & D_{\mathrm{KL}}(P \,\|\, Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)} \\
-\text{连续分布，可展开为:}\quad & D_{\mathrm{KL}}(P \,\|\, Q) = \int P(x) \log \frac{P(x)}{Q(x)} \, dx
+D_{KL}(p\|q) &= H(p, q) - H(p) \\
+&= \mathbb{E}_{x \sim p}[I_q(x)] - \mathbb{E}_{x \sim p}[I_p(x)] \\
+&= \mathbb{E}_{x \sim p}[-\log q(x)] - \mathbb{E}_{x \sim p}[-\log p(x)] \\
+&= \mathbb{E}_{x \sim p} \Big[\log \frac{p(x)}{q(x)} \Big] \\
+&= -\mathbb{E}_{x \sim p} \Big[\log \frac{q(x)}{p(x)} \Big] \\
+&\geq -\log \mathbb{E}_{x \sim p} \Big[ \frac{q(x)}{p(x)} \Big] \quad \text{; Jensen's Inequality} \\
+&= -\log \sum_{x \sim p} \Big[p(x) \frac{q(x)}{p(x)} \Big] \\
+&= -\log 1 \\
+&= 0
 \end{align}
 $$
-
-这里：
-
-- $P$ 是“真实”分布（或目标分布）。
-- $Q$ 是用来近似 $P$ 的分布。
-- $\log$ 的底通常取自然对数（信息单位为 nats），取 2 则单位为 bits。
-
-直观理解:
-
-- 如果你用 $Q$ 作为编码策略去编码实际上来自 $P$ 的数据，那么平均每个样本会多花 $D_{\mathrm{KL}}(P\|Q)$ 个信息单位（nats/bits）。
-- KL 散度表示使用分布 $Q$ 来替代 $P$ 时丢失的信息量。
-- 公式里的 $\log \frac{P(x)}{Q(x)}$ 是 **对数概率比**，乘上 $P(x)$ 并取期望，就是平均的概率比差异。
-
-性质:
-
-- **非负性**: $D_{\mathrm{KL}}(P \,\|\, Q) \ge 0$
-- **非对称性**: $D_{\mathrm{KL}}(P \,\|\, Q) \neq D_{\mathrm{KL}}(Q \,\|\, P)$
-- **相对熵=交叉熵-香农熵**: $D_{\mathrm{KL}}(P \,\|\, Q) = H(P, Q) - H(P)$
 
 ### 随机过程
 

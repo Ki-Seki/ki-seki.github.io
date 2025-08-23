@@ -1,59 +1,9 @@
 
 x
 
-{{< admonition type=quote title="从零推导 varational lower bound">}}
-$$
-\begin{aligned}
-\mathord{-} \log p_\theta(\mathbf{x}_0)
-&\leq - \log p_\theta(\mathbf{x}_0) + D_\text{KL}(q(\mathbf{x}_{1:T}\vert\mathbf{x}_0) \| p_\theta(\mathbf{x}_{1:T}\vert\mathbf{x}_0) ) & \small{\text{; KL is non-negative}}\\
-&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_{\mathbf{x}_{1:T}\sim q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T}) / p_\theta(\mathbf{x}_0)} \Big] \\
-&= - \log p_\theta(\mathbf{x}_0) + \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} + \log p_\theta(\mathbf{x}_0) \Big] \\
-&= \mathbb{E}_q \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
-\text{Let }L_\text{VLB}
-&= \mathbb{E}_{q(\mathbf{x}_{0:T})} \Big[ \log \frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \geq - \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0)
-\end{aligned}
-$$
-{{< /admonition >}}
 
-我们先大致了解下 variational lower bound是什么：
 
-1. 对数边际似然, $\log p_\theta(\mathbf{x}_0)$ , 很难直接算，因为无法对潜变量分布中的所有情况都进行直接积分计算。所以要找替代的优化下界，优化该下界就相当于优化对数边际似然
-2. 如果想要完全了解相关概念，强烈建议阅读 Lilian Weng 的另一篇文章 From Autoencoder to Beta-VAE [^lilian_ae] 中的 [章节 VAE: Variational Autoencoder](https://lilianweng.github.io/posts/2018-08-12-vae/#vae-variational-autoencoder)。
 
-我们已经知道了对数边际似然, $\log p_\theta(\mathbf{x}_0)$ 无法计算，Lilian这里给出了从零推导出 varational lower bound 的过程。这里推导比较清晰，不再展开。
-
-{{< admonition type=quote title="用Jensen不等式推导 varational lower bound">}}
-$$
-\begin{aligned}
-L_\text{CE}
-&= - \mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0) \\
-&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \int p_\theta(\mathbf{x}_{0:T}) d\mathbf{x}_{1:T} \Big) \\
-&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \int q(\mathbf{x}_{1:T} \vert \mathbf{x}_0) \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} d\mathbf{x}_{1:T} \Big) \\
-&= - \mathbb{E}_{q(\mathbf{x}_0)} \log \Big( \mathbb{E}_{q(\mathbf{x}_{1:T} \vert \mathbf{x}_0)} \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} \Big) \\
-&\leq - \mathbb{E}_{q(\mathbf{x}_{0:T})} \log \frac{p_\theta(\mathbf{x}_{0:T})}{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})} \\
-&= \mathbb{E}_{q(\mathbf{x}_{0:T})}\Big[\log \frac{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})}{p_\theta(\mathbf{x}_{0:T})} \Big] = L_\text{VLB}
-\end{aligned}
-$$
-{{< /admonition >}}
-
-这个是另外一个推导VLB的方式，直接用了 [Jensen 不等式](https://en.wikipedia.org/wiki/Jensen%27s_inequality)：
-
-设 \( \phi \) 是一个[concave function](https://en.wikipedia.org/wiki/Concave_function)，\( X \) 是一个可积的随机变量，则有
-
-\[
-\phi\left( \mathbb{E}[X] \right) \geq \mathbb{E}\left[ \phi(X) \right]
-\]
-
-对应于ddpm，RHS即为variational lower bound / ELBO：
-
-$$
-\log p_\theta(x)
-\geq \mathbb{E}_{q(z \mid x)} \left[ \log \frac{p_\theta(x, z)}{q(z \mid x)} \right]
-$$
-
-其中，$log()$ is a concave function。
-
-推导也非常直观，不过让我们对部分符号进行解释。 <!-- TODO -->
 
 {{< admonition type="quote" title="展开" >}}
 $$
