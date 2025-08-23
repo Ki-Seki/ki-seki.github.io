@@ -9,6 +9,7 @@ math: true
 ---
 
 <!-- TODO：记得email给lilian about this article -->
+<!-- TODO: unify styles of all references -->
 
 本文对Lilian Weng的《What are Diffusion Models?》 [^lilian_diffusion] 进行完善的注释导读。
 
@@ -380,7 +381,9 @@ $$
 $$
 {{< /admonition >}}
 
-刚刚已经后验的公式都推证完了，这样我们就有了golden truth 了，即神经网络要模仿的对象。那么如何建模golden truth和模型之间的关联呢。这就要用到变分推断（Variational Inference）了，或者叫做ELBO（Evidence Lower Bound）。
+刚刚已经后验的公式都推证完了，这样我们就有了golden truth 了，即神经网络要模仿的对象。那么如何建模golden truth和模型之间的关联呢。
+
+这就要用到变分推断（Variational Inference）了，或者叫做ELBO（Evidence Lower Bound）。可以把VLB理解为目标函数，Loss函数。总之就是我们期望VLB小一些，这样我们训练的模型就更容易产生真实的图像。
 
 这里可以大致了解下 variational lower bound是什么：
 
@@ -431,7 +434,7 @@ L_\text{CE}
 $$
 {{< /admonition >}}
 
-这里推导主要用到了概率论中的边际化以及Jensen 不等式。
+这里推导主要用到了概率论中的边际化以及Jensen 不等式。了解这两个之后就易证了。
 
 对$\mathbf{x}_{1:T}$边际化即:
 
@@ -443,20 +446,146 @@ p_\theta(\mathbf{x}_0)
 \end{align}
 $$
 
-[Jensen 不等式](https://en.wikipedia.org/wiki/Jensen%27s_inequality), 是指设 \( \phi \) 是一个[concave function](https://en.wikipedia.org/wiki/Concave_function)，\( X \) 是一个可积的随机变量，则有不等式: 
+Jensen 不等式 [^wiki_jensen], 是指设 \( \phi(\cdot) \) 是一个concave function [^wiki_concave]，\( X \) 是一个可积的随机变量，则有不等式: 
 
 \[
 \phi\left( \mathbb{E}[X] \right) \geq \mathbb{E}\left[ \phi(X) \right]
 \]
 
-
 例如，$-log(\cdot)$ is a concave function。
 
+{{< admonition type="quote" title="VLB 展开" >}}
+$$
+\begin{aligned}
+L_\text{VLB}
+&= \mathbb{E}_{q(\mathbf{x}_{0:T})} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+&= \mathbb{E}_q \Big[ \log\frac{\prod_{t=1}^T q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{ p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t) } \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=1}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \Big( \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)}\cdot \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1}\vert\mathbf{x}_0)} \Big) + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1} \vert \mathbf{x}_0)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] \\
+&= \mathbb{E}_q \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{q(\mathbf{x}_1 \vert \mathbf{x}_0)} + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]\\
+&= \mathbb{E}_q \Big[ \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \Big] \\
+&= \mathbb{E}_q [\underbrace{D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))}_{L_T} + \sum_{t=2}^T \underbrace{D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t))}_{L_{t-1}} \underbrace{- \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)}_{L_0} ]
+\end{aligned}
+$$
+{{< /admonition>}}
+
+为什么要把简洁的VLB展开为最后那个复杂的由多个KL散度组成的复杂公式呢?
+
+回忆下我们之前推证得到的forward diffusion process的closed form表达式，以及建模reverse diffusion process时候得到的后验和似然：
+
+$$
+\begin{align}
+%
+q(\mathbf{x}_t \vert \mathbf{x}_0) 
+&= \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I}) \\
+%
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) 
+&= \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I}) \\
+%
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) 
+&= \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
+\end{align}
+$$
+
+而刚刚我们获得的 $L_\text{VLB} = \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})}\Big[\log \frac{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})}{p_\theta(\mathbf{x}_{0:T})} \Big]$ 并没有用到这些已有的公式，因此不能直接计算. 
+而且，我们也不希望神经网络拟合的时候直接一步到位，还是希望他能模拟逐步去噪的过程。
+（ 当然后面也出现了可以一步到位的Consistency Models [^song_consistency]，后面会讲到。）
+
+因此，展开VLB的目的是将训练目标从一个难以直接优化的对数似然函数，转化为一组可计算的 KL 散度项与重构项，从而指导神经网络学习如何从噪声中逐步恢复原始数据。
+
+让我们把VLB的展开过程给写的更完整些：
+
+$$
+\begin{aligned}
+& L_\text{VLB} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ \log\frac{\prod_{t=1}^T q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{ p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t) } \Big] 
+\quad\text{; 利用马尔可夫性质展开联合概率分布为递推式} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=1}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} \Big] 
+\quad\text{; } -\log p_\theta(\mathbf{x}_T) \text{是常数，因此可以单独提出来} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] 
+\quad\text{; } \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \text{进行了特殊的建模，后面会提到} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \Big( \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)}\cdot \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1}\vert\mathbf{x}_0)} \Big) + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] 
+\quad\text{; 根据贝叶斯公式把} q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \text{转换为后验公式和前向closed form公式的组合} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1} \vert \mathbf{x}_0)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]
+\quad\text{; 根据log函数的计算规律进行拆分} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{q(\mathbf{x}_1 \vert \mathbf{x}_0)} + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]
+\quad\text{; 根据log函数的计算规律进行重组} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \Big]
+\quad\text{; 根据log函数的计算规律进行重组} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + 
+  \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} -
+  \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \\
+%
+&= \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_T)\sim q(\mathbf{x}_0, \mathbf{x}_T)} \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + 
+\sum_{t=2}^T \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_{t-1}, \mathbf{x}_t)\sim q(\mathbf{x}_0, \mathbf{x}_{t-1}, \mathbf{x}_t)} \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} -
+\mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_1)\sim q(\mathbf{x}_0, \mathbf{x}_1)} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+\quad\text{; 按全期望公式简化} \\
+%
+&= \mathbb{E}_{\mathbf{x}_0 \sim q(\mathbf{x}_0)} \left[ \mathbb{E}_{\mathbf{x}_T \sim q(\mathbf{x}_T | \mathbf{x}_0)} \log \frac{q(\mathbf{x}_T | \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} \right] + 
+\sum_{t=2}^T \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_t) \sim q(\mathbf{x}_0, \mathbf{x}_t)} \left[ \mathbb{E}_{\mathbf{x}_{t-1} \sim q(\mathbf{x}_{t-1} | \mathbf{x}_t, \mathbf{x}_0)} \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)} \right] -
+\mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_1)\sim q(\mathbf{x}_0, \mathbf{x}_1)} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+\quad\text{; 展开为条件期望形式} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ \mathbb{E}_{\mathbf{x}_T \sim q(\mathbf{x}_T | \mathbf{x}_0)} \log \frac{q(\mathbf{x}_T | \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} \right] + 
+\sum_{t=2}^T \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ \mathbb{E}_{\mathbf{x}_{t-1} \sim q(\mathbf{x}_{t-1} | \mathbf{x}_t, \mathbf{x}_0)} \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)} \right] -
+\mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+\quad\text{; 根据全期望公式补齐} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \right] + 
+\sum_{t=2}^T \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \right] -
+\mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+\quad\text{; 改写为KL散度形式} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[
+  \underbrace{D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))}_{L_T, \, \text{Prior Matching Term}} + 
+  \sum_{t=2}^T \underbrace{D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t))}_{L_{t-1}, \, \text{Denoising Matching Term}} 
+  \underbrace{- \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)}_{L_0, \, \text{Reconstruction Term}} 
+\Big]
+\quad\text{; 根据期望的线性性质结合起来三项}
+\end{aligned}
+$$
+
+{{% admonition type="quote" title="VLB中三项的参数化" open=true %}}
+$$
+\begin{aligned}
+L_\text{VLB} &= L_T + L_{T-1} + \dots + L_0 \\
+\text{where } L_T &= D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \\
+L_t &= D_\text{KL}(q(\mathbf{x}_t \vert \mathbf{x}_{t+1}, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_t \vert\mathbf{x}_{t+1})) \text{ for }1 \leq t \leq T-1 \\
+L_0 &= - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+\end{aligned}
+$$
+
+... $L_T$ is constant and can be ignored during training because $q$ has no learnable parameters and $\mathbf{x}_T$ is a Gaussian noise. [Ho et al. 2020](https://arxiv.org/abs/2006.11239) models $L_t$ using a separate discrete decoder derived from $\mathcal{N}(\mathbf{x}_0; \boldsymbol{\mu}_\theta(\mathbf{x}_1, 1), \boldsymbol{\Sigma}_\theta(\mathbf{x}_1, 1))$.
+{{% /admonition %}}
 
 
+⭐ $L_T = D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))$
 
+如原博文所述，这只是一个常数，反向传播梯度为0，因此可以忽略掉，不参与优化。
 
+⭐ $L_t = D_\text{KL}(q(\mathbf{x}_t \vert \mathbf{x}_{t+1}, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_t \vert\mathbf{x}_{t+1})) \text{ for }1 \leq t \leq T-1$
 
+这一项是最重要的，会在接下来细讲，这里暂时略过。
+
+⭐ $L_0 = - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)$
+
+为了计算的方便，这一项被近似为 t=1 时的 denoising matching term：
+
+\[
+L_0 \approx D_{\text{KL}}(q(\mathbf{x}_0 \vert \mathbf{x}_1) \parallel p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1))
+\]
 
 
 
@@ -664,6 +793,22 @@ $$
 
 $$P(X) = \sum_{y} P(X, Y = y) = \sum_{y} P(X | Y = y) P(Y = y)$$
 
+#### 期望
+
+期望的定义
+
+* 离散随机变量：$\mathbb{E}_{x \sim p}[g(x)] = \sum_{x} g(x) \cdot p(x)$
+* 连续随机变量：$\mathbb{E}_{x \sim p}[g(x)] = \int_{-\infty}^{\infty} g(x) \cdot p(x)  dx$
+
+三个重要的性质
+
+1. 线性性质：
+  $\mathbb{E}_{x \sim p, y \sim q}[a \cdot f(x, y) + b \cdot g(x, y)] = a \cdot \mathbb{E}_{x \sim p, y \sim q}[f(x, y)] + b \cdot \mathbb{E}_{x \sim p, y \sim q}[g(x, y)]$
+2. 期望的迭代法则（Law of Iterated Expectation / Tower Property）：
+  $\mathbb{E}_{(x, y) \sim p(x, y)}[f(x, y)] = \mathbb{E}_{y \sim p(y)}\left[ \mathbb{E}_{x \sim p(x|y)}[f(x, y)] \right]$
+3. 全期望公式
+  $\mathbb{E}_{x \sim p(x)}[f(x)] = \mathbb{E}_{y \sim p(y)}\left[ \mathbb{E}_{x \sim p(x|y)}[f(x)] \right]$
+
 #### Score Function
 
 在概率论和统计学中，**score function** 原本的定义是：
@@ -784,6 +929,8 @@ $$
 
 [^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** “Improved Denoising Diffusion Probabilistic Models.” _Proceedings of the 38th International Conference on Machine Learning_, edited by Marina Meila and Tong Zhang, vol. 139, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. PMLR. https://proceedings.mlr.press/v139/nichol21a.html.
 
+[^song_consistency]: Song, Yang, et al. "Consistency Models." *International Conference on Machine Learning*, 2023. https://icml.cc/virtual/2023/poster/24593.
+
 [^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
 
 [^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
@@ -791,3 +938,7 @@ $$
 [^lilian_ae]: **Weng, Lilian.** “From Autoencoder to Beta-VAE.” _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
 
 [^wiki_closed]: “Closed-form Expression.” _Wikipedia_, Wikimedia Foundation, https://en.wikipedia.org/wiki/Closed-form_expression.
+
+[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 12 Jun. 2025. Web. 23 Aug. 2025.
+
+[^wiki_concave]: Wikipedia contributors. "Concave function." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 17 Jul. 2025. Web. 23 Aug. 2025.
