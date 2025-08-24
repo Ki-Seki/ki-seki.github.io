@@ -129,14 +129,26 @@ Stochastic Gradient Langevin Dynamics（SGLD，随机梯度朗之万动力学）
 上面的采样公式是一个迭代式，他的含义是：“在梯度方向上前进一点，同时加入一些随机扰动，使得最终的样本分布逼近目标分布 \( p(x) \)。” 相关符号含义：
 
 - \( \mathbf{x}_t \)：第 \( t \) 步的样本
-- \( \frac{\delta}{2} \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) \): 漂移项，根据目标分布的梯度移动，类似受力牵引。也可以类比为前向单步前向扩散中的 $\sqrt{1 - \beta_t} \mathbf{x}_{t-1}$。
+- \( \frac{\delta}{2} \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) \): 漂移项，根据目标分布的梯度移动，类似受力牵引。也可以类比为扩散中的 $\sqrt{1 - \beta_t} \mathbf{x}_{t-1}$。
   - \( \delta / 2 \): 步长，控制每次更新的幅度
   - \( p(x) \)：目标分布的概率密度函数
   - \( \log p(x) \)：对数概率密度，便于计算和优化
   - \( \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) \)：对数概率密度的梯度，也叫 score function，表示当前点的“上升方向”
-- \( \sqrt{\delta} \boldsymbol{\epsilon}_t \): 扩散项，像布朗运动的分子碰撞。可以类比为前向单步前向扩散中的 $\sqrt{\beta_t} \boldsymbol{\epsilon}_{t-1}$。
+- \( \sqrt{\delta} \boldsymbol{\epsilon}_t \): 扩散项，像布朗运动的分子碰撞。可以类比为扩散中的 $\sqrt{\beta_t} \boldsymbol{\epsilon}_{t-1}$。
   - \( \sqrt{\delta} \)：步长（step size），控制每次更新的幅度
   - \( \epsilon_t \sim \mathcal{N}(0, I) \)：标准正态分布的随机噪声，加入随机性以避免陷入局部最优
+
+注意：这里提到的 $p(\cdot)$ 是一个通用的目标分布，可以是任何我们希望采样的分布。他和我们在diffusion中见到的$q(\cdot)$ 和 $p_\theta(\cdot)$ 是不同的。
+
+对于diffusion场景，如果我们想要生成更真实的样本，则有
+
+$$
+\mathbf{x}_t = \mathbf{x}_{t-1} + \frac{\delta}{2} \nabla_\mathbf{x} \log q(\mathbf{x}_{t-1}) + \sqrt{\delta} \boldsymbol{\epsilon}_t
+,\quad\text{where }
+\boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
+
+其中，$q(\cdot)$ 衡量样本的真实性，每一轮迭代 $\mathbf{x}_t$ 都能比 $\mathbf{x}_{t-1}$ 更真实。同时还有 $\boldsymbol{\epsilon}_t$ 避免生成样本陷入局部最优。
 
 ### Reverse diffusion process
 
@@ -734,6 +746,8 @@ PS. 在图像生成领域，采样指的就是拿训练好的模型进行推理�
 
 ...
 
+Given a Gaussian distribution $\mathbf{x} \sim \mathcal{N}(\mathbf{\mu}, \sigma^2 \mathbf{I})$, we can write the derivative of the logarithm of its density function as $\nabla_{\mathbf{x}}\log p(\mathbf{x}) = \nabla_{\mathbf{x}} \Big(-\frac{1}{2\sigma^2}(\mathbf{x} - \boldsymbol{\mu})^2 \Big) = - \frac{\mathbf{x} - \boldsymbol{\mu}}{\sigma^2} = - \frac{\boldsymbol{\epsilon}}{\sigma}$ where $\boldsymbol{\epsilon} \sim \mathcal{N}(\boldsymbol{0}, \mathbf{I})$. Recall that $q(\mathbf{x}_t \vert \mathbf{x}_0) \sim \mathcal{N}(\sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I})$ and therefore,
+
 $$
 \mathbf{s}_\theta(\mathbf{x}_t, t)
 \approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
@@ -743,181 +757,80 @@ $$
 $$
 {{% /admonition %}}
 
-目的上来看，就是用求梯度的方式，来建模 $\mu_\theta$
+让我们回顾下之前提到过Stochastic Gradient Langevin Dynamics采样公式：
 
-你问的这段关于 Noise-Conditioned Score Networks (NCSN) 的内容确实挺密的，咱们来一步步拆解一下它的核心逻辑和数学含义：
+$$
+\mathbf{x}_t = \mathbf{x}_{t-1} + \frac{\delta}{2} \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) + \sqrt{\delta} \boldsymbol{\epsilon}_t
+,\quad\text{where }
+\boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
 
----
+其中，$p(\cdot)$ 是用于衡量生成样本真实性的。如原文所示$p(\cdot)$被定义为 
 
-🧠 背景：Score-Based Generative Modeling 是什么？
+$$
+\begin{align}
+p(\mathbf{x}_t) &\triangleq q(\mathbf{x}_t \vert \mathbf{x}_0) \\
+&= \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I})
+\end{align}
+$$
 
-Score-based 模型的目标是估计数据分布的梯度（score），即：
-\[
-\nabla_x \log p(x)
-\]
-这个梯度可以用来通过 Langevin dynamics 采样出新的数据点：
-\[
-x_{t+1} = x_t + \frac{\delta}{2} \nabla_x \log p(x_t) + \sqrt{\delta} \cdot \epsilon_t
-\]
-其中 \(\epsilon_t \sim \mathcal{N}(0, I)\)，这是一种“带噪梯度上升”的方式。
+由于这个close form公式的存在，这意味着，我们能不断地迭代这个公式，来获得一个真实性更高的样本。
 
----
+因此，我们只要做出神经网络拟合这个采样公式即可。在这个式子中，$\mathbf{x}_{t-1}$ 是我们输入的值，无需拟合；$\frac{\delta}{2}$ 是常量系数，无需拟合；$\sqrt{\delta} \boldsymbol{\epsilon}_t$ 是随机采样的，也无需拟合；因此，只有中间的 $\nabla_\mathbf{x} \log q(\mathbf{x}_{t-1})$ 是关键的神经网络需要拟合的。
 
-🧊 问题：数据集中在低维流形上怎么办？
+在了解如何建模中间项之前，我们先推导一下derivative of the logarithm of Gaussian density function:
 
-根据 manifold hypothesis，真实数据 \(x\) 虽然在高维空间中，但其实集中在一个低维子空间上。这导致：
+$$
+\begin{align}
+\nabla_{\mathbf{x}}\log \mathcal{N}(\mathbf{x}; \boldsymbol{\mu}, \sigma^2 \mathbf{I})
+&= \nabla_{\mathbf{x}}\log \Big[ \frac{1}{\sqrt{(2\pi)^D \sigma^2}} \cdot \exp\Big(-\frac{1}{2\sigma^2}(\mathbf{x} - \boldsymbol{\mu})^2 \Big) \Big] \\
+&= \nabla_{\mathbf{x}} \Big[ \log\frac{1}{\sqrt{(2\pi)^D \sigma^2}} + \Big(-\frac{1}{2\sigma^2}(\mathbf{x} - \boldsymbol{\mu})^2 \Big) \Big] \\
+&= \nabla_{\mathbf{x}} \Big(-\frac{1}{2\sigma^2}(\mathbf{x} - \boldsymbol{\mu})^2 \Big) \\
+&= - \frac{\mathbf{x} - \boldsymbol{\mu}}{\sigma^2} \quad\text{; where } \mathbf{x} - \boldsymbol{\mu} \sim \mathcal{N}(\mathbf{0}, \sigma^2 \mathbf{I}) \\
+&= - \frac{(\mathbf{x} - \boldsymbol{\mu}) / \sigma}{\sigma} \quad\text{; where } \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}) \\
+&\triangleq - \frac{\boldsymbol{\epsilon}}{\sigma}
+\end{align}
+$$
 
-- 在数据密度低的区域，score 估计不准。
-- Langevin dynamics 可能会“走偏”，因为梯度估计不可靠。
+此时我们有golden truth：
 
----
+$$
+\begin{align}
+\nabla_\mathbf{x} \log q(\mathbf{x}_{t-1}) 
+&= \nabla_\mathbf{x} \log \mathcal{N}(\mathbf{x}_{t-1}; \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0, (1 - \bar{\alpha}_{t-1})\mathbf{I}) \\
+&= - \frac{\boldsymbol{\sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0}}{\sqrt{1 - \bar{\alpha}_{t-1}}}
+\end{align}
+$$
 
-💡 解决方案：加入噪声 + 多尺度训练
+这里面有两个变量，时间步 $t$ 和真实样本 $\mathbf{x}_0$。所以我们有许多 golden truth 组成的期望构成监督信号：
 
-Song & Ermon 提出：
+$$
+\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)} 
+\left( - \frac{\mathbf{x}_t - \boldsymbol{\sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0}}{1 - \bar{\alpha}_{t-1}} \right) =
+\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)} 
+\left( - \frac{\boldsymbol{\epsilon}}{\sqrt{1 - \bar{\alpha}_{t-1}}} \right)
+$$
 
-1. **加入不同强度的高斯噪声**：让数据分布变得更“满”，覆盖整个空间。
-2. **训练一个 Noise-Conditioned Score Network**：记作 \(s_\theta(x, \sigma)\)，它能估计不同噪声水平下的 score：
-   \[
-   s_\theta(x, \sigma) \approx \nabla_x \log p_\sigma(x)
-   \]
-   其中 \(p_\sigma(x)\) 是加入噪声后的数据分布。
+我们据此可以定义神经网络中的权重即为：
 
----
+$$
+\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)} 
+\left( - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_{t-1}}} \right)
+$$
 
-🔁 与扩散模型的联系：Forward Process 类似加噪过程
+- 训练时，我们sample 很多组 $(t, \mathbf{x}_0)$ 来使得神经网络拟合golden truth
+- 推理时，我们将已有的 $\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t) \approx \mathbf{s}_\theta(\mathbf{x}_t, t) = - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}$ 代入到Stochastic Gradient Langevin Dynamics采样公式，得到：
 
-这个“逐步加噪”的过程和扩散模型中的 forward diffusion 是一样的：
-\[
-q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} x_{t-1}, \beta_t I)
-\]
-最终 \(x_T\) 会变成一个纯高斯噪声。
+  $$
+  \mathbf{x}_t = 
+  \mathbf{x}_{t-1} - 
+  \frac{\delta \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{2\sqrt{1 - \bar{\alpha}_t}} + 
+  \sqrt{\delta} \boldsymbol{\epsilon}_t
+  ,\quad\text{where }
+  \boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+  $$
 
----
-
-📐 Score 与高斯分布的梯度关系
-
-对于高斯分布：
-\[
-p(x) = \mathcal{N}(x; \mu, \sigma^2 I)
-\]
-其 score 是：
-\[
-\nabla_x \log p(x) = -\frac{1}{\sigma^2}(x - \mu)
-\]
-所以在扩散模型中，score network 其实是在估计：
-\[
-\nabla_x \log p_\sigma(x) = -\frac{x - \mu}{\sigma^2}
-\]
-而这个 \(\mu\) 可以是原始数据 \(x_0\)，也可以是神经网络预测的值。
-
----
-
-🧪 总结一下这段话的意思：
-
-- 原始 score-based 模型用 Langevin dynamics 来采样，但在高维空间中不稳定。
-- 加入噪声后训练 score network 更稳定。
-- 多尺度噪声训练（noise-conditioned）让模型能适应不同的噪声水平。
-- 这个过程和扩散模型的 forward diffusion 是一致的。
-- 最终，score network 估计的是加入噪声后的数据分布的梯度。
-
----
-
-如果你想，我可以把这部分用图示或公式推导再展开一层，或者对比一下 DDPM 和 NCSN 的异同。你更想深入哪一块？
-
-你的问题非常好，我们来逐个解释这些概念和公式，帮助你建立清晰的直觉：
-
----
-
-🧭 什么是 \(\mathbb{R}^D\) 空间？
-
-这是一个 **D维欧几里得空间**，也就是所有长度为 \(D\) 的实数向量组成的空间。比如：
-
-- \(\mathbb{R}^2\)：二维平面
-- \(\mathbb{R}^3\)：三维空间
-- \(\mathbb{R}^{512}\)：比如图像的潜在表示空间
-
-在扩散模型中，数据（如图像）被表示为高维向量，通常就在 \(\mathbb{R}^D\) 中。
-
----
-
-🧮 为什么要计算梯度 \(\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)\)？
-
-这是所谓的 **score function**，表示在某个点 \(\mathbf{x}_t\) 上，数据分布的对数密度的梯度。它的作用是：
-
-- 指出“数据分布上升最快的方向”
-- 可以用来进行 **Langevin dynamics** 采样
-- 在扩散模型中，它帮助我们从噪声中“走回”真实数据分布
-
----
-
-🔁 要不要算 \(\mathbf{x}_{t-1}\)？
-
-是的，扩散模型的目标就是从一个高斯噪声 \(\mathbf{x}_T\) 开始，逐步去噪得到 \(\mathbf{x}_0\)。每一步都要估计：
-\[
-p_\theta(\mathbf{x}_{t-1} | \mathbf{x}_t)
-\]
-这个分布通常建模为高斯分布，其均值由神经网络预测。
-
----
-
-📦 什么是 \(q(\tilde{\mathbf{x}} \vert \mathbf{x})\)？
-
-这是一个 **加噪过程的条件分布**，表示在原始数据 \(\mathbf{x}\) 上加噪后得到 \(\tilde{\mathbf{x}}\) 的概率。比如：
-\[
-q(\tilde{\mathbf{x}} \vert \mathbf{x}) = \mathcal{N}(\tilde{\mathbf{x}}; \mathbf{x}, \sigma^2 I)
-\]
-在 NCSN 中，这个分布用于训练 score network 来估计加噪数据的 score。
-
----
-
-📐 这个公式是 score function 的定义吗？
-
-你写的这组公式：
-
-\[
-\mathbf{s}_\theta(\mathbf{x}_t, t)
-\approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
-= \mathbb{E}_{q(\mathbf{x}_0)} [\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x}_0)]
-= \mathbb{E}_{q(\mathbf{x}_0)} \Big[ - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}} \Big]
-= - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
-\]
-
-是 **扩散模型中 score function 的近似表达式**，其中：
-
-- \(\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\) 是神经网络预测的噪声
-- \(\bar{\alpha}_t = \prod_{s=1}^t \alpha_s\)，是前向过程的累计衰减因子
-- 最后一行是因为我们用 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\) 来生成 \(\mathbf{x}_t\)，所以可以反推 score
-
----
-
-🧪 那训练时怎么训练？真实的 score 有吗？
-
-关键点是：**真实的 score 没有显式表达式**，但我们可以通过构造损失函数来间接训练 score network。
-
-在 DDPM 或 NCSN 中，训练目标是：
-\[
-\mathcal{L}_{\text{simple}} = \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}, t} \left[ \left\| \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \right\|^2 \right]
-\]
-也就是说：
-
-- 我们知道 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\)
-- 所以我们知道真实的 \(\boldsymbol{\epsilon}\)
-- 训练目标就是让网络预测的 \(\boldsymbol{\epsilon}_\theta\) 尽量接近真实的 \(\boldsymbol{\epsilon}\)
-
-这就间接地训练了 score function，因为：
-\[
-\mathbf{s}_\theta(\mathbf{x}_t, t) \approx - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
-\]
-
-
-
-
-
-
-
-
-
+  此时，便可以不依赖真实样本 $\mathbf{x}_0$ 来迭代式采样生成新图像。
 
 
 
