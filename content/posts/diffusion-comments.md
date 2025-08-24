@@ -38,7 +38,6 @@ math: true
 | $p_\theta(\mathbf{x}_{t-1} \mid \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))$   | **reverse diffusion 似然**，通过训练模型去拟合上面的后验                                                                                                                                                                                                 |
 | $q(\mathbf{x}_T) = \mathcal{N}(\mathbf{x}_T; 0, I)$                                                                                                                     | **先验**，固定为高斯分布 $\mathcal{N}(0, I)$，推理时直接采样作为起点。                                                                                                                                                                                   |
 
-
 ## What are Diffusion Models?
 
 Diffusion 模型的基本原理就是，前向扩散增加噪声，得到纯高斯分布的样本。训练模型似然逆向diffusion process，使其能从任意高斯噪声样本恢复为真实数据样本。
@@ -543,17 +542,18 @@ $$
 \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
 \quad\text{; 根据全期望公式补齐} \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \right] + 
-\sum_{t=2}^T \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \right] -
-\mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
-\quad\text{; 改写为KL散度形式} \\
-%
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[
-  \underbrace{D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))}_{L_T, \, \text{Prior Matching Term}} + 
-  \sum_{t=2}^T \underbrace{D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t))}_{L_{t-1}, \, \text{Denoising Matching Term}} 
-  \underbrace{- \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)}_{L_0, \, \text{Reconstruction Term}} 
-\Big]
-\quad\text{; 根据期望的线性性质结合起来三项}
+&= 
+\underbrace{
+  \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \right]
+ }_{L_T, \, \text{Prior Matching Term}} + 
+\sum_{t=2}^T
+\underbrace{  
+  \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \right]
+}_{L_t, \, \text{Denoising Matching Term}}
+\underbrace{ -
+  \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+}_{L_0, \, \text{Reconstruction Term}}
+\quad\text{; 改写为KL散度形式}
 \end{aligned}
 $$
 
@@ -570,24 +570,345 @@ $$
 ... $L_T$ is constant and can be ignored during training because $q$ has no learnable parameters and $\mathbf{x}_T$ is a Gaussian noise. [Ho et al. 2020](https://arxiv.org/abs/2006.11239) models $L_t$ using a separate discrete decoder derived from $\mathcal{N}(\mathbf{x}_0; \boldsymbol{\mu}_\theta(\mathbf{x}_1, 1), \boldsymbol{\Sigma}_\theta(\mathbf{x}_1, 1))$.
 {{% /admonition %}}
 
+为了书写方便，实际上这里省略掉了期望的符号。并且原公式中第二项的取值范围是$2 \leq t \leq T$，而不是 $1 \leq t \leq T-1$. 因此我们改为严格书写应当是：
 
-⭐ $L_T = D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))$
+$$
+\begin{aligned}
+L_\text{VLB} &= L_T + L_{T-1} + \dots + L_0, \, \text{where } \\
+L_T &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \\
+L_t &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \text{ for }2 \leq t \leq T \\
+L_0 &= - \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
+\end{aligned}
+$$
+
+下面会分别讲下三项如何参与到神经网络的训练中：
+
+⭐ $L_T = \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T))$
 
 如原博文所述，这只是一个常数，反向传播梯度为0，因此可以忽略掉，不参与优化。
 
-⭐ $L_t = D_\text{KL}(q(\mathbf{x}_t \vert \mathbf{x}_{t+1}, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_t \vert\mathbf{x}_{t+1})) \text{ for }1 \leq t \leq T-1$
+⭐ $L_t = \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t))$
 
 这一项是最重要的，会在接下来细讲，这里暂时略过。
 
-⭐ $L_0 = - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)$
+⭐ $L_0 = - \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)$
 
 为了计算的方便，这一项被近似为 t=1 时的 denoising matching term：
 
 \[
-L_0 \approx D_{\text{KL}}(q(\mathbf{x}_0 \vert \mathbf{x}_1) \parallel p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1))
+L_0 \approx \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_{\text{KL}}(q(\mathbf{x}_0 \vert \mathbf{x}_1) \parallel p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1))
 \]
 
+### Parameterization of $L_t$ for Training Loss
 
+{{< admonition type="quote" title="Parameterization of $L_t$" open=true >}}
+... We would like to train $\boldsymbol{\mu}_\theta$ to predict $\tilde{\boldsymbol{\mu}}_t = \frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)$. ...
+
+$$
+\begin{aligned}
+\boldsymbol{\mu}_\theta(\mathbf{x}_t, t) &= \color{cyan}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \Big)} \\
+\text{Thus }\mathbf{x}_{t-1} &= \mathcal{N}(\mathbf{x}_{t-1}; \frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \Big), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
+\end{aligned}
+$$
+
+The loss term $L_t$ is parameterized to minimize the difference from $\tilde{\boldsymbol{\mu}}$:
+
+$$
+\begin{aligned}
+L_t
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{1}{2 \| \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) \|^2_2} \| \color{blue}{\tilde{\boldsymbol{\mu}}_t(\mathbf{x}_t, \mathbf{x}_0)} - \color{green}{\boldsymbol{\mu}_\theta(\mathbf{x}_t, t)} \|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{1}{2  \|\boldsymbol{\Sigma}_\theta \|^2_2} \| \color{blue}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)} - \color{green}{\frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t) \Big)} \|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_\theta \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_\theta \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big]
+\end{aligned}
+$$
+{{< /admonition >}}
+
+推导时仍然要用到之前推证得到的forward diffusion process的closed form表达式，以及建模reverse diffusion process时候得到的后验和似然：
+
+$$
+\begin{align}
+%
+q(\mathbf{x}_t \vert \mathbf{x}_0) 
+&= \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I}) \\
+%
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) 
+&= \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I}) \\
+%
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) 
+&= \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
+\end{align}
+$$
+
+除此之外，我们还需要知道两个多元高斯分布的KL散度计算公式（read this post [^gupta_gaussian_kl] to know how to derive it）. 给定两个高斯分布，$\mathcal{N}(\boldsymbol{\mu_q},\,\Sigma_q)$ and $\mathcal{N}(\boldsymbol{\mu_p},\,\Sigma_p)$, 数据维度式是$k$维，则他们的KL散度为：
+
+$$D_{KL}(q||p) = \frac{1}{2}\left[\log\frac{|\Sigma_p|}{|\Sigma_q|} - k + (\boldsymbol{\mu_q}-\boldsymbol{\mu_p})^T\Sigma_p^{-1}(\boldsymbol{\mu_q}-\boldsymbol{\mu_p}) + tr\left\{\Sigma_p^{-1}\Sigma_q\right\}\right]$$
+
+再者，我们要知道一个重要的假设，DDPM原论文[^ho_ddpm] 假定 $\Sigma_\theta$ 是常量超参数。假如$\Sigma_\theta$需要学习，则会导致
+
+1. 训练时需要对方差做梯度更新，可能导致发散。
+2. 对于每个时间步 $t$，$\Sigma_\theta(\mathbf{x}_t, t)$ 是高维的（例如图像像素维），训练量非常大。
+3. 经验表明，如果只预测均值，模型已经能很好地学习反向过程，生成的样本质量也很高。
+
+根据这些信息，让我们写一下完整的 $L_t$的推导：
+
+$$
+\begin{aligned}
+& L_t \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL} \left( 
+  \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I})
+  \parallel 
+  \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
+\right) \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL} \left( 
+  \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}_{t}, \tilde{\beta}_t \mathbf{I})
+  \parallel 
+  \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_{\theta,t}, \boldsymbol{\Sigma}_{\theta,t})
+\right) 
+\quad\text{; 简写上式}\\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} 
+\frac{1}{2} \left[ 
+  \log \frac{|\boldsymbol{\Sigma}_{\theta,t}|}{|\tilde{\beta}_t \mathbf{I}|} - 
+  k + 
+  (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t})^T \boldsymbol{\Sigma}_{\theta,t}^{-1} (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t}) +
+  \text{tr}(\boldsymbol{\Sigma}_{\theta,t}^{-1} \tilde{\beta}_t \mathbf{I})
+\right]
+\quad\text{; 高斯分布的KL散度展开}\\
+%
+&\approx \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} 
+\frac{1}{2} \left[ 
+  (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t})^T 
+  \boldsymbol{\Sigma}_{\theta,t}^{-1} 
+  (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t})
+\right]
+\quad\text{; 忽略常量} \Sigma_\theta(\mathbf{x}_t, t), \tilde{\beta}_t\mathbf{I}, k \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} 
+\frac{1}{2} \Big[
+  \frac{1}{\| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} 
+  \| \tilde{\boldsymbol{\mu}}_t - \boldsymbol{\mu}_{\theta,t} \|^2 
+\Big]
+\quad\text{; }\boldsymbol{\Sigma}_{\theta,t}\text{; 是对角矩阵，所以可以单独提到前面} \\
+%
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[\frac{1}{2 \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \| \tilde{\boldsymbol{\mu}}_t(\mathbf{x}_t, \mathbf{x}_0) - \boldsymbol{\mu}_\theta(\mathbf{x}_t, t) \|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[\frac{1}{2  \|\boldsymbol{\Sigma}_{\theta,t} \|^2_2} \| \frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big) - \frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t) \Big) \|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] \\
+&= \mathbb{E}_{\mathbf{x}_0\sim q(\mathbf{x}_{0})} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] \\
+&\propto \mathbb{E}_{\mathbf{x}_0\sim q(\mathbf{x}_{0}), \boldsymbol{\epsilon}_t \sim\mathcal{N}(0, I) } \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] \\
+\end{aligned}
+$$
+
+{{% admonition type="quote" title="$L_t$的化简" open=true %}}
+$$
+\begin{aligned}
+L_t^\text{simple}
+&= \mathbb{E}_{t \sim [1, T], \mathbf{x}_0, \boldsymbol{\epsilon}_t} \Big[\|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\|^2 \Big] \\
+&= \mathbb{E}_{t \sim [1, T], \mathbf{x}_0, \boldsymbol{\epsilon}_t} \Big[\|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big]
+\end{aligned}
+$$
+{{% /admonition %}}
+
+这里主要解释了两件事情：
+
+1. 训练时的蒙特卡洛采样，是对任意真实图片样本 $\mathbf{x}_0$, 任意difussion步骤 $t$ 以及任意噪声 $\boldsymbol{\epsilon}_t$ 进行采样。
+2. 训练时忽略掉了权重系数
+
+{{% admonition type="quote" title="DDPM Algorithm的训练和采样" open=true %}}
+![DDPM Algorithm](/images/DDPM_Algo.png)
+{{% /admonition %}}
+
+- Algorithm 1: Training（训练阶段）：训练就是教模型去“猜出某一时刻图像里的噪声”。这里要感谢前面推出来的各种close form的公式，我们无需逐步的进行计算。
+- Algorithm 2: Sampling（采样阶段）：采样就是从随机噪声开始，逐步去噪生成新图像。所以他要走完全部的difussion process，因此生成速度会很慢。
+
+PS. 在图像生成领域，采样指的就是拿训练好的模型进行推理。
+
+{{% admonition type="quote" title="Connection with noise-conditioned score networks (NCSN)" open=true %}}
+
+[Song & Ermon (2019)](https://arxiv.org/abs/1907.05600) proposed a score-based generative modeling method where samples are produced via [Langevin dynamics](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#connection-with-stochastic-gradient-langevin-dynamics) using gradients of the data distribution estimated with score matching.
+
+...
+
+$$
+\mathbf{s}_\theta(\mathbf{x}_t, t)
+\approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
+= \mathbb{E}_{q(\mathbf{x}_0)} [\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x}_0)]
+= \mathbb{E}_{q(\mathbf{x}_0)} \Big[ - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}} \Big]
+= - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
+$$
+{{% /admonition %}}
+
+目的上来看，就是用求梯度的方式，来建模 $\mu_\theta$
+
+你问的这段关于 Noise-Conditioned Score Networks (NCSN) 的内容确实挺密的，咱们来一步步拆解一下它的核心逻辑和数学含义：
+
+---
+
+🧠 背景：Score-Based Generative Modeling 是什么？
+
+Score-based 模型的目标是估计数据分布的梯度（score），即：
+\[
+\nabla_x \log p(x)
+\]
+这个梯度可以用来通过 Langevin dynamics 采样出新的数据点：
+\[
+x_{t+1} = x_t + \frac{\delta}{2} \nabla_x \log p(x_t) + \sqrt{\delta} \cdot \epsilon_t
+\]
+其中 \(\epsilon_t \sim \mathcal{N}(0, I)\)，这是一种“带噪梯度上升”的方式。
+
+---
+
+🧊 问题：数据集中在低维流形上怎么办？
+
+根据 manifold hypothesis，真实数据 \(x\) 虽然在高维空间中，但其实集中在一个低维子空间上。这导致：
+
+- 在数据密度低的区域，score 估计不准。
+- Langevin dynamics 可能会“走偏”，因为梯度估计不可靠。
+
+---
+
+💡 解决方案：加入噪声 + 多尺度训练
+
+Song & Ermon 提出：
+
+1. **加入不同强度的高斯噪声**：让数据分布变得更“满”，覆盖整个空间。
+2. **训练一个 Noise-Conditioned Score Network**：记作 \(s_\theta(x, \sigma)\)，它能估计不同噪声水平下的 score：
+   \[
+   s_\theta(x, \sigma) \approx \nabla_x \log p_\sigma(x)
+   \]
+   其中 \(p_\sigma(x)\) 是加入噪声后的数据分布。
+
+---
+
+🔁 与扩散模型的联系：Forward Process 类似加噪过程
+
+这个“逐步加噪”的过程和扩散模型中的 forward diffusion 是一样的：
+\[
+q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} x_{t-1}, \beta_t I)
+\]
+最终 \(x_T\) 会变成一个纯高斯噪声。
+
+---
+
+📐 Score 与高斯分布的梯度关系
+
+对于高斯分布：
+\[
+p(x) = \mathcal{N}(x; \mu, \sigma^2 I)
+\]
+其 score 是：
+\[
+\nabla_x \log p(x) = -\frac{1}{\sigma^2}(x - \mu)
+\]
+所以在扩散模型中，score network 其实是在估计：
+\[
+\nabla_x \log p_\sigma(x) = -\frac{x - \mu}{\sigma^2}
+\]
+而这个 \(\mu\) 可以是原始数据 \(x_0\)，也可以是神经网络预测的值。
+
+---
+
+🧪 总结一下这段话的意思：
+
+- 原始 score-based 模型用 Langevin dynamics 来采样，但在高维空间中不稳定。
+- 加入噪声后训练 score network 更稳定。
+- 多尺度噪声训练（noise-conditioned）让模型能适应不同的噪声水平。
+- 这个过程和扩散模型的 forward diffusion 是一致的。
+- 最终，score network 估计的是加入噪声后的数据分布的梯度。
+
+---
+
+如果你想，我可以把这部分用图示或公式推导再展开一层，或者对比一下 DDPM 和 NCSN 的异同。你更想深入哪一块？
+
+你的问题非常好，我们来逐个解释这些概念和公式，帮助你建立清晰的直觉：
+
+---
+
+🧭 什么是 \(\mathbb{R}^D\) 空间？
+
+这是一个 **D维欧几里得空间**，也就是所有长度为 \(D\) 的实数向量组成的空间。比如：
+
+- \(\mathbb{R}^2\)：二维平面
+- \(\mathbb{R}^3\)：三维空间
+- \(\mathbb{R}^{512}\)：比如图像的潜在表示空间
+
+在扩散模型中，数据（如图像）被表示为高维向量，通常就在 \(\mathbb{R}^D\) 中。
+
+---
+
+🧮 为什么要计算梯度 \(\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)\)？
+
+这是所谓的 **score function**，表示在某个点 \(\mathbf{x}_t\) 上，数据分布的对数密度的梯度。它的作用是：
+
+- 指出“数据分布上升最快的方向”
+- 可以用来进行 **Langevin dynamics** 采样
+- 在扩散模型中，它帮助我们从噪声中“走回”真实数据分布
+
+---
+
+🔁 要不要算 \(\mathbf{x}_{t-1}\)？
+
+是的，扩散模型的目标就是从一个高斯噪声 \(\mathbf{x}_T\) 开始，逐步去噪得到 \(\mathbf{x}_0\)。每一步都要估计：
+\[
+p_\theta(\mathbf{x}_{t-1} | \mathbf{x}_t)
+\]
+这个分布通常建模为高斯分布，其均值由神经网络预测。
+
+---
+
+📦 什么是 \(q(\tilde{\mathbf{x}} \vert \mathbf{x})\)？
+
+这是一个 **加噪过程的条件分布**，表示在原始数据 \(\mathbf{x}\) 上加噪后得到 \(\tilde{\mathbf{x}}\) 的概率。比如：
+\[
+q(\tilde{\mathbf{x}} \vert \mathbf{x}) = \mathcal{N}(\tilde{\mathbf{x}}; \mathbf{x}, \sigma^2 I)
+\]
+在 NCSN 中，这个分布用于训练 score network 来估计加噪数据的 score。
+
+---
+
+📐 这个公式是 score function 的定义吗？
+
+你写的这组公式：
+
+\[
+\mathbf{s}_\theta(\mathbf{x}_t, t)
+\approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t)
+= \mathbb{E}_{q(\mathbf{x}_0)} [\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x}_0)]
+= \mathbb{E}_{q(\mathbf{x}_0)} \Big[ - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}} \Big]
+= - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
+\]
+
+是 **扩散模型中 score function 的近似表达式**，其中：
+
+- \(\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\) 是神经网络预测的噪声
+- \(\bar{\alpha}_t = \prod_{s=1}^t \alpha_s\)，是前向过程的累计衰减因子
+- 最后一行是因为我们用 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\) 来生成 \(\mathbf{x}_t\)，所以可以反推 score
+
+---
+
+🧪 那训练时怎么训练？真实的 score 有吗？
+
+关键点是：**真实的 score 没有显式表达式**，但我们可以通过构造损失函数来间接训练 score network。
+
+在 DDPM 或 NCSN 中，训练目标是：
+\[
+\mathcal{L}_{\text{simple}} = \mathbb{E}_{\mathbf{x}_0, \boldsymbol{\epsilon}, t} \left[ \left\| \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \right\|^2 \right]
+\]
+也就是说：
+
+- 我们知道 \(\mathbf{x}_t = \sqrt{\bar{\alpha}_t} \mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}\)
+- 所以我们知道真实的 \(\boldsymbol{\epsilon}\)
+- 训练目标就是让网络预测的 \(\boldsymbol{\epsilon}_\theta\) 尽量接近真实的 \(\boldsymbol{\epsilon}\)
+
+这就间接地训练了 score function，因为：
+\[
+\mathbf{s}_\theta(\mathbf{x}_t, t) \approx - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}
+\]
 
 
 
@@ -713,16 +1034,51 @@ print("grad log_sigma:", log_sigma.grad)
 
 #### Gaussian distribution
 
-高斯分布（Gaussian distribution）也被称为**正态分布**，$\mathcal{N}(\mu, \sigma)$，其概率密度函数（PDF, Probability Density Function）为：
+**一维高斯分布（Univariate Gaussian）** $x \sim \mathcal{N}(\mu, \sigma^2)$ 的PDF是
 
 $$
-f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \; \exp\!\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)
+p(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)
 $$
 
-- $\mu$：均值（mean），决定分布的中心位置
-- $\sigma$：标准差（standard deviation），决定分布的宽度
-- $\sigma^2$：方差（variance）
-- $\exp(\cdot)$：自然指数函数 $e^x$
+* **均值 $\mu$**：分布的中心位置
+* **方差 $\sigma^2$**（标准差 $\sigma$）：分布的宽度（不确定性）
+
+**多维高斯分布（Multivariate Gaussian）** $\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ 的概率密度函数 (pdf)：
+
+$$
+p(\mathbf{x}) = \frac{1}{\sqrt{(2\pi)^d |\boldsymbol{\Sigma}|}} 
+\exp\!\left(-\tfrac{1}{2} (\mathbf{x}-\boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x}-\boldsymbol{\mu})\right)
+$$
+
+其中：
+
+* $\mathbf{x} \in \mathbb{R}^d$ 是 $d$ 维向量
+* 均值向量 $\boldsymbol{\mu} \in \mathbb{R}^d$：分布的中心位置。
+* 协方差矩阵 $\boldsymbol{\Sigma} \in \mathbb{R}^{d\times d}$：描述不同维度之间的方差和相关性。
+* $|\boldsymbol{\Sigma}|$ = 协方差矩阵的行列式，代表“体积缩放”。
+* $\boldsymbol{\Sigma}^{-1}$ = 协方差矩阵的逆，定义了“椭球形”的等密度曲线。
+
+对 $\boldsymbol{\Sigma}$ 的分解能揭示分布的几何性质：
+
+* 对角元素：每个维度的方差（数值大小 = 在该轴上的“宽度”）。
+* 非对角元素：不同维度之间的相关性，决定分布是否是“旋转的椭圆/椭球”。
+
+例子：
+
+* 如果 $\boldsymbol{\Sigma} = \sigma^2 I$，就是一个各向同性的“圆形/球形”分布。
+* 如果 $\boldsymbol{\Sigma}$ 不是对角阵，就有相关性，等密度线是“倾斜的椭圆/椭球”。
+
+下面两个图示更直观的展示了 $\mu$ 和 $\Sigma$ 对PDF的形状的影响 [^saleem_gaussian]：
+
+{{< media
+src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*cOOt-vnbCJtd0d7HLdyj4w.gif"
+caption="Changes to the mean vector act to translate the Gaussian’s main ‘bump’. ([source](https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b))"
+>}}
+
+{{< media
+src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*JaGLB-lu423IeMe20wRHgA.gif"
+caption="Changes to the covariance matrix act to change the shape of the Gaussian’s main ‘bump’. ([source](https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b))"
+>}}
 
 #### 联合分布，边缘分布和条件分布
 
@@ -809,6 +1165,33 @@ $$P(X) = \sum_{y} P(X, Y = y) = \sum_{y} P(X | Y = y) P(Y = y)$$
 3. 全期望公式
   $\mathbb{E}_{x \sim p(x)}[f(x)] = \mathbb{E}_{y \sim p(y)}\left[ \mathbb{E}_{x \sim p(x|y)}[f(x)] \right]$
 
+#### 随机过程
+
+随机过程（Stochastic Process）是随时间（或空间）演化的随机变量族。一个随机过程可以写成：
+
+$$
+\{ X_t \}_{t \in T}
+$$
+
+* $t$：索引集，可以是 **离散的**（如整数时间点 $t=0,1,2,\dots$）或 **连续的**（如实数时间 $t \ge 0$）。
+* $X_t$：在每个时间点 $t$ 上的一个随机变量。
+* 整个过程就是一组随机变量组成的族，反映系统随 $t$ 演化时的随机性。
+
+直观理解：
+
+* 随机变量是“某个时刻的随机量”；
+* 随机过程是“随时间变化的一串随机量”。
+
+#### Markov Property
+
+一个随机过程若满足
+
+$$
+P(X_{t+1} \mid X_t, X_{t-1}, \dots, X_0) = P(X_{t+1} \mid X_t)
+$$
+
+就说它具有马尔可夫性质，即未来只依赖于现在，而与过去无关。
+
 #### Score Function
 
 在概率论和统计学中，**score function** 原本的定义是：
@@ -892,33 +1275,6 @@ D_{KL}(p\|q) &= H(p, q) - H(p) \\
 \end{align}
 $$
 
-### 随机过程
-
-随机过程（Stochastic Process）是随时间（或空间）演化的随机变量族。一个随机过程可以写成：
-
-$$
-\{ X_t \}_{t \in T}
-$$
-
-* $t$：索引集，可以是 **离散的**（如整数时间点 $t=0,1,2,\dots$）或 **连续的**（如实数时间 $t \ge 0$）。
-* $X_t$：在每个时间点 $t$ 上的一个随机变量。
-* 整个过程就是一组随机变量组成的族，反映系统随 $t$ 演化时的随机性。
-
-直观理解：
-
-* 随机变量是“某个时刻的随机量”；
-* 随机过程是“随时间变化的一串随机量”。
-
-#### Markov Property
-
-一个随机过程若满足
-
-$$
-P(X_{t+1} \mid X_t, X_{t-1}, \dots, X_0) = P(X_{t+1} \mid X_t)
-$$
-
-就说它具有马尔可夫性质，即未来只依赖于现在，而与过去无关。
-
 ## Citation
 
 {{< bibtex >}}
@@ -936,6 +1292,10 @@ $$
 [^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
 [^lilian_ae]: **Weng, Lilian.** “From Autoencoder to Beta-VAE.” _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
+
+[^saleem_gaussian]: **Saleem, Ameer.** “Unpacking the Multivariate Gaussian Distribution.” *Medium*, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
+
+[^gupta_gaussian_kl]: **Gupta, Rishabh.** “KL Divergence between 2 Gaussian Distributions.” *Mr. Easy*, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
 
 [^wiki_closed]: “Closed-form Expression.” _Wikipedia_, Wikimedia Foundation, https://en.wikipedia.org/wiki/Closed-form_expression.
 
