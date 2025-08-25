@@ -712,9 +712,22 @@ $$
 &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)\|^2 \Big] \\
 &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] \\
 &= \mathbb{E}_{\mathbf{x}_0\sim q(\mathbf{x}_{0})} \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] \\
-&\propto \mathbb{E}_{\mathbf{x}_0\sim q(\mathbf{x}_{0}), \boldsymbol{\epsilon}_t \sim\mathcal{N}(0, I) } \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] \\
+&\propto \mathbb{E}_{t \sim [1, T], \mathbf{x}_0\sim q(\mathbf{x}_{0}), \boldsymbol{\epsilon}_t \sim\mathcal{N}(0, I) } \Big[\frac{ (1 - \alpha_t)^2 }{2 \alpha_t (1 - \bar{\alpha}_t) \| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big] \\
 \end{aligned}
 $$
+
+其中，
+
+- $t, \mathbf{x}_0, \boldsymbol{\epsilon}_t$ 都是通过蒙特卡洛采样来的，因此是模型的输入；
+- $\alpha_t, \bar{\alpha}_t$ 则都依赖于 Noise variance schedule parameter $\beta_t$，这个值是超参数，是一个调度数列，是一个值得设计的地方；
+- $\boldsymbol{\Sigma}_{\theta,t}$ 是模型在时间步 $t$ 的reverse diffusion distribution 的协方差，可以设计为constant 也可以被设计为learnable parameters。
+- $\boldsymbol{\epsilon}_\theta$ 神经网络必然要学习的项，是learnable parameters，没什么好说的。
+
+接下来会逐一讲解三个参数相关的设计策略：
+
+1. $\beta_t$和$\boldsymbol{\Sigma}_{\theta,t}$为简单常数的 $L_t^\text{simple}$ 策略
+2. $\beta_t$ 为non-trivial schedule的策略
+3. $\boldsymbol{\Sigma}_{\theta,t}$为可学习的参数策略
 
 {{% admonition type="quote" title="$L_t$的化简" open=true %}}
 $$
@@ -729,7 +742,9 @@ $$
 这里主要解释了两件事情：
 
 1. 训练时的蒙特卡洛采样，是对任意真实图片样本 $\mathbf{x}_0$, 任意difussion步骤 $t$ 以及任意噪声 $\boldsymbol{\epsilon}_t$ 进行采样。
-2. 训练时忽略掉了权重系数
+2. 训练时忽略掉了含有$\boldsymbol{\Sigma}_{\theta,t}$的权重系数，因为在原论文 [^ho_ddpm] 中这个被设置为了常数。 
+
+PS. 同时这个简化的公式还给我们观察 $L_t$ 另外的一个视角，即他可以不是KL散度 loss，而是一个MSE loss。
 
 {{% admonition type="quote" title="DDPM Algorithm的训练和采样" open=true %}}
 ![DDPM Algorithm](/images/DDPM_Algo.png)
@@ -832,6 +847,171 @@ $$
 
   此时，便可以不依赖真实样本 $\mathbf{x}_0$ 来迭代式采样生成新图像。
 
+### Parameterization of $\beta_t$
+
+{{% admonition type="quote" title="从 trivial 到 non-trivial $\beta_t$ scheduling" open=true %}}
+The forward variances are set to be a sequence of linearly increasing constants in [Ho et al. (2020)](https://arxiv.org/abs/2006.11239), from $\beta_1=10^{-4}$ to $\beta_T=0.02$. They are relatively small compared to the normalized image pixel values between $[-1, 1]$. Diffusion models in their experiments showed high-quality samples but still could not achieve competitive model log-likelihood as other generative models.
+
+[Nichol & Dhariwal (2021)](https://arxiv.org/abs/2102.09672) proposed several improvement techniques to help diffusion models to obtain lower NLL. One of the improvements is to use a cosine-based variance schedule. The choice of the scheduling function can be arbitrary, as long as it provides a near-linear drop in the middle of the training process and subtle changes around $t=0$ and $t=T$.
+
+$$ \beta_t = \text{clip}(1-\frac{\bar{\alpha}_t}{\bar{\alpha}_{t-1}}, 0.999) \quad\bar{\alpha}_t = \frac{f(t)}{f(0)}\quad\text{where }f(t)=\cos\Big(\frac{t/T+s}{1+s}\cdot\frac{\pi}{2}\Big)^2 $$
+
+where the small offset $s$ is to prevent $\beta_t$ from being too small when close to $t=0$.
+
+![Comparison](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/diffusion-beta.png)
+
+{{% /admonition %}}
+
+让我们把DDPM [^ho_ddpm] 原论文中的调度方法，和Improved DDPM [^nichol_improved_ddpm] 中的调度公式给完整写出来：
+
+DDPM [^ho_ddpm]的 **linear variance schedule**是：
+
+$$
+\begin{align}
+\beta_t &= \beta_{\text{min}} + \frac{t - 1}{T - 1} (\beta_{\text{max}} - \beta_{\text{min}}) \\
+\alpha_t &= 1 - \beta_t = 1 - \left(\beta_{\text{min}} + \frac{t - 1}{T - 1} (\beta_{\text{max}} - \beta_{\text{min}})\right) \\
+\bar{\alpha}_t &= \prod_{k=1}^{t} \alpha_t = \prod_{k=1}^{t} \left(1 - \beta_{\text{min}} - \frac{k - 1}{T - 1} (\beta_{\text{max}} - \beta_{\text{min}})\right)
+\end{align}
+$$
+
+其中：
+
+- \( \beta_{\text{min}} \) 和 \( \beta_{\text{max}} \) 是预设的最小和最大噪声值（例如 0.0001 和 0.02）
+- \( T \) 是总的扩散步数（例如 1000）
+
+Improved DDPM [^nichol_improved_ddpm] 的 **cosine-based variance schedule**是：
+
+$$
+\begin{align}
+\bar{\alpha}_t &= \frac{f(t)}{f(0)} \quad \text{; where } f(t)=\cos\Big(\frac{t/T+s}{1+s}\cdot\frac{\pi}{2}\Big)^2, s=0.008 \\
+\alpha_t &= \frac{\bar{\alpha}_t}{\bar{\alpha}_{t-1}} = \frac{f(t)}{f(t-1)} \\
+\beta_t &= \text{clip}(1-\frac{\bar{\alpha}_t}{\bar{\alpha}_{t-1}}, 0.999)
+\end{align}
+$$
+
+其中：
+
+- 这个schedule先定义 $\bar{\alpha}_t$，再定义 $\alpha_t$ 和 $\beta_t$。
+- \( s \) 是一个小的偏移量，用于防止 \( \beta_t \) 在接近 \( t=0 \) 时变得过小。Improved DDPM [^nichol_improved_ddpm]认为 having tiny amounts of noise at the beginning of the process made it hard for the network to predict accurately enough.
+- clip 函数用于确保 \( \beta_t \) 不超过 0.999，这避免了数值不稳定性。Improved DDPM [^nichol_improved_ddpm]认为这能够prevent singularities at the end of the diffusion process near $t = T$.
+
+点击下面的图的右下角可以进入到交互式界面直观的感受两种scheduler。
+
+<iframe src="https://www.desmos.com/calculator/sxftdp4sib?embed" width="100%" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
+
+### Parameterization of reverse process variance $\boldsymbol{\Sigma}_\theta$
+
+{{% admonition type="quote" title="从 unlearnable 到 learnable $\boldsymbol{\Sigma}_\theta$" open=true %}}
+[Ho et al. (2020)](https://arxiv.org/abs/2006.11239) chose to fix $\beta_t$ as constants instead of making them learnable and set $\boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) = \sigma^2_t \mathbf{I}$ , where $\sigma_t$ is not learned but set to $\beta_t$ or $\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t$. Because they found that learning a diagonal variance $\boldsymbol{\Sigma}_\theta$ leads to unstable training and poorer sample quality.
+
+[Nichol & Dhariwal (2021)](https://arxiv.org/abs/2102.09672) proposed to learn $\boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)$ as an interpolation between $\beta_t$ and $\tilde{\beta}_t$ by model predicting a mixing vector $\mathbf{v}$ :
+
+$$ \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) = \exp(\mathbf{v} \log \beta_t + (1-\mathbf{v}) \log \tilde{\beta}_t) $$
+{{% /admonition %}}
+
+回忆下我们之前的reverse diffsion 中的后验和似然
+
+$$
+\begin{align}
+%
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) 
+&= \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I}) \\
+%
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) 
+&= \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
+\end{align}
+$$
+
+其中，$\tilde{\boldsymbol{\mu}}_t (\mathbf{x}_t, \mathbf{x}_0) = \frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)$, $\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t$.
+
+为了让训练更易收敛，在DDPM [^ho_ddpm] 原论文中，作者根据两个式子的形式上的一致性，将方差部分建模为常数，$\boldsymbol{\Sigma}_\theta \triangleq \tilde{\beta}_t \text{ or } \beta_t$。而只把$\tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0)$ close form 中的噪声 $\boldsymbol{\epsilon}_t$当作可学习的参数。
+
+为什么还可以建模为 forward diffusion中 noise schedule，$\beta_t$呢？OpenAI的Nichol 在Improved DDPM [^nichol_improved_ddpm]给出了解释，因为他们实际上相差很小，尤其是在diffusion process的后程。
+
+![The ratio for every diffusion step for diffusion processes of different lengths.](/posts/image-3.png)
+
+并且他们还发现，对这里进行改进，使其变成learnable interpolation between $\beta_t$ and $\tilde{\beta}_t$ 能带来更好的结果。
+
+$$
+\boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) = \exp(\mathbf{v} \log \beta_t + (1-\mathbf{v}) \log \tilde{\beta}_t)\mathbf{I}
+$$
+
+其中，
+
+- $\mathbf{I}$ （单位矩阵），我额外添加的，以确保最终的 $\boldsymbol{\Sigma}_\theta$ 是一个对角协方差矩阵。
+- $\beta_t$ （scalar） forward noise schedule
+- $\tilde{\beta}_t$ （scalar） posterior variance
+- $\mathbf{v}$ （vector） 模型输出的 mixing coefficient。这是模型要学习的。
+- $\boldsymbol{\Sigma}_\theta$ （vector） 每个维度的预测方差（对角协方差）
+
+{{% admonition type="quote" title="Integrate learnable $\boldsymbol{\Sigma}_\theta$ into 最终的loss" open=true %}}
+However, the simple objective $L_\text{simple}$ does not depend on $\boldsymbol{\Sigma}_\theta$ . To add the dependency, they constructed a hybrid objective $L_\text{hybrid} = L_\text{simple} + \lambda L_\text{VLB}$ where $\lambda=0.001$ is small and stop gradient on $\boldsymbol{\mu}_\theta$ in the $L_\text{VLB}$ term such that $L_\text{VLB}$ only guides the learning of $\boldsymbol{\Sigma}_\theta$. Empirically they observed that $L_\text{VLB}$ is pretty challenging to optimize likely due to noisy gradients, so they proposed to use a time-averaging smoothed version of $L_\text{VLB}$ with importance sampling.
+{{% /admonition %}}
+
+这段话整体意思比较简单，主要是希望把原来的$L_\text{simple}$损失和带有learnable parameter $\boldsymbol{\Sigma}_\theta$的损失结合起来，联合优化。不过其中出现两个概念可以展开来讲下：**“noisy gradient”**，**“time-averaging smoothed version of $L_\text{VLB}$ with importance sampling”**。
+
+**noisy gradient**是出自openai的论文 An Empirical Model of Large-Batch Training [^mc_candlish_grad_noise] 提出的一个概念。
+
+在随机梯度下降（SGD）中，我们不是用整个数据集计算梯度，而是用一个小批量（mini-batch）。这会引入噪声，因为不同批次的梯度可能差异很大。**Gradient Noise Scale**就能衡量这种梯度的波动性。它的核心思想是：如果梯度在不同批次之间变化很大（噪声高），我们需要更大的批量来获得更稳定的更新。在简化假设下（如 Hessian 是单位矩阵的倍数），Gradient Noise Scale 可以表示为：
+
+\[
+B_{\text{simple}} = \frac{\text{tr}(\Sigma)}{\|G\|_2^2}
+\]
+
+其中：
+
+- \(\text{tr}(\Sigma)\)：梯度协方差矩阵的迹。即所有参数梯度的方差之和。表示梯度的“波动性”。
+- \(\|G\|_2^2\)：梯度的平方范数（global gradient norm）。即所有参数梯度的平方和。表示梯度的“平均强度”。
+
+\(B_{\text{simple}}\) 表示：**梯度的噪声强度相对于其平均强度的比例**
+
+- 如果 \(B_{\text{simple}}\) 很大，说明梯度噪声很强，建议使用更大的 batch size。
+- 如果它很小，说明梯度稳定，可以用较小的 batch size，加快训练。
+
+---
+
+这段话中，“time-averaging smoothed version of $L_\text{VLB}$ with importance sampling”则具体指的是这个公式，Improved DDPM [^nichol_improved_ddpm]提出的新的损失函数设计：
+
+$$L_{\text{vlb}} = \mathbb{E}_{t \sim p_t} \left[ \frac{L_t}{p_t} \right], \text{ where } p_t \propto \sqrt{\mathbb{E}[L_t^2]} \text{ and } \sum p_t = 1$$
+
+这个公式话中提到的重要性采样技巧是机器学习中一种常见的技术，旨在对采样的改进来提高期望的计算效率（TODO ref to appendix）。
+
+让我们回忆下原始的DDPM的损失函数：
+
+$$
+L_t^\text{simple}
+= \mathbb{E}_{t \sim [1, T], \mathbf{x}_0, \boldsymbol{\epsilon}_t} \Big[\|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2 \Big]
+$$
+
+可以看到它的时间步 $t$ 服从均匀分布，则其概率密度函数为 $p'(t)=\frac{1}{T}$.
+
+然而 Improved DDPM [^nichol_improved_ddpm] 指出，前几个时间步贡献了绝大多损失值，因而均匀采样是低效的。
+
+![ Terms of the VLB vs diffusion step.The first few terms
+ contribute most to NLL.](/posts/image-2.png)
+
+因此，我们可以用另外一个分布来优化采样，作者提出了一个新的分布 $p_t \propto \sqrt{\mathbb{E}[L_t^2]} \text{ where } \sum p_t = 1$，这个分布和损失值成正比，意味着我们期望损失值高的区域（小时间步的区域）被更多的采样到。利用重要性采样公式调整期望为：
+
+$$
+\begin{align}
+L_{\text{vlb}} 
+&= \mathbb{E}_{t \sim p'(t)}[L_t] \\
+&= \int L_t p'(t) dt \\
+&= \int L_t \frac{p'(t)}{p(t)} p(t) dt \\
+&= \mathbb{E}_{t \sim p(t)}\left[ L_t \frac{p'(t)}{p(t)} \right] \\
+&= \mathbb{E}_{t \sim p(t)}\left[ \frac{1}{T} \frac{L_t}{p(t)} \right] \\
+&= \frac{1}{T} \mathbb{E}_{t \sim p(t)}\left[ \frac{L_t}{p(t)} \right] \\
+&\propto \boxed{\mathbb{E}_{t \sim p(t)} \left[ \frac{L_t}{p(t)} \right]}, \text{ where } p(t) \propto \sqrt{\mathbb{E}[L_t^2]} \text{ and } \sum p(t) = 1
+\end{align}
+$$
+
+
+
+
+
+
+
+
 
 
 
@@ -849,7 +1029,7 @@ $$
 
 ## Appendix
 
-### 生成模型背景
+### 相关深度学习知识点
 
 #### GAN, VAE, and Flow-based models 是什么
 
@@ -914,6 +1094,65 @@ print("grad mu:", mu.grad)
 print("grad log_sigma:", log_sigma.grad)
 ```
 
+#### 重要性采样（Importance Sampling）技巧
+
+假设你想计算某个函数 \( f(x) \) 关于概率分布 \( p(x) \) 的期望：
+
+\[
+\mathbb{E}_{x \sim p}[f(x)] = \int f(x) p(x) dx
+\]
+
+但直接从 \( p(x) \) 采样困难，或者 \( f(x) \) 在 \( p(x) \) 下大多数样本贡献很小，只有少数区域贡献大（比如尾部事件），这时直接蒙特卡洛估计效率很低。
+
+如果能**从另一个更容易采样的分布 \( q(x) \) 中采样，然后通过加权来纠正偏差**，那么估计起来就会更方便，这就是重要性采样。
+
+重要性采样对原期望重写为：
+
+\[
+\mathbb{E}_{x \sim p}[f(x)] = \int f(x) p(x) dx = \int f(x) \frac{p(x)}{q(x)} q(x) dx = \mathbb{E}_{x \sim q}\left[ f(x) \frac{p(x)}{q(x)} \right]
+\]
+
+其中，
+
+- \( q(x) \)是**提议分布（proposal distribution）** ，  并且 \( q(x) > 0 \) 当 \( p(x) > 0 \)（即支撑集包含 \( p \) 的支撑集）
+- \( w(x_i) = \frac{p(x_i)}{q(x_i)} \) 被称为**重要性权重（importance weight）**。
+
+这时，我们就可以从 \( q(x) \) 中采样 \( x_i \sim q(x) \)，然后估计：
+
+\[
+\hat{\mu} = \frac{1}{N} \sum_{i=1}^N f(x_i) \cdot \frac{p(x_i)}{q(x_i)}
+\]
+
+让我们举个例子，假设：
+
+- \( p(x) = \mathcal{N}(0, 1) \)
+- \( f(x) = x^2 \cdot \mathbb{1}[x > 2] \)
+- 直接从 \( p \) 采样，大部分样本 \( x < 2 \)，贡献为0，效率低。
+- 如果改用 \( q(x) = \mathcal{N}(2.5, 1) \) 来采样，更可能采到 \( x > 2 \) 的区域。
+
+代码示意（Python）：
+
+```python
+import numpy as np
+
+N = 10000
+# 从 q(x) ~ N(2.5, 1) 采样
+x = np.random.normal(2.5, 1, N)
+
+# 计算未归一化密度（忽略常数）
+log_p = -0.5 * x**2           # log N(0,1)
+log_q = -0.5 * (x - 2.5)**2   # log N(2.5,1)
+
+# 重要性权重（未归一化）
+w = np.exp(log_p - log_q)
+
+# 函数值
+f = x**2 * (x > 2)
+
+# 归一化重要性采样估计
+mu_hat = np.sum(f * w) / np.sum(w)
+print("Importance Sampling estimate:", mu_hat)
+```
 
 #### 重要的diffusion相关的论文
 
@@ -1212,6 +1451,6 @@ $$
 
 [^wiki_closed]: “Closed-form Expression.” _Wikipedia_, Wikimedia Foundation, https://en.wikipedia.org/wiki/Closed-form_expression.
 
-[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 12 Jun. 2025. Web. 23 Aug. 2025.
+[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 12 Jun. 2025. Web. 23 Aug. 2025. https://en.wikipedia.org/wiki/Jensen%27s_inequality.
 
-[^wiki_concave]: Wikipedia contributors. "Concave function." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 17 Jul. 2025. Web. 23 Aug. 2025.
+[^wiki_concave]: Wikipedia contributors. "Concave function." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 17 Jul. 2025. Web. 23 Aug. 2025. https://en.wikipedia.org/wiki/Concave_function.
