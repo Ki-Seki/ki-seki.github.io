@@ -789,11 +789,21 @@ p(\mathbf{x}_t) &\triangleq q(\mathbf{x}_t \vert \mathbf{x}_0) \\
 \end{align}
 $$
 
-由于这个close form公式的存在，这意味着，我们能不断地迭代这个公式，来获得一个真实性更高的样本。
+代入进去，我们则拥有更完整的采样公式为：
 
-因此，我们只要做出神经网络拟合这个采样公式即可。在这个式子中，$\mathbf{x}_{t-1}$ 是我们输入的值，无需拟合；$\frac{\delta}{2}$ 是常量系数，无需拟合；$\sqrt{\delta} \boldsymbol{\epsilon}_t$ 是随机采样的，也无需拟合；因此，只有中间的 $\nabla_\mathbf{x} \log q(\mathbf{x}_{t-1})$ 是关键的神经网络需要拟合的。
+$$
+\mathbf{x}_t = \mathbf{x}_{t-1} + \frac{\delta}{2} \nabla_\mathbf{x} \log q(\mathbf{x}_{t-1} \vert \mathbf{x}_0) + \sqrt{\delta} \boldsymbol{\epsilon}_t
+,\quad\text{where }
+\boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
 
-在了解如何建模中间项之前，我们先推导一下derivative of the logarithm of Gaussian density function:
+由于这个close form公式的存在，这意味着，我们能不断地迭代这个公式，来获得一个真实性更高的样本。所以现在问题的关键是看下这其中的各项是否能得到。
+
+因此，我们只要做出神经网络拟合这个采样公式即可。在这个式子中，$\mathbf{x}_{t-1}$ 是我们输入的值；$\frac{\delta}{2}$ 是常量系数；$\sqrt{\delta} \boldsymbol{\epsilon}_t$ 是随机采样的；只有中间的 $\nabla_\mathbf{x} \log q(\mathbf{x}_{t-1})$ 是关键的神经网络需要拟合的。
+
+---
+
+在了解如何建模中间项之前，我们先推导一下derivative of the logarithm of Gaussian density function（这个是一个单独的推导，也可以先跳过）:
 
 $$
 \begin{align}
@@ -807,7 +817,19 @@ $$
 \end{align}
 $$
 
-此时我们有golden truth：
+所以，结论即：
+
+$$
+\boxed{
+  \nabla_{\mathbf{x}}\log \mathcal{N}(\mathbf{x}; \boldsymbol{\mu}, \sigma^2 \mathbf{I})
+  = - \frac{\boldsymbol{\epsilon}}{\sigma}
+} 
+\quad\text{; where } \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
+
+---
+
+有了上面的这个公式，我们来推导下我们现在的golden truth：
 
 $$
 \begin{align}
