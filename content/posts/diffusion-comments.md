@@ -1027,7 +1027,31 @@ L_{\text{vlb}}
 \end{align}
 $$
 
+## Conditioned Generation
 
+### Classifier Guided Diffusion
+
+{{% admonition type="quote" title="Classifier Guided Diffusion采样公式" open=true %}}
+To explicit incorporate class information into the diffusion process, [Dhariwal & Nichol (2021)](https://arxiv.org/abs/2105.05233) trained a classifier $f_\phi(y \vert \mathbf{x}_t, t)$ on noisy image $\mathbf{x}_t$ and use gradients $\nabla_\mathbf{x} \log f_\phi(y \vert \mathbf{x}_t)$ to guide the diffusion sampling process toward the conditioning information $y$ (e.g. a target class label) by altering the noise prediction. Recall that $\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t) = - \frac{1}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)$ and we can write the score function for the joint distribution $q(\mathbf{x}_t, y)$ as following,
+
+$$ \begin{aligned} \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t, y) &= \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t) + \nabla_{\mathbf{x}_t} \log q(y \vert \mathbf{x}_t) \\ &\approx - \frac{1}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) + \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t) \\ &= - \frac{1}{\sqrt{1 - \bar{\alpha}_t}} (\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) - \sqrt{1 - \bar{\alpha}_t} \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t)) \end{aligned} $$
+Thus, a new classifier-guided predictor $\bar{\boldsymbol{\epsilon}}_\theta$ would take the form as following,
+
+$$ \bar{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t) = \boldsymbol{\epsilon}_\theta(x_t, t) - \sqrt{1 - \bar{\alpha}_t} \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t) $$
+To control the strength of the classifier guidance, we can add a weight $w$ to the delta part,
+
+$$ \bar{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t) = \boldsymbol{\epsilon}_\theta(x_t, t) - \sqrt{1 - \bar{\alpha}_t} \; w \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t) $$
+{{% /admonition %}}
+
+整体想法即拿一个pre-trained diffusion model 和一个 pre-trained image classifier model，组合两个模型来做条件生成。利用langevin dynamics的技巧，如果我们拥有classifier，便能拿到类别$l$的梯度信息，有梯度信息便可以通过langevin dynamics来进行采样，通过逐步迭代拿到符合类别 $l$ 的图片：
+
+$$
+\mathbf{x}_t = \mathbf{x}_{t-1} + \frac{\delta}{2} \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_{t-1}, y) + \sqrt{\delta} \boldsymbol{\epsilon}_t
+,\quad\text{where }
+\boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
+
+**博文公式中的推导思路**就是第一步先通过条件概率转换为diffusion part的梯度，和分类器 part的梯度。第二步将理论公式转换为含learnable参数的形式。第三步进行了并非必要的化简。
 
 
 

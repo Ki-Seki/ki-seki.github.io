@@ -2,34 +2,27 @@
 math: true
 ---
 
-## Conditioned Generation
+### Classifier-Free Guidance
 
-### Classifier Guided Diffusion
-
-{{% admonition type="quote" title="Title" open=true %}}
+{{% admonition type="quote" title="Classifier-Free Guidance 采样公式" open=true %}}
 $$
 \begin{aligned}
-\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t, y)
-&= \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t) + \nabla_{\mathbf{x}_t} \log q(y \vert \mathbf{x}_t) \\
-&\approx - \frac{1}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) + \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t) \\
-&= - \frac{1}{\sqrt{1 - \bar{\alpha}_t}} (\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) - \sqrt{1 - \bar{\alpha}_t} \nabla_{\mathbf{x}_t} \log f_\phi(y \vert \mathbf{x}_t))
+\nabla_{\mathbf{x}_t} \log p(y \vert \mathbf{x}_t)
+&= \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t \vert y) - \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t) \\
+&= - \frac{1}{\sqrt{1 - \bar{\alpha}_t}}\Big( \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \Big) \\
+\bar{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t, y)
+&= \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \sqrt{1 - \bar{\alpha}_t} \; w \nabla_{\mathbf{x}_t} \log p(y \vert \mathbf{x}_t) \\
+&= \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) + w \big(\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \big) \\
+&= (w+1) \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - w \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)
 \end{aligned}
 $$
 {{% /admonition %}}
 
-这个是优化目标，就相当于在原本的ddpm网络头上加了一个分类器。
+classifer guided diffusion 利用两个已经训练好的模型，无需其他操作，这个优势很明显。但另外一个优势是，可以控制“conditioin”的强度，通过前面提到的$w$ 权重。
 
-第一行其实就是既要训练从噪声开始到真实图像的生成能力，还要加上从条件/类别到噪声的能力。
+而对于 claasifer-free guidance，最简单的就是直接把condition信息训练进diffusion模型即可，但是就失去condition强度控制的强度这个feature了。
 
-第二行把他们都转换为了含learnable参数的形式。
-
-这个公式就是ADM-G。
-
-### Classifier-Free Guidance
-
-{{% admonition type="quote" title="Title" open=true %}}
-Inner content...
-{{% /admonition %}}
+那另外一种思路是，如原博文所示，和带有pre-trained classifer-based condition generation不同的是，classifier-free guidance需要一个pre-trained unconditioned diffusion，以及一个由$(\mathbf{x}_t, y)$ pairs 额外训练的 conditiondiffusion模型，通过两者的“相减”来构建出conditional diffusion model。
 
 🧠 Classifier-Free Guidance 全面总结
 
