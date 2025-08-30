@@ -1053,10 +1053,90 @@ $$
 
 **博文公式中的推导思路**就是第一步先通过条件概率转换为diffusion part的梯度，和分类器 part的梯度。第二步将理论公式转换为含learnable参数的形式。第三步进行了并非必要的化简。
 
+### Classifier-Free Guidance
 
+{{% admonition type="quote" title="Classifier-Free Guidance 采样公式" open=true %}}
+$$
+\begin{aligned}
+\nabla_{\mathbf{x}_t} \log p(y \vert \mathbf{x}_t)
+&= \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t \vert y) - \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t) \\
+&= - \frac{1}{\sqrt{1 - \bar{\alpha}_t}}\Big( \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \Big) \\
+\bar{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t, y)
+&= \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \sqrt{1 - \bar{\alpha}_t} \; w \nabla_{\mathbf{x}_t} \log p(y \vert \mathbf{x}_t) \\
+&= \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) + w \big(\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \big) \\
+&= (w+1) \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - w \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)
+\end{aligned}
+$$
+{{% /admonition %}}
 
+classifer guided diffusion 的优势是可以直接利用两个已经训练好的模型，无需其他操作。另外一个优势是，通过前面提到的$w$ 权重，可以控制“conditioin”的强度。
 
+而对于 claasifer-free guidance，最简单的就是直接把condition信息训练进diffusion模型即可，但是这就失去condition强度控制的这个feature了。
 
+所以另外一种思路是，如原博文所示，在同一个network骨架上训练带condition和不带condition的两种情况，只在condition输入上做区分。这样就可以通过“相减”来实现condition强度的控制。
+
+让我们把采样公式给写的完整些：
+
+$$
+\begin{aligned}
+\nabla_{\mathbf{x}_t} \log p(y \vert \mathbf{x}_t)
+&= \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t \vert y) + \nabla_{\mathbf{x}_t} \log p(y) - \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t) &\quad\text{(按照贝叶斯公式展开)}\\
+&= \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t \vert y) - \nabla_{\mathbf{x}_t} \log p(\mathbf{x}_t) \\
+&= - \frac{1}{\sqrt{1 - \bar{\alpha}_t}}\Big( \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \Big) \\
+\bar{\boldsymbol{\epsilon}}_\theta(\mathbf{x}_t, t, y)
+&= \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \sqrt{1 - \bar{\alpha}_t} \; w \nabla_{\mathbf{x}_t} \log p(y \vert \mathbf{x}_t) \\
+&= \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) + w \big(\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \big)  &\quad\text{(按照classifier guided 方式展开)}\\
+&= (w+1) \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y) - w \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)
+\end{aligned}
+$$
+
+{{% admonition type="quote" title="FID和IS" open=true %}}
+Their experiments showed that classifier-free guidance can achieve a good balance between FID (distinguish between synthetic and generated images) and IS (quality and diversity).
+{{% /admonition %}}
+
+FID和IS是生成模型中重要的评估指标。
+
+---
+
+FID（Fréchet Inception Distance）【TODO论文：https://arxiv.org/abs/1706.08500】衡量的是生成图像与真实图像在特征空间中的分布差异。它使用 Inception 网络提取图像特征，然后计算两个高维高斯分布之间的 Fréchet 距离。
+
+\[
+\text{FID} = \|\mu_r - \mu_g\|^2 + \text{Tr}(\Sigma_r + \Sigma_g - 2(\Sigma_r \Sigma_g)^{1/2})
+\]
+其中：
+
+- \( \mu_r, \Sigma_r \)：真实图像的均值和协方差
+- \( \mu_g, \Sigma_g \)：生成图像的均值和协方差
+
+FID 越低，表示生成图像与真实图像越接近；
+
+---
+
+IS（Inception Score）【TODO论文：https://arxiv.org/abs/1606.03498】衡量的是生成图像的“清晰度”和“多样性”。它使用 Inception 网络预测图像类别分布，然后计算预测分布的 KL 散度。
+
+\[
+\text{IS} = \exp\left( \mathbb{E}_{x \sim p_g} \left[ D_{\text{KL}}(p(y|x) \| p(y)) \right] \right)
+\]
+
+其中：
+- \( p(y|x) \)：Inception 网络对生成图像的预测分布
+- \( p(y) \)：所有生成图像的平均预测分布
+
+IS 越高，表示图像清晰（预测分布熵低）且多样性高（平均分布熵高）
+
+{{% admonition type="quote" title="无分类器引导比 Classifier 引导效果更好" open=true %}}
+The guided diffusion model, GLIDE ([Nichol, Dhariwal & Ramesh, et al. 2022](https://arxiv.org/abs/2112.10741)), explored both guiding strategies, CLIP guidance and classifier-free guidance, and found that the latter is more preferred. They hypothesized that it is because CLIP guidance exploits the model with adversarial examples towards the CLIP model, rather than optimize the better matched images generation.
+{{% /admonition %}}
+
+GLIDE 是一种引导式扩散模型（guided diffusion model），由 Nichol、Dhariwal 和 Ramesh 等人在 2022 年提出。它尝试了两种图像生成的引导策略：
+
+1. **CLIP guidance（CLIP 引导）**：利用 CLIP 模型的图文匹配能力来引导图像生成过程。
+2. **Classifier-free guidance（无分类器引导）**：不依赖外部分类器，而是通过训练一个模型同时学习有条件和无条件的图像生成，从而实现引导。
+
+GLIDE 的实验发现，**无分类器引导比 CLIP 引导效果更好**，即：
+- 无分类器引导：模型自己学会怎么生成图像，不依赖外部判断。
+- CLIP 引导：模型依赖 CLIP 的评分，但可能会“作弊”去骗过 CLIP。
+- GLIDE 更偏好前者，因为它更自然、更稳健。
 
 
 
