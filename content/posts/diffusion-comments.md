@@ -1138,6 +1138,71 @@ GLIDE 的实验发现，**无分类器引导比 CLIP 引导效果更好**，即�
 - CLIP 引导：模型依赖 CLIP 的评分，但可能会“作弊”去骗过 CLIP。
 - GLIDE 更偏好前者，因为它更自然、更稳健。
 
+## Speed up Diffusion Models
+
+### Fewer Sampling Steps & Distillation
+
+{{% admonition type="quote" title="Naive Strided Sampling" open=true %}}
+One simple way is to run a strided sampling schedule (Nichol & Dhariwal, 2021) by taking the sampling update every $\lceil T/S \rceil$ steps to reduce the process from $T$ to $S$ steps. The new sampling schedule for generation is $\{\tau_1, \dots, \tau_S\}$ where $\tau_1 < \tau_2 < \dots <\tau_S \in [1, T]$ and $S < T$.
+{{% /admonition %}}
+
+下面是标准的DDPM采样公式：
+
+$$
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)
+= \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)) \quad, t\in[1,T]
+$$
+
+这里的naive strided sampling将采样公式改为了：
+
+$$
+p_\theta(\mathbf{x}_{\tau_{k-1}} \vert \mathbf{x}_{\tau_k})
+= \mathcal{N}(\mathbf{x}_{\tau_{k-1}}; \boldsymbol{\mu}_\theta(\mathbf{x}_{\tau_k}, \tau_k), \boldsymbol{\Sigma}_\theta(\mathbf{x}_{\tau_k}, \tau_k)) \quad, k\in[1,S]
+$$
+
+当然，跨多步时，真实的均值和方差应该通过多步高斯组合公式推导出来。因此这个strided sampling的策略只是一个粗糙的加速。
+
+{{% admonition type="quote" title="denoising diffusion implicit model" open=true %}}
+For another approach, let’s rewrite $q_\sigma(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)$ to be parameterized by a desired standard deviation $\sigma_t$ according to the [nice property](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice):
+
+$$ \begin{aligned} \mathbf{x}_{t-1} &= \sqrt{\bar{\alpha}_{t-1}}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_{t-1}}\boldsymbol{\epsilon}_{t-1} & \\ &= \sqrt{\bar{\alpha}_{t-1}}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_{t-1} - \sigma_t^2} \boldsymbol{\epsilon}_t + \sigma_t\boldsymbol{\epsilon} & \\ &= \sqrt{\bar{\alpha}_{t-1}} \Big( \frac{\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t} \epsilon^{(t)}_\theta(\mathbf{x}_t)}{\sqrt{\bar{\alpha}_t}} \Big) + \sqrt{1 - \bar{\alpha}_{t-1} - \sigma_t^2} \epsilon^{(t)}_\theta(\mathbf{x}_t) + \sigma_t\boldsymbol{\epsilon} \\ q_\sigma(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) &= \mathcal{N}(\mathbf{x}_{t-1}; \sqrt{\bar{\alpha}_{t-1}} \Big( \frac{\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t} \epsilon^{(t)}_\theta(\mathbf{x}_t)}{\sqrt{\bar{\alpha}_t}} \Big) + \sqrt{1 - \bar{\alpha}_{t-1} - \sigma_t^2} \epsilon^{(t)}_\theta(\mathbf{x}_t), \sigma_t^2 \mathbf{I}) \end{aligned} $$
+where the model $\epsilon^{(t)}_\theta(.)$ predicts the $\epsilon_t$ from $\mathbf{x}_t$.
+
+Recall that in $q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I})$, therefore we have:
+
+$$ \tilde{\beta}_t = \sigma_t^2 = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t $$
+Let $\sigma_t^2 = \eta \cdot \tilde{\beta}_t$ such that we can adjust $\eta \in \mathbb{R}^+$ as a hyperparameter to control the sampling stochasticity. The special case of $\eta = 0$ makes the sampling process deterministic. Such a model is named the denoising diffusion implicit model (DDIM; [Song et al., 2020](https://arxiv.org/abs/2010.02502)). DDIM has the same marginal noise distribution but deterministically maps noise back to the original data samples.
+
+During generation, we don’t have to follow the whole chain $t=1,\dots,T$, but rather a subset of steps. Let’s denote $s < t$ as two steps in this accelerated trajectory. The DDIM update step is:
+
+$$ q_{\sigma, s < t}(\mathbf{x}_s \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_s; \sqrt{\bar{\alpha}_s} \Big( \frac{\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t} \epsilon^{(t)}_\theta(\mathbf{x}_t)}{\sqrt{\bar{\alpha}_t}} \Big) + \sqrt{1 - \bar{\alpha}_s - \sigma_t^2} \epsilon^{(t)}_\theta(\mathbf{x}_t), \sigma_t^2 \mathbf{I}) $$
+While all the models are trained with $T=1000$ diffusion steps in the experiments, they observed that DDIM ($\eta=0$) can produce the best quality samples when $S$ is small, while DDPM ($\eta=1$) performs much worse on small $S$. DDPM does perform better when we can afford to run the full reverse Markov diffusion steps ($S=T=1000$). With DDIM, it is possible to train the diffusion model up to any arbitrary number of forward steps but only sample from a subset of steps in the generative process.
+{{% /admonition %}}
+
+Naive Strided Sampling 在数学上缺少严谨性，DDIM [^song_ddim]弥补了这个问题，同时DDIM将原来的随机采样过程转变为随机和确定性相结合的采样过程，更加灵活。
+
+此外，DDIM和DDPM的主要区别在于如何建模似然，来预测后验。
+
+$$
+\begin{align}
+\text{DDPM后验：} & q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I}) \\
+\text{DDPM似然：} & p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)) \\
+\text{DDIM似然：} & q_\sigma(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_{t-1}; \sqrt{\bar{\alpha}_{t-1}} \Big( \frac{\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t} \epsilon^{(t)}_\theta(\mathbf{x}_t)}{\sqrt{\bar{\alpha}_t}} \Big) + \sqrt{1 - \bar{\alpha}_{t-1} - \sigma_t^2} \epsilon^{(t)}_\theta(\mathbf{x}_t), \sigma_t^2 \mathbf{I})
+\end{align}
+$$
+
+其中，
+
+- $\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t$
+- $\sigma_t^2 = \eta \cdot \tilde{\beta}_t$。当$\eta=0$时，采样过程是确定性的（DDIM）；当$\eta=1$时，采样过程是随机的（DDPM）。
+
+注意：DDPM和DDIM分属不同的论文，因此可能有符号上的冲突，这里遵循原文，并没有将他们做统一。
+
+公式的推导的思路是，从forward diffusion process closed form公式出发，尝试分出去一个$\sigma_t^2$ 到方差位置，利用下面这样的技巧：
+
+\[
+\text{Var}(\boldsymbol{\epsilon}_{t-1}) = a^2 \cdot \text{Var}(\boldsymbol{\epsilon}_t) + b^2 \cdot \text{Var}(\boldsymbol{\epsilon}) = a^2 + b^2 \quad \text{; where }\epsilon_t \text{ and }\epsilon \text{ are independent}
+\]
 
 
 
@@ -1564,6 +1629,8 @@ $$
 [^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** “Improved Denoising Diffusion Probabilistic Models.” _Proceedings of the 38th International Conference on Machine Learning_, edited by Marina Meila and Tong Zhang, vol. 139, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. PMLR. https://proceedings.mlr.press/v139/nichol21a.html.
 
 [^song_consistency]: Song, Yang, et al. "Consistency Models." *International Conference on Machine Learning*, 2023. https://icml.cc/virtual/2023/poster/24593.
+
+[^song_ddim]: Song, Jiaming, Chenlin Meng, and Stefano Ermon. “Denoising Diffusion Implicit Models.” *International Conference on Learning Representations*, 2021, https://openreview.net/forum?id=St1giarCHLP.
 
 [^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
 
