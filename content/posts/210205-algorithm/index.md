@@ -3453,7 +3453,7 @@ DP 算法最好选择从 1 开始计数，因为下标为 0 时往往是边界
 > 例子
 >
 > PAT B1003 “我要通过”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/B1003.cpp` 中查看题解。其 FSM 图如下：
-> ![B1003 FSM](https://raw.githubusercontent.com/Ki-Seki/ki-seki.github.io/refs/heads/main/content/images/B1003_FSM.png)
+> ![B1003 FSM](B1003_FSM.png)
 >
 > PAT A1060 “Are They Equal”，[点此处](https://github.com/Ki-Seki/solutions)，并在以下目录 `solutions/solutions-PAT/A1060.cpp` 中查看题解。
 
