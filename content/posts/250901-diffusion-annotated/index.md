@@ -748,7 +748,10 @@ $$
 PS. 同时这个简化的公式还给我们观察 $L_t$ 另外的一个视角，即他可以不是KL散度 loss，而是一个MSE loss。
 
 {{% admonition type="quote" title="DDPM Algorithm的训练和采样" open=true %}}
-![DDPM Algorithm](/images/DDPM_Algo.png)
+{{< media
+src="DDPM_Algo.png"
+caption="The training and sampling algorithms in DDPM (Image source: [Ho et al. 2020](https://arxiv.org/abs/2006.11239))"
+>}}
 {{% /admonition %}}
 
 - Algorithm 1: Training（训练阶段）：训练就是教模型去“猜出某一时刻图像里的噪声”。这里要感谢前面推出来的各种close form的公式，我们无需逐步的进行计算。
@@ -881,8 +884,10 @@ $$ \beta_t = \text{clip}(1-\frac{\bar{\alpha}_t}{\bar{\alpha}_{t-1}}, 0.999) \qu
 
 where the small offset $s$ is to prevent $\beta_t$ from being too small when close to $t=0$.
 
-![Comparison](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/diffusion-beta.png)
-
+{{< media
+src="Linear_and_Cosine_Scheduling.png"
+caption="Comparison of linear and cosine-based scheduling of during training. (Image source: [Nichol & Dhariwal, 2021](https://arxiv.org/abs/2102.09672))"
+>}}
 {{% /admonition %}}
 
 让我们把DDPM [^ho_ddpm] 原论文中的调度方法，和Improved DDPM [^nichol_improved_ddpm] 中的调度公式给完整写出来：
@@ -951,7 +956,10 @@ $$
 
 为什么还可以建模为 forward diffusion中 noise schedule，$\beta_t$呢？OpenAI的Nichol 在Improved DDPM [^nichol_improved_ddpm]给出了解释，因为他们实际上相差很小，尤其是在diffusion process的后程。
 
-![The ratio for every diffusion step for diffusion processes of different lengths.](/posts/image-3.png)
+{{< media
+src="Ratio_vs_Diffusion_Step.png"
+caption="The ratio for every diffusion step for diffusion processes of different lengths. ([source](https://proceedings.mlr.press/v139/nichol21a.html))"
+>}}
 
 并且他们还发现，对这里进行改进，使其变成learnable interpolation between $\beta_t$ and $\tilde{\beta}_t$ 能带来更好的结果。
 
@@ -1010,8 +1018,10 @@ $$
 
 然而 Improved DDPM [^nichol_improved_ddpm] 指出，前几个时间步贡献了绝大多损失值，因而均匀采样是低效的。
 
-![ Terms of the VLB vs diffusion step.The first few terms
- contribute most to NLL.](/posts/image-2.png)
+{{< media
+src="VLB_vs_Diffusion_Step.png"
+caption="Terms of the VLB vs diffusion step. The first few terms contribute most to NLL. ([source](https://proceedings.mlr.press/v139/nichol21a.html))"
+>}}
 
 因此，我们可以用另外一个分布来优化采样，作者提出了一个新的分布 $p_t \propto \sqrt{\mathbb{E}[L_t^2]} \text{ where } \sum p_t = 1$，这个分布和损失值成正比，意味着我们期望损失值高的区域（小时间步的区域）被更多的采样到。利用重要性采样公式调整期望为：
 
@@ -1206,7 +1216,10 @@ $$
 \]
 
 {{% admonition type="quote" title="Progressive Distillation" open=true %}}
-![alt text](/posts/image.png)
+{{< media
+src="Progressive_Distillation_Algo.png"
+caption="Comparison of Algorithm 1 (diffusion model training) and Algorithm 2 (progressive distillation) side-by-side, where the relative changes in progressive distillation are highlighted in green. (Image source: [Salimans & Ho, 2022](https://arxiv.org/abs/2202.00512))"
+>}}
 {{% /admonition %}}
 
 我们可以对右侧Progressive Distillation的算法进行一些更详细的解释。
@@ -1314,63 +1327,307 @@ LDM 中 Query、Key、Value 的来源：
 | $\tau_\theta(y)$                                             | 条件编码器（如 CLIP 或 BERT）对条件 $y$ 的编码结果。输出为一组 token embeddings（例如每个词一个向量）。维度：$M \times d_\tau$，其中 $M$ 是 token 数量（如 77 个文本 token），$d_\tau$ 是嵌入维度（如 768）。 |
 | $\mathbf{W}^{(i)}_Q, \mathbf{W}^{(i)}_K, \mathbf{W}^{(i)}_V$ | 可学习的投影矩阵（参数），用于将输入映射到注意力空间中的 Q/K/V。                                                                                                                                              |
 
+## Scale up Generation Resolution and Quality
 
+这段是在讲如何通过一系列技术手段，把扩散模型的图像生成质量和分辨率提升到更高水平。主要讲了Noise Conditioning Augmentation技巧，unCLIP模型结构，Imagen模型结构，以及其他一些改进。最重要的是要了解Noise Conditioning Augmentation和unCLIP模型结构。
 
+{{% admonition type="quote" title="Noise conditioning augmentation" open=true %}}
+*Noise conditioning augmentation* between pipeline models is crucial to the final image quality, which is to apply strong data augmentation to the conditioning input $\mathbf{z}$ of each super-resolution model $p_\theta(\mathbf{x} \vert \mathbf{z})$. The conditioning noise helps reduce compounding error in the pipeline setup...
 
+They found the most effective noise is to apply Gaussian noise at low resolution and Gaussian blur at high resolution. In addition, they also explored two forms of conditioning augmentation that require small modification to the training process. Note that conditioning noise is only applied to training but not at inference.
 
+* Truncated conditioning augmentation stops the diffusion process early at step $t > 0$ for low resolution.
+* Non-truncated conditioning augmentation runs the full low resolution reverse process until step 0 but then corrupt it by $\mathbf{z}_t \sim q(\mathbf{x}_t \vert \mathbf{x}_0)$ and then feeds the corrupted $\mathbf{z}_t$ s into the super-resolution model.
+{{% /admonition %}}
 
+用pipeline of multiple diffusion models时，每一级的输入是上一级的输出，因此就容易造成误差累积，导致最终图像的损坏，因此他们引入了 **噪声条件增强（Noise Conditioning Augmentation）**，用来让模型学会在“有点模糊或有点噪声”的条件下也能生成清晰图像，避免误差在多级模型中逐步放大。
 
+两种噪声：
 
+- **低分辨率阶段**：加入高斯噪声。
+- **高分辨率阶段**：加入高斯模糊。
+- 这些噪声只在训练时加入，推理阶段不使用。
 
+两种训练方式：
+1. **Truncated Conditioning Augmentation**：在低分辨率阶段提前终止扩散过程（比如只跑到第 t 步）。
+2. **Non-Truncated Conditioning Augmentation**：完整跑完低分辨率扩散过程，然后再人为加入噪声，作为高分模型的输入。
 
+{{% admonition type="quote" title="unCLIP" open=true %}}
+The two-stage diffusion model unCLIP ([Ramesh et al. 2022](https://arxiv.org/abs/2204.06125)) heavily utilizes the CLIP text encoder to produce text-guided images at high quality. Given a pretrained CLIP model $\mathbf{c}$ and paired training data for the diffusion model, $(\mathbf{x}, y)$, where $x$ is an image and $y$ is the corresponding caption, we can compute the CLIP text and image embedding, $\mathbf{c}^t(y)$ and $\mathbf{c}^i(\mathbf{x})$, respectively. The unCLIP learns two models in parallel:
 
+- A prior model $P(\mathbf{c}^i \vert y)$: outputs CLIP image embedding $\mathbf{c}^i$ given the text $y$.
+- A decoder $P(\mathbf{x} \vert \mathbf{c}^i, [y])$: generates the image $\mathbf{x}$ given CLIP image embedding $\mathbf{c}^i$ and optionally the original text $y$.
 
+These two models enable conditional generation, because
 
+$$ \underbrace{P(\mathbf{x} \vert y) = P(\mathbf{x}, \mathbf{c}^i \vert y)}_{\mathbf{c}^i\text{ is deterministic given }\mathbf{x}} = P(\mathbf{x} \vert \mathbf{c}^i, y)P(\mathbf{c}^i \vert y) $$
 
+{{< media
+src="unCLIP_Structure.png"
+caption="The architecture of unCLIP. (Image source: [Ramesh et al. 2022](https://arxiv.org/abs/2204.06125))"
+>}}
 
+unCLIP follows a two-stage image generation process:
 
+1. Given a text $y$, a CLIP model is first used to generate a text embedding $\mathbf{c}^t(y)$. Using CLIP latent space enables zero-shot image manipulation via text.
+2. A diffusion or autoregressive prior $P(\mathbf{c}^i \vert y)$ processes this CLIP text embedding to construct an image prior and then a diffusion decoder $P(\mathbf{x} \vert \mathbf{c}^i, [y])$ generates an image, conditioned on the prior. This decoder can also generate image variations conditioned on an image input, preserving its style and semantics.
+{{% /admonition %}}
 
+unCLIP是一个两阶段的文本生成图像模型，核心是利用 CLIP 的文本和图像嵌入：
 
+1. **Prior 模型**：输入文本 → 输出 CLIP 图像嵌入。
+2. **Decoder 模型**：输入图像嵌入（和可选文本）→ 输出图像。
 
+这种设计允许：
+- 文本生成图像。
+- 给定图像生成变体（保持风格和语义）。
 
+和unCLIP类似，Imagen模型也是两阶段的文本生成图像模型，区别在于文本编码器的选择。unCLIP用的是CLIP，Imagen用的是大型语言模型T5-XXL。Imagen另外还对U-Net结构做了一些优化。
 
+## Model Architecture
 
+{{% admonition type="quote" title="U-Net，ControlNet，DiT的实现" open=true %}}
+**U-Net** ([Ronneberger, et al. 2015](https://arxiv.org/abs/1505.04597)) consists of a downsampling stack and an upsampling stack...
 
+**ControlNet** ([Zhang et al. 2023](https://arxiv.org/abs/2302.05543)) introduces architectural changes via adding a “sandwiched” zero convolution layers of a trainable copy of the original model weights into each encoder layer of the U-Net...
 
+**Diffusion Transformer** (**DiT**; [Peebles & Xie, 2023](https://arxiv.org/abs/2212.09748)) for diffusion modeling operates on latent patches, using the same design space of [LDM](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#ldm) (Latent Diffusion Model)...
+{{% /admonition %}}
 
+Weng的blog已经对这三个模型进行了介绍，下面展示他们的精简 PyTorch 实现示例。这些示例旨在展示核心的架构思想，并非完整的可运行代码。这里需要对CNN网络有些了解，参考Wang的CNN Explainer文章[^zijie_cnn]以掌握一些基础。
 
+**U-Net** 主要展示了下采样、上采样和跳跃连接的核心思想。它使用了一个简单的 `double_conv` 块，包含了两个卷积层、ReLU 和批量归一化。
 
+{{< details "U-Net PyTorch Implementation" >}}
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
+class DoubleConv(nn.Module):
+    """(conv => BN => ReLU) * 2"""
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.double_conv = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
+        )
 
+    def forward(self, x):
+        return self.double_conv(x)
 
+class SimpleUnet(nn.Module):
+    def __init__(self, n_channels, n_classes):
+        super(SimpleUnet, self).__init__()
+        self.n_channels = n_channels
+        self.n_classes = n_classes
 
+        # Downsampling path
+        self.inc = DoubleConv(n_channels, 64)
+        self.down1 = nn.MaxPool2d(2)
+        self.down2 = DoubleConv(64, 128)
+        self.down3 = nn.MaxPool2d(2)
+        self.down4 = DoubleConv(128, 256)
+        self.down5 = nn.MaxPool2d(2)
 
+        # Upsampling path
+        self.up1 = nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2)
+        self.up2 = DoubleConv(256, 128)  # 128 from upconv + 128 from skip connection
+        self.up3 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
+        self.up4 = DoubleConv(128, 64)   # 64 from upconv + 64 from skip connection
+        self.outc = nn.Conv2d(64, n_classes, kernel_size=1)
 
+    def forward(self, x):
+        x1 = self.inc(x)
+        x2 = self.down2(self.down1(x1))
+        x3 = self.down4(self.down3(x2))
 
+        x = self.up1(x3)
+        x = torch.cat([x, x2], dim=1)
+        x = self.up2(x)
 
+        x = self.up3(x)
+        x = torch.cat([x, x1], dim=1)
+        x = self.up4(x)
+        logits = self.outc(x)
+        return logits
+```
+{{< /details >}}
 
+**ControlNet** 相当于是对U-Net的微调方法，他的核心思想是在冻结的 U-Net 主干网络上添加一个可训练的副本，并通过零卷积连接。
 
+{{< details "ControlNet PyTorch Implementation" >}}
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
+class ZeroConv2d(nn.Module):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
+        super().__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, *args, **kwargs)
+        self.conv.weight.data.fill_(0.)
+        self.conv.bias.data.fill_(0.)
 
+    def forward(self, x):
+        return self.conv(x)
 
+class ControlNetBlock(nn.Module):
+    """A simplified example of a ControlNet block with a frozen backbone."""
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        # The frozen U-Net backbone block
+        self.backbone_frozen = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
+        
+        # A trainable copy of the backbone block
+        self.backbone_trainable = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
 
+        # Initialize trainable part with backbone's weights
+        self.backbone_trainable.load_state_dict(self.backbone_frozen.state_dict())
 
+        # Freeze the original backbone
+        for param in self.backbone_frozen.parameters():
+            param.requires_grad = False
 
+        # Zero convolutions
+        self.zero_conv_in = ZeroConv2d(in_channels, in_channels, kernel_size=1)
+        self.zero_conv_out = ZeroConv2d(out_channels, out_channels, kernel_size=1)
 
+    def forward(self, x, conditioning_vector):
+        # Apply the frozen backbone to the input
+        output_frozen = self.backbone_frozen(x)
+        
+        # Apply the trainable copy to the sum of input and conditioning vector
+        # The conditioning vector is first processed by a zero convolution
+        conditioning_processed = self.zero_conv_in(conditioning_vector)
+        trainable_input = x + conditioning_processed
+        output_trainable = self.backbone_trainable(trainable_input)
+        
+        # Add the output of the trainable part (with zero convolution) to the frozen output
+        final_output = output_frozen + self.zero_conv_out(output_trainable)
+        return final_output
+```
+{{< /details >}}
 
+**DiT** 的核心思想是使用 Transformer 来处理扩散模型的潜在表示。它将图像潜在表示“切片”成序列化的 patches，这里展示使用 Adaptive Layer Normalization (adaLN) 来注入时间步长和类别信息。
 
+{{< details "DiT PyTorch Implementation" >}}
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
+class AdaLN(nn.Module):
+    """
+    Adaptive Layer Normalization (adaLN) for DiT.
+    Generates scale and shift parameters from a conditioning vector.
+    """
+    def __init__(self, n_embd):
+        super().__init__()
+        self.n_embd = n_embd
+        # We need a linear layer to predict gamma and beta
+        self.linear = nn.Linear(n_embd, 2 * n_embd)
+        self.norm = nn.LayerNorm(n_embd)
 
+    def forward(self, x, c):
+        # c is the conditioning vector (sum of time and class embeddings)
+        gamma, beta = self.linear(c).chunk(2, dim=-1)
+        x = self.norm(x)
+        # Apply scaling and shifting
+        return x * (1 + gamma.unsqueeze(1)) + beta.unsqueeze(1)
 
+class DiTBlock(nn.Module):
+    """A simplified DiT block, combining Attention and MLP with adaLN."""
+    def __init__(self, n_embd, n_heads):
+        super().__init__()
+        self.adaLN1 = AdaLN(n_embd)
+        self.attention = nn.MultiheadAttention(n_embd, n_heads, batch_first=True)
+        self.adaLN2 = AdaLN(n_embd)
+        self.mlp = nn.Sequential(
+            nn.Linear(n_embd, 4 * n_embd),
+            nn.GELU(),
+            nn.Linear(4 * n_embd, n_embd)
+        )
 
+    def forward(self, x, c):
+        # x is the sequence of patches, c is the conditioning vector
+        x = x + self.attention(self.adaLN1(x, c), self.adaLN1(x, c), self.adaLN1(x, c))[0]
+        x = x + self.mlp(self.adaLN2(x, c))
+        return x
 
+class SimpleDiT(nn.Module):
+    """Simplified DiT model for latent diffusion."""
+    def __init__(self, img_size, patch_size, n_embd, n_heads, n_layers, num_classes=1000):
+        super().__init__()
+        self.patch_size = patch_size
+        num_patches = (img_size // patch_size) ** 2
+        
+        # Patch embedding and positional embedding
+        self.patch_embed = nn.Linear(3 * patch_size**2, n_embd)
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches, n_embd))
 
+        # Time and class embeddings
+        self.time_embed = nn.Sequential(
+            nn.Linear(n_embd, 4 * n_embd),
+            nn.GELU(),
+            nn.Linear(4 * n_embd, n_embd)
+        )
+        self.class_embed = nn.Embedding(num_classes, n_embd)
 
+        # Transformer blocks
+        self.blocks = nn.ModuleList([DiTBlock(n_embd, n_heads) for _ in range(n_layers)])
+        
+        # Final output layer
+        self.final_layer = nn.Linear(n_embd, 3 * patch_size**2)
 
+    def forward(self, x, t, c):
+        # 1. Patchify and embed
+        x = x.unfold(2, self.patch_size, self.patch_size).unfold(3, self.patch_size, self.patch_size)
+        x = x.contiguous().view(x.size(0), -1, 3 * self.patch_size**2)
+        x = self.patch_embed(x) + self.pos_embed
+        
+        # 2. Time and class conditioning
+        t_emb = self.time_embed(t)
+        c_emb = self.class_embed(c)
+        cond = t_emb + c_emb
 
+        # 3. Pass through DiT blocks
+        for block in self.blocks:
+            x = block(x, cond)
 
+        # 4. Final layer to predict noise
+        output = self.final_layer(x)
+        return output
+```
+{{< /details >}}
 
+## Quick Summary
 
+{{% admonition type="quote" title="Pros and Cons" open=true %}}
+- **Pros**: Tractability and flexibility are two conflicting objectives in generative modeling. Tractable models can be analytically evaluated and cheaply fit data (e.g. via a Gaussian or Laplace), but they cannot easily describe the structure in rich datasets. Flexible models can fit arbitrary structures in data, but evaluating, training, or sampling from these models is usually expensive. Diffusion models are both analytically tractable and flexible
+
+- **Cons**: Diffusion models rely on a long Markov chain of diffusion steps to generate samples, so it can be quite expensive in terms of time and compute. New methods have been proposed to make the process much faster, but the sampling is still slower than GAN.
+{{% /admonition %}}
+
+在生成模型设计中，“可解析性”（tractability）与“灵活性”（flexibility）通常是矛盾的目标：
+
+- **可解析性**：指模型的数学结构清晰，便于推理和优化。例如高斯分布、拉普拉斯分布等可以直接计算似然、采样、训练。
+- **灵活性**：指模型可以拟合复杂、高维、非线性的数据结构，比如图像、音频、文本等。但这类模型往往难以训练、采样或评估。
+
+传统模型如：
+- **VAE**：可解析但牺牲了生成质量。
+- **GAN**：灵活但训练不稳定，缺乏显式似然。
+- **Flow-based models**：可逆但架构受限。
+
+而扩散模型的独特之处在于：它们通过逐步添加噪声（forward process）和学习去噪（reverse process），在理论上保持了高维高斯建模的可解析性，同时通过深度神经网络学习复杂数据结构，达到了灵活性。
+
+其缺点依然存在，但是仍然有各种新技术在不断涌现，试图解决采样速度慢的问题。
+
+此外，今天，diffusion model已经是de facto的生成模型标准，尤其是在图像生成领域。它们在生成质量、样本多样性和训练稳定性方面表现出色，且易于扩展到更大规模和更复杂的任务。
 
 ## Appendix
 
@@ -1378,7 +1635,10 @@ LDM 中 Query、Key、Value 的来源：
 
 #### GAN, VAE, and Flow-based models 是什么
 
-![Generative Models](/images/Generative_Models.png)
+{{< media
+src="Generative_Models.png"
+caption="Overview of different types of generative models. ([Source](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/))"
+>}}
 
 这几个都是最常见的几类图像生成模型，可以大致了解其原理：
 
@@ -1501,7 +1761,7 @@ print("Importance Sampling estimate:", mu_hat)
 
 #### 重要的diffusion相关的论文
 
-这些论文均为 weng lilian写作diffusion博文的时候所引用的文章，同样也是diffusion领域最重要的一些文章。
+这些论文均为 lilian weng写作diffusion博文的时候所引用的文章，同样也是diffusion领域最重要的一些文章。
 
 | 论文                                                                                                                                                                   | 介绍                                                                                                     |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -1797,6 +2057,8 @@ $$
 [^saleem_gaussian]: **Saleem, Ameer.** “Unpacking the Multivariate Gaussian Distribution.” *Medium*, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
 
 [^gupta_gaussian_kl]: **Gupta, Rishabh.** “KL Divergence between 2 Gaussian Distributions.” *Mr. Easy*, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
+
+[^zijie_cnn]: Wang, Zijie J., et al. “CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization.” IEEE Transactions on Visualization and Computer Graphics (TVCG), IEEE, 2020. https://poloclub.github.io/cnn-explainer/.
 
 [^wiki_closed]: “Closed-form Expression.” _Wikipedia_, Wikimedia Foundation, https://en.wikipedia.org/wiki/Closed-form_expression.
 
