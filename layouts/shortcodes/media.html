@@ -6,7 +6,7 @@
 {{- if or (hasPrefix $src "https://www.youtube.com/") (hasPrefix $src "https://youtu.be/") (hasPrefix $src "http://www.youtube.com/") (hasPrefix $src "http://youtu.be/") -}}
   {{- $videoId := "" -}}
   {{- if or (hasPrefix $src "https://youtu.be/") (hasPrefix $src "http://youtu.be/") -}}
-{{- $videoId := replaceRE ".*youtu\\.be/([a-zA-Z0-9_-]{11}).*" "$1" $src -}}
+    {{- $videoId = replaceRE ".*youtu\\.be/([a-zA-Z0-9_-]{11}).*" "$1" $src -}}
   {{- else -}}
     {{- $videoId = replaceRE ".*[?&]v=([a-zA-Z0-9_-]{11}).*" "$1" $src -}}
   {{- end -}}
