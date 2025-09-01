@@ -2038,34 +2038,34 @@ $$
 
 ## References
 
-[^ho_ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** “Denoising Diffusion Probabilistic Models.” _Advances in Neural Information Processing Systems_, edited by H. Larochelle et al., vol. 33, Curran Associates, Inc., 2020, pp. 6840–6851. https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
+[^ho_ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** "Denoising Diffusion Probabilistic Models." *Advances in Neural Information Processing Systems*, vol. 33, edited by H. Larochelle et al., Curran Associates, Inc., 2020, pp. 6840–6851. *NeurIPS*, https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
 
-[^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** “Improved Denoising Diffusion Probabilistic Models.” _Proceedings of the 38th International Conference on Machine Learning_, edited by Marina Meila and Tong Zhang, vol. 139, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. PMLR. https://proceedings.mlr.press/v139/nichol21a.html.
+[^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** "Improved Denoising Diffusion Probabilistic Models." *Proceedings of the 38th International Conference on Machine Learning*, vol. 139, edited by Marina Meila and Tong Zhang, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. *PMLR*, https://proceedings.mlr.press/v139/nichol21a.html.
 
-[^song_consistency]: Song, Yang, et al. "Consistency Models." *International Conference on Machine Learning*, 2023. https://icml.cc/virtual/2023/poster/24593.
+[^song_consistency]: **Song, Yang, et al.** "Consistency Models." *International Conference on Machine Learning*, 2023. *ICML*, https://icml.cc/virtual/2023/poster/24593.
 
-[^song_ddim]: Song, Jiaming, Chenlin Meng, and Stefano Ermon. “Denoising Diffusion Implicit Models.” *International Conference on Learning Representations*, 2021, https://openreview.net/forum?id=St1giarCHLP.
+[^song_ddim]: **Song, Jiaming, Chenlin Meng, and Stefano Ermon.** "Denoising Diffusion Implicit Models." *International Conference on Learning Representations*, 2021. *OpenReview*, https://openreview.net/forum?id=St1giarCHLP.
 
-[^salimans_progressive_distillation]: Salimans, Tim, and Jonathan Ho. “Progressive Distillation for Fast Sampling of Diffusion Models.” *International Conference on Learning Representations*, 2022, https://openreview.net/forum?id=TIdIXIpzhoI.
+[^salimans_progressive_distillation]: **Salimans, Tim, and Jonathan Ho.** "Progressive Distillation for Fast Sampling of Diffusion Models." *International Conference on Learning Representations*, 2022. *OpenReview*, https://openreview.net/forum?id=TIdIXIpzhoI.
 
-[^salimans_improve_gan]: Salimans, Tim, et al. *Improved Techniques for Training GANs*. Proceedings of the 30th International Conference on Neural Information Processing Systems (NIPS'16), Curran Associates Inc., 2016, pp. 2234–2242. ACM Digital Library, [https://dl.acm.org/doi/10.5555/3157096.3157346](https://dl.acm.org/doi/10.5555/3157096.3157346).
+[^salimans_improve_gan]: **Salimans, Tim, et al.** "Improved Techniques for Training GANs." *Proceedings of the 30th International Conference on Neural Information Processing Systems (NIPS'16)*, Curran Associates Inc., 2016, pp. 2234–2242. *ACM Digital Library*, https://dl.acm.org/doi/10.5555/3157096.3157346.
 
-[^heusel_fid]: Heusel, Martin, et al. GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium. Proceedings of the 31st International Conference on Neural Information Processing Systems (NIPS'17), Curran Associates Inc., 2017, pp. 6629–6640. ACM Digital Library, https://dl.acm.org/doi/10.5555/3295222.3295408.
+[^heusel_fid]: **Heusel, Martin, et al.** "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium." *Proceedings of the 31st International Conference on Neural Information Processing Systems (NIPS'17)*, Curran Associates Inc., 2017, pp. 6629–6640. *ACM Digital Library*, https://dl.acm.org/doi/10.5555/3295222.3295408.
 
-[^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
+[^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** *An Empirical Model of Large-Batch Training*. 14 Dec. 2018. *arXiv*, https://arxiv.org/abs/1812.06162.
 
-[^lilian_diffusion]: **Weng, Lilian.** “What Are Diffusion Models?” _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
+[^lilian_diffusion]: **Weng, Lilian.** "What Are Diffusion Models?" *Lil'Log*, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
-[^lilian_ae]: **Weng, Lilian.** “From Autoencoder to Beta-VAE.” _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
+[^lilian_ae]: **Weng, Lilian.** "From Autoencoder to Beta-VAE." *Lil'Log*, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
 
-[^saleem_gaussian]: **Saleem, Ameer.** “Unpacking the Multivariate Gaussian Distribution.” *Medium*, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
+[^saleem_gaussian]: **Saleem, Ameer.** "Unpacking the Multivariate Gaussian Distribution." *Medium*, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
 
-[^gupta_gaussian_kl]: **Gupta, Rishabh.** “KL Divergence between 2 Gaussian Distributions.” *Mr. Easy*, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
+[^gupta_gaussian_kl]: **Gupta, Rishabh.** "KL Divergence between 2 Gaussian Distributions." *Mr. Easy*, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
 
-[^zijie_cnn]: Wang, Zijie J., et al. “CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization.” IEEE Transactions on Visualization and Computer Graphics (TVCG), IEEE, 2020. https://poloclub.github.io/cnn-explainer/.
+[^zijie_cnn]: **Wang, Zijie J., et al.** "CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization." *IEEE Transactions on Visualization and Computer Graphics (TVCG)*, IEEE, 2020. https://poloclub.github.io/cnn-explainer/.
 
-[^wiki_closed]: “Closed-form Expression.” _Wikipedia_, Wikimedia Foundation, https://en.wikipedia.org/wiki/Closed-form_expression.
+[^wiki_closed]: Wikipedia contributors. "Closed-form expression." *Wikipedia, The Free Encyclopedia*, 26 July 2025, https://en.wikipedia.org/wiki/Closed-form_expression. Accessed 1 Sept. 2025.
 
-[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 12 Jun. 2025. Web. 23 Aug. 2025. https://en.wikipedia.org/wiki/Jensen%27s_inequality.
+[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." *Wikipedia, The Free Encyclopedia*, 12 June 2025, https://en.wikipedia.org/wiki/Jensen%27s_inequality. Accessed 23 Aug. 2025.
 
-[^wiki_concave]: Wikipedia contributors. "Concave function." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 17 Jul. 2025. Web. 23 Aug. 2025. https://en.wikipedia.org/wiki/Concave_function.
+[^wiki_concave]: Wikipedia contributors. "Concave function." *Wikipedia, The Free Encyclopedia*, 17 July 2025, https://en.wikipedia.org/wiki/Concave_function. Accessed 23 Aug. 2025.
