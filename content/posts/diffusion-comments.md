@@ -3,17 +3,18 @@ date: '2025-08-15T01:41:53+08:00'
 title: '《What are Diffusion Models?》注释'
 author:
   - Shichao Song
-summary: ''
-tags: ["diffusion"]
+tags: ["vision", "diffusion", "math"]
 math: true
 ---
 
 <!-- TODO：记得email给lilian about this article -->
 <!-- TODO: unify styles of all references -->
+<!-- TODO：check all images -->
+<!-- TODO：标点符号用英文的 -->
 
 本文对Lilian Weng的《What are Diffusion Models?》 [^lilian_diffusion] 进行完善的注释导读。
 
-笔者在写此文时，对图像生成模型了解和相关的数学背景知识了解均较少。如果你也有相似的背景，那么此文应该会适合你。当然，我可能也因此犯一些低级错误，敬请指正。
+笔者在写此文时，对图像生成模型和相关的数学背景知识了解均较少。如果你也有相似的背景，那么此文应该会适合你。当然，我可能也因此犯一些低级错误，敬请指正。
 
 本文的结构和原文基本保持一致。每个小节中重点的公式，概念都会进行扩展的推导或解释。除此之外，文章开始附上了常见的符号解释；文末还附加上了为了看懂原文所需的一些背景知识。
 
@@ -1194,7 +1195,7 @@ $$
 其中，
 
 - $\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t$
-- $\sigma_t^2 = \eta \cdot \tilde{\beta}_t$。当$\eta=0$时，采样过程是确定性的（DDIM）；当$\eta=1$时，采样过程是随机的（DDPM）。
+- $\sigma_t^2 = \eta \cdot \tilde{\beta}_t$。当$\eta=0$时，方差为0，因此采样过程是确定性的（DDIM）；当$\eta=1$时，采样过程是随机的（DDPM）。
 
 注意：DDPM和DDIM分属不同的论文，因此可能有符号上的冲突，这里遵循原文，并没有将他们做统一。
 
@@ -1203,6 +1204,159 @@ $$
 \[
 \text{Var}(\boldsymbol{\epsilon}_{t-1}) = a^2 \cdot \text{Var}(\boldsymbol{\epsilon}_t) + b^2 \cdot \text{Var}(\boldsymbol{\epsilon}) = a^2 + b^2 \quad \text{; where }\epsilon_t \text{ and }\epsilon \text{ are independent}
 \]
+
+{{% admonition type="quote" title="Progressive Distillation" open=true %}}
+![alt text](/posts/image.png)
+{{% /admonition %}}
+
+我们可以对右侧Progressive Distillation的算法进行一些更详细的解释。
+
+首先是两层循环：外层循环控制训练 K 个不同的 student diffusion model，每个都能用更少的 step 采样生成图像；内层循环则是训练当前 student model。
+
+在内层循环中：
+
+1. $\text{Cat}[1,2,...,N]$指的是 Catgorical 分布，从1到N均匀采样一个整数 $t$，表示当前的时间步。
+2. $t' = t - \frac{0.5}{N}, \quad t'' = t - \frac{1}{N}$ 指的是将时间步 $t$ 拆分成两个更小的步长，分别是 $t'$ 和 $t''$。
+3. $z_{t'} = \alpha_{t'} \tilde{x}_\eta(z_t) + \frac{\sigma_{t'}}{\sigma_t} \Big( z_t - \alpha_t \tilde{x}_\eta(z_t) \Big)$ 是其中一个teacher DDIM采样的更新公式，表示从 $z_t$ 经过一步采样得到 $z_{t'}$。具体推导可以参见原文[^salimans_progressive_distillation].
+
+{{% admonition type="quote" title="Consistency Model" open=true %}}
+Given a trajectory $\{\mathbf{x}_t \vert t \in [\epsilon, T]\}$ , the consistency function $f$ is defined as $f: (\mathbf{x}_t, t) \mapsto \mathbf{x}_\epsilon$ and the equation $f(\mathbf{x}_t, t) = f(\mathbf{x}_{t’}, t’) = \mathbf{x}_\epsilon$ holds true for all $t, t’ \in [\epsilon, T]$. When $t=\epsilon$, $f$ is an identify function. The model can be parameterized as follows, where $c_\text{skip}(t)$ and $c_\text{out}(t)$ functions are designed in a way that $c_\text{skip}(\epsilon) = 1, c_\text{out}(\epsilon) = 0$:
+
+$$ f_\theta(\mathbf{x}, t) = c_\text{skip}(t)\mathbf{x} + c_\text{out}(t) F_\theta(\mathbf{x}, t) $$
+It is possible for the consistency model to generate samples in a single step, while still maintaining the flexibility of trading computation for better quality following a multi-step sampling process.
+{{% /admonition %}}
+
+Consistency Model（CM，一致性模型）的目标是学一个直接映射$f$，能把任意噪声等级 $t>0$ 的点 $\mathbf{x}_t$ 直接送回同一条生成轨迹的“源头”（更精确地说，是非常靠近 0 的一个小时间点 $\epsilon$ 上的样本 $\mathbf{x}_\epsilon$）。
+
+---
+
+为什么映到 $\mathbf{x}_\epsilon$ 而不是精确的 $\mathbf{x}_0$？
+
+* $t=0$ 往往不够数值稳定（奇异/条件数很差），选一个很小的 $\epsilon>0$ 会**更好训练、更稳**。
+* $\mathbf{x}_\epsilon$ 与 $\mathbf{x}_0$ 已经极其接近；需要时再从 $\epsilon\to 0$ 补一两步细化即可。
+
+---
+
+$t=\epsilon$ 时为什么是恒等映射？
+
+论文把 $f_\theta$ 写成一个**带跳连的残差型参数化**：
+
+$$
+f_\theta(\mathbf{x},t) \;=\; c_{\text{skip}}(t)\,\mathbf{x} \;+\; c_{\text{out}}(t)\,F_\theta(\mathbf{x},t),
+$$
+
+并特意设计
+
+$$
+c_{\text{skip}}(\epsilon)=1,\qquad c_{\text{out}}(\epsilon)=0.
+$$
+
+于是
+
+$$
+f_\theta(\mathbf{x},\epsilon)=\mathbf{x},
+$$
+
+也就是恒等映射（identity）。
+
+### Latent Variable Space
+
+{{% admonition type="quote" title="Latent Diffusion Model（LDM）" open=true %}}
+$$
+\begin{aligned}
+&\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\Big(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d}}\Big) \cdot \mathbf{V} \\
+&\text{where }\mathbf{Q} = \mathbf{W}^{(i)}_Q \cdot \varphi_i(\mathbf{z}_i),\;
+\mathbf{K} = \mathbf{W}^{(i)}_K \cdot \tau_\theta(y),\;
+\mathbf{V} = \mathbf{W}^{(i)}_V \cdot \tau_\theta(y) \\
+&\text{and }
+\mathbf{W}^{(i)}_Q \in \mathbb{R}^{d \times d^i_\epsilon},\;
+\mathbf{W}^{(i)}_K, \mathbf{W}^{(i)}_V \in \mathbb{R}^{d \times d_\tau},\;
+\varphi_i(\mathbf{z}_i) \in \mathbb{R}^{N \times d^i_\epsilon},\;
+\tau_\theta(y) \in \mathbb{R}^{M \times d_\tau}
+\end{aligned}
+$$
+{{% /admonition %}}
+
+
+这个公式描述的是 **Latent Diffusion Model（LDM）** 中用于 **交叉注意力（cross-attention）机制** 的一个关键模块。它结合了 **Transformer 中的注意力机制** 与 **扩散模型中的条件控制机制**，是 LDM 实现 **文本到图像生成** 或其他条件生成任务的核心组件。
+
+---
+
+缩放点积注意力（scaled dot-product attention）:
+
+$$
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d}}\right) \cdot \mathbf{V}
+$$
+
+- $\mathbf{Q}$：查询（Query），代表当前需要处理的信息。
+- $\mathbf{K}$：键（Key），代表可被关注的信息。
+- $\mathbf{V}$：值（Value），当 $\mathbf{Q}$ 和 $\mathbf{K}$ 匹配时，从中提取实际内容。
+- 分母 $\sqrt{d}$ 是缩放因子，防止内积过大导致 softmax 梯度消失。
+- softmax 沿着 Key 的维度归一化，得到注意力权重。
+- 最终输出是一个加权和，表示“根据查询，从值中提取哪些部分更重要”。
+
+---
+
+LDM 中 Query、Key、Value 的来源：
+
+- **Query 来自图像（潜在表示）**
+- **Key 和 Value 来自文本/条件信息**
+
+这意味着：**图像的每一个空间位置都在“关注”哪些文本词最相关**。例如，生成一张“一只红色的狗在草地上奔跑”的图片时，图像中“草地”区域会更多地关注文本中的“grass”这个词。
+
+这种机制让模型能够精确地将语义条件与图像空间结构对齐。
+
+| 符号                                                         | 含义                                                                                                                                                                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| $\mathbf{z}_i$                                               | 第 $i$ 层的潜在变量（latent feature），即扩散模型在 U-Net 中某一层的特征图，处于低维潜在空间中。                                                                                                              |
+| $\varphi_i(\mathbf{z}_i)$                                    | 将潜在特征 $\mathbf{z}_i$ 投影或 reshape 成适合注意力计算的形式（例如展平为序列）。维度：$N \times d^i_\epsilon$，其中 $N$ 是空间位置数（如 H×W），$d^i_\epsilon$ 是该层特征维度。                            |
+| $y$                                                          | 条件输入（如文本描述）。                                                                                                                                                                                      |
+| $\tau_\theta(y)$                                             | 条件编码器（如 CLIP 或 BERT）对条件 $y$ 的编码结果。输出为一组 token embeddings（例如每个词一个向量）。维度：$M \times d_\tau$，其中 $M$ 是 token 数量（如 77 个文本 token），$d_\tau$ 是嵌入维度（如 768）。 |
+| $\mathbf{W}^{(i)}_Q, \mathbf{W}^{(i)}_K, \mathbf{W}^{(i)}_V$ | 可学习的投影矩阵（参数），用于将输入映射到注意力空间中的 Q/K/V。                                                                                                                                              |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1631,6 +1785,8 @@ $$
 [^song_consistency]: Song, Yang, et al. "Consistency Models." *International Conference on Machine Learning*, 2023. https://icml.cc/virtual/2023/poster/24593.
 
 [^song_ddim]: Song, Jiaming, Chenlin Meng, and Stefano Ermon. “Denoising Diffusion Implicit Models.” *International Conference on Learning Representations*, 2021, https://openreview.net/forum?id=St1giarCHLP.
+
+[^salimans_progressive_distillation]: Salimans, Tim, and Jonathan Ho. “Progressive Distillation for Fast Sampling of Diffusion Models.” *International Conference on Learning Representations*, 2022, https://openreview.net/forum?id=TIdIXIpzhoI.
 
 [^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
 
