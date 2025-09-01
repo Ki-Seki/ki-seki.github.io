@@ -62,7 +62,7 @@ $$
 - $\beta_t\mathbf{I}$，是协方差矩阵，也是个对角矩阵，所有对角线元素都是 $\beta_t$. 每一维都加相同强度的噪声，不偏向任何方向。
 
 整体扩散过程是，根据[马尔可夫性质](#markov-property)将单步扩散过程连乘起来的递推式。
-整体扩散过程是我们需要的，因为他能帮助我们从真实数据分布中快速采样得到最后的纯噪声 $\mathbf{x}_T$； 
+整体扩散过程是我们需要的，因为他能帮助我们从真实数据分布中快速采样得到最后的纯噪声 $\mathbf{x}_T$；
 然而它依赖于递推式，计算起来较慢。因此实践中会使用更简单的计算方式，即下面讲的封闭形式的公式。
 
 {{< admonition type=quote title="前向扩散表达式的closed form形式" >}}
@@ -182,7 +182,7 @@ $$
 上面两个公式对应了整体的，和单步的Reverse diffusion process的似然公式。即我们准备建立的神经网络的形式。
 
 由于我们把reverse diffusion process建模为了高斯分布，
-因此其可学习的参数就是高斯的均值和方差，$\boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)$. 
+因此其可学习的参数就是高斯的均值和方差，$\boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t)$.
 
 让我们看下diffusion模型训练推理中涉及到的四个重要的分布。
 forward diffusion 生成噪声；
@@ -210,7 +210,7 @@ $$
 $$
 \begin{align}
 \tilde{\boldsymbol{\mu}}_t (\mathbf{x}_t, \mathbf{x}_0) &= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} \mathbf{x}_0 \\
-\tilde{\beta}_t &= \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t 
+\tilde{\beta}_t &= \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t
 \end{align}
 $$
 
@@ -330,7 +330,7 @@ $$
 \cdot
 \exp\Big( -\frac{1}{2} \big( C(\mathbf{x}_t, \mathbf{x}_0) - \frac{\tilde{\boldsymbol{\mu}}_t^2}{\tilde{\beta}_t} \big) \Big) \\
 %
-& \propto \exp\Big( -\frac{1}{2} \big( \color{red}{\frac{1}{\tilde{\beta}_t}} \mathbf{x}_{t-1}^2 \color{blue}{- \frac{2\tilde{\boldsymbol{\mu}}_t}{\tilde{\beta}_t}} \mathbf{x}_{t-1} \color{black}{ + \frac{\tilde{\boldsymbol{\mu}}_t^2}{\tilde{\beta}_t} \big) \Big)} 
+& \propto \exp\Big( -\frac{1}{2} \big( \color{red}{\frac{1}{\tilde{\beta}_t}} \mathbf{x}_{t-1}^2 \color{blue}{- \frac{2\tilde{\boldsymbol{\mu}}_t}{\tilde{\beta}_t}} \mathbf{x}_{t-1} \color{black}{ + \frac{\tilde{\boldsymbol{\mu}}_t^2}{\tilde{\beta}_t} \big) \Big)}
 \quad\text{;where}\quad (*) \\
 %
 & = \mathcal{N}(\mathbf{x}_{t-1}; \color{blue}{\tilde{\boldsymbol{\mu}_t}}(\mathbf{x}_t, \mathbf{x}_0), \color{red}{\tilde{\beta}_t} \mathbf{I})
@@ -404,7 +404,6 @@ $$
 3. 所以要找替代的优化下界，优化该下界就相当于优化对数边际似然
 4. 如果想要完全了解相关概念，强烈建议阅读 Lilian Weng 的另一篇文章 From Autoencoder to Beta-VAE [^lilian_ae] 中的 [章节 VAE: Variational Autoencoder](https://lilianweng.github.io/posts/2018-08-12-vae/#vae-variational-autoencoder)。
 
-
 $$
 \begin{aligned}
 \mathord{-} \log p_\theta(\mathbf{x}_0)
@@ -452,13 +451,13 @@ $$
 
 $$
 \begin{align}
-p_\theta(\mathbf{x}_0) 
+p_\theta(\mathbf{x}_0)
 &= \int \Big[ p_\theta(\mathbf{x}_0 | \mathbf{x}_{1:T}) p_\theta(\mathbf{x}_{1:T}) \Big] d\mathbf{x}_{1:T} \\
 &= \int p_\theta(\mathbf{x}_{0:T}) d\mathbf{x}_{1:T}
 \end{align}
 $$
 
-Jensen 不等式 [^wiki_jensen], 是指设 \( \phi(\cdot) \) 是一个concave function [^wiki_concave]，\( X \) 是一个可积的随机变量，则有不等式: 
+Jensen 不等式 [^wiki_jensen], 是指设 \( \phi(\cdot) \) 是一个concave function [^wiki_concave]，\( X \) 是一个可积的随机变量，则有不等式:
 
 \[
 \phi\left( \mathbb{E}[X] \right) \geq \mathbb{E}\left[ \phi(X) \right]
@@ -490,18 +489,18 @@ $$
 $$
 \begin{align}
 %
-q(\mathbf{x}_t \vert \mathbf{x}_0) 
+q(\mathbf{x}_t \vert \mathbf{x}_0)
 &= \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I}) \\
 %
-q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) 
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
 &= \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I}) \\
 %
-p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) 
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)
 &= \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
 \end{align}
 $$
 
-而刚刚我们获得的 $L_\text{VLB} = \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})}\Big[\log \frac{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})}{p_\theta(\mathbf{x}_{0:T})} \Big]$ 并没有用到这些已有的公式，因此不能直接计算. 
+而刚刚我们获得的 $L_\text{VLB} = \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})}\Big[\log \frac{q(\mathbf{x}_{1:T} \vert \mathbf{x}_{0})}{p_\theta(\mathbf{x}_{0:T})} \Big]$ 并没有用到这些已有的公式，因此不能直接计算.
 而且，我们也不希望神经网络拟合的时候直接一步到位，还是希望他能模拟逐步去噪的过程。
 （ 当然后面也出现了可以一步到位的Consistency Models [^song_consistency]，后面会讲到。）
 
@@ -515,16 +514,16 @@ $$
 %
 &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ \log\frac{q(\mathbf{x}_{1:T}\vert\mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \Big] \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ \log\frac{\prod_{t=1}^T q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{ p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t) } \Big] 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ \log\frac{\prod_{t=1}^T q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{ p_\theta(\mathbf{x}_T) \prod_{t=1}^T p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t) } \Big]
 \quad\text{; 利用马尔可夫性质展开联合概率分布为递推式} \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=1}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} \Big] 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=1}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} \Big]
 \quad\text{; } -\log p_\theta(\mathbf{x}_T) \text{是常数，因此可以单独提出来} \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t\vert\mathbf{x}_{t-1})}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]
 \quad\text{; } \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \text{进行了特殊的建模，后面会提到} \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \Big( \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)}\cdot \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1}\vert\mathbf{x}_0)} \Big) + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big] 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \Big( \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)}\cdot \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1}\vert\mathbf{x}_0)} \Big) + \log \frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]
 \quad\text{; 根据贝叶斯公式把} q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \text{转换为后验公式和前向closed form公式的组合} \\
 %
 &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ -\log p_\theta(\mathbf{x}_T) + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_t \vert \mathbf{x}_0)}{q(\mathbf{x}_{t-1} \vert \mathbf{x}_0)} + \log\frac{q(\mathbf{x}_1 \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)} \Big]
@@ -536,29 +535,29 @@ $$
 &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \Big[ \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} - \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \Big]
 \quad\text{; 根据log函数的计算规律进行重组} \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} +
   \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \sum_{t=2}^T \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} -
   \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1) \\
 %
-&= \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_T)\sim q(\mathbf{x}_0, \mathbf{x}_T)} \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} + 
+&= \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_T)\sim q(\mathbf{x}_0, \mathbf{x}_T)} \log\frac{q(\mathbf{x}_T \vert \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} +
 \sum_{t=2}^T \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_{t-1}, \mathbf{x}_t)\sim q(\mathbf{x}_0, \mathbf{x}_{t-1}, \mathbf{x}_t)} \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)} -
 \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_1)\sim q(\mathbf{x}_0, \mathbf{x}_1)} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
 \quad\text{; 按全期望公式简化} \\
 %
-&= \mathbb{E}_{\mathbf{x}_0 \sim q(\mathbf{x}_0)} \left[ \mathbb{E}_{\mathbf{x}_T \sim q(\mathbf{x}_T | \mathbf{x}_0)} \log \frac{q(\mathbf{x}_T | \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} \right] + 
+&= \mathbb{E}_{\mathbf{x}_0 \sim q(\mathbf{x}_0)} \left[ \mathbb{E}_{\mathbf{x}_T \sim q(\mathbf{x}_T | \mathbf{x}_0)} \log \frac{q(\mathbf{x}_T | \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} \right] +
 \sum_{t=2}^T \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_t) \sim q(\mathbf{x}_0, \mathbf{x}_t)} \left[ \mathbb{E}_{\mathbf{x}_{t-1} \sim q(\mathbf{x}_{t-1} | \mathbf{x}_t, \mathbf{x}_0)} \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)} \right] -
 \mathbb{E}_{(\mathbf{x}_0, \mathbf{x}_1)\sim q(\mathbf{x}_0, \mathbf{x}_1)} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
 \quad\text{; 展开为条件期望形式} \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ \mathbb{E}_{\mathbf{x}_T \sim q(\mathbf{x}_T | \mathbf{x}_0)} \log \frac{q(\mathbf{x}_T | \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} \right] + 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ \mathbb{E}_{\mathbf{x}_T \sim q(\mathbf{x}_T | \mathbf{x}_0)} \log \frac{q(\mathbf{x}_T | \mathbf{x}_0)}{p_\theta(\mathbf{x}_T)} \right] +
 \sum_{t=2}^T \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ \mathbb{E}_{\mathbf{x}_{t-1} \sim q(\mathbf{x}_{t-1} | \mathbf{x}_t, \mathbf{x}_0)} \log \frac{q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)}{p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)} \right] -
 \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \log p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1)
 \quad\text{; 根据全期望公式补齐} \\
 %
-&= 
+&=
 \underbrace{
   \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \right]
- }_{L_T, \, \text{Prior Matching Term}} + 
+ }_{L_T, \, \text{Prior Matching Term}} +
 \sum_{t=2}^T
 \underbrace{  
   \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \right]
@@ -642,13 +641,13 @@ $$
 $$
 \begin{align}
 %
-q(\mathbf{x}_t \vert \mathbf{x}_0) 
+q(\mathbf{x}_t \vert \mathbf{x}_0)
 &= \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t)\mathbf{I}) \\
 %
-q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) 
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
 &= \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I}) \\
 %
-p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) 
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)
 &= \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
 \end{align}
 $$
@@ -671,40 +670,40 @@ $$
 %
 &= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL} \left( 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL} \left(
   \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I})
-  \parallel 
+  \parallel
   \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
 \right) \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL} \left( 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_\text{KL} \left(
   \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}_{t}, \tilde{\beta}_t \mathbf{I})
-  \parallel 
+  \parallel
   \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_{\theta,t}, \boldsymbol{\Sigma}_{\theta,t})
-\right) 
+\right)
 \quad\text{; 简写上式}\\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} 
-\frac{1}{2} \left[ 
-  \log \frac{|\boldsymbol{\Sigma}_{\theta,t}|}{|\tilde{\beta}_t \mathbf{I}|} - 
-  k + 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})}
+\frac{1}{2} \left[
+  \log \frac{|\boldsymbol{\Sigma}_{\theta,t}|}{|\tilde{\beta}_t \mathbf{I}|} -
+  k +
   (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t})^T \boldsymbol{\Sigma}_{\theta,t}^{-1} (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t}) +
   \text{tr}(\boldsymbol{\Sigma}_{\theta,t}^{-1} \tilde{\beta}_t \mathbf{I})
 \right]
 \quad\text{; 高斯分布的KL散度展开}\\
 %
-&\approx \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} 
-\frac{1}{2} \left[ 
-  (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t})^T 
-  \boldsymbol{\Sigma}_{\theta,t}^{-1} 
+&\approx \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})}
+\frac{1}{2} \left[
+  (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t})^T
+  \boldsymbol{\Sigma}_{\theta,t}^{-1}
   (\tilde{\boldsymbol{\mu}}_{t} - \boldsymbol{\mu}_{\theta,t})
 \right]
 \quad\text{; 忽略常量} \Sigma_\theta(\mathbf{x}_t, t), \tilde{\beta}_t\mathbf{I}, k \\
 %
-&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} 
+&= \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})}
 \frac{1}{2} \Big[
-  \frac{1}{\| \boldsymbol{\Sigma}_{\theta,t} \|^2_2} 
-  \| \tilde{\boldsymbol{\mu}}_t - \boldsymbol{\mu}_{\theta,t} \|^2 
+  \frac{1}{\| \boldsymbol{\Sigma}_{\theta,t} \|^2_2}
+  \| \tilde{\boldsymbol{\mu}}_t - \boldsymbol{\mu}_{\theta,t} \|^2
 \Big]
 \quad\text{; }\boldsymbol{\Sigma}_{\theta,t}\text{; 是对角矩阵，所以可以单独提到前面} \\
 %
@@ -743,7 +742,7 @@ $$
 这里主要解释了两件事情：
 
 1. 训练时的蒙特卡洛采样，是对任意真实图片样本 $\mathbf{x}_0$, 任意difussion步骤 $t$ 以及任意噪声 $\boldsymbol{\epsilon}_t$ 进行采样。
-2. 训练时忽略掉了含有$\boldsymbol{\Sigma}_{\theta,t}$的权重系数，因为在原论文 [^ho_ddpm] 中这个被设置为了常数。 
+2. 训练时忽略掉了含有$\boldsymbol{\Sigma}_{\theta,t}$的权重系数，因为在原论文 [^ho_ddpm] 中这个被设置为了常数。
 
 PS. 同时这个简化的公式还给我们观察 $L_t$ 另外的一个视角，即他可以不是KL散度 loss，而是一个MSE loss。
 
@@ -784,7 +783,7 @@ $$
 \boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
 $$
 
-其中，$p(\cdot)$ 是用于衡量生成样本真实性的。如原文所示$p(\cdot)$被定义为 
+其中，$p(\cdot)$ 是用于衡量生成样本真实性的。如原文所示$p(\cdot)$被定义为
 
 $$
 \begin{align}
@@ -827,7 +826,7 @@ $$
 \boxed{
   \nabla_{\mathbf{x}}\log \mathcal{N}(\mathbf{x}; \boldsymbol{\mu}, \sigma^2 \mathbf{I})
   = - \frac{\boldsymbol{\epsilon}}{\sigma}
-} 
+}
 \quad\text{; where } \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
 $$
 
@@ -837,7 +836,7 @@ $$
 
 $$
 \begin{align}
-\nabla_\mathbf{x} \log q(\mathbf{x}_{t-1}) 
+\nabla_\mathbf{x} \log q(\mathbf{x}_{t-1})
 &= \nabla_\mathbf{x} \log \mathcal{N}(\mathbf{x}_{t-1}; \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0, (1 - \bar{\alpha}_{t-1})\mathbf{I}) \\
 &= - \frac{\boldsymbol{\sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0}}{\sqrt{1 - \bar{\alpha}_{t-1}}}
 \end{align}
@@ -846,16 +845,16 @@ $$
 这里面有两个变量，时间步 $t$ 和真实样本 $\mathbf{x}_0$。所以我们有许多 golden truth 组成的期望构成监督信号：
 
 $$
-\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)} 
+\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)}
 \left( - \frac{\mathbf{x}_t - \boldsymbol{\sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0}}{1 - \bar{\alpha}_{t-1}} \right) =
-\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)} 
+\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)}
 \left( - \frac{\boldsymbol{\epsilon}}{\sqrt{1 - \bar{\alpha}_{t-1}}} \right)
 $$
 
 我们据此可以定义神经网络中的权重即为：
 
 $$
-\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)} 
+\mathbb{E}_{t \sim [1, .., T], \mathbf{x}_0 \sim q(\mathbf{x}_0)}
 \left( - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_{t-1}}} \right)
 $$
 
@@ -863,9 +862,9 @@ $$
 - 推理时，我们将已有的 $\nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t) \approx \mathbf{s}_\theta(\mathbf{x}_t, t) = - \frac{\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{\sqrt{1 - \bar{\alpha}_t}}$ 代入到Stochastic Gradient Langevin Dynamics采样公式，得到：
 
   $$
-  \mathbf{x}_t = 
-  \mathbf{x}_{t-1} - 
-  \frac{\delta \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{2\sqrt{1 - \bar{\alpha}_t}} + 
+  \mathbf{x}_t =
+  \mathbf{x}_{t-1} -
+  \frac{\delta \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)}{2\sqrt{1 - \bar{\alpha}_t}} +
   \sqrt{\delta} \boldsymbol{\epsilon}_t
   ,\quad\text{where }
   \boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
@@ -942,10 +941,10 @@ $$ \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t) = \exp(\mathbf{v} \log \beta_t + 
 $$
 \begin{align}
 %
-q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) 
+q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0)
 &= \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I}) \\
 %
-p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t) 
+p_\theta(\mathbf{x}_{t-1} \vert \mathbf{x}_t)
 &= \mathcal{N}(\mathbf{x}_{t-1}; \boldsymbol{\mu}_\theta(\mathbf{x}_t, t), \boldsymbol{\Sigma}_\theta(\mathbf{x}_t, t))
 \end{align}
 $$
@@ -1027,7 +1026,7 @@ caption="Terms of the VLB vs diffusion step. The first few terms contribute most
 
 $$
 \begin{align}
-L_{\text{vlb}} 
+L_{\text{vlb}}
 &= \mathbb{E}_{t \sim p'(t)}[L_t] \\
 &= \int L_t p'(t) dt \\
 &= \int L_t \frac{p'(t)}{p(t)} p(t) dt \\
@@ -1130,6 +1129,7 @@ IS（Inception Score）[^salimans_improve_gan] 衡量的是生成图像的“清
 \]
 
 其中：
+
 - \( p(y|x) \)：Inception 网络对生成图像的预测分布
 - \( p(y) \)：所有生成图像的平均预测分布
 
@@ -1145,6 +1145,7 @@ GLIDE 是一种引导式扩散模型（guided diffusion model），由 Nichol、
 2. **Classifier-free guidance（无分类器引导）**：不依赖外部分类器，而是通过训练一个模型同时学习有条件和无条件的图像生成，从而实现引导。
 
 GLIDE 的实验发现，**无分类器引导比 CLIP 引导效果更好**，即：
+
 - 无分类器引导：模型自己学会怎么生成图像，不依赖外部判断。
 - CLIP 引导：模型依赖 CLIP 的评分，但可能会“作弊”去骗过 CLIP。
 - GLIDE 更偏好前者，因为它更自然、更稳健。
@@ -1245,8 +1246,8 @@ Consistency Model（CM，一致性模型）的目标是学一个直接映射$f$�
 
 为什么映到 $\mathbf{x}_\epsilon$ 而不是精确的 $\mathbf{x}_0$？
 
-* $t=0$ 往往不够数值稳定（奇异/条件数很差），选一个很小的 $\epsilon>0$ 会**更好训练、更稳**。
-* $\mathbf{x}_\epsilon$ 与 $\mathbf{x}_0$ 已经极其接近；需要时再从 $\epsilon\to 0$ 补一两步细化即可。
+- $t=0$ 往往不够数值稳定（奇异/条件数很差），选一个很小的 $\epsilon>0$ 会**更好训练、更稳**。
+- $\mathbf{x}_\epsilon$ 与 $\mathbf{x}_0$ 已经极其接近；需要时再从 $\epsilon\to 0$ 补一两步细化即可。
 
 ---
 
@@ -1290,7 +1291,6 @@ $$
 $$
 {{% /admonition %}}
 
-
 这个公式描述的是 **Latent Diffusion Model（LDM）** 中用于 **交叉注意力（cross-attention）机制** 的一个关键模块。它结合了 **Transformer 中的注意力机制** 与 **扩散模型中的条件控制机制**，是 LDM 实现 **文本到图像生成** 或其他条件生成任务的核心组件。
 
 ---
@@ -1332,12 +1332,12 @@ LDM 中 Query、Key、Value 的来源：
 这段是在讲如何通过一系列技术手段，把扩散模型的图像生成质量和分辨率提升到更高水平。主要讲了Noise Conditioning Augmentation技巧，unCLIP模型结构，Imagen模型结构，以及其他一些改进。最重要的是要了解Noise Conditioning Augmentation和unCLIP模型结构。
 
 {{% admonition type="quote" title="Noise conditioning augmentation" open=true %}}
-*Noise conditioning augmentation* between pipeline models is crucial to the final image quality, which is to apply strong data augmentation to the conditioning input $\mathbf{z}$ of each super-resolution model $p_\theta(\mathbf{x} \vert \mathbf{z})$. The conditioning noise helps reduce compounding error in the pipeline setup...
+_Noise conditioning augmentation_ between pipeline models is crucial to the final image quality, which is to apply strong data augmentation to the conditioning input $\mathbf{z}$ of each super-resolution model $p_\theta(\mathbf{x} \vert \mathbf{z})$. The conditioning noise helps reduce compounding error in the pipeline setup...
 
 They found the most effective noise is to apply Gaussian noise at low resolution and Gaussian blur at high resolution. In addition, they also explored two forms of conditioning augmentation that require small modification to the training process. Note that conditioning noise is only applied to training but not at inference.
 
-* Truncated conditioning augmentation stops the diffusion process early at step $t > 0$ for low resolution.
-* Non-truncated conditioning augmentation runs the full low resolution reverse process until step 0 but then corrupt it by $\mathbf{z}_t \sim q(\mathbf{x}_t \vert \mathbf{x}_0)$ and then feeds the corrupted $\mathbf{z}_t$ s into the super-resolution model.
+- Truncated conditioning augmentation stops the diffusion process early at step $t > 0$ for low resolution.
+- Non-truncated conditioning augmentation runs the full low resolution reverse process until step 0 but then corrupt it by $\mathbf{z}_t \sim q(\mathbf{x}_t \vert \mathbf{x}_0)$ and then feeds the corrupted $\mathbf{z}_t$ s into the super-resolution model.
 {{% /admonition %}}
 
 用pipeline of multiple diffusion models时，每一级的输入是上一级的输出，因此就容易造成误差累积，导致最终图像的损坏，因此他们引入了 **噪声条件增强（Noise Conditioning Augmentation）**，用来让模型学会在“有点模糊或有点噪声”的条件下也能生成清晰图像，避免误差在多级模型中逐步放大。
@@ -1349,6 +1349,7 @@ They found the most effective noise is to apply Gaussian noise at low resolution
 - 这些噪声只在训练时加入，推理阶段不使用。
 
 两种训练方式：
+
 1. **Truncated Conditioning Augmentation**：在低分辨率阶段提前终止扩散过程（比如只跑到第 t 步）。
 2. **Non-Truncated Conditioning Augmentation**：完整跑完低分辨率扩散过程，然后再人为加入噪声，作为高分模型的输入。
 
@@ -1379,6 +1380,7 @@ unCLIP是一个两阶段的文本生成图像模型，核心是利用 CLIP 的�
 2. **Decoder 模型**：输入图像嵌入（和可选文本）→ 输出图像。
 
 这种设计允许：
+
 - 文本生成图像。
 - 给定图像生成变体（保持风格和语义）。
 
@@ -1399,6 +1401,7 @@ Weng的blog已经对这三个模型进行了介绍，下面展示他们的精简
 **U-Net** 主要展示了下采样、上采样和跳跃连接的核心思想。它使用了一个简单的 `double_conv` 块，包含了两个卷积层、ReLU 和批量归一化。
 
 {{< details "U-Net PyTorch Implementation" >}}
+
 ```python
 import torch
 import torch.nn as nn
@@ -1456,11 +1459,13 @@ class SimpleUnet(nn.Module):
         logits = self.outc(x)
         return logits
 ```
+
 {{< /details >}}
 
 **ControlNet** 相当于是对U-Net的微调方法，他的核心思想是在冻结的 U-Net 主干网络上添加一个可训练的副本，并通过零卷积连接。
 
 {{< details "ControlNet PyTorch Implementation" >}}
+
 ```python
 import torch
 import torch.nn as nn
@@ -1511,11 +1516,13 @@ class ControlNetBlock(nn.Module):
         final_output = output_frozen + self.zero_conv_out(output_trainable)
         return final_output
 ```
+
 {{< /details >}}
 
 **DiT** 的核心思想是使用 Transformer 来处理扩散模型的潜在表示。它将图像潜在表示“切片”成序列化的 patches，这里展示使用 Adaptive Layer Normalization (adaLN) 来注入时间步长和类别信息。
 
 {{< details "DiT PyTorch Implementation" >}}
+
 ```python
 import torch
 import torch.nn as nn
@@ -1603,11 +1610,13 @@ class SimpleDiT(nn.Module):
         output = self.final_layer(x)
         return output
 ```
+
 {{< /details >}}
 
 ## Quick Summary
 
 {{% admonition type="quote" title="Pros and Cons" open=true %}}
+
 - **Pros**: Tractability and flexibility are two conflicting objectives in generative modeling. Tractable models can be analytically evaluated and cheaply fit data (e.g. via a Gaussian or Laplace), but they cannot easily describe the structure in rich datasets. Flexible models can fit arbitrary structures in data, but evaluating, training, or sampling from these models is usually expensive. Diffusion models are both analytically tractable and flexible
 
 - **Cons**: Diffusion models rely on a long Markov chain of diffusion steps to generate samples, so it can be quite expensive in terms of time and compute. New methods have been proposed to make the process much faster, but the sampling is still slower than GAN.
@@ -1619,6 +1628,7 @@ class SimpleDiT(nn.Module):
 - **灵活性**：指模型可以拟合复杂、高维、非线性的数据结构，比如图像、音频、文本等。但这类模型往往难以训练、采样或评估。
 
 传统模型如：
+
 - **VAE**：可解析但牺牲了生成质量。
 - **GAN**：灵活但训练不稳定，缺乏显式似然。
 - **Flow-based models**：可逆但架构受限。
@@ -1786,7 +1796,6 @@ print("Importance Sampling estimate:", mu_hat)
 | [19] Peebles & Xie. “Scalable diffusion models with transformers.” ICCV 2023.                                                                                          | 将扩散模型 backbone 换为 transformer，提升可扩展性与生成质量。                                           |
 | [20] Zhang et al. “Adding Conditional Control to Text-to-Image Diffusion Models.” arXiv 2023.                                                                          | 提出 **ControlNet**，在已有扩散模型上添加条件控制层，实现可控图像生成。                                  |
 
-
 ### 概率论
 
 #### Gaussian distribution
@@ -1797,33 +1806,33 @@ $$
 p(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)
 $$
 
-* **均值 $\mu$**：分布的中心位置
-* **方差 $\sigma^2$**（标准差 $\sigma$）：分布的宽度（不确定性）
+- **均值 $\mu$**：分布的中心位置
+- **方差 $\sigma^2$**（标准差 $\sigma$）：分布的宽度（不确定性）
 
 **多维高斯分布（Multivariate Gaussian）** $\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ 的概率密度函数 (pdf)：
 
 $$
-p(\mathbf{x}) = \frac{1}{\sqrt{(2\pi)^d |\boldsymbol{\Sigma}|}} 
+p(\mathbf{x}) = \frac{1}{\sqrt{(2\pi)^d |\boldsymbol{\Sigma}|}}
 \exp\!\left(-\tfrac{1}{2} (\mathbf{x}-\boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x}-\boldsymbol{\mu})\right)
 $$
 
 其中：
 
-* $\mathbf{x} \in \mathbb{R}^d$ 是 $d$ 维向量
-* 均值向量 $\boldsymbol{\mu} \in \mathbb{R}^d$：分布的中心位置。
-* 协方差矩阵 $\boldsymbol{\Sigma} \in \mathbb{R}^{d\times d}$：描述不同维度之间的方差和相关性。
-* $|\boldsymbol{\Sigma}|$ = 协方差矩阵的行列式，代表“体积缩放”。
-* $\boldsymbol{\Sigma}^{-1}$ = 协方差矩阵的逆，定义了“椭球形”的等密度曲线。
+- $\mathbf{x} \in \mathbb{R}^d$ 是 $d$ 维向量
+- 均值向量 $\boldsymbol{\mu} \in \mathbb{R}^d$：分布的中心位置。
+- 协方差矩阵 $\boldsymbol{\Sigma} \in \mathbb{R}^{d\times d}$：描述不同维度之间的方差和相关性。
+- $|\boldsymbol{\Sigma}|$ = 协方差矩阵的行列式，代表“体积缩放”。
+- $\boldsymbol{\Sigma}^{-1}$ = 协方差矩阵的逆，定义了“椭球形”的等密度曲线。
 
 对 $\boldsymbol{\Sigma}$ 的分解能揭示分布的几何性质：
 
-* 对角元素：每个维度的方差（数值大小 = 在该轴上的“宽度”）。
-* 非对角元素：不同维度之间的相关性，决定分布是否是“旋转的椭圆/椭球”。
+- 对角元素：每个维度的方差（数值大小 = 在该轴上的“宽度”）。
+- 非对角元素：不同维度之间的相关性，决定分布是否是“旋转的椭圆/椭球”。
 
 例子：
 
-* 如果 $\boldsymbol{\Sigma} = \sigma^2 I$，就是一个各向同性的“圆形/球形”分布。
-* 如果 $\boldsymbol{\Sigma}$ 不是对角阵，就有相关性，等密度线是“倾斜的椭圆/椭球”。
+- 如果 $\boldsymbol{\Sigma} = \sigma^2 I$，就是一个各向同性的“圆形/球形”分布。
+- 如果 $\boldsymbol{\Sigma}$ 不是对角阵，就有相关性，等密度线是“倾斜的椭圆/椭球”。
 
 下面两个图示更直观的展示了 $\mu$ 和 $\Sigma$ 对PDF的形状的影响 [^saleem_gaussian]：
 
@@ -1910,8 +1919,8 @@ $$P(X) = \sum_{y} P(X, Y = y) = \sum_{y} P(X | Y = y) P(Y = y)$$
 
 期望的定义
 
-* 离散随机变量：$\mathbb{E}_{x \sim p}[g(x)] = \sum_{x} g(x) \cdot p(x)$
-* 连续随机变量：$\mathbb{E}_{x \sim p}[g(x)] = \int_{-\infty}^{\infty} g(x) \cdot p(x)  dx$
+- 离散随机变量：$\mathbb{E}_{x \sim p}[g(x)] = \sum_{x} g(x) \cdot p(x)$
+- 连续随机变量：$\mathbb{E}_{x \sim p}[g(x)] = \int_{-\infty}^{\infty} g(x) \cdot p(x)  dx$
 
 三个重要的性质
 
@@ -1930,14 +1939,14 @@ $$
 \{ X_t \}_{t \in T}
 $$
 
-* $t$：索引集，可以是 **离散的**（如整数时间点 $t=0,1,2,\dots$）或 **连续的**（如实数时间 $t \ge 0$）。
-* $X_t$：在每个时间点 $t$ 上的一个随机变量。
-* 整个过程就是一组随机变量组成的族，反映系统随 $t$ 演化时的随机性。
+- $t$：索引集，可以是 **离散的**（如整数时间点 $t=0,1,2,\dots$）或 **连续的**（如实数时间 $t \ge 0$）。
+- $X_t$：在每个时间点 $t$ 上的一个随机变量。
+- 整个过程就是一组随机变量组成的族，反映系统随 $t$ 演化时的随机性。
 
 直观理解：
 
-* 随机变量是“某个时刻的随机量”；
-* 随机过程是“随时间变化的一串随机量”。
+- 随机变量是“某个时刻的随机量”；
+- 随机过程是“随时间变化的一串随机量”。
 
 #### Markov Property
 
@@ -1957,9 +1966,9 @@ $$
 s_\theta(x) = \nabla_\theta \log p_\theta(x)
 $$
 
-* 这是对**参数 θ 的对数似然函数**的梯度。
-* 在经典统计中，它用来做 **最大似然估计** 或 **Fisher 信息量计算**。
-* 直觉上，它告诉你“如果想让观测数据 x 更可能，应该如何调整模型参数 θ”。
+- 这是对**参数 θ 的对数似然函数**的梯度。
+- 在经典统计中，它用来做 **最大似然估计** 或 **Fisher 信息量计算**。
+- 直觉上，它告诉你“如果想让观测数据 x 更可能，应该如何调整模型参数 θ”。
 
 但是在 **diffusion 模型 / score-based generative model** 中，score function 被扩展为：
 
@@ -1967,8 +1976,8 @@ $$
 s(x) = \nabla_x \log p(x)
 $$
 
-* 这里是对 **数据本身 x 的对数密度**求梯度。
-* 它告诉你**数据分布的上升方向**，也就是“哪里数据更可能出现”。
+- 这里是对 **数据本身 x 的对数密度**求梯度。
+- 它告诉你**数据分布的上升方向**，也就是“哪里数据更可能出现”。
 
 ### 信息论
 
@@ -2038,34 +2047,34 @@ $$
 
 ## References
 
-[^ho_ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** "Denoising Diffusion Probabilistic Models." *Advances in Neural Information Processing Systems*, vol. 33, edited by H. Larochelle et al., Curran Associates, Inc., 2020, pp. 6840–6851. *NeurIPS*, https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
+[^ho_ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** "Denoising Diffusion Probabilistic Models." _Advances in Neural Information Processing Systems_, vol. 33, edited by H. Larochelle et al., Curran Associates, Inc., 2020, pp. 6840–6851. _NeurIPS_, https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
 
-[^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** "Improved Denoising Diffusion Probabilistic Models." *Proceedings of the 38th International Conference on Machine Learning*, vol. 139, edited by Marina Meila and Tong Zhang, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. *PMLR*, https://proceedings.mlr.press/v139/nichol21a.html.
+[^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** "Improved Denoising Diffusion Probabilistic Models." _Proceedings of the 38th International Conference on Machine Learning_, vol. 139, edited by Marina Meila and Tong Zhang, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. _PMLR_, https://proceedings.mlr.press/v139/nichol21a.html.
 
-[^song_consistency]: **Song, Yang, et al.** "Consistency Models." *International Conference on Machine Learning*, 2023. *ICML*, https://icml.cc/virtual/2023/poster/24593.
+[^song_consistency]: **Song, Yang, et al.** "Consistency Models." _International Conference on Machine Learning_, 2023. _ICML_, https://icml.cc/virtual/2023/poster/24593.
 
-[^song_ddim]: **Song, Jiaming, Chenlin Meng, and Stefano Ermon.** "Denoising Diffusion Implicit Models." *International Conference on Learning Representations*, 2021. *OpenReview*, https://openreview.net/forum?id=St1giarCHLP.
+[^song_ddim]: **Song, Jiaming, Chenlin Meng, and Stefano Ermon.** "Denoising Diffusion Implicit Models." _International Conference on Learning Representations_, 2021. _OpenReview_, https://openreview.net/forum?id=St1giarCHLP.
 
-[^salimans_progressive_distillation]: **Salimans, Tim, and Jonathan Ho.** "Progressive Distillation for Fast Sampling of Diffusion Models." *International Conference on Learning Representations*, 2022. *OpenReview*, https://openreview.net/forum?id=TIdIXIpzhoI.
+[^salimans_progressive_distillation]: **Salimans, Tim, and Jonathan Ho.** "Progressive Distillation for Fast Sampling of Diffusion Models." _International Conference on Learning Representations_, 2022. _OpenReview_, https://openreview.net/forum?id=TIdIXIpzhoI.
 
-[^salimans_improve_gan]: **Salimans, Tim, et al.** "Improved Techniques for Training GANs." *Proceedings of the 30th International Conference on Neural Information Processing Systems (NIPS'16)*, Curran Associates Inc., 2016, pp. 2234–2242. *ACM Digital Library*, https://dl.acm.org/doi/10.5555/3157096.3157346.
+[^salimans_improve_gan]: **Salimans, Tim, et al.** "Improved Techniques for Training GANs." _Proceedings of the 30th International Conference on Neural Information Processing Systems (NIPS'16)_, Curran Associates Inc., 2016, pp. 2234–2242. _ACM Digital Library_, https://dl.acm.org/doi/10.5555/3157096.3157346.
 
-[^heusel_fid]: **Heusel, Martin, et al.** "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium." *Proceedings of the 31st International Conference on Neural Information Processing Systems (NIPS'17)*, Curran Associates Inc., 2017, pp. 6629–6640. *ACM Digital Library*, https://dl.acm.org/doi/10.5555/3295222.3295408.
+[^heusel_fid]: **Heusel, Martin, et al.** "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium." _Proceedings of the 31st International Conference on Neural Information Processing Systems (NIPS'17)_, Curran Associates Inc., 2017, pp. 6629–6640. _ACM Digital Library_, https://dl.acm.org/doi/10.5555/3295222.3295408.
 
-[^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** *An Empirical Model of Large-Batch Training*. 14 Dec. 2018. *arXiv*, https://arxiv.org/abs/1812.06162.
+[^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. 14 Dec. 2018. _arXiv_, https://arxiv.org/abs/1812.06162.
 
-[^lilian_diffusion]: **Weng, Lilian.** "What Are Diffusion Models?" *Lil'Log*, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
+[^lilian_diffusion]: **Weng, Lilian.** "What Are Diffusion Models?" _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
-[^lilian_ae]: **Weng, Lilian.** "From Autoencoder to Beta-VAE." *Lil'Log*, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
+[^lilian_ae]: **Weng, Lilian.** "From Autoencoder to Beta-VAE." _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
 
-[^saleem_gaussian]: **Saleem, Ameer.** "Unpacking the Multivariate Gaussian Distribution." *Medium*, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
+[^saleem_gaussian]: **Saleem, Ameer.** "Unpacking the Multivariate Gaussian Distribution." _Medium_, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
 
-[^gupta_gaussian_kl]: **Gupta, Rishabh.** "KL Divergence between 2 Gaussian Distributions." *Mr. Easy*, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
+[^gupta_gaussian_kl]: **Gupta, Rishabh.** "KL Divergence between 2 Gaussian Distributions." _Mr. Easy_, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
 
-[^zijie_cnn]: **Wang, Zijie J., et al.** "CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization." *IEEE Transactions on Visualization and Computer Graphics (TVCG)*, IEEE, 2020. https://poloclub.github.io/cnn-explainer/.
+[^zijie_cnn]: **Wang, Zijie J., et al.** "CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization." _IEEE Transactions on Visualization and Computer Graphics (TVCG)_, IEEE, 2020. https://poloclub.github.io/cnn-explainer/.
 
-[^wiki_closed]: Wikipedia contributors. "Closed-form expression." *Wikipedia, The Free Encyclopedia*, 26 July 2025, https://en.wikipedia.org/wiki/Closed-form_expression. Accessed 1 Sept. 2025.
+[^wiki_closed]: Wikipedia contributors. "Closed-form expression." _Wikipedia, The Free Encyclopedia_, 26 July 2025, https://en.wikipedia.org/wiki/Closed-form_expression. Accessed 1 Sept. 2025.
 
-[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." *Wikipedia, The Free Encyclopedia*, 12 June 2025, https://en.wikipedia.org/wiki/Jensen%27s_inequality. Accessed 23 Aug. 2025.
+[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." _Wikipedia, The Free Encyclopedia_, 12 June 2025, https://en.wikipedia.org/wiki/Jensen%27s_inequality. Accessed 23 Aug. 2025.
 
-[^wiki_concave]: Wikipedia contributors. "Concave function." *Wikipedia, The Free Encyclopedia*, 17 July 2025, https://en.wikipedia.org/wiki/Concave_function. Accessed 23 Aug. 2025.
+[^wiki_concave]: Wikipedia contributors. "Concave function." _Wikipedia, The Free Encyclopedia_, 17 July 2025, https://en.wikipedia.org/wiki/Concave_function. Accessed 23 Aug. 2025.
