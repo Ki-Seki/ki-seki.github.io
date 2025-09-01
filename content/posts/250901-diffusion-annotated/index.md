@@ -559,7 +559,7 @@ $$
   \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_T \vert \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_T)) \right]
  }_{L_T, \, \text{Prior Matching Term}} +
 \sum_{t=2}^T
-\underbrace{  
+\underbrace{
   \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} \left[ D_\text{KL}(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) \parallel p_\theta(\mathbf{x}_{t-1} \vert\mathbf{x}_t)) \right]
 }_{L_t, \, \text{Denoising Matching Term}}
 \underbrace{ -
@@ -1487,7 +1487,7 @@ class ControlNetBlock(nn.Module):
         super().__init__()
         # The frozen U-Net backbone block
         self.backbone_frozen = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
-        
+
         # A trainable copy of the backbone block
         self.backbone_trainable = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
 
@@ -1505,13 +1505,13 @@ class ControlNetBlock(nn.Module):
     def forward(self, x, conditioning_vector):
         # Apply the frozen backbone to the input
         output_frozen = self.backbone_frozen(x)
-        
+
         # Apply the trainable copy to the sum of input and conditioning vector
         # The conditioning vector is first processed by a zero convolution
         conditioning_processed = self.zero_conv_in(conditioning_vector)
         trainable_input = x + conditioning_processed
         output_trainable = self.backbone_trainable(trainable_input)
-        
+
         # Add the output of the trainable part (with zero convolution) to the frozen output
         final_output = output_frozen + self.zero_conv_out(output_trainable)
         return final_output
@@ -1572,7 +1572,7 @@ class SimpleDiT(nn.Module):
         super().__init__()
         self.patch_size = patch_size
         num_patches = (img_size // patch_size) ** 2
-        
+
         # Patch embedding and positional embedding
         self.patch_embed = nn.Linear(3 * patch_size**2, n_embd)
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches, n_embd))
@@ -1587,7 +1587,7 @@ class SimpleDiT(nn.Module):
 
         # Transformer blocks
         self.blocks = nn.ModuleList([DiTBlock(n_embd, n_heads) for _ in range(n_layers)])
-        
+
         # Final output layer
         self.final_layer = nn.Linear(n_embd, 3 * patch_size**2)
 
@@ -1596,7 +1596,7 @@ class SimpleDiT(nn.Module):
         x = x.unfold(2, self.patch_size, self.patch_size).unfold(3, self.patch_size, self.patch_size)
         x = x.contiguous().view(x.size(0), -1, 3 * self.patch_size**2)
         x = self.patch_embed(x) + self.pos_embed
-        
+
         # 2. Time and class conditioning
         t_emb = self.time_embed(t)
         c_emb = self.class_embed(c)
@@ -1658,8 +1658,8 @@ caption="Overview of different types of generative models. ([Source](https://lil
 
 #### 从 AE 到 VAE 再到 VQ-VAE
 
-- AE 是一个具有编码器和解码器的神经网络，目标是学习输入数据的压缩表示（潜在变量），主要用于降维和特征提取。  
-- VAE 在 AE 的基础上引入了概率建模和变分推断，使模型具备生成能力。  
+- AE 是一个具有编码器和解码器的神经网络，目标是学习输入数据的压缩表示（潜在变量），主要用于降维和特征提取。
+- VAE 在 AE 的基础上引入了概率建模和变分推断，使模型具备生成能力。
 - VQ-VAE（向量量化变分自编码器）进一步引入了离散潜在空间，通过向量量化替代连续潜在分布，更适合离散结构建模（如语音、图像中的符号化特征），并为后续的生成模型（如 Transformer 解码器）提供离散 token 表示。
 
 | 特性                 | 自编码器（AE）                  | 变分自编码器（VAE）                                            | 向量量化 VAE（VQ-VAE）                               |
