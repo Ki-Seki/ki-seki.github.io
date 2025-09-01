@@ -7,10 +7,10 @@ tags: ["vision", "diffusion", "math"]
 math: true
 ---
 
-<!-- TODO：记得email给lilian about this article -->
-<!-- TODO: unify styles of all references -->
-<!-- TODO：check all images -->
+<!-- TODO: 翻译为英文 -->
 <!-- TODO：标点符号用英文的 -->
+<!-- TODO：更改post日期等yaml头 -->
+<!-- TODO：记得email给lilian about this article -->
 
 本文对Lilian Weng的《What are Diffusion Models?》 [^lilian_diffusion] 进行完善的注释导读。
 
@@ -61,7 +61,7 @@ $$
 - $\beta_t$ 定义了在扩散过程中每个时间步的方差大小，一般来说$\beta_t$逐渐增大，因此和原始数据差异越来越大（$\sqrt{1 - \beta_t}$ ↓），数据变异性也逐渐变大（$\beta_t\mathbf{I}$ ↑），总体上逐渐使得每一步的噪声更多。
 - $\beta_t\mathbf{I}$，是协方差矩阵，也是个对角矩阵，所有对角线元素都是 $\beta_t$. 每一维都加相同强度的噪声，不偏向任何方向。
 
-整体扩散过程是，根据马尔可夫性质(TODO: ref to appendix)将单步扩散过程连乘起来的递推式。
+整体扩散过程是，根据[马尔可夫性质](#markov-property)将单步扩散过程连乘起来的递推式。
 整体扩散过程是我们需要的，因为他能帮助我们从真实数据分布中快速采样得到最后的纯噪声 $\mathbf{x}_T$； 
 然而它依赖于递推式，计算起来较慢。因此实践中会使用更简单的计算方式，即下面讲的封闭形式的公式。
 
@@ -81,7 +81,7 @@ $$
 
 Closed-form expression 指的是可以用有限的、明确的数学表达式直接写出来解，不需要迭代、数值近似或求解方程的公式 [^wiki_closed]。
 
-根据单步扩散过程$q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$，以及重参数化技巧(TODO: ref to appendix) $z = \mu + \sigma \cdot \epsilon$，我们可以重写单步扩散过程为：
+根据单步扩散过程$q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t} \mathbf{x}_{t-1}, \beta_t\mathbf{I})$，以及[重参数化技巧](#reparameterization-trick) $z = \mu + \sigma \cdot \epsilon$，我们可以重写单步扩散过程为：
 
 $$\mathbf{x}_t = \sqrt{1 - \beta_t}\mathbf{x}_{t-1} + \sqrt{\beta_t}\boldsymbol{\epsilon}_{t-1}$$
 
@@ -1005,7 +1005,7 @@ B_{\text{simple}} = \frac{\text{tr}(\Sigma)}{\|G\|_2^2}
 
 $$L_{\text{vlb}} = \mathbb{E}_{t \sim p_t} \left[ \frac{L_t}{p_t} \right], \text{ where } p_t \propto \sqrt{\mathbb{E}[L_t^2]} \text{ and } \sum p_t = 1$$
 
-这个公式话中提到的重要性采样技巧是机器学习中一种常见的技术，旨在对采样的改进来提高期望的计算效率（TODO ref to appendix）。
+这个公式中提到的[重要性采样技巧](#importance-sampling-trick)是机器学习中一种常见的技术，旨在对采样的改进来提高期望的计算效率。
 
 让我们回忆下原始的DDPM的损失函数：
 
@@ -1109,7 +1109,7 @@ FID和IS是生成模型中重要的评估指标。
 
 ---
 
-FID（Fréchet Inception Distance）【TODO论文：https://arxiv.org/abs/1706.08500】衡量的是生成图像与真实图像在特征空间中的分布差异。它使用 Inception 网络提取图像特征，然后计算两个高维高斯分布之间的 Fréchet 距离。
+FID（Fréchet Inception Distance）[^heusel_fid] 衡量的是生成图像与真实图像在特征空间中的分布差异。它使用 Inception 网络提取图像特征，然后计算两个高维高斯分布之间的 Fréchet 距离。
 
 \[
 \text{FID} = \|\mu_r - \mu_g\|^2 + \text{Tr}(\Sigma_r + \Sigma_g - 2(\Sigma_r \Sigma_g)^{1/2})
@@ -1123,7 +1123,7 @@ FID 越低，表示生成图像与真实图像越接近；
 
 ---
 
-IS（Inception Score）【TODO论文：https://arxiv.org/abs/1606.03498】衡量的是生成图像的“清晰度”和“多样性”。它使用 Inception 网络预测图像类别分布，然后计算预测分布的 KL 散度。
+IS（Inception Score）[^salimans_improve_gan] 衡量的是生成图像的“清晰度”和“多样性”。它使用 Inception 网络预测图像类别分布，然后计算预测分布的 KL 散度。
 
 \[
 \text{IS} = \exp\left( \mathbb{E}_{x \sim p_g} \left[ D_{\text{KL}}(p(y|x) \| p(y)) \right] \right)
@@ -1663,7 +1663,7 @@ caption="Overview of different types of generative models. ([Source](https://lil
 | 是否可采样生成新数据 | 否                              | 可从先验 \( p(z) \) 采样生成数据                               | 可通过采样离散 token 并解码生成数据                  |
 | 是否使用KL散度       | 否                              | 是（约束潜在分布接近先验）                                     | 否（改用向量量化和额外损失函数替代）                 |
 
-#### reparameterization trick
+#### Reparameterization Trick
 
 定义：重参数化**将随机变量从不可导的采样操作中解耦出来**的方法，让采样操作可以参与梯度下降优化。
 
@@ -1699,7 +1699,7 @@ print("grad mu:", mu.grad)
 print("grad log_sigma:", log_sigma.grad)
 ```
 
-#### 重要性采样（Importance Sampling）技巧
+#### Importance Sampling Trick
 
 假设你想计算某个函数 \( f(x) \) 关于概率分布 \( p(x) \) 的期望：
 
@@ -1828,12 +1828,12 @@ $$
 下面两个图示更直观的展示了 $\mu$ 和 $\Sigma$ 对PDF的形状的影响 [^saleem_gaussian]：
 
 {{< media
-src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*cOOt-vnbCJtd0d7HLdyj4w.gif"
+src="Gaussian_Mean.gif"
 caption="Changes to the mean vector act to translate the Gaussian’s main ‘bump’. ([source](https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b))"
 >}}
 
 {{< media
-src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*JaGLB-lu423IeMe20wRHgA.gif"
+src="Gaussian_Covariance.gif"
 caption="Changes to the covariance matrix act to change the shape of the Gaussian’s main ‘bump’. ([source](https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b))"
 >}}
 
@@ -2047,6 +2047,10 @@ $$
 [^song_ddim]: Song, Jiaming, Chenlin Meng, and Stefano Ermon. “Denoising Diffusion Implicit Models.” *International Conference on Learning Representations*, 2021, https://openreview.net/forum?id=St1giarCHLP.
 
 [^salimans_progressive_distillation]: Salimans, Tim, and Jonathan Ho. “Progressive Distillation for Fast Sampling of Diffusion Models.” *International Conference on Learning Representations*, 2022, https://openreview.net/forum?id=TIdIXIpzhoI.
+
+[^salimans_improve_gan]: Salimans, Tim, et al. *Improved Techniques for Training GANs*. Proceedings of the 30th International Conference on Neural Information Processing Systems (NIPS'16), Curran Associates Inc., 2016, pp. 2234–2242. ACM Digital Library, [https://dl.acm.org/doi/10.5555/3157096.3157346](https://dl.acm.org/doi/10.5555/3157096.3157346).
+
+[^heusel_fid]: Heusel, Martin, et al. GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium. Proceedings of the 31st International Conference on Neural Information Processing Systems (NIPS'17), Curran Associates Inc., 2017, pp. 6629–6640. ACM Digital Library, https://dl.acm.org/doi/10.5555/3295222.3295408.
 
 [^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. arXiv, 14 Dec. 2018, https://arxiv.org/abs/1812.06162.
 
