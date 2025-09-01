@@ -1,6 +1,6 @@
 ---
 date: '2025-08-15T01:41:53+08:00'
-title: '《What are Diffusion Models?》注释'
+title: '《What are Diffusion Models?》完全注释'
 author:
   - Shichao Song
 tags: ["vision", "diffusion", "math"]
