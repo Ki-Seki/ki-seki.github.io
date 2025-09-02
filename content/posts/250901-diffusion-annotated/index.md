@@ -13,7 +13,7 @@ When writing this article, I had limited knowledge of image generation models an
 
 The structure of this article is largely consistent with the original:
 
-- Key formulas and concepts in each section will be expanded with derivations or explanations. 
+- Key formulas and concepts in each section will be expanded with derivations or explanations.
 - In addition, common symbol explanations are provided at the beginning of the article.
 - And some background knowledge required to understand the original text is appended at the end.
 
@@ -115,7 +115,7 @@ In **the single-step diffusion process**:
 - $\beta_t$ defines the variance at each time step in the diffusion process. Generally, $\beta_t$ increases gradually. As a result, the difference from the original data becomes larger ($\sqrt{1 - \beta_t}$ decreases), the data variability also increases ($\beta_t\mathbf{I}$ increases), and overall, more noise is added at each step.
 - $\beta_t\mathbf{I}$ is the covariance matrix, which is also a diagonal matrix. All diagonal elements are $\beta_t$. The same intensity of noise is added to each dimension.
 
-The **overall diffusion process** is a recurrence formula obtained by multiplying the single-step diffusion processes together according to the [Markov property]({{< relref "#markov-property" >}}). 
+The **overall diffusion process** is a recurrence formula obtained by multiplying the single-step diffusion processes together according to the [Markov property]({{< relref "#markov-property" >}}).
 
 The overall diffusion process is necessary because it helps us quickly sample the final pure noise $\mathbf{x}_T$ from the real data distribution. However, it relies on the recurrence formula and is computationally expensive. Therefore, in practice, a simpler calculation method, i.e., the closed-form formula described below, is used.
 
@@ -179,19 +179,19 @@ $$
 
 Langevin dynamics is a statistical method in physics for simulating molecular motion. It describes the random disturbances (e.g., thermal noise) experienced by particles moving in a potential field and is often used to model the stochastic behavior of complex systems.
 
-Stochastic Gradient Langevin Dynamics (SGLD) is a sampling method that combines Langevin dynamics with stochastic gradient descent (SGD) in machine learning. Its goal is to sample from a probability distribution \( p(x) \) without knowing the specific form of this distribution, only requiring knowledge of its gradient.
+Stochastic Gradient Langevin Dynamics (SGLD) is a sampling method that combines Langevin dynamics with stochastic gradient descent (SGD) in machine learning. Its goal is to sample from a probability distribution $p(x)$ without knowing the specific form of this distribution, only requiring knowledge of its gradient.
 
-The above sampling formula is an iterative formula. Its meaning is: "Move a little in the gradient direction and add some random disturbances to make the final sample distribution approximate the target distribution \( p(x) \)." The meanings of the relevant symbols are as follows:
+The above sampling formula is an iterative formula. Its meaning is: "Move a little in the gradient direction and add some random disturbances to make the final sample distribution approximate the target distribution $p(x)$." The meanings of the relevant symbols are as follows:
 
-- \( \mathbf{x}_t \): The sample at the \( t \)-th step.
-- \( \frac{\delta}{2} \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) \): The drift term. It moves according to the gradient of the target distribution, similar to being pulled by a force. It can also be analogized to $\sqrt{1 - \beta_t} \mathbf{x}_{t-1}$ in diffusion.
-  - \( \delta / 2 \): The step size, controlling the magnitude of each update.
-  - \( p(x) \): The probability density function of the target distribution.
-  - \( \log p(x) \): The log-probability density, facilitating calculation and optimization.
-  - \( \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1}) \): The gradient of the log-probability density, also called the score function, representing the "uphill direction" at the current point.
-- \( \sqrt{\delta} \boldsymbol{\epsilon}_t \): The diffusion term, similar to the molecular collisions in Brownian motion. It can be analogized to $\sqrt{\beta_t} \boldsymbol{\epsilon}_{t-1}$ in diffusion.
-  - \( \sqrt{\delta} \): The step size, controlling the magnitude of each update.
-  - \( \epsilon_t \sim \mathcal{N}(0, I) \): Random noise following a standard normal distribution, adding randomness to avoid getting stuck in local optima.
+- $\mathbf{x}_t$: The sample at the $t$-th step.
+- $\frac{\delta}{2} \nabla_\mathbf{x} \log p(\mathbf{x}_{t-1})$: The drift term. It moves according to the gradient of the target distribution, similar to being pulled by a force. It can also be analogized to $\sqrt{1 - \beta_t} \mathbf{x}_{t-1}$ in diffusion.
+  - $\delta / 2$: The step size, controlling the magnitude of each update.
+  - $p(x)$: The probability density function of the target distribution.
+  - $\log p(x)$: The log-probability density, facilitating calculation and optimization.
+  - $\nabla_\mathbf{x} \log p(\mathbf{x}_{t-1})$: The gradient of the log-probability density, also called the score function, representing the "uphill direction" at the current point.
+- $\sqrt{\delta} \boldsymbol{\epsilon}_t$: The diffusion term, similar to the molecular collisions in Brownian motion. It can be analogized to $\sqrt{\beta_t} \boldsymbol{\epsilon}_{t-1}$ in diffusion.
+  - $\sqrt{\delta}$: The step size, controlling the magnitude of each update.
+  - $\epsilon_t \sim \mathcal{N}(0, I)$: Random noise following a standard normal distribution, adding randomness to avoid getting stuck in local optima.
 
 ---
 
@@ -210,7 +210,7 @@ Here, $q(\cdot)$ measures the authenticity of the samples. In each iteration, $\
 ### Reverse diffusion process
 
 {{< admonition type=quote title="Reverse Diffusion Process is Also Gaussian" >}}
-Note that if \(\beta_t\) is small enough, \(q(\mathbf{x}_{t-1} \vert \mathbf{x}_t)\) will also be Gaussian.
+Note that if $\beta_t$ is small enough, $q(\mathbf{x}_{t-1} \vert \mathbf{x}_t)$ will also be Gaussian.
 {{< /admonition >}}
 
 Let's review the forward single-step diffusion formula:
@@ -222,11 +222,11 @@ q(\mathbf{x}_t \vert \mathbf{x}_{t-1}) &= \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \b
 \end{align}
 $$
 
-When \(\beta_t\) is small, it means that little noise is added at each step. Then:
+When $\beta_t$ is small, it means that little noise is added at each step. Then:
 
-- The relationship between \(\mathbf{x}_t\) and \(\mathbf{x}_{t-1}\) is very close to a linear transformation plus a small perturbation.
+- The relationship between $\mathbf{x}_t$ and $\mathbf{x}_{t-1}$ is very close to a linear transformation plus a small perturbation.
 - A linear transformation of a Gaussian distribution still maintains a Gaussian form.
-- This makes the reverse conditional distribution approximately Gaussian. 
+- This makes the reverse conditional distribution approximately Gaussian.
 
 Therefore, we usually model the reverse process using a Gaussian distribution.
 
@@ -283,9 +283,9 @@ $$
 where $C(\mathbf{x}_t, \mathbf{x}_0)$ is some function not involving $\mathbf{x}_{t-1}$ and details are omitted...recall that $\alpha_t = 1 - \beta_t$ and $\bar{\alpha}_t = \prod_{i=1}^t \alpha_i$.
 {{< /admonition >}}
 
-First, we can use Bayes' formula to transform the calculation of the posterior into the calculation of the prior, i.e., the calculation of the forward diffusion. This allows us to build on the previous derivations. 
+First, we can use Bayes' formula to transform the calculation of the posterior into the calculation of the prior, i.e., the calculation of the forward diffusion. This allows us to build on the previous derivations.
 
-Second, we can expand the probabilities into calculations between Gaussian probability density functions to obtain a new Gaussian probability density form. 
+Second, we can expand the probabilities into calculations between Gaussian probability density functions to obtain a new Gaussian probability density form.
 
 Let's elaborate on the reasoning steps based on these two ideas:
 
@@ -513,11 +513,11 @@ p_\theta(\mathbf{x}_0)
 \end{align}
 $$
 
-Jensen's inequality [^wiki_jensen] states that if \( \phi(\cdot) \) is a concave function [^wiki_concave] and \( X \) is an integrable random variable, then the following inequality holds:
+Jensen's inequality [^wiki_jensen] states that if $\phi(\cdot)$ is a concave function [^wiki_concave] and $X$ is an integrable random variable, then the following inequality holds:
 
-\[
+$$
 \phi\left( \mathbb{E}[X] \right) \geq \mathbb{E}\left[ \phi(X) \right]
-\]
+$$
 
 For example, $\log(\cdot)$ is a concave function.
 
@@ -663,9 +663,9 @@ This term is the most important and will be elaborated on later. It is temporari
 
 For the convenience of calculation, this term is approximated as the denoising matching term at $t = 1$:
 
-\[
+$$
 L_0 \approx \mathbb{E}_{\mathbf{x}_{0:T}\sim q(\mathbf{x}_{0:T})} D_{\text{KL}}(q(\mathbf{x}_0 \vert \mathbf{x}_1) \parallel p_\theta(\mathbf{x}_0 \vert \mathbf{x}_1))
-\]
+$$
 
 ### Parameterization of $L_t$ for Training Loss
 
@@ -965,8 +965,8 @@ $$
 
 where:
 
-- \( \beta_{\text{min}} \) and \( \beta_{\text{max}} \) are the preset minimum and maximum noise values (e.g., 0.0001 and 0.02).
-- \( T \) is the total number of diffusion steps (e.g., 1000).
+- $\beta_{\text{min}}$ and $\beta_{\text{max}}$ are the preset minimum and maximum noise values (e.g., 0.0001 and 0.02).
+- $T$ is the total number of diffusion steps (e.g., 1000).
 
 The **cosine-based variance schedule** in Improved DDPM [^nichol_improved_ddpm] is:
 
@@ -981,8 +981,8 @@ $$
 where:
 
 - This schedule first defines $\bar{\alpha}_t$, then $\alpha_t$ and $\beta_t$.
-- The small offset \( s \) is used to prevent \( \beta_t \) from becoming too small when close to \( t = 0 \). Improved DDPM [^nichol_improved_ddpm] argues that having tiny amounts of noise at the beginning of the process makes it difficult for the network to predict accurately enough.
-- The clip function ensures that \( \beta_t \) does not exceed 0.999, avoiding numerical instability. Improved DDPM [^nichol_improved_ddpm] suggests that this can prevent singularities at the end of the diffusion process near $t = T$.
+- The small offset $s$ is used to prevent $\beta_t$ from becoming too small when close to $t = 0$. Improved DDPM [^nichol_improved_ddpm] argues that having tiny amounts of noise at the beginning of the process makes it difficult for the network to predict accurately enough.
+- The clip function ensures that $\beta_t$ does not exceed 0.999, avoiding numerical instability. Improved DDPM [^nichol_improved_ddpm] suggests that this can prevent singularities at the end of the diffusion process near $t = T$.
 
 Click the bottom-right corner of the following figure to enter an interactive interface and intuitively experience the two schedulers.
 
@@ -1050,22 +1050,22 @@ The overall meaning of this passage is relatively straightforward. The main goal
 
 **Noisy gradient** is a concept proposed in OpenAI's paper *An Empirical Model of Large-Batch Training* [^mc_candlish_grad_noise].
 
-In Stochastic Gradient Descent (SGD), instead of computing gradients using the entire dataset, we use a mini-batch. This introduces noise because gradients from different batches can vary significantly. The **Gradient Noise Scale** can measure this gradient volatility. 
+In Stochastic Gradient Descent (SGD), instead of computing gradients using the entire dataset, we use a mini-batch. This introduces noise because gradients from different batches can vary significantly. The **Gradient Noise Scale** can measure this gradient volatility.
 
 Its core idea is that if gradients vary greatly across different batches (high noise), we need a larger batch size to obtain more stable updates. Under simplified assumptions (e.g., the Hessian is a multiple of the identity matrix), the Gradient Noise Scale can be expressed as:
 
-\[
+$$
 B_{\text{simple}} = \frac{\text{tr}(\Sigma)}{\|G\|_2^2}
-\]
+$$
 
 where:
 
-- \(\text{tr}(\Sigma)\): The trace of the gradient covariance matrix, which is the sum of the variances of all parameter gradients, representing the "volatility" of the gradients.
-- \(\|G\|_2^2\): The squared norm of the gradient (global gradient norm), which is the sum of the squares of all parameter gradients, representing the "average intensity" of the gradients.
+- $\text{tr}(\Sigma)$: The trace of the gradient covariance matrix, which is the sum of the variances of all parameter gradients, representing the "volatility" of the gradients.
+- $\|G\|_2^2$: The squared norm of the gradient (global gradient norm), which is the sum of the squares of all parameter gradients, representing the "average intensity" of the gradients.
 
-\(B_{\text{simple}}\) represents: **the ratio of the gradient noise intensity to its average intensity**
+$B_{\text{simple}}$ represents: **the ratio of the gradient noise intensity to its average intensity**
 
-- If \(B_{\text{simple}}\) is large, it indicates strong gradient noise, and a larger batch size is recommended.
+- If $B_{\text{simple}}$ is large, it indicates strong gradient noise, and a larger batch size is recommended.
 - If it is small, it means the gradients are stable, and a smaller batch size can be used to speed up training.
 
 ---
@@ -1129,10 +1129,10 @@ $$
 \boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
 $$
 
-**The derivation ideas in the blog post are as follows**: 
+**The derivation ideas in the blog post are as follows**:
 
-- First, we convert the conditional probability into the gradients of the diffusion part and the classifier part. 
-- Second, we transform the theoretical formula into a form containing learnable parameters. 
+- First, we convert the conditional probability into the gradients of the diffusion part and the classifier part.
+- Second, we transform the theoretical formula into a form containing learnable parameters.
 - Third, we perform a maybe unnecessary simplification.
 
 ### Classifier-Free Guidance
@@ -1182,14 +1182,14 @@ FID and IS are important evaluation metrics for generative models.
 
 FID (Fréchet Inception Distance) [^heusel_fid] measures the distribution difference between generated images and real images in the feature space. It uses the Inception network to extract image features and then calculates the Fréchet distance between two high-dimensional Gaussian distributions.
 
-\[
+$$
 \text{FID} = \|\mu_r - \mu_g\|^2 + \text{Tr}(\Sigma_r + \Sigma_g - 2(\Sigma_r \Sigma_g)^{1/2})
-\]
+$$
 
 where:
 
-- \( \mu_r, \Sigma_r \): Mean and covariance of real images.
-- \( \mu_g, \Sigma_g \): Mean and covariance of generated images.
+- $\mu_r, \Sigma_r$: Mean and covariance of real images.
+- $\mu_g, \Sigma_g$: Mean and covariance of generated images.
 
 A lower FID indicates that the generated images are closer to the real images.
 
@@ -1197,14 +1197,14 @@ A lower FID indicates that the generated images are closer to the real images.
 
 IS (Inception Score) [^salimans_improve_gan] measures the "sharpness" and "diversity" of generated images. It uses the Inception network to predict the image category distribution and then calculates the KL divergence of the predicted distribution.
 
-\[
+$$
 \text{IS} = \exp\left( \mathbb{E}_{x \sim p_g} \left[ D_{\text{KL}}(p(y|x) \| p(y)) \right] \right)
-\]
+$$
 
 where:
 
-- \( p(y|x) \): Predicted distribution of the Inception network for generated images.
-- \( p(y) \): Average predicted distribution of all generated images.
+- $p(y|x)$: Predicted distribution of the Inception network for generated images.
+- $p(y)$: Average predicted distribution of all generated images.
 
 A higher IS indicates that the images are sharp (low entropy of the predicted distribution) and diverse (high entropy of the average distribution).
 
@@ -1285,9 +1285,9 @@ Note: DDPM and DDIM are from different papers, so there may be math symbol confl
 
 The derivation of the formula starts from the closed-form formula of the forward diffusion process. We attempt to separate a $\sigma_t^2$ term to the variance position using the following technique:
 
-\[
+$$
 \text{Var}(\boldsymbol{\epsilon}_{t-1}) = a^2 \cdot \text{Var}(\boldsymbol{\epsilon}_t) + b^2 \cdot \text{Var}(\boldsymbol{\epsilon}) = a^2 + b^2 \quad \text{; where }\epsilon_t \text{ and }\epsilon \text{ are independent}
-\]
+$$
 
 {{% admonition type="quote" title="Progressive Distillation" open=true %}}
 {{< media
@@ -1402,14 +1402,14 @@ This mechanism allows the model to precisely align semantic conditions with the 
 
 ## Scale up Generation Resolution and Quality
 
-This section discusses how to improve the image generation quality and resolution of diffusion models to a higher level through a series of techniques. 
+This section discusses how to improve the image generation quality and resolution of diffusion models to a higher level through a series of techniques.
 
-It mainly covers the Noise Conditioning Augmentation technique, the unCLIP model architecture, the Imagen model architecture, and some other improvements. 
+It mainly covers the Noise Conditioning Augmentation technique, the unCLIP model architecture, the Imagen model architecture, and some other improvements.
 
 Here, we only pay attention to the Noise Conditioning Augmentation and the unCLIP model architecture.
 
 {{% admonition type="quote" title="Noise conditioning augmentation" open=true %}}
-_Noise conditioning augmentation_ between pipeline models is crucial to the final image quality, which is to apply strong data augmentation to the conditioning input $\mathbf{z}$ of each super-resolution model $p_\theta(\mathbf{x} \vert \mathbf{z})$. The conditioning noise helps reduce compounding error in the pipeline setup...
+*Noise conditioning augmentation* between pipeline models is crucial to the final image quality, which is to apply strong data augmentation to the conditioning input $\mathbf{z}$ of each super-resolution model $p_\theta(\mathbf{x} \vert \mathbf{z})$. The conditioning noise helps reduce compounding error in the pipeline setup...
 
 They found the most effective noise is to apply Gaussian noise at low resolution and Gaussian blur at high resolution. In addition, they also explored two forms of conditioning augmentation that require small modification to the training process. Note that conditioning noise is only applied to training but not at inference.
 
@@ -1713,13 +1713,13 @@ src="Generative_Models.png"
 caption="Overview of different types of generative models. ([Source](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/))"
 >}}
 
-- **VAE (Variational Autoencoder)**: 
+- **VAE (Variational Autoencoder)**:
   - Principal: The input image is compressed into latent space variables by an encoder and then reconstructed by a decoder.
   - Pro/Con: Tractable but sacrifices generation quality.
-- **GAN (Generative Adversarial Network)**: 
+- **GAN (Generative Adversarial Network)**:
   - Principal: Two networks are trained, one for generating images and the other for distinguishing real from fake images.
   - Pro/Con: Flexible but suffers from unstable training and lacks an explicit likelihood.
-- **Flow-based models**: 
+- **Flow-based models**:
   - Principal: Images are generated through flow matching, which combines function-level processes.
   - Pro/Con: Reversible but have limited architectures.
 
@@ -1737,15 +1737,15 @@ Moreover, nowadays, diffusion models have become the de facto standard for gener
 - **VAE (Variational Autoencoder)**: Based on the AE, it introduces probabilistic modeling and variational inference, enabling the model to have generative capabilities.
 - **VQ-VAE (Vector Quantized Variational Autoencoder)**: It further introduces a discrete latent space, replacing the continuous latent distribution with vector quantization. It is more suitable for modeling discrete structures (e.g., symbolic features in speech and images) and provides discrete token representations for subsequent generative models (e.g., Transformer decoders).
 
-| Feature                          | Autoencoder (AE)                          | Variational Autoencoder (VAE)                                        | Vector Quantized VAE (VQ-VAE)                                                          |
-| -------------------------------- | ----------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Encoder Output                   | A deterministic vector \( z = f(x) \)     | A distribution \( q(z \vert x) = \mathcal{N}(\mu(x), \sigma^2(x)) \) | A discrete codebook vector \( z \in \mathcal{E} \) obtained by nearest-neighbor search |
-| Latent Space Type                | Continuous and deterministic              | Continuous and probabilistic                                         | Discrete and finite codebook                                                           |
-| Training Objective               | Minimize reconstruction error (e.g., MSE) | Maximize the variational lower bound (ELBO)                          | Reconstruction error + codebook loss + commitment loss                                 |
-| Generative Model?                | No                                        | Yes                                                                  | Yes                                                                                    |
-| Probabilistic Modeling?          | No                                        | Yes (models the latent variable distribution)                        | No (but provides a discrete symbolic latent space)                                     |
-| Can Sample to Generate New Data? | No                                        | Can generate data by sampling from the prior \( p(z) \)              | Can generate data by sampling discrete tokens and decoding                             |
-| Uses KL Divergence?              | No                                        | Yes (constrains the latent distribution to be close to the prior)    | No (replaced by vector quantization and additional loss functions)                     |
+| Feature                          | Autoencoder (AE)                          | Variational Autoencoder (VAE)                                     | Vector Quantized VAE (VQ-VAE)                                                      |
+| -------------------------------- | ----------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Encoder Output                   | A deterministic vector $z = f(x)$         | A distribution $q(z \vert x) = \mathcal{N}(\mu(x), \sigma^2(x))$  | A discrete codebook vector $z \in \mathcal{E}$ obtained by nearest-neighbor search |
+| Latent Space Type                | Continuous and deterministic              | Continuous and probabilistic                                      | Discrete and finite codebook                                                       |
+| Training Objective               | Minimize reconstruction error (e.g., MSE) | Maximize the variational lower bound (ELBO)                       | Reconstruction error + codebook loss + commitment loss                             |
+| Generative Model?                | No                                        | Yes                                                               | Yes                                                                                |
+| Probabilistic Modeling?          | No                                        | Yes (models the latent variable distribution)                     | No (but provides a discrete symbolic latent space)                                 |
+| Can Sample to Generate New Data? | No                                        | Can generate data by sampling from the prior $p(z)$               | Can generate data by sampling discrete tokens and decoding                         |
+| Uses KL Divergence?              | No                                        | Yes (constrains the latent distribution to be close to the prior) | No (replaced by vector quantization and additional loss functions)                 |
 
 #### Reparameterization Trick
 
@@ -1785,39 +1785,39 @@ print("grad log_sigma:", log_sigma.grad)
 
 #### Importance Sampling Trick
 
-Suppose you want to compute the expectation of a function \( f(x) \) with respect to a probability distribution \( p(x) \):
+Suppose you want to compute the expectation of a function $f(x)$ with respect to a probability distribution $p(x)$:
 
-\[
+$$
 \mathbb{E}_{x \sim p}[f(x)] = \int f(x) p(x) dx
-\]
+$$
 
-However, it might be difficult to sample directly from \( p(x) \), or most samples of \( f(x) \) under \( p(x) \) contribute little, with only a few regions making significant contributions (e.g., tail events). In such cases, direct Monte Carlo estimation can be inefficient.
+However, it might be difficult to sample directly from $p(x)$, or most samples of $f(x)$ under $p(x)$ contribute little, with only a few regions making significant contributions (e.g., tail events). In such cases, direct Monte Carlo estimation can be inefficient.
 
-If we can **sample from another distribution \( q(x) \) that is easier to sample from and then correct the bias through weighting**, the estimation becomes more convenient. This is known as importance sampling.
+If we can **sample from another distribution $q(x)$ that is easier to sample from and then correct the bias through weighting**, the estimation becomes more convenient. This is known as importance sampling.
 
 Importance sampling rewrites the original expectation as:
 
-\[
+$$
 \mathbb{E}_{x \sim p}[f(x)] = \int f(x) p(x) dx = \int f(x) \frac{p(x)}{q(x)} q(x) dx = \mathbb{E}_{x \sim q}\left[ f(x) \frac{p(x)}{q(x)} \right]
-\]
+$$
 
 Where:
 
-- \( q(x) \) is the **proposal distribution**, and \( q(x) > 0 \) when \( p(x) > 0 \) (i.e., the support of \( q \) contains the support of \( p \)).
-- \( w(x_i) = \frac{p(x_i)}{q(x_i)} \) is called the **importance weight**.
+- $q(x)$ is the **proposal distribution**, and $q(x) > 0$ when $p(x) > 0$ (i.e., the support of $q$ contains the support of $p$).
+- $w(x_i) = \frac{p(x_i)}{q(x_i)}$ is called the **importance weight**.
 
-At this point, we can sample \( x_i \sim q(x) \) from \( q(x) \) and then estimate:
+At this point, we can sample $x_i \sim q(x)$ from $q(x)$ and then estimate:
 
-\[
+$$
 \hat{\mu} = \frac{1}{N} \sum_{i=1}^N f(x_i) \cdot \frac{p(x_i)}{q(x_i)}
-\]
+$$
 
 Let's take an example. Assume:
 
-- \( p(x) = \mathcal{N}(0, 1) \)
-- \( f(x) = x^2 \cdot \mathbb{1}[x > 2] \)
-- If we sample directly from \( p \), most samples satisfy \( x < 2 \), contributing zero to the result, which is inefficient.
-- If we switch to sampling from \( q(x) = \mathcal{N}(2.5, 1) \), we are more likely to sample points in the region \( x > 2 \).
+- $p(x) = \mathcal{N}(0, 1)$
+- $f(x) = x^2 \cdot \mathbb{1}[x > 2]$
+- If we sample directly from $p$, most samples satisfy $x < 2$, contributing zero to the result, which is inefficient.
+- If we switch to sampling from $q(x) = \mathcal{N}(2.5, 1)$, we are more likely to sample points in the region $x > 2$.
 
 PyTorch Code Example:
 
@@ -1909,47 +1909,47 @@ caption="Changes to the covariance matrix act to change the shape of the Gaussia
 
 The relationship among them is:
 
-\[
+$$
 \text{Posterior} = \frac{\text{Likelihood} \times \text{Prior}}{\text{Evidence}}
 \quad\leftrightarrow\quad
 P(\text{Parameters} | \text{Data}) = \frac{P(\text{Data} | \text{Parameters}) \cdot P(\text{Parameters})}{P(\text{Data})}
-\]
+$$
 
 #### Bayes’ Rule
 
 Bayes’ Rule is a core principle in probability theory, used to update the probability of an event given certain conditions. Its basic form is:
 
-\[
+$$
 P(A \vert B) = \frac{P(B \vert A) \cdot P(A)}{P(B)}
-\]
+$$
 
 Where:
 
-- \(P(A)\): The prior probability of event A (the belief in A before observing B).
-- \(P(B \vert A)\): The likelihood of observing B given that A has occurred.
-- \(P(B)\): The marginal probability of event B (the probability of B occurring under all possible scenarios).
-- \(P(A \vert B)\): The posterior probability of event A after observing B (the updated belief).
+- $P(A)$: The prior probability of event A (the belief in A before observing B).
+- $P(B \vert A)$: The likelihood of observing B given that A has occurred.
+- $P(B)$: The marginal probability of event B (the probability of B occurring under all possible scenarios).
+- $P(A \vert B)$: The posterior probability of event A after observing B (the updated belief).
 
 #### Law of Total Probability
 
 The Law of Total Probability is used to **calculate the probability of an event** when the probability of this event is not easy to calculate directly. It can be solved by **decomposing it into the sum of conditional probabilities under several mutually exclusive scenarios**.
 
-Suppose events \( B_1, B_2, \dots, B_n \) form a **complete set of events** in the sample space (i.e., they are mutually exclusive and their union is the entire space), that is:
+Suppose events $B_1, B_2, \dots, B_n$ form a **complete set of events** in the sample space (i.e., they are mutually exclusive and their union is the entire space), that is:
 
-- \( B_i \cap B_j = \emptyset \) (Mutually exclusive).
-- \( \bigcup_{i=1}^n B_i = \Omega \) (Exhaustive).
+- $B_i \cap B_j = \emptyset$ (Mutually exclusive).
+- $\bigcup_{i=1}^n B_i = \Omega$ (Exhaustive).
 
-Then for any event \( A \), we have:
+Then for any event $A$, we have:
 
-\[
+$$
 P(A) = \sum_{i=1}^n P(A \mid B_i) P(B_i)
-\]
+$$
 
 #### Marginalization
 
 Marginalization refers to **obtaining the probability distribution of another variable from a joint probability distribution by "summing (or integrating) over certain variables"**.
 
-For example, given the joint distribution \( P(X, Y) \) of two random variables \( X \) and \( Y \), if we want to obtain the distribution \( P(X) \) of \( X \), we need to "marginalize" over all possible values of \( Y \):
+For example, given the joint distribution $P(X, Y)$ of two random variables $X$ and $Y$, if we want to obtain the distribution $P(X)$ of $X$, we need to "marginalize" over all possible values of $Y$:
 
 $$
 \begin{align}
@@ -2087,40 +2087,41 @@ D_{KL}(p\|q) &= H(p, q) - H(p) \\
 &= 0
 \end{align}
 $$
+
 ## Citation
 
 {{< bibtex >}}
 
 ## References
 
-[^ho_ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** "Denoising Diffusion Probabilistic Models." _Advances in Neural Information Processing Systems_, vol. 33, edited by H. Larochelle et al., Curran Associates, Inc., 2020, pp. 6840–6851. _NeurIPS_, https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
+[^ho_ddpm]: **Ho, Jonathan, Ajay Jain, and Pieter Abbeel.** "Denoising Diffusion Probabilistic Models." *Advances in Neural Information Processing Systems*, vol. 33, edited by H. Larochelle et al., Curran Associates, Inc., 2020, pp. 6840–6851. *NeurIPS*, https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html.
 
-[^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** "Improved Denoising Diffusion Probabilistic Models." _Proceedings of the 38th International Conference on Machine Learning_, vol. 139, edited by Marina Meila and Tong Zhang, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. _PMLR_, https://proceedings.mlr.press/v139/nichol21a.html.
+[^nichol_improved_ddpm]: **Nichol, Alexander Quinn, and Prafulla Dhariwal.** "Improved Denoising Diffusion Probabilistic Models." *Proceedings of the 38th International Conference on Machine Learning*, vol. 139, edited by Marina Meila and Tong Zhang, Proceedings of Machine Learning Research, 18–24 July 2021, pp. 8162–8171. *PMLR*, https://proceedings.mlr.press/v139/nichol21a.html.
 
-[^song_consistency]: **Song, Yang, et al.** "Consistency Models." _International Conference on Machine Learning_, 2023. _ICML_, https://icml.cc/virtual/2023/poster/24593.
+[^song_consistency]: **Song, Yang, et al.** "Consistency Models." *International Conference on Machine Learning*, 2023. *ICML*, https://icml.cc/virtual/2023/poster/24593.
 
-[^song_ddim]: **Song, Jiaming, Chenlin Meng, and Stefano Ermon.** "Denoising Diffusion Implicit Models." _International Conference on Learning Representations_, 2021. _OpenReview_, https://openreview.net/forum?id=St1giarCHLP.
+[^song_ddim]: **Song, Jiaming, Chenlin Meng, and Stefano Ermon.** "Denoising Diffusion Implicit Models." *International Conference on Learning Representations*, 2021. *OpenReview*, https://openreview.net/forum?id=St1giarCHLP.
 
-[^salimans_progressive_distillation]: **Salimans, Tim, and Jonathan Ho.** "Progressive Distillation for Fast Sampling of Diffusion Models." _International Conference on Learning Representations_, 2022. _OpenReview_, https://openreview.net/forum?id=TIdIXIpzhoI.
+[^salimans_progressive_distillation]: **Salimans, Tim, and Jonathan Ho.** "Progressive Distillation for Fast Sampling of Diffusion Models." *International Conference on Learning Representations*, 2022. *OpenReview*, https://openreview.net/forum?id=TIdIXIpzhoI.
 
-[^salimans_improve_gan]: **Salimans, Tim, et al.** "Improved Techniques for Training GANs." _Proceedings of the 30th International Conference on Neural Information Processing Systems (NIPS'16)_, Curran Associates Inc., 2016, pp. 2234–2242. _ACM Digital Library_, https://dl.acm.org/doi/10.5555/3157096.3157346.
+[^salimans_improve_gan]: **Salimans, Tim, et al.** "Improved Techniques for Training GANs." *Proceedings of the 30th International Conference on Neural Information Processing Systems (NIPS'16)*, Curran Associates Inc., 2016, pp. 2234–2242. *ACM Digital Library*, https://dl.acm.org/doi/10.5555/3157096.3157346.
 
-[^heusel_fid]: **Heusel, Martin, et al.** "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium." _Proceedings of the 31st International Conference on Neural Information Processing Systems (NIPS'17)_, Curran Associates Inc., 2017, pp. 6629–6640. _ACM Digital Library_, https://dl.acm.org/doi/10.5555/3295222.3295408.
+[^heusel_fid]: **Heusel, Martin, et al.** "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium." *Proceedings of the 31st International Conference on Neural Information Processing Systems (NIPS'17)*, Curran Associates Inc., 2017, pp. 6629–6640. *ACM Digital Library*, https://dl.acm.org/doi/10.5555/3295222.3295408.
 
-[^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** _An Empirical Model of Large-Batch Training_. 14 Dec. 2018. _arXiv_, https://arxiv.org/abs/1812.06162.
+[^mc_candlish_grad_noise]: **McCandlish, Sam, et al.** *An Empirical Model of Large-Batch Training*. 14 Dec. 2018. *arXiv*, https://arxiv.org/abs/1812.06162.
 
-[^lilian_diffusion]: **Weng, Lilian.** "What Are Diffusion Models?" _Lil'Log_, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
+[^lilian_diffusion]: **Weng, Lilian.** "What Are Diffusion Models?" *Lil'Log*, 11 July 2021, https://lilianweng.github.io/posts/2021-07-11-diffusion-models/.
 
-[^lilian_ae]: **Weng, Lilian.** "From Autoencoder to Beta-VAE." _Lil'Log_, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
+[^lilian_ae]: **Weng, Lilian.** "From Autoencoder to Beta-VAE." *Lil'Log*, 12 Aug. 2018, https://lilianweng.github.io/posts/2018-08-12-vae/.
 
-[^saleem_gaussian]: **Saleem, Ameer.** "Unpacking the Multivariate Gaussian Distribution." _Medium_, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
+[^saleem_gaussian]: **Saleem, Ameer.** "Unpacking the Multivariate Gaussian Distribution." *Medium*, 12 May 2025, https://ameer-saleem.medium.com/why-the-multivariate-gaussian-distribution-isnt-as-scary-as-you-might-think-5c43433ca23b.
 
-[^gupta_gaussian_kl]: **Gupta, Rishabh.** "KL Divergence between 2 Gaussian Distributions." _Mr. Easy_, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
+[^gupta_gaussian_kl]: **Gupta, Rishabh.** "KL Divergence between 2 Gaussian Distributions." *Mr. Easy*, 16 Apr. 2020, https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/.
 
-[^zijie_cnn]: **Wang, Zijie J., et al.** "CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization." _IEEE Transactions on Visualization and Computer Graphics (TVCG)_, IEEE, 2020. https://poloclub.github.io/cnn-explainer/.
+[^zijie_cnn]: **Wang, Zijie J., et al.** "CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization." *IEEE Transactions on Visualization and Computer Graphics (TVCG)*, IEEE, 2020. https://poloclub.github.io/cnn-explainer/.
 
-[^wiki_closed]: Wikipedia contributors. "Closed-form expression." _Wikipedia, The Free Encyclopedia_, 26 July 2025, https://en.wikipedia.org/wiki/Closed-form_expression. Accessed 1 Sept. 2025.
+[^wiki_closed]: Wikipedia contributors. "Closed-form expression." *Wikipedia, The Free Encyclopedia*, 26 July 2025, https://en.wikipedia.org/wiki/Closed-form_expression. Accessed 1 Sept. 2025.
 
-[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." _Wikipedia, The Free Encyclopedia_, 12 June 2025, https://en.wikipedia.org/wiki/Jensen%27s_inequality. Accessed 23 Aug. 2025.
+[^wiki_jensen]: Wikipedia contributors. "Jensen's inequality." *Wikipedia, The Free Encyclopedia*, 12 June 2025, https://en.wikipedia.org/wiki/Jensen%27s_inequality. Accessed 23 Aug. 2025.
 
-[^wiki_concave]: Wikipedia contributors. "Concave function." _Wikipedia, The Free Encyclopedia_, 17 July 2025, https://en.wikipedia.org/wiki/Concave_function. Accessed 23 Aug. 2025.
+[^wiki_concave]: Wikipedia contributors. "Concave function." *Wikipedia, The Free Encyclopedia*, 17 July 2025, https://en.wikipedia.org/wiki/Concave_function. Accessed 23 Aug. 2025.
