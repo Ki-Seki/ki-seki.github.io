@@ -1,5 +1,5 @@
 ---
-date: '2025-09-02T03:55:39+08:00'
+date: '2025-09-02T18:49:24+08:00'
 title: 'Fully Annotated Guide to "What are Diffusion Models?"'
 author:
   - Shichao Song
@@ -17,7 +17,7 @@ The structure of this article is largely consistent with the original:
 - In addition, common symbol explanations are provided at the beginning of the article.
 - And some background knowledge required to understand the original text is appended at the end.
 
-If you only want to learn the basics of the Diffusion model, the first section, [*What are Diffusion Models?*]({{< relref "#what-are-diffusion-models" >}}) is sufficient.
+Note: If you only want to learn the basics of the Diffusion model, the first section, [*What are Diffusion Models?*]({{< relref "#what-are-diffusion-models" >}}) is sufficient.
 
 ### Notations
 
