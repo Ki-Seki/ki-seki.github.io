@@ -1,12 +1,10 @@
 # Kiseki Log
 
-## ⭐ Star or 👀 Watch
+If you find this blog helpful, please consider giving it a ⭐ **star** or 👀 **watching** the repository to get notified about the latest articles and updates.
 
-If you find this blog helpful, please consider giving it a **star** or **watching** the repository to get notified about the latest articles and updates.
+Also feel free to open ⁉️ **issues** or 🤝 **pull requests** for suggestions and improvements!
 
-Also feel free to open issues or pull requests for suggestions and improvements!
-
-## 🚀 Local Development
+## Deployment
 
 To serve the site locally:
 
@@ -27,12 +25,9 @@ To serve the site locally:
    - The site will be available at [http://localhost:1313](http://localhost:1313).
    - The `-D` flag includes draft posts.
 
-## 📄 License
+## License
 
-### Theme License
-
-See `themes/PaperMod/LICENSE` for theme license details.
-
-### Content License
-
-<a href="https://ki-seki.github.io/">Kiseki Log</a> © 2023-Present by <a href="https://ki-seki.github.io/cv/">Shichao Song</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+<a href="https://ki-seki.github.io/">Kiseki Log</a> © 2023-Present by <a href="https://ki-seki.github.io/cv/">Shichao Song</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><span style="margin-left:.2em;"></span>
+<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="Creative Commons" style="height:1em;"><span style="margin-left:.2em;"></span>
+<img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="Attribution" style="height:1em;"><span style="margin-left:.2em;"></span>
+<img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="ShareAlike" style="height:1em;">
