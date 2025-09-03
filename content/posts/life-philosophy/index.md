@@ -8,7 +8,7 @@ tags: ["Life", "Philosophy"]
 ---
 
 {{< media
-src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Maslow%27s_Hierarchy_of_Needs_Diagram.png"
+src="Maslow_Hierarchy_of_Needs.png"
 caption="马斯洛需求层次理论图示 from [wikipedia](https://en.wikipedia.org/wiki/Maslow%27s_hierarchy_of_needs)"
 >}}
 
