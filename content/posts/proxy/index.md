@@ -9,7 +9,8 @@ tags: []
 
 ## TODO
 
-- [ ] 待阅读：[各种协议的介绍](https://www.techfens.com/posts/kexueshangwang.html)
+- [ ] [各种协议的介绍](https://www.techfens.com/posts/kexueshangwang.html)
+- [ ] [各种基础知识](https://zhaotizi.site/)
 
 ## 计算机网络基础知识
 
