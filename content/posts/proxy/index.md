@@ -42,9 +42,7 @@ caption="代理原理"
 - 图形界面（GUI）：提供用户友好的操作界面，简化配置和管理过程。包括客户端、终端、浏览器UI等。
 - 机场/服务商：提供代理服务器节点和相关服务的供应商，通常按流量或时间收费。
 
-
-
-## 名词解释
+## 名词解释/基本知识
 
 - VPN：虚拟私有网络（Virtual Private Network），在网络层或链路层建立加密隧道，将全部或部分流量通过远端网关转发。常见实现包括 WireGuard、OpenVPN、IKEv2 等，适合需要全局流量加密或访问内网资源的场景。
 - SOCKS5：一种通用的代理协议，工作在会话层/应用层，支持 TCP 和 UDP 转发，能代理任意 TCP/UDP 流量（例如 SSH、DNS、游戏），常用于程序级代理或与像 Shadowsocks 这样的加密代理结合使用。
@@ -74,36 +72,49 @@ caption="代理原理"
     network: ws
   ```
 
+## Clash 相关历史
+
+| 代码                                             | 介绍                        | 发布 ~ 删库          |
+| ------------------------------------------------ | --------------------------- | -------------------- |
+| {{< github "Dreamacro/clash" >}}                 | 原始的Clash内核仓库         | 2018-06 ~ Unknown    |
+| {{< github "fossabot/clash" >}}                  | 原始Clash的备份             | 2018-06 ~ Unknown    |
+| {{< github "MetaCubeX/mihomo" >}} 的 Meta 分支   | 对Clash内核的继续开发       | Unknown ~ Present    |
+| {{< github "Fndroid/clash_for_windows_pkg" >}}   | Clash的一个桌面客户端       | Unknown ~ 2023-11-02 |
+| {{< github "zzzgydi/clash-verge" >}}             | Clash的另一个桌面客户端     | Unknown ~ 2023-11-03 |
+| {{< github "clash-verge-rev/clash-verge-rev" >}} | Continuation of Clash Verge | 2023-11-03 ~ Present |
+
 ## 📦 主流翻墙工具清单（客户端）
+
+这个链接里存了非常多：https://wiki.metacubex.one/startup/client/client/
 
 按平台和核心分类整理如下：
 
 ### 🖥️ 桌面端（Windows/macOS/Linux）
 
-| 工具名         | 平台       | 核心/协议支持       | 特点 |
-|----------------|------------|----------------------|------|
-| Clash          | Win/macOS/Linux | 多协议（SS/V2Ray/Trojan） | 高性能，规则分流 |
-| ClashX         | macOS      | Clash GUI            | macOS 专用图形界面 |
-| Clash Verge    | Win/macOS  | Clash Premium        | 多功能 GUI |
-| Clash Meta     | 多平台     | 增强版 Clash         | 支持 Reality/VLESS 等新协议 |
-| Sing-box       | 多平台     | 新一代核心           | 高性能，支持 Hysteria2 等 |
-| V2RayN         | Windows    | V2Ray                | 支持 VMess/VLESS |
-| Qv2ray         | Win/macOS/Linux | V2Ray GUI         | 跨平台图形界面 |
-| Trojan-Qt5     | Windows/macOS | Trojan             | 简洁 GUI |
-| Psiphon        | Win/macOS  | VPN/SSH/HTTP Proxy   | 免费，抗封锁强 |
-| UltraSurf      | Windows    | HTTP Proxy           | 同上，轻量级 |
+| 工具名      | 平台            | 核心/协议支持             | 特点                        |
+| ----------- | --------------- | ------------------------- | --------------------------- |
+| Clash       | Win/macOS/Linux | 多协议（SS/V2Ray/Trojan） | 高性能，规则分流            |
+| ClashX      | macOS           | Clash GUI                 | macOS 专用图形界面          |
+| Clash Verge | Win/macOS       | Clash Premium             | 多功能 GUI                  |
+| Clash Meta  | 多平台          | 增强版 Clash              | 支持 Reality/VLESS 等新协议 |
+| Sing-box    | 多平台          | 新一代核心                | 高性能，支持 Hysteria2 等   |
+| V2RayN      | Windows         | V2Ray                     | 支持 VMess/VLESS            |
+| Qv2ray      | Win/macOS/Linux | V2Ray GUI                 | 跨平台图形界面              |
+| Trojan-Qt5  | Windows/macOS   | Trojan                    | 简洁 GUI                    |
+| Psiphon     | Win/macOS       | VPN/SSH/HTTP Proxy        | 免费，抗封锁强              |
+| UltraSurf   | Windows         | HTTP Proxy                | 同上，轻量级                |
 
 ### 📱 移动端（iOS/Android）
 
-| 工具名         | 平台       | 核心/协议支持       | 特点 |
-|----------------|------------|----------------------|------|
-| Shadowrocket   | iOS        | 多协议               | 功能强大，支持脚本 |
-| QuantumultX    | iOS        | 多协议               | 高级用户首选 |
-| Surge          | iOS/macOS  | 多协议+调试功能      | 开发者友好 |
-| Stash          | iOS        | Clash/Sing-box       | 新秀，界面现代 |
-| Surfboard      | iOS/Android| Clash/Sing-box       | 简洁易用 |
-| v2rayNG        | Android    | V2Ray                | Android 上的主力 |
-| Nekoray        | Windows/Linux | V2Ray/SS/Trojan   | 轻量 GUI，支持多协议 |
+| 工具名       | 平台          | 核心/协议支持   | 特点                 |
+| ------------ | ------------- | --------------- | -------------------- |
+| Shadowrocket | iOS           | 多协议          | 功能强大，支持脚本   |
+| QuantumultX  | iOS           | 多协议          | 高级用户首选         |
+| Surge        | iOS/macOS     | 多协议+调试功能 | 开发者友好           |
+| Stash        | iOS           | Clash/Sing-box  | 新秀，界面现代       |
+| Surfboard    | iOS/Android   | Clash/Sing-box  | 简洁易用             |
+| v2rayNG      | Android       | V2Ray           | Android 上的主力     |
+| Nekoray      | Windows/Linux | V2Ray/SS/Trojan | 轻量 GUI，支持多协议 |
 
 ---
 
@@ -139,25 +150,18 @@ graph TD
 
 ## 🔐 常见协议与原理简述
 
-| 协议名称     | 原理简述 |
-|--------------|----------|
-| **Shadowsocks (SS)** | 基于 SOCKS5 的加密代理，轻量快速，抗封锁能力中等 |
-| **ShadowsocksR (SSR)** | SS 的改进版，增加混淆与协议插件，抗封锁更强 |
-| **VMess**     | V2Ray 专属协议，支持动态端口与加密，抗封锁强 |
-| **VLESS**     | VMess 的无认证版本，适合与 TLS/XTLS 搭配使用 |
-| **Trojan**    | 模拟 HTTPS 流量，使用 TLS 加密，伪装性强 |
-| **Reality**   | Trojan 的进化版，支持 XTLS Vision，抗主动探测 |
-| **Hysteria2** | 基于 QUIC 的协议，速度快，抗干扰强 |
-| **WireGuard (VPN)** | 现代 VPN 协议，轻量高效，适合全局代理与网络层隧道 |
-| **OpenVPN / IKEv2 (VPN)** | 传统 VPN 协议族，成熟、互操作性好，常用于企业与个人连接 |
-| **SOCKS5** | 应用层代理协议，支持 TCP/UDP 转发，常用于程序级代理与端口转发 |
-| **HTTP Proxy** | 适用于 HTTP/HTTPS 请求的代理，结合 CONNECT 可做隧道，但对非 HTTP 支持有限 |
-| **Obfs4/Meek/Snowflake** | Tor 的混淆插件，用于突破 DPI 检测 |
-| **SSU (I2P)** | UDP 混淆协议，抗封锁极强，适用于匿名网络 |
-
-
-## 历史
-
-- 2023 年 11 月 2 日 {{< github "Fndroid/clash_for_windows_pkg" >}} 作者删库
-- 2023 年 11 月 3 日 {{< github "zzzgydi/clash-verge" >}} 作者删库
-- 2018 年 6 月 10 日 {{< github "fossabot/clash" >}} 诞生
+| 协议名称                  | 原理简述                                                                  |
+| ------------------------- | ------------------------------------------------------------------------- |
+| **Shadowsocks (SS)**      | 基于 SOCKS5 的加密代理，轻量快速，抗封锁能力中等                          |
+| **ShadowsocksR (SSR)**    | SS 的改进版，增加混淆与协议插件，抗封锁更强                               |
+| **VMess**                 | V2Ray 专属协议，支持动态端口与加密，抗封锁强                              |
+| **VLESS**                 | VMess 的无认证版本，适合与 TLS/XTLS 搭配使用                              |
+| **Trojan**                | 模拟 HTTPS 流量，使用 TLS 加密，伪装性强                                  |
+| **Reality**               | Trojan 的进化版，支持 XTLS Vision，抗主动探测                             |
+| **Hysteria2**             | 基于 QUIC 的协议，速度快，抗干扰强                                        |
+| **WireGuard (VPN)**       | 现代 VPN 协议，轻量高效，适合全局代理与网络层隧道                         |
+| **OpenVPN / IKEv2 (VPN)** | 传统 VPN 协议族，成熟、互操作性好，常用于企业与个人连接                   |
+| **SOCKS5**                | 应用层代理协议，支持 TCP/UDP 转发，常用于程序级代理与端口转发             |
+| **HTTP Proxy**            | 适用于 HTTP/HTTPS 请求的代理，结合 CONNECT 可做隧道，但对非 HTTP 支持有限 |
+| **Obfs4/Meek/Snowflake**  | Tor 的混淆插件，用于突破 DPI 检测                                         |
+| **SSU (I2P)**             | UDP 混淆协议，抗封锁极强，适用于匿名网络                                  |
