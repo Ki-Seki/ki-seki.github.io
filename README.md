@@ -1,4 +1,4 @@
-# Kiseki Log
+# The Kiseki Log
 
 If you find this blog helpful, please consider giving it a ⭐ **star** or 👀 **watching** the repository to get notified about the latest articles and updates.
 
@@ -27,7 +27,7 @@ To serve the site locally:
 
 ## License
 
-<a href="https://ki-seki.github.io/">Kiseki Log</a> © 2023-Present by <a href="https://ki-seki.github.io/cv/">Shichao Song</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><span style="margin-left:.2em;"></span>
+<a href="https://ki-seki.github.io/">The Kiseki Log</a> © 2023-Present by <a href="https://ki-seki.github.io/cv/">Shichao Song</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><span style="margin-left:.2em;"></span>
 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="Creative Commons" style="height:1em;"><span style="margin-left:.2em;"></span>
 <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="Attribution" style="height:1em;"><span style="margin-left:.2em;"></span>
 <img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="ShareAlike" style="height:1em;">
