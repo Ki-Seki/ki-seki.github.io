@@ -83,6 +83,9 @@ caption="代理原理"
 | {{< github "zzzgydi/clash-verge" >}}             | Clash的另一个桌面客户端     | Unknown ~ 2023-11-03 |
 | {{< github "clash-verge-rev/clash-verge-rev" >}} | Continuation of Clash Verge | 2023-11-03 ~ Present |
 
+
+如果想在linux服务器上搞，clash-for-linux, clash-for-autodl, shellcrash 都可以，但是首先选择 clash-for-linux 试下，因为他更方便。
+
 ## 📦 主流翻墙工具清单（客户端）
 
 这个链接里存了非常多：https://wiki.metacubex.one/startup/client/client/

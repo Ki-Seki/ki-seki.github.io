@@ -8,3 +8,5 @@ tags: []
 ---
 
 什么是work的，什么是不work的。
+
+https://mp.weixin.qq.com/s/F8F8QLsGMDAOvxvd0HE_yg：也提到了折叠式的训练顺序
