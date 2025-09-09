@@ -1,4 +1,14 @@
-## 狭义约束生成工具
+## Fill-in-the-middle
+
+相关论文：
+- https://arxiv.org/abs/2506.00204
+- https://arxiv.org/abs/2207.14255
+- https://arxiv.org/abs/2501.08648
+- https://openreview.net/forum?id=jKYyFbH8ap
+
+## 约束生成
+
+### 狭义约束生成工具
 
 - https://github.com/guidance-ai/guidance: dependents 大多是套壳的约束生成工具
 - https://github.com/guidance-ai/llguidance
@@ -10,7 +20,7 @@
 - https://github.com/mlc-ai/xgrammar：效率很高，众多库的核心依赖
 - https://github.com/otriscon/llm-structured-output
 
-## 下游dependent
+### 下游dependent
 
 - 大多是套壳的约束生成工具
   - https://github.com/AlbanPerli/Noema-Declarative-AI
@@ -22,7 +32,7 @@
 - agent系统：camel-ai
 - 数据合成：distilabel
 
-## 广义约束生成工具
+### 广义约束生成工具
 
 - https://github.com/ggerganov/llama.cpp: GBNF
 - https://github.com/stanfordnlp/dspy
@@ -30,7 +40,7 @@
 - https://github.com/pydantic/pydantic-ai
 - https://github.com/sgl-project/sgl-learning-materials
 
-## 一些不错的博客
+### 一些不错的博客
 
 - ✅ https://www.aidancooper.co.uk/constrained-decoding/
 - ✅ https://blog.dottxt.co/coalescence.html?ref=aidancooper.co.uk
@@ -42,13 +52,13 @@
 - https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md
   - GBNF 简明教程。是关于symbol和production rule的。
 
-## 重要概念
+### 重要概念
 
 - https://en.wikipedia.org/wiki/Context-free_grammar
 - https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form
 - https://en.wikipedia.org/wiki/Formal_grammar
 
-## 重要论文
+### 重要论文
 
 - JSONSchemaBench: A Rigorous Benchmark of Structured Outputs for Language Models 
   - https://arxiv.org/abs/2501.10868
