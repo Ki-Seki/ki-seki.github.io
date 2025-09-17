@@ -13,12 +13,13 @@ benchmark：https://github.com/guidance-ai/jsonschemabench/tree/main/maskbench
 ### 狭义约束生成工具
 
 - https://github.com/guidance-ai/guidance: dependents 大多是套壳的约束生成工具
-- https://github.com/google/langextract
+- https://github.com/google/langextract：大语言模型来提取内容
 - https://github.com/outlines-dev/outlines：有提供自己的backend
 - https://github.com/instructor-ai/instructor
 - https://github.com/PrefectHQ/marvin
 - https://github.com/eth-sri/lmql
 - https://github.com/otriscon/llm-structured-output
+- https://github.com/generative-computing/mellea: Instruct-Validate-Repair 范式
 
 ### 下游dependent
 
