@@ -8,6 +8,11 @@
 - https://github.com/mlc-ai/xgrammar：众多库的核心依赖
 - https://github.com/ggml-org/llama.cpp
 
+小众些：
+- https://github.com/noamgat/lm-format-enforcer
+- https://github.com/1rgs/jsonformer
+- https://github.com/ModelTC/LightLLM
+
 benchmark：https://github.com/guidance-ai/jsonschemabench/tree/main/maskbench
 
 ### 狭义约束生成工具
