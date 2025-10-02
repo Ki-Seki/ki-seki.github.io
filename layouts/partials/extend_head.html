@@ -22,6 +22,11 @@
 {{- $admonitionJS := resources.Get "js/admonition.js" | minify }}
 <script src="{{ $admonitionJS.RelPermalink }}"></script>
 
+{{ if eq .Section "moments" }}
+  {{- $momentsJS := resources.Get "js/moments.js" | minify -}}
+  <script defer src="{{ $momentsJS.RelPermalink }}"></script>
+{{ end }}
+
 {{- /* Load Mermaid for diagrams */ -}}
 {{ if .Page.Store.Get "hasMermaid" }}
 <script type="module">
