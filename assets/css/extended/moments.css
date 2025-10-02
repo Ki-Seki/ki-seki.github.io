@@ -1,0 +1,326 @@
+.moments-page {
+  margin: 0 auto;
+  max-width: min(720px, calc(100% - var(--gap) * 2));
+}
+
+.moments-header {
+  margin-bottom: 2.5rem;
+}
+
+.moments-header h1 {
+  font-size: clamp(32px, 5vw, 42px);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.moments-subtitle {
+  color: var(--secondary);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.moments-intro {
+  color: var(--secondary);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.moments-feed {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding-inline-start: 1.75rem;
+  border-inline-start: 1px solid var(--border);
+}
+
+.moment-card {
+  position: relative;
+}
+
+.moment-marker {
+  position: absolute;
+  top: 0.9rem;
+  inset-inline-start: -2.2rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 6px var(--theme), 0 8px 16px rgba(17, 17, 26, 0.08);
+}
+
+.dark .moment-marker {
+  box-shadow: 0 0 0 6px var(--theme), 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.moment-body {
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: 0 16px 30px rgba(17, 17, 26, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.moment-card:hover .moment-body {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(17, 17, 26, 0.08);
+}
+
+.moment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--secondary);
+  margin-bottom: 0;
+}
+
+.moment-meta time {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.moment-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.moment-open:hover,
+.moment-open:focus {
+  color: var(--primary);
+  border-color: var(--border);
+  background-color: rgba(0, 0, 0, 0.03);
+  text-decoration: none;
+}
+
+.moment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.1rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+  color: inherit;
+  line-height: 1.6;
+}
+
+.dark .moment-chip {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.moment-chip__dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.65;
+}
+
+.moment-chip.mood {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+}
+
+.moment-title {
+  font-size: clamp(20px, 4vw, 26px);
+  margin-bottom: 0;
+}
+
+.moment-content {
+  color: var(--content);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.moment-content > :last-child {
+  margin-bottom: 0;
+}
+
+.moment-content.is-collapsed {
+  position: relative;
+  max-height: 12.5rem;
+  overflow: hidden;
+}
+
+.moment-content.is-collapsed::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4.5rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, var(--entry) 90%);
+}
+
+.dark .moment-content.is-collapsed::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, var(--entry) 90%);
+}
+
+.moment-content.is-expanded {
+  max-height: none;
+}
+
+.moment-content.is-expanded::after {
+  display: none;
+}
+
+.moment-toggle {
+  align-self: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--secondary);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.moment-toggle:hover,
+.moment-toggle:focus {
+  color: var(--primary);
+  border-color: var(--border);
+  background-color: rgba(0, 0, 0, 0.03);
+  transform: translateY(-1px);
+}
+
+.dark .moment-toggle:hover,
+.dark .moment-toggle:focus {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.moment-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--border);
+}
+
+.moment-footer .moment-meta {
+  gap: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.moments-empty {
+  color: var(--secondary);
+  font-size: 0.95rem;
+}
+
+.moments-pagination {
+  margin-top: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--secondary);
+}
+
+.moments-pagination__link {
+  color: var(--theme);
+  background: var(--primary);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 500;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.moments-pagination__link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(17, 17, 26, 0.08);
+}
+
+.moments-pagination__status {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.moments-pagination__placeholder {
+  width: 110px;
+  height: 1px;
+}
+
+.moment-meta--single {
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+}
+
+.moment-meta--single .moment-chip {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+}
+
+.dark .moment-meta--single .moment-chip {
+  background: var(--entry);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 680px) {
+  .moments-feed {
+    padding-inline-start: 1.25rem;
+  }
+
+  .moment-marker {
+    inset-inline-start: -1.8rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .moments-feed {
+    border-inline-start: none;
+    padding-inline-start: 0;
+  }
+
+  .moment-marker {
+    display: none;
+  }
+
+  .moments-pagination {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .moments-pagination__status {
+    width: 100%;
+  }
+
+  .moments-pagination__placeholder {
+    display: none;
+  }
+
+  .moment-open {
+    padding-inline: 0;
+    margin-top: 0.5rem;
+  }
+
+  .moment-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,75 @@
+{{ define "main" }}
+<section class="moments-page">
+  <header class="moments-header">
+    {{ partial "breadcrumbs.html" . }}
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}
+      <p class="moments-subtitle">{{ . | markdownify }}</p>
+    {{ end }}
+    {{ with .Content }}
+      <div class="moments-intro">{{ . }}</div>
+    {{ end }}
+  </header>
+
+  {{ $paginator := .Paginate (.Pages.ByDate.Reverse) }}
+
+  <div class="moments-feed">
+    {{ range $index, $page := $paginator.Pages }}
+      {{ $contentID := printf "moment-content-%d" (add $index 1) }}
+      {{ $isLong := gt $page.WordCount 150 }}
+      <article class="moment-card">
+        <div class="moment-marker" aria-hidden="true"></div>
+        <div class="moment-body">
+          {{ with $page.Title }}
+            <h2 class="moment-title">
+              {{ . }}
+            </h2>
+          {{ end }}
+
+          <div id="{{ $contentID }}" class="moment-content{{ if $isLong }} is-collapsed{{ end }}"{{ if $isLong }} data-collapsed="true"{{ end }}>
+            {{ if not ($page.Param "disableAnchoredHeadings") }}
+              {{ partial "anchored_headings.html" $page.Content }}
+            {{ else }}
+              {{ $page.Content }}
+            {{ end }}
+          </div>
+
+          {{ if $isLong }}
+            <button class="moment-toggle" type="button" data-moment-toggle aria-expanded="false" aria-controls="{{ $contentID }}" data-expand-label="Read full note" data-collapse-label="Hide note">
+              Read full note
+            </button>
+          {{ end }}
+
+          <footer class="moment-footer">
+            <div class="moment-meta">
+              <time datetime="{{ $page.Date | time.Format "2006-01-02T15:04:05Z07:00" }}">{{ $page.Date | time.Format "Jan 2, 2006 · 15:04" }}</time>
+              {{ partial "moment/chips.html" (dict "page" $page) }}
+            </div>
+            <a class="moment-open" href="{{ $page.RelPermalink }}" aria-label="Open this moment">Open note →</a>
+          </footer>
+        </div>
+      </article>
+    {{ else }}
+      <p class="moments-empty">No moments yet—check back soon.</p>
+    {{ end }}
+  </div>
+
+  {{ if gt $paginator.TotalPages 1 }}
+    <nav class="moments-pagination" aria-label="Moments navigation">
+      {{ if $paginator.HasPrev }}
+        <a class="moments-pagination__link prev" href="{{ $paginator.Prev.URL | absURL }}" rel="prev">← Newer notes</a>
+      {{ else }}
+        <span class="moments-pagination__placeholder"></span>
+      {{ end }}
+
+      <span class="moments-pagination__status">Page {{ $paginator.PageNumber }} of {{ $paginator.TotalPages }}</span>
+
+      {{ if $paginator.HasNext }}
+        <a class="moments-pagination__link next" href="{{ $paginator.Next.URL | absURL }}" rel="next">Older notes →</a>
+      {{ else }}
+        <span class="moments-pagination__placeholder"></span>
+      {{ end }}
+    </nav>
+  {{ end }}
+</section>
+{{ end }}
