@@ -1,6 +1,6 @@
 ---
 title: "September in Beijing"
-date: 2025-09-30T23:59:59+08:00
+date: 2025-09-29T06:00:00+08:00
 draft: false
 location: "Beijing"
 mood: "Joyful"
