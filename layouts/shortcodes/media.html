@@ -35,14 +35,27 @@
 
 {{/* ---------- Local/Remote Image ---------- */}}
 {{- else -}}
-  {{- $res := .Page.Resources.GetMatch $src -}}
-  {{- if $res -}}
-    <img src="{{ $res.RelPermalink }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
-  {{- else if fileExists (printf "static/%s" $src) -}}
-    <img src="{{ relURL $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
-  {{- else -}}
-    <img src="{{ $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
-  {{- end -}}
+    {{- $res := .Page.Resources.GetMatch $src -}}
+    {{- $pageDir := "" -}}
+    {{- with .Page.File }}
+      {{- $pageDir = .Dir -}}
+    {{- end -}}
+    {{- $isAbsolute := or (hasPrefix $src "/") (strings.HasPrefix $src "http://") (strings.HasPrefix $src "https://") -}}
+    {{- $contentPath := "" -}}
+    {{- $contentURL := "" -}}
+    {{- if and $pageDir (not $isAbsolute) -}}
+      {{- $contentPath = path.Join "content" $pageDir $src -}}
+      {{- $contentURL = path.Join "/" $pageDir $src -}}
+    {{- end -}}
+    {{- if $res -}}
+      <img src="{{ $res.RelPermalink }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+    {{- else if fileExists (printf "static/%s" $src) -}}
+      <img src="{{ relURL $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+    {{- else if and $contentPath (fileExists $contentPath) -}}
+      <img src="{{ relURL $contentURL }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+    {{- else -}}
+      <img src="{{ $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+    {{- end -}}
 {{- end -}}
 
 {{/* ---------- Caption ---------- */}}

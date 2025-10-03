@@ -42,7 +42,7 @@
 
           <footer class="moment-footer">
             <div class="moment-meta">
-              <time datetime="{{ $page.Date | time.Format "2006-01-02T15:04:05Z07:00" }}">{{ $page.Date | time.Format "Jan 2, 2006 · 15:04" }}</time>
+              <time datetime="{{ $page.Date | time.Format "2006-01-02T15:04:05Z07:00" }}">{{ $page.Date | time.Format "Jan 2, 2006" }}</time>
               {{ partial "moment/chips.html" (dict "page" $page) }}
             </div>
             <a class="moment-open" href="{{ $page.RelPermalink }}" aria-label="Open this moment">Open note →</a>
