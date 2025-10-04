@@ -35,7 +35,8 @@
 
 {{/* ---------- Local/Remote Image ---------- */}}
 {{- else -}}
-    {{- $res := .Page.Resources.GetMatch $src -}}
+  {{- $res := .Page.Resources.GetMatch $src -}}
+  {{- $thumbRes := $res -}}
     {{- $pageDir := "" -}}
     {{- with .Page.File }}
       {{- $pageDir = .Dir -}}
@@ -49,6 +50,12 @@
     {{- end -}}
     {{- $imageURL := "" -}}
     {{- if $res -}}
+      {{- if or (gt $res.Width 1280) (gt $res.Height 1280) -}}
+        {{- $processed := $res.Fit "1280x1280 q80" -}}
+        {{- with $processed -}}
+          {{- $thumbRes = . -}}
+        {{- end -}}
+      {{- end -}}
       {{- $imageURL = $res.RelPermalink -}}
     {{- else if fileExists (printf "static/%s" $src) -}}
       {{- $imageURL = relURL $src -}}
@@ -57,13 +64,17 @@
     {{- else -}}
       {{- $imageURL = $src -}}
     {{- end -}}
+    {{- $thumbURL := $imageURL -}}
+    {{- with $thumbRes -}}
+      {{- $thumbURL = .RelPermalink -}}
+    {{- end -}}
     {{- $galleryID := printf "media-gallery-%s" (md5 .Page.RelPermalink) -}}
     {{- $captionText := "" -}}
     {{- with $caption -}}
       {{- $captionText = (strings.TrimSpace (. | markdownify | plainify)) -}}
     {{- end -}}
     <a href="{{ $imageURL }}" class="media-lightbox-trigger glightbox" data-gallery="{{ $galleryID }}"{{ if $captionText }} data-title="{{ $captionText }}"{{ end }}>
-      <img src="{{ $imageURL }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+  <img src="{{ $thumbURL }}" alt="{{ $caption }}" loading="lazy" style="max-width: 100%; height: auto;"{{ if $res }} data-fullsrc="{{ $imageURL }}"{{ end }}>
     </a>
 {{- end -}}
 
