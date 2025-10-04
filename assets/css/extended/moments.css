@@ -207,8 +207,7 @@
 
 .moments-feed .moment-content figure:first-of-type img {
   width: 100% !important;
-  height: clamp(160px, 30vw, 240px) !important;
-  object-fit: cover;
+  height: auto !important;
   display: block;
   border-radius: var(--radius);
 }
@@ -220,8 +219,7 @@
 .moments-feed .moment-content p > img:first-child,
 .moments-feed .moment-content p > a:first-child > img:first-child {
   width: 100% !important;
-  height: clamp(160px, 30vw, 240px) !important;
-  object-fit: cover;
+  height: auto !important;
   border-radius: var(--radius);
   display: block;
 }
