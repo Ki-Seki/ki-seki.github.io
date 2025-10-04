@@ -1,7 +1,7 @@
 {{- $src := .Get "src" -}}
 {{- $caption := .Get "caption" -}}
 
-<figure style="text-align: center;">
+<figure class="media-figure">
 {{/* ---------- YouTube ---------- */}}
 {{- if or (hasPrefix $src "https://www.youtube.com/") (hasPrefix $src "https://youtu.be/") (hasPrefix $src "http://www.youtube.com/") (hasPrefix $src "http://youtu.be/") -}}
   {{- $videoId := "" -}}
@@ -47,15 +47,24 @@
       {{- $contentPath = path.Join "content" $pageDir $src -}}
       {{- $contentURL = path.Join "/" $pageDir $src -}}
     {{- end -}}
+    {{- $imageURL := "" -}}
     {{- if $res -}}
-      <img src="{{ $res.RelPermalink }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+      {{- $imageURL = $res.RelPermalink -}}
     {{- else if fileExists (printf "static/%s" $src) -}}
-      <img src="{{ relURL $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+      {{- $imageURL = relURL $src -}}
     {{- else if and $contentPath (fileExists $contentPath) -}}
-      <img src="{{ relURL $contentURL }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+      {{- $imageURL = relURL $contentURL -}}
     {{- else -}}
-      <img src="{{ $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+      {{- $imageURL = $src -}}
     {{- end -}}
+    {{- $galleryID := printf "media-gallery-%s" (md5 .Page.RelPermalink) -}}
+    {{- $captionText := "" -}}
+    {{- with $caption -}}
+      {{- $captionText = (strings.TrimSpace (. | markdownify | plainify)) -}}
+    {{- end -}}
+    <a href="{{ $imageURL }}" class="media-lightbox-trigger glightbox" data-gallery="{{ $galleryID }}"{{ if $captionText }} data-title="{{ $captionText }}"{{ end }}>
+      <img src="{{ $imageURL }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
+    </a>
 {{- end -}}
 
 {{/* ---------- Caption ---------- */}}

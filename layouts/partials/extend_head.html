@@ -18,6 +18,16 @@
 {{- /* Load Font Awesome for admonition icons */ -}}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+{{- /* Load GLightbox for media zoom */ -}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/js/glightbox.min.js"></script>
+
+{{- $mediaLightboxCSS := resources.Get "css/extended/media.css" | minify -}}
+<link rel="stylesheet" href="{{ $mediaLightboxCSS.RelPermalink }}">
+
+{{- $mediaLightboxJS := resources.Get "js/media-lightbox.js" | minify -}}
+<script defer src="{{ $mediaLightboxJS.RelPermalink }}"></script>
+
 {{- /* Load admonition JavaScript */ -}}
 {{- $admonitionJS := resources.Get "js/admonition.js" | minify }}
 <script src="{{ $admonitionJS.RelPermalink }}"></script>

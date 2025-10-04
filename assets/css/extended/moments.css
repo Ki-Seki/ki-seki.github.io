@@ -8,9 +8,10 @@
 }
 
 .moments-header h1 {
-  font-size: clamp(32px, 5vw, 42px);
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+  font-size: clamp(36px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.25rem;
 }
 
 .moments-subtitle {
@@ -138,14 +139,100 @@
 }
 
 .moment-title {
-  font-size: clamp(20px, 4vw, 26px);
+  font-size: clamp(22px, 4vw, 30px);
+  letter-spacing: -0.005em;
+  line-height: 1.2;
   margin-bottom: 0;
 }
 
 .moment-content {
   color: var(--content);
-  font-size: 0.98rem;
-  line-height: 1.75;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.moment-content h2,
+.moment-content h3,
+.moment-content h4,
+.moment-content h5,
+.moment-content h6 {
+  margin: 2rem 0 1rem;
+}
+
+.moment-content h2 {
+  font-size: clamp(24px, 4vw, 32px);
+}
+
+.moment-content h3 {
+  font-size: clamp(20px, 3vw, 24px);
+}
+
+.moment-content h4 {
+  font-size: 1.1rem;
+}
+
+.moment-content p,
+.moment-content ul,
+.moment-content ol,
+.moment-content figure,
+.moment-content blockquote,
+.moment-content pre {
+  margin-bottom: var(--content-gap);
+}
+
+.moment-content ul,
+.moment-content ol {
+  padding-inline-start: 1.5rem;
+}
+
+.moment-content li + li {
+  margin-top: 0.35rem;
+}
+
+.moment-content blockquote {
+  border-inline-start: 3px solid var(--border);
+  padding-inline-start: 1.25rem;
+  color: var(--secondary);
+}
+
+.moment-content figure > figcaption {
+  margin-top: 0.75rem;
+  color: var(--secondary);
+  font-size: 0.9rem;
+}
+
+.moments-feed .moment-content figure:first-of-type {
+  margin-bottom: calc(var(--content-gap) * 0.75);
+}
+
+.moments-feed .moment-content figure:first-of-type img {
+  width: 100% !important;
+  height: clamp(160px, 30vw, 240px) !important;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius);
+}
+
+.moments-feed .moment-content figure:first-of-type .media-lightbox-trigger {
+  display: block;
+}
+
+.moments-feed .moment-content p > img:first-child,
+.moments-feed .moment-content p > a:first-child > img:first-child {
+  width: 100% !important;
+  height: clamp(160px, 30vw, 240px) !important;
+  object-fit: cover;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.moments-feed .moment-content p > a:first-child {
+  display: block;
+}
+
+.moments-feed .moment-content p > img:first-child + br,
+.moments-feed .moment-content p > a:first-child + br {
+  display: none;
 }
 
 .moment-content > :last-child {
