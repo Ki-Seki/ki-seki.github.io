@@ -12,6 +12,7 @@
 - https://github.com/noamgat/lm-format-enforcer
 - https://github.com/1rgs/jsonformer
 - https://github.com/ModelTC/LightLLM
+- https://github.com/567-labs/instructor
 
 benchmark：https://github.com/guidance-ai/jsonschemabench/tree/main/maskbench
 
