@@ -233,7 +233,7 @@ jobs:
 
             // Add and commit changes
             await exec.exec('git', ['add', 'content/moments/']);
-            await exec.exec('git', ['commit', '-m', `Add moment from issue #${issueNumber}`]);
+            await exec.exec('git', ['commit', '-m', `post: add moment from issue #${issueNumber}`]);
 
             // Push branch
             await exec.exec('git', ['push', 'origin', branchName]);
@@ -242,7 +242,7 @@ jobs:
             const pr = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Add moment: ${dirname}`,
+              title: `post: add moment, ${dirname}`,
               head: branchName,
               base: 'main',
               body: [
