@@ -3,20 +3,6 @@ description: Create a new moment post for the blog
 title: "[Moment] "
 labels: ["moment"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for sharing a moment! Fill in the details below to create a new moment post.
-
-  - type: input
-    id: title
-    attributes:
-      label: Title
-      description: The title of your moment
-      placeholder: "e.g., Autumn Begins"
-    validations:
-      required: true
-
   - type: textarea
     id: content
     attributes:
