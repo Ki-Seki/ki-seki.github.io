@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   create-moment:
-    if: github.event.label.name == 'moment'
+    if: github.event.label.name == 'moment' && github.event.issue.user.login == 'Ki-Seki'
     runs-on: ubuntu-latest
 
     steps:
@@ -39,10 +39,9 @@ jobs:
 
             const title = parseField('Title') ||
               issue.title.replace('[Moment] ', '');
-            const content = parseField('Content');
+            let content = parseField('Content');
             const location = parseField('Location') || 'Beijing';
             const mood = parseField('Mood') || 'Happy';
-            const draft = parseField('Draft Status') || 'false';
 
             // Generate filename from date and title
             const now = new Date();
@@ -59,12 +58,31 @@ jobs:
             const dateForFrontmatter = now.toISOString()
               .slice(0, 19) + '+08:00';
 
+            // Convert Markdown images to Hugo media shortcodes
+            // Pattern: ![alt text](image_url)
+            const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+            const images = [];
+            let imageIndex = 0;
+
+            content = content.replace(imageRegex, (match, alt, url) => {
+              // Extract filename from URL
+              const urlParts = url.split('/');
+              const originalFilename = urlParts[urlParts.length - 1];
+              
+              // Store image info for later download
+              images.push({ url, filename: originalFilename, alt });
+              
+              // Convert to Hugo shortcode
+              const caption = alt || '';
+              return `{{< media\nsrc="${originalFilename}"\ncaption="${caption}"\n>}}`;
+            });
+
             // Create the moment post content
             const momentContent = [
               '---',
               `title: "${title}"`,
               `date: ${dateForFrontmatter}`,
-              `draft: ${draft}`,
+              `draft: false`,
               `location: "${location}"`,
               `mood: "${mood}"`,
               '---',
@@ -77,11 +95,13 @@ jobs:
             core.setOutput('dirname', dirname);
             core.setOutput('content', momentContent);
             core.setOutput('issue_number', issue.number);
+            core.setOutput('images', JSON.stringify(images));
 
             return {
               dirname,
               content: momentContent,
-              issue_number: issue.number
+              issue_number: issue.number,
+              images
             };
 
       - name: Create moment directory and file
@@ -91,6 +111,39 @@ jobs:
         run: |
           mkdir -p "content/moments/${DIRNAME}"
           echo "${CONTENT}" > "content/moments/${DIRNAME}/index.md"
+
+      - name: Download images
+        if: steps.parse.outputs.images != '[]'
+        env:
+          DIRNAME: ${{ steps.parse.outputs.dirname }}
+          IMAGES: ${{ steps.parse.outputs.images }}
+        run: |
+          # Parse images JSON and download each one
+          echo "$IMAGES" | jq -r '.[] | @json' | while read -r img; do
+            url=$(echo "$img" | jq -r '.url')
+            filename=$(echo "$img" | jq -r '.filename')
+            
+            # Download image to moment directory
+            wget -q -O "content/moments/${DIRNAME}/${filename}" "$url" || true
+          done
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install pre-commit
+        run: |
+          pip install pre-commit
+
+      - name: Run pre-commit checks
+        run: |
+          # Run pre-commit and auto-fix issues
+          pre-commit run --files content/moments/${{ steps.parse.outputs.dirname }}/index.md || true
+          # Check if any files were modified by pre-commit
+          if [[ -n $(git status -s) ]]; then
+            git add content/moments/${{ steps.parse.outputs.dirname }}/index.md
+          fi
 
       - name: Create Pull Request
         id: create_pr

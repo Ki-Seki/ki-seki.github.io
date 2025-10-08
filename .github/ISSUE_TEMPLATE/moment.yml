@@ -48,15 +48,3 @@ body:
       placeholder: "e.g., Happy, Cozy, Zen-like"
     validations:
       required: false
-      
-  - type: dropdown
-    id: draft
-    attributes:
-      label: Draft Status
-      description: Should this be published as a draft?
-      options:
-        - "false"
-        - "true"
-      default: 0
-    validations:
-      required: true
