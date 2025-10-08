@@ -12,6 +12,10 @@ permissions:
 jobs:
   create-moment:
     if: github.event.label.name == 'moment' && github.event.issue.user.login == 'Ki-Seki'
+    # avoid duplicate concurrent runs for same issue
+    concurrency:
+      group: moment-${{ github.event.issue.number }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +29,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const crypto = require('crypto');
             const issue = context.payload.issue;
             const issueBody = issue.body || '';
 
@@ -46,10 +51,9 @@ jobs:
             const location = parseField('Location') || 'Beijing';
             const mood = parseField('Mood') || 'Happy';
 
-            // Generate filename from date and title
+            // Generate dirname from date and title
             const now = new Date();
-            const dateStr = now.toISOString().slice(2, 10)
-              .replace(/-/g, '');
+            const dateStr = now.toISOString().slice(2, 10).replace(/-/g, '');
             const titleSlug = title.toLowerCase()
               .replace(/[^\w\s-]/g, '')
               .replace(/\s+/g, '-')
@@ -58,44 +62,61 @@ jobs:
             const dirname = `${dateStr}-${titleSlug}`;
 
             // Format date for frontmatter (ISO 8601 with timezone)
-            const dateForFrontmatter = now.toISOString()
-              .slice(0, 19) + '+08:00';
+            const dateForFrontmatter = now.toISOString().slice(0, 19) + '+08:00';
 
-            // Convert Markdown and HTML <img> images to Hugo media shortcodes
-            // Support patterns: ![alt text](image_url) and <img src="..." alt="...">
+            // We'll collect unique images by URL so the same URL maps to the same local filename
             const images = [];
-            let imageIndex = 0;
+            const seen = new Map();
 
             // helper to extract filename from URL and strip query/hash
             const extractFilename = (url) => {
               try {
                 const parts = url.split('/');
                 let fname = parts[parts.length - 1] || '';
-                // strip query string and hash
                 fname = fname.split('?')[0].split('#')[0];
-                return fname || `image-${Date.now()}-${++imageIndex}`;
+                return fname || '';
               } catch (e) {
-                return `image-${Date.now()}-${++imageIndex}`;
+                return '';
               }
             };
 
-            // handle Markdown images: ![alt](url)
+            const makeDeterministicFilename = (url) => {
+              const original = extractFilename(url) || 'image';
+              // sanitize
+              let base = original.replace(/[^\w.\-]+/g, '-').replace(/^[-_]+|[-_]+$/g, '');
+              if (base.length > 50) base = base.slice(0, 50);
+              const hash = crypto.createHash('sha1').update(url).digest('hex').slice(0, 8);
+              return `${hash}-${base}`;
+            };
+
+            // Replace Markdown images: ![alt](url)
             content = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
-              const originalFilename = extractFilename(url);
-              const filename = `${imageIndex++}-${originalFilename}`;
-              images.push({ url, filename, originalFilename, alt });
+              url = url.trim();
+              if (seen.has(url)) {
+                const filename = seen.get(url);
+                const caption = alt || '';
+                return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
+              }
+              const filename = makeDeterministicFilename(url);
+              seen.set(url, filename);
+              images.push({ url, filename, originalFilename: extractFilename(url), alt });
               const caption = alt || '';
               return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
             });
 
-            // handle HTML <img ... src="..." ...>
+            // Replace HTML <img ... src="..."> tags
             content = content.replace(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi, (match, url) => {
-              // try to extract alt attribute from the original tag
+              url = url.trim();
               const altMatch = match.match(/alt=["']([^"']*)["']/i);
               const alt = altMatch ? altMatch[1] : '';
-              const originalFilename = extractFilename(url);
-              const filename = `${imageIndex++}-${originalFilename}`;
-              images.push({ url, filename, originalFilename, alt });
+              if (seen.has(url)) {
+                const filename = seen.get(url);
+                const caption = alt || '';
+                return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
+              }
+              const filename = makeDeterministicFilename(url);
+              seen.set(url, filename);
+              images.push({ url, filename, originalFilename: extractFilename(url), alt });
               const caption = alt || '';
               return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
             });
@@ -120,12 +141,8 @@ jobs:
             core.setOutput('issue_number', issue.number);
             core.setOutput('images', JSON.stringify(images));
 
-            return {
-              dirname,
-              content: momentContent,
-              issue_number: issue.number,
-              images
-            };
+            return { dirname, content: momentContent, issue_number: issue.number, images };
+
 
       - name: Create moment directory and file
         env:
@@ -133,7 +150,8 @@ jobs:
           CONTENT: ${{ steps.parse.outputs.content }}
         run: |
           mkdir -p "content/moments/${DIRNAME}"
-          echo "${CONTENT}" > "content/moments/${DIRNAME}/index.md"
+          # use printf to safely write content (preserves newlines and avoids echo pitfalls)
+          printf '%s' "$CONTENT" > "content/moments/${DIRNAME}/index.md"
 
       - name: Download images
         if: steps.parse.outputs.images != '[]'
@@ -143,25 +161,33 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "content/moments/${DIRNAME}"
-          # Parse images JSON and download each one
+          # Parse images JSON and download each one (skip when file exists)
           echo "$IMAGES" | jq -c '.[]' | while read -r img; do
             url=$(echo "$img" | jq -r '.url')
             filename=$(echo "$img" | jq -r '.filename')
 
             dest="content/moments/${DIRNAME}/${filename}"
 
-            # Download to a temp file first
-            tmpfile="${dest}.download"
-            wget -q -O "$tmpfile" "$url" || true
-
-            # If download resulted in empty file, remove and continue
-            if [ ! -s "$tmpfile" ]; then
-              rm -f "$tmpfile" || true
-              echo "Warning: failed to download $url" >&2
+            # if the file (or file with extension) already exists, skip download
+            if [ -f "$dest" ]; then
+              echo "Skipped, already present: $dest"
               continue
             fi
 
-            # Use 'file' to detect mime type and determine extension
+            tmpfile="${dest}.download"
+            # download with curl (follow redirects), fail on HTTP errors
+            if ! curl -fsSL -o "$tmpfile" "$url"; then
+              echo "Warning: failed to download $url" >&2
+              rm -f "$tmpfile" || true
+              continue
+            fi
+
+            if [ ! -s "$tmpfile" ]; then
+              rm -f "$tmpfile" || true
+              echo "Warning: empty download for $url" >&2
+              continue
+            fi
+
             mime=$(file --mime-type -b "$tmpfile" || true)
             case "$mime" in
               image/jpeg) ext=".jpg" ;;
@@ -174,7 +200,6 @@ jobs:
             esac
 
             final="$dest"
-            # If filename doesn't already have that extension, append it
             if [ -n "$ext" ] && [[ "$filename" != *"$ext" ]]; then
               final="content/moments/${DIRNAME}/${filename}${ext}"
             fi
@@ -183,31 +208,12 @@ jobs:
 
             # If final filename changed, update index.md shortcode src
             if [ "$final" != "$dest" ]; then
-              # escape slashes for sed
               old=$(printf '%s' "$filename" | sed 's/[\/&]/\\&/g')
               new=$(basename "$final")
               new_esc=$(printf '%s' "$new" | sed 's/[\/&]/\\&/g')
               sed -i "s/src=\"${old}\"/src=\"${new_esc}\"/g" "content/moments/${DIRNAME}/index.md" || true
             fi
           done
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install pre-commit
-        run: |
-          pip install pre-commit
-
-      - name: Run pre-commit checks
-        run: |
-          # Run pre-commit and auto-fix issues
-          pre-commit run --files content/moments/${{ steps.parse.outputs.dirname }}/index.md || true
-          # Check if any files were modified by pre-commit
-          if [[ -n $(git status -s) ]]; then
-            git add content/moments/${{ steps.parse.outputs.dirname }}/index.md
-          fi
 
       - name: Create Pull Request
         id: create_pr
