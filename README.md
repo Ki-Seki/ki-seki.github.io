@@ -25,6 +25,19 @@ To serve the site locally:
    - The site will be available at [http://localhost:1313](http://localhost:1313).
    - The `-D` flag includes draft posts.
 
+## Moment Posts
+
+This repository includes an automated workflow to create moment posts from GitHub issues. 
+
+### Timezone Configuration
+
+By default, moment posts use `+08:00` (China Standard Time) timezone. To change the timezone:
+
+1. Go to Settings → Secrets and variables → Actions → Variables
+2. Create a variable named `TIMEZONE_OFFSET` with your timezone offset (e.g., `-05:00`, `+09:00`)
+
+See [.github/workflows/README.md](.github/workflows/README.md) for more details.
+
 ## License
 
 <a href="https://ki-seki.github.io/">The Kiseki Log</a> © 2023-2025 by <a href="https://ki-seki.github.io/cv/">Shichao Song</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><span style="margin-left:.2em;"></span>
