@@ -58,23 +58,43 @@ jobs:
             const dateForFrontmatter = now.toISOString()
               .slice(0, 19) + '+08:00';
 
-            // Convert Markdown images to Hugo media shortcodes
-            // Pattern: ![alt text](image_url)
-            const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+            // Convert Markdown and HTML <img> images to Hugo media shortcodes
+            // Support patterns: ![alt text](image_url) and <img src="..." alt="...">
             const images = [];
             let imageIndex = 0;
 
-            content = content.replace(imageRegex, (match, alt, url) => {
-              // Extract filename from URL
-              const urlParts = url.split('/');
-              const originalFilename = urlParts[urlParts.length - 1];
+            // helper to extract filename from URL and strip query/hash
+            const extractFilename = (url) => {
+              try {
+                const parts = url.split('/');
+                let fname = parts[parts.length - 1] || '';
+                // strip query string and hash
+                fname = fname.split('?')[0].split('#')[0];
+                return fname || `image-${Date.now()}-${++imageIndex}`;
+              } catch (e) {
+                return `image-${Date.now()}-${++imageIndex}`;
+              }
+            };
 
-              // Store image info for later download
-              images.push({ url, filename: originalFilename, alt });
-
-              // Convert to Hugo shortcode
+            // handle Markdown images: ![alt](url)
+            content = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
+              const originalFilename = extractFilename(url);
+              const filename = `${imageIndex++}-${originalFilename}`;
+              images.push({ url, filename, originalFilename, alt });
               const caption = alt || '';
-              return `{{< media\nsrc="${originalFilename}"\ncaption="${caption}"\n>}}`;
+              return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
+            });
+
+            // handle HTML <img ... src="..." ...>
+            content = content.replace(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi, (match, url) => {
+              // try to extract alt attribute from the original tag
+              const altMatch = match.match(/alt=["']([^"']*)["']/i);
+              const alt = altMatch ? altMatch[1] : '';
+              const originalFilename = extractFilename(url);
+              const filename = `${imageIndex++}-${originalFilename}`;
+              images.push({ url, filename, originalFilename, alt });
+              const caption = alt || '';
+              return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
             });
 
             // Create the moment post content
@@ -118,13 +138,54 @@ jobs:
           DIRNAME: ${{ steps.parse.outputs.dirname }}
           IMAGES: ${{ steps.parse.outputs.images }}
         run: |
+          set -euo pipefail
+          mkdir -p "content/moments/${DIRNAME}"
           # Parse images JSON and download each one
-          echo "$IMAGES" | jq -r '.[] | @json' | while read -r img; do
+          echo "$IMAGES" | jq -c '.[]' | while read -r img; do
             url=$(echo "$img" | jq -r '.url')
             filename=$(echo "$img" | jq -r '.filename')
 
-            # Download image to moment directory
-            wget -q -O "content/moments/${DIRNAME}/${filename}" "$url" || true
+            dest="content/moments/${DIRNAME}/${filename}"
+
+            # Download to a temp file first
+            tmpfile="${dest}.download"
+            wget -q -O "$tmpfile" "$url" || true
+
+            # If download resulted in empty file, remove and continue
+            if [ ! -s "$tmpfile" ]; then
+              rm -f "$tmpfile" || true
+              echo "Warning: failed to download $url" >&2
+              continue
+            fi
+
+            # Use 'file' to detect mime type and determine extension
+            mime=$(file --mime-type -b "$tmpfile" || true)
+            case "$mime" in
+              image/jpeg) ext=".jpg" ;;
+              image/png) ext=".png" ;;
+              image/gif) ext=".gif" ;;
+              image/webp) ext=".webp" ;;
+              image/svg+xml) ext=".svg" ;;
+              image/x-icon) ext=".ico" ;;
+              *) ext="" ;;
+            esac
+
+            final="$dest"
+            # If filename doesn't already have that extension, append it
+            if [ -n "$ext" ] && [[ "$filename" != *"$ext" ]]; then
+              final="content/moments/${DIRNAME}/${filename}${ext}"
+            fi
+
+            mv "$tmpfile" "$final"
+
+            # If final filename changed, update index.md shortcode src
+            if [ "$final" != "$dest" ]; then
+              # escape slashes for sed
+              old=$(printf '%s' "$filename" | sed 's/[\/&]/\\&/g')
+              new=$(basename "$final")
+              new_esc=$(printf '%s' "$new" | sed 's/[\/&]/\\&/g')
+              sed -i "s/src=\"${old}\"/src=\"${new_esc}\"/g" "content/moments/${DIRNAME}/index.md" || true
+            fi
           done
 
       - name: Set up Python
