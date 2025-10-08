@@ -1,0 +1,62 @@
+name: Create a Moment
+description: Create a new moment post for the blog
+title: "[Moment] "
+labels: ["moment"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing a moment! Fill in the details below to create a new moment post.
+        
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: The title of your moment
+      placeholder: "e.g., Autumn Begins"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: content
+    attributes:
+      label: Content
+      description: The content of your moment (supports Markdown)
+      placeholder: |
+        Write your moment here. You can use Markdown formatting.
+        
+        For images, you can either:
+        - Paste them directly (they'll be uploaded to GitHub)
+        - Use the media shortcode: {{< media src="image.jpg" caption="Caption" >}}
+    validations:
+      required: true
+      
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: Where is this moment from?
+      placeholder: "e.g., Beijing"
+    validations:
+      required: false
+      
+  - type: input
+    id: mood
+    attributes:
+      label: Mood
+      description: What's your mood?
+      placeholder: "e.g., Happy, Cozy, Zen-like"
+    validations:
+      required: false
+      
+  - type: dropdown
+    id: draft
+    attributes:
+      label: Draft Status
+      description: Should this be published as a draft?
+      options:
+        - "false"
+        - "true"
+      default: 0
+    validations:
+      required: true

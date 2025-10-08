@@ -1,0 +1,114 @@
+name: Create Moment from Issue
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  create-moment:
+    if: github.event.label.name == 'moment'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Parse issue and create moment
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const issueBody = issue.body || '';
+            
+            // Parse the issue body to extract fields
+            const parseField = (fieldName) => {
+              const regex = new RegExp(`### ${fieldName}\\s*([\\s\\S]*?)(?=###|$)`, 'i');
+              const match = issueBody.match(regex);
+              return match ? match[1].trim() : '';
+            };
+            
+            const title = parseField('Title') || issue.title.replace('[Moment] ', '');
+            const content = parseField('Content');
+            const location = parseField('Location') || 'Beijing';
+            const mood = parseField('Mood') || 'Happy';
+            const draft = parseField('Draft Status') || 'false';
+            
+            // Generate filename from date and title
+            const now = new Date();
+            const dateStr = now.toISOString().slice(2, 10).replace(/-/g, '');
+            const titleSlug = title.toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/--+/g, '-')
+              .trim();
+            const dirname = `${dateStr}-${titleSlug}`;
+            
+            // Format date for frontmatter (ISO 8601 with timezone)
+            const dateForFrontmatter = now.toISOString().slice(0, 19) + '+08:00';
+            
+            // Create the moment post content
+            const momentContent = `---
+title: "${title}"
+date: ${dateForFrontmatter}
+draft: ${draft}
+location: "${location}"
+mood: "${mood}"
+---
+
+${content}
+`;
+            
+            // Set outputs
+            core.setOutput('dirname', dirname);
+            core.setOutput('content', momentContent);
+            core.setOutput('issue_number', issue.number);
+            
+            return {
+              dirname,
+              content: momentContent,
+              issue_number: issue.number
+            };
+            
+      - name: Create moment directory and file
+        env:
+          DIRNAME: ${{ steps.parse.outputs.dirname }}
+          CONTENT: ${{ steps.parse.outputs.content }}
+        run: |
+          mkdir -p "content/moments/${DIRNAME}"
+          echo "${CONTENT}" > "content/moments/${DIRNAME}/index.md"
+          
+      - name: Commit and push moment
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/moments/
+          git commit -m "Add moment from issue #${{ steps.parse.outputs.issue_number }}"
+          git push
+          
+      - name: Close issue with comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dirname = '${{ steps.parse.outputs.dirname }}';
+            const issueNumber = ${{ steps.parse.outputs.issue_number }};
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `✅ Moment created successfully!\n\nYour moment has been created at \`content/moments/${dirname}/index.md\`.\n\nIt will be published when the site is rebuilt.`
+            });
+            
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              state: 'closed'
+            });
