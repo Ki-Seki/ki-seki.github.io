@@ -62,7 +62,13 @@ jobs:
             const dirname = `${dateStr}-${titleSlug}`;
 
             // Format date for frontmatter (ISO 8601 with timezone)
-            const dateForFrontmatter = now.toISOString().slice(0, 19) + '+08:00';
+            // Use system default timezone instead of hardcoding
+            const offsetMinutes = -now.getTimezoneOffset();
+            const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
+            const offsetMins = Math.abs(offsetMinutes) % 60;
+            const offsetSign = offsetMinutes >= 0 ? '+' : '-';
+            const timezoneOffset = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMins).padStart(2, '0')}`;
+            const dateForFrontmatter = now.toISOString().slice(0, 19) + timezoneOffset;
 
             // We'll collect unique images by URL so the same URL maps to the same local filename
             const images = [];
