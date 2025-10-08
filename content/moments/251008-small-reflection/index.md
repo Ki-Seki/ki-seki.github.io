@@ -1,6 +1,6 @@
 ---
 title: "Small reflection"
-date: 2025-10-08T15:04:49+08:00
+date: 2025-10-08T15:04:49+00:00
 draft: false
 location: "Beijing"
 mood: "Rainy"
