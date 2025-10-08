@@ -17,6 +17,12 @@ jobs:
       group: moment-${{ github.event.issue.number }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
+    env:
+      # Configure your timezone offset here (e.g., +08:00, -05:00, +00:00)
+      # This will be used for the timestamp in moment posts
+      # You can also set this as a repository variable named TIMEZONE_OFFSET
+      # Repository variable takes precedence over this default value
+      TIMEZONE_OFFSET: ${{ vars.TIMEZONE_OFFSET || '+08:00' }}
 
     steps:
       - name: Checkout repository
@@ -27,6 +33,8 @@ jobs:
       - name: Parse issue and create moment
         id: parse
         uses: actions/github-script@v7
+        env:
+          TIMEZONE_OFFSET: ${{ env.TIMEZONE_OFFSET }}
         with:
           script: |
             const crypto = require('crypto');
@@ -62,7 +70,9 @@ jobs:
             const dirname = `${dateStr}-${titleSlug}`;
 
             // Format date for frontmatter (ISO 8601 with timezone)
-            const dateForFrontmatter = now.toISOString().slice(0, 19) + '+08:00';
+            // Use timezone offset from environment variable (default: +08:00)
+            const timezoneOffset = process.env.TIMEZONE_OFFSET || '+08:00';
+            const dateForFrontmatter = now.toISOString().slice(0, 19) + timezoneOffset;
 
             // We'll collect unique images by URL so the same URL maps to the same local filename
             const images = [];
