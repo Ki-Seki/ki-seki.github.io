@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for sharing a moment! Fill in the details below to create a new moment post.
-        
+
   - type: input
     id: title
     attributes:
@@ -16,7 +16,7 @@ body:
       placeholder: "e.g., Autumn Begins"
     validations:
       required: true
-      
+
   - type: textarea
     id: content
     attributes:
@@ -24,13 +24,13 @@ body:
       description: The content of your moment (supports Markdown)
       placeholder: |
         Write your moment here. You can use Markdown formatting.
-        
+
         For images, you can either:
         - Paste them directly (they'll be uploaded to GitHub)
         - Use the media shortcode: {{< media src="image.jpg" caption="Caption" >}}
     validations:
       required: true
-      
+
   - type: input
     id: location
     attributes:
@@ -39,7 +39,7 @@ body:
       placeholder: "e.g., Beijing"
     validations:
       required: false
-      
+
   - type: input
     id: mood
     attributes:

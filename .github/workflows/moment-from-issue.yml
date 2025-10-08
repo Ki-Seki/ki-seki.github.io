@@ -68,10 +68,10 @@ jobs:
               // Extract filename from URL
               const urlParts = url.split('/');
               const originalFilename = urlParts[urlParts.length - 1];
-              
+
               // Store image info for later download
               images.push({ url, filename: originalFilename, alt });
-              
+
               // Convert to Hugo shortcode
               const caption = alt || '';
               return `{{< media\nsrc="${originalFilename}"\ncaption="${caption}"\n>}}`;
@@ -122,7 +122,7 @@ jobs:
           echo "$IMAGES" | jq -r '.[] | @json' | while read -r img; do
             url=$(echo "$img" | jq -r '.url')
             filename=$(echo "$img" | jq -r '.filename')
-            
+
             # Download image to moment directory
             wget -q -O "content/moments/${DIRNAME}/${filename}" "$url" || true
           done
