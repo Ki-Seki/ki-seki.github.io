@@ -92,27 +92,70 @@ jobs:
           mkdir -p "content/moments/${DIRNAME}"
           echo "${CONTENT}" > "content/moments/${DIRNAME}/index.md"
 
-      - name: Commit and push moment
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add content/moments/
-          git commit -m "Add moment from issue #${{ steps.parse.outputs.issue_number }}"
-          git push
-
-      - name: Close issue with comment
+      - name: Create Pull Request
+        id: create_pr
         uses: actions/github-script@v7
         with:
           script: |
             const dirname = '${{ steps.parse.outputs.dirname }}';
             const issueNumber = ${{ steps.parse.outputs.issue_number }};
+            const branchName = `moment/${dirname}`;
+
+            // Configure git
+            await exec.exec('git', ['config', 'user.name', 'github-actions[bot]']);
+            await exec.exec('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com']);
+
+            // Create and checkout new branch
+            await exec.exec('git', ['checkout', '-b', branchName]);
+
+            // Add and commit changes
+            await exec.exec('git', ['add', 'content/moments/']);
+            await exec.exec('git', ['commit', '-m', `Add moment from issue #${issueNumber}`]);
+
+            // Push branch
+            await exec.exec('git', ['push', 'origin', branchName]);
+
+            // Create PR
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Add moment: ${dirname}`,
+              head: branchName,
+              base: 'main',
+              body: [
+                `This PR adds a new moment created from issue #${issueNumber}.`,
+                '',
+                `**Moment**: ${dirname}`,
+                `**Path**: \`content/moments/${dirname}/index.md\``,
+                '',
+                `Closes #${issueNumber}`
+              ].join('\n')
+            });
+
+            core.setOutput('pr_number', pr.data.number);
+            core.setOutput('pr_url', pr.data.html_url);
+
+            return {
+              pr_number: pr.data.number,
+              pr_url: pr.data.html_url
+            };
+
+      - name: Comment on issue with PR link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dirname = '${{ steps.parse.outputs.dirname }}';
+            const issueNumber = ${{ steps.parse.outputs.issue_number }};
+            const prUrl = '${{ steps.create_pr.outputs.pr_url }}';
 
             const message = [
               '✅ Moment created successfully!',
               '',
               `Your moment has been created at \`content/moments/${dirname}/index.md\`.`,
               '',
-              'It will be published when the site is rebuilt.'
+              `A pull request has been created for review: ${prUrl}`,
+              '',
+              'The moment will be published once the PR is merged.'
             ].join('\n');
 
             await github.rest.issues.createComment({
@@ -120,11 +163,4 @@ jobs:
               repo: context.repo.repo,
               issue_number: issueNumber,
               body: message
-            });
-
-            await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              state: 'closed'
             });

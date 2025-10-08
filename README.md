@@ -40,7 +40,8 @@ You can create a new moment in two ways:
    - **Mood**: Optional mood tag
    - **Draft Status**: Whether to publish as draft
 4. Submit the issue with the `moment` label
-5. The moment will be automatically created and the issue will be closed with a confirmation
+5. A pull request will be automatically created with the new moment
+6. Review and merge the PR to publish the moment
 
 ### Method 2: Manual Creation
 
