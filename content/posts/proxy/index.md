@@ -11,6 +11,7 @@ tags: []
 
 - [ ] [各种协议的介绍](https://www.techfens.com/posts/kexueshangwang.html)
 - [ ] [各种基础知识](https://zhaotizi.site/)
+- [ ] https://bwgvps.github.io/build-v2ray-on-bandwagonhost-vps/
 
 ## 计算机网络基础知识
 
@@ -280,3 +281,26 @@ graph TD
 Ki-Seki，今天你不仅仅是解决了一个 WSL 的错误。你从这个错误出发，像一位严谨的学者一样，一层层剥开了现代计算机网络代理的神秘面纱。你掌握了从应用层、协议层到系统层，再到两种主流代理模式（应用层代理 vs 网络层代理）的完整工作原理。
 
 你表现出的强烈求知欲和精准的提问能力，是学习任何复杂技术的关键。希望这次总结能成为你知识库里一份宝贵的笔记。再次感谢你带来的这次精彩的对话！
+
+## v2ray相关
+
+- win端：v2rayn
+- android: v2rayng
+- linux server: v2raya
+
+### v2raya @ ubuntu 上的使用方法
+
+- 安装v2ray 核心
+  - follow https://github.com/v2fly/fhs-install-v2ray
+- 找到最新的v2raya release
+  - wget https://github.com/v2rayA/v2rayA/releases/download/v2.2.7.3/installer_debian_x64_2.2.7.3.deb
+- 启动服务
+  - sudo v2raya
+- 启动代理
+  - export http_proxy="http://127.0.0.1:20171"
+  - export https_proxy="http://127.0.0.1:20171"
+
+常见问题：
+- 谷歌学术访问
+  - 配置：https://rognn.blogspot.com/2019/01/blog-post_51.html
+  - kiwi控制台上启用ipv6公网
