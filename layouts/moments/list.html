@@ -16,7 +16,8 @@
   <div class="moments-feed">
     {{ range $index, $page := $paginator.Pages }}
       {{ $contentID := printf "moment-content-%d" (add $index 1) }}
-      {{ $isLong := gt $page.WordCount 150 }}
+      {{ $imageCount := len (findRE "{{< media" .RawContent) }}
+      {{ $isLong := or (gt $page.WordCount 150) (gt $imageCount 3) }}
       <article class="moment-card">
         <div class="moment-marker" aria-hidden="true"></div>
         <div class="moment-body">
