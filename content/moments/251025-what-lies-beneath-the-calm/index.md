@@ -8,5 +8,5 @@ mood: "Complex"
 
 {{< media
 src="99e53055-79c8fe63-204b-4df8-84de-3fbb6f66ce8c.jpg"
-caption="Xizhimen Bridge"
+caption="Xizhimen Bridge (西直门桥)"
 >}}
