@@ -37,6 +37,14 @@ math: true
 
 ## <font color="lightgray">H2</font> Work Experience
 
+- **Ant Group**
+
+    Research Intern at Ant Research
+
+    Collaborated with Director, **Qing Shao**
+
+    2025.07 - Present
+
 - **Institute for Advanced Algorithms Research, Shanghai**
 
     Research Intern at the Large Language Model Center
