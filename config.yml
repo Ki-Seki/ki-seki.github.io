@@ -4,6 +4,7 @@ languageCode: en
 copyright: "© 2023-2025 Shichao Song [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
 theme: PaperMod
 
+timeout: 360
 enableInlineShortcodes: true
 enableRobotsTXT: true
 enableGitInfo: true
