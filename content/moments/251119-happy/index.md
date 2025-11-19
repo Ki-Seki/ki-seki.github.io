@@ -6,4 +6,9 @@ location: "Beijing"
 mood: "Happy"
 ---
 
-https://github.com/user-attachments/assets/399498c0-8d93-4b9a-b8e5-69c07186860d
+
+
+{{< media
+src="https://github.com/user-attachments/assets/399498c0-8d93-4b9a-b8e5-69c07186860d"
+caption="Mobflip. Outside the Yifu Auditorium at Renmin University (人民大学逸夫会堂外)"
+>}}
