@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE 10,000TH SUNSET</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            color: #000;
+            text-align: center;
+        }
+
+        .container {
+            padding: 20px;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin: 0;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.1;
+        }
+
+        .divider {
+            width: 40px;
+            height: 2px;
+            background-color: #000;
+            margin: 24px auto;
+        }
+
+        p {
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            margin: 0;
+            font-weight: 300;
+            color: #333;
+            letter-spacing: 0.2em;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>THE 10,000TH SUNSET</h1>
+        <div class="divider"></div>
+        <p>Coming Soon 敬请期待</p>
+    </div>
+</body>
+</html>
