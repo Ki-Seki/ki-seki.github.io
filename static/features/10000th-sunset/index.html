@@ -1,63 +1,2352 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE 10,000TH SUNSET</title>
+    <title>The 10,000th Sunset</title>
+    <link rel="icon" href="favicon/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&family=Noto+Serif+SC:wght@300;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f0f0;
-            color: #000;
-            text-align: center;
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+        }
+        .font-serif-en {
+            font-family: 'Playfair Display', serif;
+        }
+        .font-serif-cn {
+            font-family: 'Noto Serif SC', serif;
+        }
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
-        .container {
-            padding: 20px;
-            animation: fadeIn 1.5s ease-out;
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+            will-change: opacity, visibility;
         }
-
-        h1 {
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            margin: 0;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            line-height: 1.1;
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: none;
         }
-
-        .divider {
-            width: 40px;
-            height: 2px;
-            background-color: #000;
-            margin: 24px auto;
+        
+        .image-hover-zoom {
+            transition: transform 0.7s ease;
         }
-
-        p {
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            margin: 0;
-            font-weight: 300;
-            color: #333;
-            letter-spacing: 0.2em;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .group:hover .image-hover-zoom {
+            transform: scale(1.02);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>THE 10,000TH SUNSET</h1>
-        <div class="divider"></div>
-        <p>Coming Soon 敬请期待</p>
+<body x-data="{ showTranslation: false, showModal: false, modalImage: '', modalCaption: '' }">
+
+    <!-- Modal for Full Image -->
+    <div x-show="showModal" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+         @click.self="showModal = false"
+         @keydown.escape.window="showModal = false"
+         style="display: none;">
+        <div class="relative max-w-7xl max-h-screen w-full flex flex-col items-center justify-center">
+            <button @click="showModal = false" class="absolute top-4 right-4 text-white/70 hover:text-white z-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <img :src="modalImage" class="max-h-[85vh] max-w-full object-contain shadow-2xl" alt="Full size">
+            <p x-text="modalCaption" class="mt-4 text-center text-white/60 font-light text-sm max-w-2xl"></p>
+        </div>
     </div>
+
+    <!-- Hero Section -->
+    <header class="relative h-screen w-full overflow-hidden flex items-center justify-center">
+        <div class="absolute inset-0 z-0">
+            <img src="sunsets/+0800Jiujiang/+0800Jiujiang02.jpg" alt="Cover" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#050505]"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-4 fade-in-section is-visible">
+            
+            <h1 class="text-5xl md:text-7xl lg:text-9xl font-serif-en text-white mb-6 tracking-tight">
+                The 10,000th<br><span class="italic text-orange-200/80">Sunset</span>
+            </h1>
+            <div class="w-px h-16 bg-gradient-to-b from-white/0 via-white/50 to-white/0 mx-auto my-8"></div>
+            <p class="text-lg md:text-xl font-light tracking-widest font-cinzel text-white/80">
+                1998.04.15 — 2025.08.31
+            </p>
+            <p class="mt-2 text-xs text-white/40 tracking-widest">DAY 00000 - DAY 10000</p>
+        </div>
+        
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-white/30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+        </div>
+    </header>
+
+    <!-- Intro Text -->
+    <section class="py-24 md:py-32 px-6 md:px-12 max-w-4xl mx-auto text-center fade-in-section">
+        <p class="text-xl md:text-3xl font-serif-en leading-relaxed text-white/90 mb-8">
+            "On August 31, 2025,<br>the sun set in 27 different corners of the Earth"
+        </p>
+        <p class="text-lg md:text-xl font-serif-en text-white/60 mb-12 italic">
+            For Little Pumpkin
+        </p>
+        
+        
+        
+        <!-- Translation Toggle -->
+        <div class="mt-16 flex justify-center">
+            <button @click="showTranslation = !showTranslation" 
+                    class="group flex items-center space-x-2 px-4 py-2 rounded-full border border-white/10 hover:border-white/30 transition-all duration-300">
+                <span class="text-xs tracking-widest uppercase" :class="!showTranslation ? 'text-white' : 'text-white/40'">EN</span>
+                <div class="w-8 h-4 bg-white/10 rounded-full relative">
+                    <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform duration-300"
+                         :class="showTranslation ? 'translate-x-4' : 'translate-x-0'"></div>
+                </div>
+                <span class="text-xs tracking-widest uppercase" :class="showTranslation ? 'text-white' : 'text-white/40'">CN</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <main class="pb-32 space-y-32 md:space-y-48">
+
+
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+1000Sydney.jpg'; modalCaption = ''">
+                        <img src="thumbs/+1000Sydney.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>01</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+10</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Bondi Beach, Sydney, Australia
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">邦迪海滩, 悉尼, 澳大利亚</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Last of the winter sun Bondi Beach</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>邦迪海滩冬日最后的阳光</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">33.8698° S, 151.2083° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/richardkwatts/54758044676/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Richard Watts</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 columns-1 md:columns-2 gap-4 space-y-4 block gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0900Miyakojima/+0900Miyakojima01.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0900Miyakojima/+0900Miyakojima01.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0900Miyakojima/+0900Miyakojima02.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0900Miyakojima/+0900Miyakojima02.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0900Miyakojima/+0900Miyakojima03.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0900Miyakojima/+0900Miyakojima03.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0900Miyakojima/+0900Miyakojima04.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0900Miyakojima/+0900Miyakojima04.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0900Miyakojima/+0900Miyakojima05.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0900Miyakojima/+0900Miyakojima05.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>02</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+09</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Miyako Island, Miyakojima, Japan
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">宫古列岛, 宫古岛, 日本</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>ということで大好きな宮古島で素敵なスタッフ様方と被写体パワーもりもりつよつよ貸切ウエディングフォトを<br>以前宮古島に住んでいた折にしたのでした<br>スタッフ様方が毎度本当に親身で有難かった、衣装も細身のを更に詰めて頂いた<br>最高の自画自賛ですが見て貰えたら喜びます、最高の1日でした</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>所以呢，我就在最喜欢的宫古岛，和超棒的工作人员们一起，拍了这场“被摄体能量满满超强”的包场婚纱照。<br>那还是我以前住在宫古岛的时候拍的。<br>工作人员们每次都特别贴心，真的非常感谢，连原本就很修身的礼服都帮我再改得更合身。<br>有点自夸但真的太满意了，如果你能看看我会很开心，那真的是最棒的一天。</p>
+                    </div>
+                    
+                </div>
+            
+                <div class="mt-8 pt-4 border-t border-white/5">
+                    <p class="text-[10px] tracking-wider text-white/30 uppercase font-sans">Note</p>
+                    <p class="mt-1 text-xs text-white/40 font-light leading-relaxed">
+                        照片分享于2025年8月31日，拍摄时间未知。
+                    </p>
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">24.8055° N, 125.2811° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://x.com/krep_lk/status/1962114108331086047" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">X</a> <span class="text-white/40">/</span> <a href="https://x.com/krep_lk/status/1962113809725989289" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">2</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">@krep_lk</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 columns-1 md:columns-2 gap-4 space-y-4 block gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing01.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing01.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing02.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing02.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing03.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing03.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing04.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing04.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing05.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing05.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing06.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing06.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing07.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing07.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing08.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing08.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Nanjing/+0800Nanjing09.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Nanjing/+0800Nanjing09.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>03</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Xuanwu Lake, Nanjing, China
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">玄武湖, 南京, 中国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">2025年的8月，以一场绝美晚霞结束</p>
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>本来看今天天气预报是80%下雨，没想着出门。透过玻璃窗看见外面大片的云朵，于是我赌今天的晚霞应该会很漂亮，于是决定去玄武湖碰碰运气。<br>幸运的是，我今天赌对了，肉眼看更会惊叹晚霞的绚烂与美好，不同层次的橘粉蓝紫，交融在天空中，让人心动千千万万遍，控制不住得按下一次次快门，想多留住这眼前的美好。<br>湖面吹来的凉风，温柔又惬意，热爱音乐为爱发电的陌生人，唱着一首首情歌，更添氛围。在晚风中，听《晚风》。<br>时间：2025年8月31日下午6-7点<br>地点：玄武湖十里长堤<br>设备：佳能R50➕55210</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">32.0438° N, 118.7789° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.xiaohongshu.com/discovery/item/68b46364000000001d01e1c3?source=webshare&xhsshare=pc_web&xsec_token=ABmHe8THyGEfneLHqDg3MPEvYDec_y9kbLD_9WiEL6ito=&xsec_source=pc_share" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Xiaohongshu</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">木叶</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Zhangjiakou.png'; modalCaption = ''">
+                        <img src="thumbs/+0800Zhangjiakou.png.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>04</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Taishizhuang Village, Zhangjiakou, China
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">太师庄, 张家口, 中国</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="mt-6 relative pl-4 border-l-2 border-orange-300/20">
+                    <div class="text-sm font-serif-en italic text-white/50 leading-relaxed">
+                        “而说起太平庄村发展旅游业的最初启动，还要追溯到1987、1988年左右。某日来自北京251厂的职工来村游玩，一望无际的大草原漫天花海草海映入他们眼帘，村里的孩子们在草原上骑马喂马的景致也让厂内职工感到耳目一新，久居城市的职工哪里见过这些，于是他们纷纷表示了自己想要骑马拍照的愿望，淳朴的村里孩子们热情好客，指导职工们应当如何骑马，应当如何喂马，日落西山后又挥手和他们作别。这些职工们玩得很是开心，纷纷拿出钱来感谢孩子们的热情款待。村民受此启发，纷纷利用自家饲养的马在村北河滩草地上搞起了骑马游乐项目。今年61岁的村会计胡军山介绍说。”——张家口新闻网记者李晓利
+                    </div>
+                    
+                </div>
+            
+                <div class="mt-8 pt-4 border-t border-white/5">
+                    <p class="text-[10px] tracking-wider text-white/30 uppercase font-sans">Note</p>
+                    <p class="mt-1 text-xs text-white/40 font-light leading-relaxed">
+                        照片分享于2025年8月31日，拍摄时间未知。落日场景由 Google Nano Banana 2 辅助生成。
+                    </p>
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">40.5443° N, ,117.1048° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">晓楠</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Beijing.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Beijing.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>05</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Beijing Daxing International Airport, Beijing, China
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">北京大兴国际机场, 北京, 中国</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>广东之旅结束飞回北京，下飞机后见到的绝美日落。没人能想到百天之后这个随手拍的照片竟然还能发挥作用。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">40.1906° N, 116.4121° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">啊墩</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 columns-1 md:columns-2 gap-4 space-y-4 block gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Jiujiang/+0800Jiujiang01.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Jiujiang/+0800Jiujiang01.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Jiujiang/+0800Jiujiang02.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Jiujiang/+0800Jiujiang02.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Jiujiang/+0800Jiujiang03.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Jiujiang/+0800Jiujiang03.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>06</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Lushan Mountain, Jiujiang, China
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">庐山, 九江, 中国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">8月31日的庐山日落</p>
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>#庐山日落 真的是山水画具象化了，脑子里直接响起来#毛不易 的#一程山路 ，然后一路循环从龙首崖到神龙宫路，但是走太久了，千万不要走除非体力很好时间很早。<br>下午两个半小时10公里徒步，西线基本全局打卡，如琴湖 - 花径 - 锦绣谷 - 仙人洞 - 大天池 - 文殊台 - 龙首崖 - 悬索桥 - 神龙宫路 - 电站大坝 - 黄龙潭，最后芦林湖天黑没去成，等明天观光车再去溜达<br>提前买好观光车票🎫，提前看好时间，观光车最晚19点，星龙索道最晚17点。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">29.3886° N, 115.3820° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.xiaohongshu.com/discovery/item/68b44fca000000001c0356d3?source=webshare&xhsshare=pc_web&xsec_token=ABmHe8THyGEfneLHqDg3MPEvSgu0vHrwn5ppB0sI-OSic=&xsec_source=pc_share" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Xiaohongshu</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">鸡蛋群殴西红柿🍅</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 columns-1 md:columns-2 gap-4 space-y-4 block gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Haikou/+0800Haikou01.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Haikou/+0800Haikou01.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Haikou/+0800Haikou02.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Haikou/+0800Haikou02.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in break-inside-avoid mb-4"
+                         @click="showModal = true; modalImage = 'sunsets/+0800Haikou/+0800Haikou03.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0800Haikou/+0800Haikou03.jpg.webp" class="w-full h-auto object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>07</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Haikou Yundong Library, Haikou, China
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">海口云洞图书馆, 海口, 中国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">08.31海口云洞的晚霞，像极了电影里的结尾！</p>
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">20.0462° N, 110.1957° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.xiaohongshu.com/discovery/item/68b431de000000001d0213f8?source=webshare&xhsshare=pc_web&xsec_token=ABuZxDn-U_X6a29Emwx4aYusTbjyl32K5DExQhJck-uz4=&xsec_source=pc_share" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Xiaohongshu</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">蓝调Time</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0700Bangkok.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0700Bangkok.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>08</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+07</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Chao Phraya River, Bangkok, Thailand
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">湄南河, 曼谷, 泰国</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Time spent in Bangkok was so close.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>在曼谷度过的时光是如此亲近。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">13.7525° N, 100.4935° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://weibo.com/3165043217/Q2quj5Glm" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Weibo</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">greirl_</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in aspect-[4/5] md:aspect-auto md:h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0400Yerevan/+0400Yerevan01.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0400Yerevan/+0400Yerevan01.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in aspect-[4/5] md:aspect-auto md:h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0400Yerevan/+0400Yerevan02.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0400Yerevan/+0400Yerevan02.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>09</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+04</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Mount Ararat, Yerevan, Armenia
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">亚拉拉特山, 埃里温, 亚美尼亚</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">With my boys❤️</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">和我的孩子们❤️</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>One of the highlights of our travels through the Caucasus was catching a breathtaking view of Mount Ararat in Turkey, seen from Armenia.  We couldn’t have asked for better timing with the sunset. </p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>我们在高加索地区的旅行亮点之一，就是从亚美尼亚境内捕捉到了土耳其亚拉拉特山的壮丽景色。我们赶上了日落的绝佳时机。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">40.1777° N, 44.5126° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://x.com/tihaby/status/1962213986926997552" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">X</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">@tihaby</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0100Šilo.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0100Šilo.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>10</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+01</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    North Adriatic Coast, Šilo, Croatia
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">北亚得里亚海海岸, 希洛, 克罗地亚</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">The trace of the day lingers in the sea and sky 🌊</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">白日的痕迹留连于海天之间 🌊</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Zalazak nad Šilom.<br>Sunce se skrilo iza brda, ali je ostavilo nebo i more obasjano bojama koje će se pamtiti. Trag dana koji polako tone u tišinu večeri.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>希洛上空的日落。<br>太阳藏到了山后，但留下的天空和大海被色彩照亮，令人难忘。白日的痕迹正慢慢沉入夜晚的寂静之中。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">45.1460° N, 14.6630° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/malioli/54796648788/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Oliver Švob</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0100Meløy.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0100Meløy.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>11</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+01</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Storsand, Meløy, Norway
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">斯托桑德, 梅勒伊, 挪威</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Airplane in the clouds</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">云中飞机</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Today started with a small disaster: my 12-45mm lens dropped to the floor and broke😒. I had no choice but to take this evening's sunset photo with my macro lens instead.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>今天以一场小灾难开始：我的12-45mm镜头掉在地上摔坏了😒。我别无选择，只能用微距镜头拍摄今晚的日落。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">66.9491° N, 13.1948° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/201206285@N03/54757169505/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Dan Robert Johansen</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0100Brussels.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0100Brussels.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>12</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+01</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    European Quarter, Brussels, Belgium
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">欧盟区, 布鲁塞尔, 比利时</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Cyberpunk Brussels</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">赛博朋克布鲁塞尔</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>I've always seen a futuristic quality in the architecture of the European Quarter, especially at dusk. The electric blue of the tunnel lights against the fiery sunset felt like a classic cyberpunk color palette.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>我总觉得欧盟区的建筑有一种未来感，尤其是在黄昏时分。隧道灯光的电光蓝与火红的日落形成对比，仿佛经典的赛博朋克配色。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">50.8466° N, 4.3517° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/vincentvanderveken/54758222286/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Vincent Vanderveken</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0100NoisyleGrand.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0100NoisyleGrand.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>13</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+01</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Les Espaces d'Abraxas, Noisy-le-Grand, France
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">阿布拉克萨斯空间, 诺瓦西勒格朗, 法国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Sunset</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">日落</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Série du 31 août : un ciel flamboyant</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>8月31日系列：艳丽的天空</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">48.8492° N, 2.5525° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/53072698@N05/54777784844/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Françoise et Gérard</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0100Paris.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0100Paris.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>14</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+01</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Seine, Paris, France
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">塞纳河, 巴黎, 法国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Sunset on the Seine, Paris, 2025</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">2025年巴黎塞纳河日落</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Paris glows in fire and violet as the Seine carries the day into night.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>当塞纳河将白昼带入黑夜，巴黎在火焰色与紫罗兰色的光辉中闪耀。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">48.8589° N, 2.3200° E</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/dcdhe/54757296460/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">David Enzel</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0000Selsey.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0000Selsey.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>15</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+00</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    West Beach, Selsey, United Kingdom
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">西海滩, 塞尔西, 英国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">West Beach Sunset</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">西海滩日落</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Taken from Selsey West Beach, Isle of Wight is just visible on the left of the horizon and Portsmouth dead ahead (if you zoom a lot!)</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>拍摄于塞尔西西海滩，地平线左侧依稀可见怀特岛，正前方则是朴茨茅斯（如果你把焦距拉得特别近的话！）</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">50.7328° N, 0.7923° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/198584526@N08/54760731820/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Tursiops</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/+0000Hvolsvöllur.jpg'; modalCaption = ''">
+                        <img src="thumbs/+0000Hvolsvöllur.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>16</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT+00</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Seljalandsfoss, Hvolsvöllur, Iceland
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">塞里雅兰瀑布, 霍尔斯沃德吕尔, 冰岛</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Behind the Falls</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">瀑布背后</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Walking behind Seljalandsfoss! What an amazing scene as the sun sets in the West.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>走在塞里雅兰瀑布后面！当太阳在西方落下时，这是多么迷人的景象。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">63.7508° N, 20.2238° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/charleszieglerphotography/54853358087/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Charles Ziegler</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in aspect-[4/5] md:aspect-auto md:h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0200Ilulissat/-0200Ilulissat01.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0200Ilulissat/-0200Ilulissat01.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in aspect-[4/5] md:aspect-auto md:h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0200Ilulissat/-0200Ilulissat02.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0200Ilulissat/-0200Ilulissat02.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>17</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-02</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Ilulissat Icefjord, Ilulissat, Greenland
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">伊卢利萨特冰峡湾, 伊卢利萨特, 格陵兰</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Ilulissat is a town in western Greenland, famous for the UNESCO-listed Ilulissat Icefjord, where the Sermeq Kujalleq glacier calves massive icebergs into Disko Bay. The town offers unique experiences like boat tours among icebergs, dog sledding, and whale watching. Spent a day or two here before heading further North. I have never seen so much Ice, and the journey just gets more crazy from here.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>伊卢利萨特是格陵兰岛西部的一个城镇，以被联合国教科文组织列入名录的伊卢利萨特冰峡湾而闻名，瑟梅克·库雅雷克冰川在此崩解出巨大的冰山进入迪斯科湾。这个小镇提供独特的体验，如冰山游船、狗拉雪橇和观鲸。在这里待了一两天后继续向北。我从未见过这么多的冰，接下来的旅程只会更加疯狂。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">69.2197° N, 51.0986° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://x.com/RyanPyle/status/1962266252560461877" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">X</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">@RyanPyle</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in aspect-[4/5] md:aspect-auto md:h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0500NewYork/-0500NewYork01.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0500NewYork/-0500NewYork01.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in aspect-[4/5] md:aspect-auto md:h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0500NewYork/-0500NewYork02.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0500NewYork/-0500NewYork02.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>18</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-05</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Brooklyn Bridge, New York, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">布鲁克林大桥, 纽约, 美国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">watching summer fly away… #sunset 8/31/25 🌆✈️</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">目送夏天飞逝…… #日落 8/31/25 🌆✈️</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Seasons change. Summer comes and goes. In life, where everything is fleeting, only love is constant.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>季节更替，夏去夏来。在万物转瞬即逝的生命中，唯有爱是永恒。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">40.7127° N, 74.0060° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/64520211@N04/54757690096/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a> <span class="text-white/40">/</span> <a href="https://www.flickr.com/photos/64520211@N04/54757869199/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">2</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Tatyana</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0500Philadelphia.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0500Philadelphia.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>19</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-05</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Center City, Philadelphia, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">市中心, 费城, 美国</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="mt-6 relative pl-4 border-l-2 border-orange-300/20">
+                    <div class="text-sm font-serif-en italic text-white/50 leading-relaxed">
+                        "Excellently framed picture of Philly’s skyline, Michael! Astonishing sharpness and beautiful soft light and pink hues in the clouds.<br>I love this perspective of your beautiful city, which someday I´d love visiting." by Daniel Garrido  (Flickr)
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-2 text-sm font-serif-cn italic text-white/40 leading-relaxed transition-all duration-500" style="display: none;">
+                        “费城天际线的照片构图非常出色，Michael！清晰度惊人，柔和的光线和粉色云彩非常美丽。<br>我很喜欢你这座美丽城市的这个视角，希望有一天能去拜访。”——Flickr 平台 Daniel Garrido
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">39.9527° N, 75.1635° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/mhoffman1/54758552548/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Michael Hoffman</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0500Washington.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0500Washington.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>20</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-05</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Anacostia River, Washington, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">安纳科斯蒂亚河, 华盛顿, 美国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Sunset over the Anacostia River</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">安纳科斯蒂亚河上的日落</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">38.8950° N, 77.0365° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/diane_krauthamer/54818199810/in/faves-203929805@N03/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Diane Krauthamer</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0600Minneapolis.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0600Minneapolis.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>21</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-06</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Lake Nokomis, Minneapolis, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">诺科米斯湖, 明尼阿波利斯, 美国</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="mt-6 relative pl-4 border-l-2 border-orange-300/20">
+                    <div class="text-sm font-serif-en italic text-white/50 leading-relaxed">
+                        “这幅作品精准地捕捉了昼夜交替时那稍纵即逝的静谧，天空与湖面在冷暖色调的渐变中完美融合，仿佛大自然最温柔的叹息。水面上零星漂浮的浮标如同五线谱上静止的音符，在深邃的倒影中赋予了画面一种深沉而富有韵律的呼吸感。这种对光影极简而深刻的处理，不仅是视觉的享受，更是一次关于宁静与永恒的心灵洗礼。”——Google Gemini 3 Pro
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">44.9773° N, 93.2655° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/98623843@N05/54794909746/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Joe Passe</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0700Gardiner.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0700Gardiner.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>22</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-07</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Yellowstone National Park, Gardiner, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">黄石国家公园, 加德纳, 美国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Sunset with vapor, Yellowstone National Park</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">水汽氤氲的日落，黄石国家公园</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">45.0351° N, 110.7127° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/143951243@N04/54779563453/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Lech Gawuć</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0800SouthLakeTahoe.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0800SouthLakeTahoe.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>23</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Lake Tahoe, South Lake Tahoe, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">太浩湖, 南太浩湖, 美国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Another Tahoe Sunset</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">又一场太浩湖日落</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Whenever I come to Tahoe, I don't want to miss the sunset. With clouds, it's always spectacular. This one is no exception. Although it was only slightly overcast on that day, the sunset did not disappoint.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>每当我来太浩湖，都不想错过日落。有云的时候总是特别壮观。这次也不例外。虽然那天天色微阴，但日落并没有让人失望。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">38.9457° N, 119.9687° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/tourtrophy/54779646805/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">tourtrophy</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0800Seattle.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0800Seattle.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>24</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Lawtonwood, Seattle, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">劳顿伍德, 西雅图, 美国</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="mt-6 relative pl-4 border-l-2 border-orange-300/20">
+                    <div class="text-sm font-serif-en italic text-white/50 leading-relaxed">
+                        “这幅作品捕捉了日落时分那种令人屏息的静谧壮美，深沉的墨色山林与燃烧般的夕阳构成了极具张力的色彩对话。那艘在余晖中漂浮的孤舟，不仅为宏大的自然景观提供了尺度，更赋予了画面一种关于归途与漂泊的诗意叙事。波光粼粼的金色倒影仿佛是时间流逝的实体，让人在凝视的瞬间，感受到一种既温柔又宏大的苍茫感。”——Google Gemini 3 Pro
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">47.6038° N, 122.3301° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/motus/54758191810/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Sergiy Matusevych</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0800SanFrancisco.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0800SanFrancisco.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>25</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Golden Gate Bridge, San Francisco, United States
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">金门大桥, 旧金山, 美国</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">Golden Hour on the Golden Gate</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">金门大桥的黄金时刻</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Sunset from the Wave Organ last night! You can't beat this classic view of the Golden Gate Bridge. So happy the beautiful sunset season is here in San Francisco!<br>It was the lucky snapshot :)</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>昨晚在浪琴拍摄的日落！这金门大桥的经典景色真是无与伦比。很高兴旧金山美好的日落季节到了！<br>这是一张幸运的快照 :)</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">37.7879° N, 122.4075° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/davidyuweb/54756602920/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">David Yu</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 ">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0800Richmond.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0800Richmond.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-first">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>26</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Richmond Country Farms, Richmond, Canada
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">列治文乡村农场, 列治文, 加拿大</h2>
+                
+                <p class="text-lg md:text-xl font-serif-en text-white/80 mt-2 italic">RICHMOND SKIES - ALWAYS WORTH LOOKING UP!</p>
+                <p class="text-lg md:text-xl font-serif-cn text-white/60 mt-1 italic transition-all duration-500" x-show="showTranslation" style="display: none;">列治文的天空——永远值得抬头仰望！</p>
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="relative pl-4 border-l border-white/10">
+                    <div class="prose prose-invert prose-sm font-light text-white/70 leading-relaxed">
+                        <p>Richmond is blessed with wide-open skies and coastal vistas that make for breathtaking skywatching.<br>In Richmond, the sky is never just background—it’s a living canvas. It holds the hush of morning fog, the drama of westward winds, and the quiet promise of stars above the slough. Always worth looking up.</p>
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-4 prose prose-invert prose-sm font-serif-cn text-white/60 leading-relaxed transition-all duration-500" style="display: none;">
+                        <p>列治文拥有广阔的天空和海岸景观，是绝佳的观天之地。<br>在列治文，天空不仅仅是背景——它是鲜活的画布。它承载着晨雾的静谧、西风的戏剧性，以及泥沼之上星空的无声承诺。永远值得抬头仰望。</p>
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">49.1632° N, 123.1374° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/spetersongallery/54847771659/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">Peterson Ph♡tography</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+        <article class="fade-in-section relative px-4 md:px-12 max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-8 grid grid-cols-1 gap-4 lg:order-first">
+                    <div class="group relative overflow-hidden rounded-sm bg-[#111] cursor-zoom-in h-full"
+                         @click="showModal = true; modalImage = 'sunsets/-0800GalianoIsland.jpg'; modalCaption = ''">
+                        <img src="thumbs/-0800GalianoIsland.jpg.webp" class="w-full h-full object-cover image-hover-zoom" loading="lazy" alt="">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span class="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">View Full</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Column -->
+                <div class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-8 lg:order-last">
+                    <div class="space-y-4">
+                        
+            <div class="flex items-center space-x-3 text-xs tracking-widest text-orange-300/70 uppercase font-medium">
+                <span>27</span>
+                <span class="w-8 h-px bg-orange-300/30"></span>
+                <span>GMT-08</span>
+            </div>
+        
+                        
+            <div>
+                <h2 class="text-3xl md:text-4xl font-serif-en text-white leading-tight">
+                    Montague Harbour, Galiano Island, Canada
+                </h2>
+                <h2 x-show="showTranslation" style="display: none;" class="text-2xl md:text-3xl font-serif-cn text-white/80 leading-tight mt-2 transition-all duration-500">蒙塔古港, 加利亚诺岛, 加拿大</h2>
+                
+                
+                
+            </div>
+        
+                    </div>
+
+                    <div class="flex-grow">
+                        
+                <div class="mt-6 relative pl-4 border-l-2 border-orange-300/20">
+                    <div class="text-sm font-serif-en italic text-white/50 leading-relaxed">
+                        "Camping , short hiking around the park. The best spot to watch all those amazing sunsets. Small secluded beaches with crystal clear water." by bccanuck2018 (Tripadvisor)
+                    </div>
+                    
+                    <div x-show="showTranslation" class="mt-2 text-sm font-serif-cn italic text-white/40 leading-relaxed transition-all duration-500" style="display: none;">
+                        “露营，公园周边短途徒步。观赏壮丽日落的最佳地点。拥有清澈见底海水的小众隐蔽海滩。”——Tripadvisor 平台 bccanuck2018
+                    </div>
+                    
+                </div>
+            
+                    </div>
+
+                    
+            <div class="pt-8 border-t border-white/5 grid grid-cols-2 gap-6 text-xs tracking-wider text-white/40 uppercase">
+                
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Coordinate</span>
+                    <span class="text-white/60 font-mono text-xs">48.9367° N, 123.4682° W</span>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Source</span>
+                    <a href="https://www.flickr.com/photos/ronandmisha/54761090291/in/gallery-203929805@N03-72157724476207319/" target="_blank" class="text-white/60 hover:text-white transition-colors border-b border-white/20 hover:border-white/60">Flickr</a>
+                </div>
+            
+                <div>
+                    <span class="block text-white/20 mb-1 text-[10px]">Photographer</span>
+                    <span class="text-white/60">ShootFirst ThinkLater</span>
+                </div>
+            
+            </div>
+        
+                </div>
+            
+            </div>
+        </article>
+            
+</main>
+
+    <!-- Footer -->
+    <footer class="py-24 border-t border-white/5 text-center">
+        <div class="fade-in-section">
+            <p class="font-serif-en text-xl md:text-2xl text-white/60 tracking-[0.2em] uppercase">
+                2 7 &nbsp; L O C A T I O N S &nbsp; · &nbsp; 2 7 &nbsp; S U N S E T S &nbsp; · &nbsp; 2 7 &nbsp; Y E A R S
+            </p>
+            <div class="mt-12 text-xs text-white/20 tracking-widest uppercase">
+                
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple Intersection Observer for fade-in animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // Only animate once
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
 </body>
 </html>
