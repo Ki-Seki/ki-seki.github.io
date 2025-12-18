@@ -20,5 +20,5 @@ And I feel deeply grateful that someone is now me. 🎄
 
 {{< media
 src="8c5846ed-5210811b-9b28-43f4-8c7a-629ecf5424ee.jpg"
-caption="Image"
+caption=""
 >}}
