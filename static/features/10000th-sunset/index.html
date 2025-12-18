@@ -1,63 +1,93 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE 10,000TH SUNSET</title>
+    <title>The 10,000th Sunset</title>
+    <link rel="icon" href="favicon/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&family=Noto+Serif+SC:wght@300;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f0f0;
-            color: #000;
-            text-align: center;
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+        }
+        .font-serif-en {
+            font-family: 'Playfair Display', serif;
+        }
+        .font-serif-cn {
+            font-family: 'Noto Serif SC', serif;
         }
 
-        .container {
-            padding: 20px;
-            animation: fadeIn 1.5s ease-out;
-        }
-
-        h1 {
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            margin: 0;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            line-height: 1.1;
-        }
-
-        .divider {
-            width: 40px;
-            height: 2px;
-            background-color: #000;
-            margin: 24px auto;
-        }
-
-        p {
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            margin: 0;
-            font-weight: 300;
-            color: #333;
-            letter-spacing: 0.2em;
+        .fade-in {
+            animation: fadeIn 2s ease-out forwards;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .btn-minimal {
+            position: relative;
+            padding-bottom: 6px;
+        }
+        .btn-minimal::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.6);
+            transition: width 0.4s ease;
+        }
+        .btn-minimal:hover::after {
+            width: 100%;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>THE 10,000TH SUNSET</h1>
-        <div class="divider"></div>
-        <p>Coming Soon 敬请期待</p>
+<body class="h-screen w-full flex flex-col items-center justify-center overflow-hidden relative">
+
+    <!-- Background Image with Overlay -->
+    <div class="absolute inset-0 z-0">
+        <img src="sunsets/+0800Jiujiang/+0800Jiujiang02.jpg" alt="Background" class="w-full h-full object-cover opacity-30 blur-md scale-105">
+        <div class="absolute inset-0 bg-[#050505]/60"></div>
     </div>
+
+    <!-- Center Content -->
+    <div class="relative z-10 fade-in text-center">
+        <a href="gallery.html" class="group inline-flex flex-col items-center gap-2 text-white/90 hover:text-white transition-colors duration-500 btn-minimal">
+            <span class="text-lg md:text-2xl tracking-[0.3em] uppercase font-serif-en">Enter Gallery</span>
+            <span class="text-sm md:text-base tracking-[0.2em] font-serif-cn text-white/70 group-hover:text-white/90 transition-colors duration-500">进入画廊</span>
+        </a>
+    </div>
+
+    <!-- Bottom Content -->
+    <div class="absolute bottom-12 left-0 w-full text-center z-10 space-y-10 fade-in" style="animation-delay: 0.5s; opacity: 0; animation-fill-mode: forwards;">
+
+        <!-- Notices -->
+        <div class="space-y-4 text-white/50 font-light px-6">
+            <div class="flex flex-col items-center justify-center gap-1 text-xs md:text-sm">
+                <p class="font-serif-en tracking-wider">Due to high-resolution images, loading may be slow. VPN recommended in China.</p>
+                <p class="font-serif-cn tracking-wider">由于包含大量高清图片，国内访问可能较慢，建议使用代理。</p>
+            </div>
+
+            <div class="flex flex-col items-center justify-center gap-1 text-xs md:text-sm md:hidden">
+                <p class="font-serif-en tracking-wider">Desktop view recommended.</p>
+                <p class="font-serif-cn tracking-wider">推荐在桌面端浏览。</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <p class="text-[10px] md:text-xs text-white/30 tracking-[0.2em] uppercase font-serif-en">
+            Ki-Seki.github.io
+        </p>
+    </div>
+
 </body>
 </html>
