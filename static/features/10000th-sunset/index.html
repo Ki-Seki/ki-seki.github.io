@@ -16,7 +16,8 @@
         body {
             margin: 0;
             padding: 0;
-            height: 100vh;
+            height: 100%;
+            min-height: 100vh;
             width: 100%;
             background-color: #080808;
             color: #e5e5e5;
@@ -26,8 +27,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
+        }
+
+        /* Main Content Wrapper */
+        .main-content {
+            transform: translateY(-5vh);
+            /* Move up slightly */
+            z-index: 10;
+            text-align: center;
         }
 
         /* System Serif Fonts - High End Look */
@@ -155,30 +165,57 @@
             width: 100%;
             padding: 0 2rem;
             animation-delay: 0.5s;
+            z-index: 10;
+            text-align: center;
+        }
+
+        /* Prevent overlap on short screens */
+        @media (max-height: 600px) {
+            .bottom-info {
+                position: static;
+                margin-top: 2rem;
+                padding-bottom: 2rem;
+            }
+
+            .main-content {
+                transform: none;
+                /* Reset transform */
+                margin-top: 2rem;
+            }
+
+            body {
+                justify-content: flex-start;
+                padding-top: 4rem;
+            }
         }
 
         .info-text {
-            color: #666;
+            color: rgba(255, 255, 255, 0.25);
+            /* Much dimmer for contrast */
             line-height: 1.8;
             transition: color 0.3s ease;
         }
 
         .info-text:hover {
-            color: #888;
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .info-en {
             font-size: 0.7rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            margin-bottom: 0.2rem;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0 0 0.1rem 0;
+            /* Use sans-serif for functional text to distinguish from artistic title */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         .info-cn {
             font-size: 0.85rem;
             letter-spacing: 0.1em;
-            font-family: "Songti SC", "SimSun", serif;
+            /* Use sans-serif for functional text */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 300;
+            margin: 0;
         }
 
         /* Mobile Only Visibility */
@@ -213,7 +250,7 @@
     <div class="ambient-light"></div>
 
     <!-- Center Content -->
-    <div class="z-10 fade-in text-center">
+    <div class="z-10 fade-in text-center main-content">
         <a href="gallery.html" class="enter-link">
             <div class="btn-content">
                 <!-- English First -->
