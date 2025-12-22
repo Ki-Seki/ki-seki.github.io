@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +10,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&family=Noto+Serif+SC:wght@300;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&family=Noto+Serif+SC:wght@300;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet">
     <style>
         body {
             background-color: #050505;
             color: #e5e5e5;
             font-family: 'Inter', sans-serif;
         }
+
         .font-serif-en {
             font-family: 'Playfair Display', serif;
         }
+
         .font-serif-cn {
             font-family: 'Noto Serif SC', serif;
         }
@@ -28,14 +33,20 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .btn-minimal {
             position: relative;
             padding-bottom: 6px;
         }
+
         .btn-minimal::after {
             content: '';
             position: absolute;
@@ -46,34 +57,41 @@
             background-color: rgba(255, 255, 255, 0.6);
             transition: width 0.4s ease;
         }
+
         .btn-minimal:hover::after {
             width: 100%;
         }
     </style>
 </head>
+
 <body class="h-screen w-full flex flex-col items-center justify-center overflow-hidden relative">
 
     <!-- Background Image with Overlay -->
     <div class="absolute inset-0 z-0">
-        <img src="sunsets/+0800Jiujiang/+0800Jiujiang02.jpg" alt="Background" class="w-full h-full object-cover opacity-30 blur-md scale-105">
+        <img src="sunsets/+0800Jiujiang/+0800Jiujiang02.jpg" alt="Background"
+            class="w-full h-full object-cover opacity-30 blur-md scale-105">
         <div class="absolute inset-0 bg-[#050505]/60"></div>
     </div>
 
     <!-- Center Content -->
     <div class="relative z-10 fade-in text-center">
-        <a href="gallery.html" class="group inline-flex flex-col items-center gap-2 text-white/90 hover:text-white transition-colors duration-500 btn-minimal">
+        <a href="gallery.html"
+            class="group inline-flex flex-col items-center gap-2 text-white/90 hover:text-white transition-colors duration-500 btn-minimal">
             <span class="text-lg md:text-2xl tracking-[0.3em] uppercase font-serif-en">Enter Gallery</span>
-            <span class="text-sm md:text-base tracking-[0.2em] font-serif-cn text-white/70 group-hover:text-white/90 transition-colors duration-500">进入画廊</span>
+            <span
+                class="text-sm md:text-base tracking-[0.2em] font-serif-cn text-white/70 group-hover:text-white/90 transition-colors duration-500">进入画廊</span>
         </a>
     </div>
 
     <!-- Bottom Content -->
-    <div class="absolute bottom-12 left-0 w-full text-center z-10 space-y-10 fade-in" style="animation-delay: 0.5s; opacity: 0; animation-fill-mode: forwards;">
+    <div class="absolute bottom-12 left-0 w-full text-center z-10 space-y-10 fade-in"
+        style="animation-delay: 0.5s; opacity: 0; animation-fill-mode: forwards;">
 
         <!-- Notices -->
         <div class="space-y-4 text-white/50 font-light px-6">
             <div class="flex flex-col items-center justify-center gap-1 text-xs md:text-sm">
-                <p class="font-serif-en tracking-wider">Due to high-resolution images, loading may be slow. VPN recommended in China.</p>
+                <p class="font-serif-en tracking-wider">Due to high-resolution images, loading may be slow. VPN
+                    recommended in China.</p>
                 <p class="font-serif-cn tracking-wider">由于包含大量高清图片，国内访问可能较慢，建议使用代理。</p>
             </div>
 
@@ -90,4 +108,5 @@
     </div>
 
 </body>
+
 </html>
