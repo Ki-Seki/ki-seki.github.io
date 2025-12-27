@@ -13,7 +13,7 @@ tags:
 math: true
 ---
 
-Speculative decoding accelerates the inference process of Large Language Models (LLMs) by trading space for time, while ensuring that the generation distribution remains consistent with the original model.
+Speculative decoding accelerates the inference process of Large Language Models (LLMs) by using additional compute resources to reduce latency, while ensuring that the generation distribution remains consistent with the original model.
 
 This article mainly shares the derivation ideas for the construction process of the Speculative Sampling algorithm mentioned in the paper "Fast Inference from Transformers via Speculative Decoding" [^1].
 
