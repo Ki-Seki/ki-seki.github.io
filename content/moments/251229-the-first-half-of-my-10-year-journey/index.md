@@ -6,7 +6,7 @@ location: "Beijing"
 mood: "Confident"
 ---
 
-On June 24th, 2021, I officially decided to start my 10-Year journey. It originated from a saying I like very much: Men always overestimate what they could accomplish within a year, while underestimating what they could achieve in 10 years. And no wonder, this is very true speaking from experience.
+On June 24th, 2021, I officially decided to start my 10-Year journey. It originated from a saying I like very much: Most people overestimate what they can do in one year and underestimate what they can do in ten years. And no wonder, this is very true speaking from experience.
 
 At that time, I said I would keep improving my English and tech skills to make a living, and also keep skateboarding as a lifelong hobby.
 
