@@ -12,7 +12,7 @@ At that time, I said I would keep improving my English and tech skills to make a
 
 Today, I feel English is truly my second language. As for my CS skills, now I'm earning a CS PhD degree with decent publication experience, and I've made significant contributions to the open-source community. But sadly, I must admit I betrayed my passions from time to time, which really makes me disappointed sometimes. I didn't skate for almost 3-4 years. I stuck with an unsuitable job and a relationship both for almost 2 years. There will always be ups and downs. All in all, I'll rate myself an 8/10, better than just passing. 😀
 
-Another thing worth mentioning is that at the end of the first half of my 10-Year journey, I met a new good friend; she really feels like an old friend. She brought so much joy to me. No guarantee should be given for the relationship. Allow experiences to flow through me rather than just to me. I only hope I could express all my emotions with great sincerity so that no regret will exist. Thannnnnk you soooooo much! 🎃
+Another thing worth mentioning is that at the end of the first half of my 10-Year journey, I met a new good friend; she really feels like an old friend. She brought so much joy to me. No guarantee should be given for the relationship. Allow experiences to flow through me rather than just to me. I only hope I could express all my emotions with great sincerity so that no regret will exist. Thank you soooooo much! 🎃
 
 Looking ahead, I think English + CS + Skateboarding will still be the keywords for the second half. In the upcoming 6 months, I hope I can finish 2 research projects and get hired by a foreign company remotely or on-site in Beijing.
 
