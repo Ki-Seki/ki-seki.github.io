@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The 10,000th Sunset</title>
+    <link rel="icon" href="favicon/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
+    <style>
+        /* Reset & Base */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            min-height: 100vh;
+            width: 100%;
+            background-color: #080808;
+            color: #e5e5e5;
+            /* System Sans-Serif Stack */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Main Content Wrapper */
+        .main-content {
+            transform: translateY(-5vh);
+            /* Move up slightly */
+            z-index: 10;
+            text-align: center;
+        }
+
+        /* System Serif Fonts - High End Look */
+        .font-serif-en {
+            font-family: "Didot", "Bodoni MT", "Noto Serif", "Times New Roman", serif;
+        }
+
+        .font-serif-cn {
+            font-family: "Songti SC", "SimSun", "STSong", "华文宋体", serif;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Background - Subtle Ambient Light */
+        .ambient-light {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            /* Very subtle, desaturated warm grey gradient from bottom */
+            background: radial-gradient(circle at 50% 130%, #1a1a1a 0%, #080808 60%);
+            opacity: 1;
+        }
+
+        /* Layout Utilities */
+        .z-10 {
+            position: relative;
+            z-index: 10;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .gap-3 {
+            gap: 0.75rem;
+        }
+
+        /* Button Styles */
+        .enter-link {
+            text-decoration: none;
+            padding: 3rem;
+            display: block;
+            cursor: pointer;
+            /* Remove tap highlight on mobile */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+            opacity: 0.85;
+        }
+
+        .enter-link:hover .btn-content {
+            transform: translateY(-4px);
+            opacity: 1;
+        }
+
+        .title-en {
+            font-size: 0.9rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: #e5e5e5;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Horizontal Separator */
+        .separator {
+            width: 1.5rem;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 0.5rem 0;
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.6s ease;
+        }
+
+        .enter-link:hover .separator {
+            width: 4rem;
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .title-cn {
+            font-size: 1.15rem;
+            letter-spacing: 0.5em;
+            color: #e5e5e5;
+            font-weight: 300;
+            margin-left: 0.5em;
+            /* Optical alignment */
+            display: block;
+        }
+
+        /* Bottom Info */
+        .bottom-info {
+            position: absolute;
+            bottom: 3rem;
+            left: 0;
+            width: 100%;
+            padding: 0 2rem;
+            animation-delay: 0.5s;
+            z-index: 10;
+            text-align: center;
+        }
+
+        /* Prevent overlap on short screens */
+        @media (max-height: 600px) {
+            .bottom-info {
+                position: static;
+                margin-top: 2rem;
+                padding-bottom: 2rem;
+            }
+
+            .main-content {
+                transform: none;
+                /* Reset transform */
+                margin-top: 2rem;
+            }
+
+            body {
+                justify-content: flex-start;
+                padding-top: 4rem;
+            }
+        }
+
+        .info-text {
+            color: rgba(255, 255, 255, 0.25);
+            /* Much dimmer for contrast */
+            line-height: 1.8;
+            transition: color 0.3s ease;
+        }
+
+        .info-text:hover {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .info-en {
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin: 0 0 0.1rem 0;
+            /* Use sans-serif for functional text to distinguish from artistic title */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .info-cn {
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            /* Use sans-serif for functional text */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 300;
+            margin: 0;
+        }
+
+        /* Mobile Only Visibility */
+        .mobile-only {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .title-en {
+                font-size: 1.1rem;
+                letter-spacing: 0.5em;
+            }
+
+            .title-cn {
+                font-size: 1.4rem;
+                letter-spacing: 0.6em;
+            }
+
+            .mobile-only {
+                display: none;
+            }
+
+            /* Hide on desktop */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="ambient-light"></div>
+
+    <!-- Center Content -->
+    <div class="z-10 fade-in text-center main-content">
+        <a href="gallery.html" class="enter-link">
+            <div class="btn-content">
+                <!-- English First -->
+                <span class="title-en font-serif-en">Enter Gallery</span>
+
+                <!-- Horizontal Separator -->
+                <div class="separator"></div>
+
+                <!-- Chinese Second -->
+                <span class="title-cn font-serif-cn">进入画廊</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Bottom Content -->
+    <div class="z-10 fade-in bottom-info text-center">
+        <div class="flex-col gap-3">
+
+            <!-- Notice 1 -->
+            <div class="info-text">
+                <p class="info-en">Contains High-Res Images</p>
+                <p class="info-cn">含高清图片，国内建议使用 VPN</p>
+            </div>
+
+            <!-- Notice 2 (Mobile Only) -->
+            <div class="info-text mobile-only">
+                <p class="info-en">Best viewed on Desktop</p>
+                <p class="info-cn">桌面端体验最佳</p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

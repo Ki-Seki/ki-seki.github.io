@@ -1,0 +1,11 @@
+{{/* Renders the location and mood chips for a moment entry. */}}
+{{- $page := .page -}}
+{{- with $page.Params.location }}
+  <span class="moment-chip">
+    <span class="moment-chip__dot" aria-hidden="true"></span>
+    {{ . }}
+  </span>
+{{- end }}
+{{- with $page.Params.mood }}
+  <span class="moment-chip mood">{{ . }}</span>
+{{- end }}

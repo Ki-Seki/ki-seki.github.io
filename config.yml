@@ -1,9 +1,10 @@
 baseURL: https://ki-seki.github.io/
 title: The Kiseki Log
 languageCode: en
-copyright: "© 2023-Present Shichao Song [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
+copyright: "© 2023-2025 Shichao Song [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
 theme: PaperMod
 
+timeout: 360
 enableInlineShortcodes: true
 enableRobotsTXT: true
 enableGitInfo: true
@@ -38,6 +39,9 @@ languages:
         - name: Posts
           url: posts/
           weight: 1
+        - name: Moments
+          url: moments/
+          weight: 3
         - name: Archive
           url: archives/
           weight: 5
@@ -94,8 +98,8 @@ params:
   homeInfoParams:
     Title: 👋 Hi, all!
     Content: >
-      I am Shichao Song, a second-year PhD student.
-      My current research focuses on large language models.
+      I am Shichao Song, a third-year PhD student.
+      My current research focuses on foundation models.
       I blog about my research and life.
 
   socialIcons:
@@ -111,8 +115,6 @@ params:
       url: https://www.linkedin.com/in/song-sc/
     - name: rss
       url: https://ki-seki.github.io/posts/index.xml
-    - name: heart
-      url: https://song-shichao.github.io/
 
   editPost:
     URL: "https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content"

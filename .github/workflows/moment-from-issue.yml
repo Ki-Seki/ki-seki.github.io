@@ -1,0 +1,295 @@
+name: Create Moment from Issue
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  create-moment:
+    if: github.event.label.name == 'moment' && github.event.issue.user.login == 'Ki-Seki'
+    # avoid duplicate concurrent runs for same issue
+    concurrency:
+      group: moment-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse issue and create moment
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const crypto = require('crypto');
+            const issue = context.payload.issue;
+            const issueBody = issue.body || '';
+
+            // Parse the issue body to extract fields
+            const parseField = (fieldName) => {
+              const regex = new RegExp(
+                `### ${fieldName}\\s*([\\s\\S]*?)(?=###|$)`,
+                'i'
+              );
+              const match = issueBody.match(regex);
+              return match ? match[1].trim() : '';
+            };
+
+            // Derive title from the issue title by removing a leading
+            // "[Moment] " prefix (case-insensitive). No need to require
+            // a separate Title field in the issue body anymore.
+            const title = (issue.title || '').replace(/^\s*\[Moment\]\s*/i, '').trim();
+            let content = parseField('Content');
+            const location = parseField('Location') || 'Beijing';
+            const mood = parseField('Mood') || 'Happy';
+
+            // Generate dirname from date and title
+            const now = new Date();
+            const dateStr = now.toISOString().slice(2, 10).replace(/-/g, '');
+            const titleSlug = title.toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/--+/g, '-')
+              .trim();
+            const dirname = `${dateStr}-${titleSlug}`;
+
+            // Format date for frontmatter (ISO 8601 with timezone)
+            // Use system default timezone instead of hardcoding
+            const offsetMinutes = -now.getTimezoneOffset();
+            const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
+            const offsetMins = Math.abs(offsetMinutes) % 60;
+            const offsetSign = offsetMinutes >= 0 ? '+' : '-';
+            const timezoneOffset = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMins).padStart(2, '0')}`;
+            const dateForFrontmatter = now.toISOString().slice(0, 19) + timezoneOffset;
+
+            // We'll collect unique images by URL so the same URL maps to the same local filename
+            const images = [];
+            const seen = new Map();
+
+            // helper to extract filename from URL and strip query/hash
+            const extractFilename = (url) => {
+              try {
+                const parts = url.split('/');
+                let fname = parts[parts.length - 1] || '';
+                fname = fname.split('?')[0].split('#')[0];
+                return fname || '';
+              } catch (e) {
+                return '';
+              }
+            };
+
+            const makeDeterministicFilename = (url) => {
+              const original = extractFilename(url) || 'image';
+              // sanitize
+              let base = original.replace(/[^\w.\-]+/g, '-').replace(/^[-_]+|[-_]+$/g, '');
+              if (base.length > 50) base = base.slice(0, 50);
+              const hash = crypto.createHash('sha1').update(url).digest('hex').slice(0, 8);
+              return `${hash}-${base}`;
+            };
+
+            // Replace Markdown images: ![alt](url)
+            content = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
+              url = url.trim();
+              if (seen.has(url)) {
+                const filename = seen.get(url);
+                const caption = alt || '';
+                return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
+              }
+              const filename = makeDeterministicFilename(url);
+              seen.set(url, filename);
+              images.push({ url, filename, originalFilename: extractFilename(url), alt });
+              const caption = alt || '';
+              return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
+            });
+
+            // Replace HTML <img ... src="..."> tags
+            content = content.replace(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi, (match, url) => {
+              url = url.trim();
+              const altMatch = match.match(/alt=["']([^"']*)["']/i);
+              const alt = altMatch ? altMatch[1] : '';
+              if (seen.has(url)) {
+                const filename = seen.get(url);
+                const caption = alt || '';
+                return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
+              }
+              const filename = makeDeterministicFilename(url);
+              seen.set(url, filename);
+              images.push({ url, filename, originalFilename: extractFilename(url), alt });
+              const caption = alt || '';
+              return `{{< media\nsrc="${filename}"\ncaption="${caption}"\n>}}`;
+            });
+
+            // Create the moment post content
+            const momentContent = [
+              '---',
+              `title: "${title}"`,
+              `date: ${dateForFrontmatter}`,
+              `draft: false`,
+              `location: "${location}"`,
+              `mood: "${mood}"`,
+              '---',
+              '',
+              content,
+              ''
+            ].join('\n');
+
+            // Set outputs
+            core.setOutput('dirname', dirname);
+            core.setOutput('content', momentContent);
+            core.setOutput('issue_number', issue.number);
+            core.setOutput('images', JSON.stringify(images));
+
+            return { dirname, content: momentContent, issue_number: issue.number, images };
+
+
+      - name: Create moment directory and file
+        env:
+          DIRNAME: ${{ steps.parse.outputs.dirname }}
+          CONTENT: ${{ steps.parse.outputs.content }}
+        run: |
+          mkdir -p "content/moments/${DIRNAME}"
+          # use printf to safely write content (preserves newlines and avoids echo pitfalls)
+          printf '%s' "$CONTENT" > "content/moments/${DIRNAME}/index.md"
+
+      - name: Download images
+        if: steps.parse.outputs.images != '[]'
+        env:
+          DIRNAME: ${{ steps.parse.outputs.dirname }}
+          IMAGES: ${{ steps.parse.outputs.images }}
+        run: |
+          set -euo pipefail
+          mkdir -p "content/moments/${DIRNAME}"
+          # Parse images JSON and download each one (skip when file exists)
+          echo "$IMAGES" | jq -c '.[]' | while read -r img; do
+            url=$(echo "$img" | jq -r '.url')
+            filename=$(echo "$img" | jq -r '.filename')
+
+            dest="content/moments/${DIRNAME}/${filename}"
+
+            # if the file (or file with extension) already exists, skip download
+            if [ -f "$dest" ]; then
+              echo "Skipped, already present: $dest"
+              continue
+            fi
+
+            tmpfile="${dest}.download"
+            # download with curl (follow redirects), fail on HTTP errors
+            if ! curl -fsSL -o "$tmpfile" "$url"; then
+              echo "Warning: failed to download $url" >&2
+              rm -f "$tmpfile" || true
+              continue
+            fi
+
+            if [ ! -s "$tmpfile" ]; then
+              rm -f "$tmpfile" || true
+              echo "Warning: empty download for $url" >&2
+              continue
+            fi
+
+            mime=$(file --mime-type -b "$tmpfile" || true)
+            case "$mime" in
+              image/jpeg) ext=".jpg" ;;
+              image/png) ext=".png" ;;
+              image/gif) ext=".gif" ;;
+              image/webp) ext=".webp" ;;
+              image/svg+xml) ext=".svg" ;;
+              image/x-icon) ext=".ico" ;;
+              *) ext="" ;;
+            esac
+
+            final="$dest"
+            if [ -n "$ext" ] && [[ "$filename" != *"$ext" ]]; then
+              final="content/moments/${DIRNAME}/${filename}${ext}"
+            fi
+
+            mv "$tmpfile" "$final"
+
+            # If final filename changed, update index.md shortcode src
+            if [ "$final" != "$dest" ]; then
+              old=$(printf '%s' "$filename" | sed 's/[\/&]/\\&/g')
+              new=$(basename "$final")
+              new_esc=$(printf '%s' "$new" | sed 's/[\/&]/\\&/g')
+              sed -i "s/src=\"${old}\"/src=\"${new_esc}\"/g" "content/moments/${DIRNAME}/index.md" || true
+            fi
+          done
+
+      - name: Create Pull Request
+        id: create_pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dirname = '${{ steps.parse.outputs.dirname }}';
+            const issueNumber = ${{ steps.parse.outputs.issue_number }};
+            const branchName = `moment/${dirname}`;
+
+            // Configure git
+            await exec.exec('git', ['config', 'user.name', 'github-actions[bot]']);
+            await exec.exec('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com']);
+
+            // Create and checkout new branch
+            await exec.exec('git', ['checkout', '-b', branchName]);
+
+            // Add and commit changes
+            await exec.exec('git', ['add', 'content/moments/']);
+            await exec.exec('git', ['commit', '-m', `post: add moment from issue #${issueNumber}`]);
+
+            // Push branch
+            await exec.exec('git', ['push', 'origin', branchName]);
+
+            // Create PR
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `post: add moment, ${dirname}`,
+              head: branchName,
+              base: 'main',
+              body: [
+                `This PR adds a new moment created from issue #${issueNumber}.`,
+                '',
+                `**Moment**: ${dirname}`,
+                `**Path**: \`content/moments/${dirname}/index.md\``,
+                '',
+                `Closes #${issueNumber}`
+              ].join('\n')
+            });
+
+            core.setOutput('pr_number', pr.data.number);
+            core.setOutput('pr_url', pr.data.html_url);
+
+            return {
+              pr_number: pr.data.number,
+              pr_url: pr.data.html_url
+            };
+
+      - name: Comment on issue with PR link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dirname = '${{ steps.parse.outputs.dirname }}';
+            const issueNumber = ${{ steps.parse.outputs.issue_number }};
+            const prUrl = '${{ steps.create_pr.outputs.pr_url }}';
+
+            const message = [
+              '✅ Moment created successfully!',
+              '',
+              `Your moment has been created at \`content/moments/${dirname}/index.md\`.`,
+              '',
+              `A pull request has been created for review: ${prUrl}`,
+              '',
+              'The moment will be published once the PR is merged.'
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: message
+            });

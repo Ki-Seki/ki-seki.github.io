@@ -1,7 +1,7 @@
 {{- $src := .Get "src" -}}
 {{- $caption := .Get "caption" -}}
 
-<figure style="text-align: center;">
+<figure class="media-figure">
 {{/* ---------- YouTube ---------- */}}
 {{- if or (hasPrefix $src "https://www.youtube.com/") (hasPrefix $src "https://youtu.be/") (hasPrefix $src "http://www.youtube.com/") (hasPrefix $src "http://youtu.be/") -}}
   {{- $videoId := "" -}}
@@ -36,13 +36,46 @@
 {{/* ---------- Local/Remote Image ---------- */}}
 {{- else -}}
   {{- $res := .Page.Resources.GetMatch $src -}}
-  {{- if $res -}}
-    <img src="{{ $res.RelPermalink }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
-  {{- else if fileExists (printf "static/%s" $src) -}}
-    <img src="{{ relURL $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
-  {{- else -}}
-    <img src="{{ $src }}" alt="{{ $caption }}" style="max-width: 100%; height: auto;">
-  {{- end -}}
+  {{- $thumbRes := $res -}}
+    {{- $pageDir := "" -}}
+    {{- with .Page.File }}
+      {{- $pageDir = .Dir -}}
+    {{- end -}}
+    {{- $isAbsolute := or (hasPrefix $src "/") (strings.HasPrefix $src "http://") (strings.HasPrefix $src "https://") -}}
+    {{- $contentPath := "" -}}
+    {{- $contentURL := "" -}}
+    {{- if and $pageDir (not $isAbsolute) -}}
+      {{- $contentPath = path.Join "content" $pageDir $src -}}
+      {{- $contentURL = path.Join "/" $pageDir $src -}}
+    {{- end -}}
+    {{- $imageURL := "" -}}
+    {{- if $res -}}
+      {{- if or (gt $res.Width 1280) (gt $res.Height 1280) -}}
+        {{- $processed := $res.Fit "1280x1280 q80" -}}
+        {{- with $processed -}}
+          {{- $thumbRes = . -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $imageURL = $res.RelPermalink -}}
+    {{- else if fileExists (printf "static/%s" $src) -}}
+      {{- $imageURL = relURL $src -}}
+    {{- else if and $contentPath (fileExists $contentPath) -}}
+      {{- $imageURL = relURL $contentURL -}}
+    {{- else -}}
+      {{- $imageURL = $src -}}
+    {{- end -}}
+    {{- $thumbURL := $imageURL -}}
+    {{- with $thumbRes -}}
+      {{- $thumbURL = .RelPermalink -}}
+    {{- end -}}
+    {{- $galleryID := printf "media-gallery-%s" (md5 .Page.RelPermalink) -}}
+    {{- $captionText := "" -}}
+    {{- with $caption -}}
+      {{- $captionText = (strings.TrimSpace (. | markdownify | plainify)) -}}
+    {{- end -}}
+    <a href="{{ $imageURL }}" class="media-lightbox-trigger glightbox" data-gallery="{{ $galleryID }}"{{ if $captionText }} data-title="{{ $captionText }}"{{ end }}>
+  <img src="{{ $thumbURL }}" alt="{{ $caption }}" loading="lazy" style="max-width: 100%; height: auto;"{{ if $res }} data-fullsrc="{{ $imageURL }}"{{ end }}>
+    </a>
 {{- end -}}
 
 {{/* ---------- Caption ---------- */}}
