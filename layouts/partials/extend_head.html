@@ -44,3 +44,7 @@
   mermaid.initialize({ startOnLoad: true });
 </script>
 {{ end }}
+
+{{- /* Load local timezone converter for all time elements */ -}}
+{{- $localTimeJS := resources.Get "js/local-time.js" | minify -}}
+<script defer src="{{ $localTimeJS.RelPermalink }}"></script>
