@@ -10,7 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const date = new Date(isoString);
       
       // Check if the element is in a list view (moments feed) or detailed view
-      // List views typically show just date, detailed views show date + time
+      // Note: This specifically checks for .moment-card which is used in moments/list.html
+      // List views show just date, detailed views show date + time
       const isListView = timeEl.closest(".moment-card") !== null;
       
       // Check if this is an "Updated" time (contains "Updated:" text)
