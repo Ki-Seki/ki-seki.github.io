@@ -62,13 +62,11 @@ jobs:
             const dirname = `${dateStr}-${titleSlug}`;
 
             // Format date for frontmatter (ISO 8601 with timezone)
-            // Use system default timezone instead of hardcoding
-            const offsetMinutes = -now.getTimezoneOffset();
-            const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
-            const offsetMins = Math.abs(offsetMinutes) % 60;
-            const offsetSign = offsetMinutes >= 0 ? '+' : '-';
-            const timezoneOffset = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMins).padStart(2, '0')}`;
-            const dateForFrontmatter = now.toISOString().slice(0, 19) + timezoneOffset;
+            // Use Beijing timezone (+08:00) to match blog posts
+            const timezoneOffset = '+08:00';
+            // Convert UTC time to Beijing time
+            const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+            const dateForFrontmatter = beijingTime.toISOString().slice(0, 19) + timezoneOffset;
 
             // We'll collect unique images by URL so the same URL maps to the same local filename
             const images = [];
