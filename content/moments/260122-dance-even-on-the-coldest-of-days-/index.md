@@ -11,4 +11,4 @@ src="2c8a61a3-2f8620d1-fb30-49e4-bcde-a41b898cb447.jpg"
 caption="The snow in Beijing on January 17th"
 >}}
 
-<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" height=86 src="https://i.y.qq.com/n2/m/outchain/player/index.html?songid=109298983&songtype=0"></iframe>
+<iframe style="border: none; margin: 0;" height="66" width="100%" src="https://i.y.qq.com/n2/m/outchain/player/index.html?songid=109298983&songtype=0"></iframe>

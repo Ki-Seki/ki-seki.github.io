@@ -12,4 +12,4 @@ A tribute to Nathan and Nora from *Upload*, to the two young men in love beneath
 
 Not every affection must lead to a happy ending, but may every sincere feeling be expressed and shared without limit ❤️. No hardship can ever stop the growth of spiritual faith 🌷.
 
-<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" height=86 src="https://i.y.qq.com/n2/m/outchain/player/index.html?songid=251473112&songtype=0"></iframe>
+<iframe style="border: none; margin: 0;" height="66" width="100%" src="https://i.y.qq.com/n2/m/outchain/player/index.html?songid=251473112&songtype=0"></iframe>
