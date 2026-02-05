@@ -32,11 +32,10 @@
 {{- $admonitionJS := resources.Get "js/admonition.js" | minify }}
 <script src="{{ $admonitionJS.RelPermalink }}"></script>
 
-{{- /* Load local time script only where time metadata is used */ -}}
-{{ if or (eq .Section "posts") (eq .Section "moments") }}
-  {{- $localTimeJS := resources.Get "js/local-time.js" | minify }}
-  <script defer src="{{ $localTimeJS.RelPermalink }}"></script>
-{{ end }}
+{{- /* Load local time script */ -}}
+{{- $localTimeJS := resources.Get "js/local-time.js" | minify }}
+<script defer src="{{ $localTimeJS.RelPermalink }}"></script>
+
 
 {{ if eq .Section "moments" }}
   {{- $momentsJS := resources.Get "js/moments.js" | minify -}}
