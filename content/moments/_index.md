@@ -1,6 +1,6 @@
 ---
 title: Moments
-description: "The stream of small moments"
+description: "A kaleidoscope of moments"
 ShowReadingTime: false
 ShowShareButtons: false
 comments: true
