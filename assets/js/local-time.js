@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+function initLocalTime() {
     const timeElements = document.querySelectorAll(".post-meta time, .moment-meta time");
 
     timeElements.forEach(function(timeElement) {
@@ -16,4 +16,10 @@ document.addEventListener("DOMContentLoaded", function() {
             timeElement.textContent = localDateString;
         }
     });
-});
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initLocalTime);
+} else {
+    initLocalTime();
+}
