@@ -1,5 +1,5 @@
 function initLocalTime() {
-    const timeElements = document.querySelectorAll(".post-meta time, .moment-meta time");
+    const timeElements = document.querySelectorAll(".post-meta time, .moment-meta time, .archive-meta time");
 
     timeElements.forEach(function(timeElement) {
         const datetime = timeElement.getAttribute("datetime");
