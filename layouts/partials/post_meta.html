@@ -1,14 +1,14 @@
 {{- $scratch := newScratch }}
 
 {{- if not .Date.IsZero -}}
-{{- $scratch.Add "meta" (slice (printf "<span title='%s'>%s</span>" (.Date) (.Date | time.Format (default "January 2, 2006" site.Params.DateFormat)))) }}
+{{- $scratch.Add "meta" (slice (printf "<time datetime='%s'>%s</time>" (.Date.Format "2006-01-02T15:04:05Z07:00") (.Date | time.Format (default "January 2, 2006" site.Params.DateFormat)))) }}
 {{- end }}
 
 {{- if .GitInfo -}}
 {{- $gitDate := .GitInfo.AuthorDate.UTC -}}
 {{- $pubDate := .Date.UTC -}}
 {{- if ne ($gitDate.Format "2006-01-02") ($pubDate.Format "2006-01-02") -}}
-{{- $scratch.Add "meta" (slice (printf "<span title='Last modified: %s'>Updated: %s</span>" (.GitInfo.AuthorDate) (.GitInfo.AuthorDate | time.Format (default "January 2, 2006" site.Params.DateFormat)))) }}
+{{- $scratch.Add "meta" (slice (printf "<span title='Last modified: %s'>Updated: <time datetime='%s'>%s</time></span>" (.GitInfo.AuthorDate) (.GitInfo.AuthorDate.Format "2006-01-02T15:04:05Z07:00") (.GitInfo.AuthorDate | time.Format (default "January 2, 2006" site.Params.DateFormat)))) }}
 {{- end }}
 {{- end }}
 
