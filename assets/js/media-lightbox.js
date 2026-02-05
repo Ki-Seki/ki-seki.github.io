@@ -19,6 +19,4 @@
     initLightbox();
   }
 
-  document.addEventListener("turbo:load", initLightbox);
-  document.addEventListener("astro:after-swap", initLightbox);
 })();
