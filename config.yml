@@ -1,6 +1,7 @@
 baseURL: https://ki-seki.github.io/
 title: The Kiseki Log
 languageCode: en
+hasCJKLanguage: true
 copyright: "© 2023-2026 Shichao Song [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
 theme: PaperMod
 
