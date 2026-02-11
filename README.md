@@ -9,7 +9,7 @@ Also feel free to open **issues** or **pull requests** for suggestions and impro
 To serve the site locally:
 
 1. **Install [Hugo](https://gohugo.io/getting-started/installing/)** (extended version recommended).
-   
+
    To verify that you have the extended version installed, run:
 
    ```bash
