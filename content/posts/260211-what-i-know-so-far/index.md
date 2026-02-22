@@ -1,7 +1,13 @@
 ---
 title: "我目前知道的"
 date: 2026-02-11T17:34:19+08:00
-tags: ["AI", "life"]
+summary: '关于 AI 和人的一个简单技术人文讨论'
+cover:
+    image: "human_and_ai.png"
+    caption: "快速的 AI 时代和温暖的人心（[Google Gemini](https://gemini.google.com/) 生成）"
+tags:
+  - AI
+  - life
 ---
 
 好像每天有无数的新模型，<br>
@@ -14,7 +20,7 @@ AI时代产生大量生产力，<br>
 我们大概率也解决不了生产力过剩的问题。
 
 凯恩斯的预言，<br>
-显然是错了。<br>
+显然是错了[^1]。<br>
 历史也依然在重复：<br>
 信息过载的时候我们要打信息差；<br>
 生产力过剩的时候我们要 AI +<br>
@@ -25,7 +31,7 @@ AI 没能解放普罗大众，<br>
 不过，新旧势力永远在变更。<br>
 对于情绪的表达者，<br>
 对于拥有生命力的人，<br>
-对于 N 人（intuitive）和 F 人（feeling），<br>
+对于 N 人（intuitive）和 F 人（feeling）‌[^2]，<br>
 这是最好的时代。<br>
 因为 AI 让人的情绪绽放得更灿烂、更自由。<br>
 任何一个普通人都更有机会接触到全部人类文明所有的知识结晶。<br>
@@ -35,10 +41,10 @@ AI 没能解放普罗大众，<br>
 
 对于未来的趋势，<br>
 辩证哲学中的观点清晰地展现在眼前。<br>
-"新事物符合历史发展方向，<br>
+“新事物符合历史发展方向，<br>
 拥有旧事物不可比拟的优越性。<br>
 新事物在初期不完善、力量弱，<br>
-必然会遭到旧势力的反抗和挫折。"
+必然会遭到旧势力的反抗和挫折。”
 
 ---
 
@@ -83,9 +89,9 @@ Human-native 的地方，<br>
 在所有的纷争中，<br>
 有一个不容置疑的技能凸显出来：<br>
 用来判断和评价的理解力。<br>
-AI 发展要面对的下半场挑战，<br>
+AI 发展要面对的下半场挑战[^3]，<br>
 也发生在人身上。<br>
-无论是对情绪的理解力，<br>
+无论是对情绪[^4]的理解力，<br>
 还是对内容的理解力。<br>
 我们需要理解关于人的情绪、人性、需求...<br>
 我们需要理解AI生成内容，<br>
@@ -101,3 +107,17 @@ Pause -> Perceive -> Pivot -> Proceed<br>
 暂停了才有可能打破第四面墙，<br>
 然后去洞悉关系中缺少的悸动，<br>
 或者是AI生成的图片中多余的表达。
+
+## Citation
+
+{{< bibtex >}}
+
+## References
+
+[^1]: “凯恩斯的预言错在哪里_思想理论_人民论坛网.” Rmlt.com.cn, 2017, theory.rmlt.com.cn/2012/0712/41371.shtml. Accessed 22 Feb. 2026.
+
+[^2]: 16 Personalities. “INFP Personality (“the Mediator”).” 16Personalities, NERIS Analytics Limited, 2025, www.16personalities.com/infp-personality.
+
+[^3]: Yao, Shunyu. “The Second Half.” Github.io, 2019, ysymyth.github.io/The-Second-Half/. Accessed 22 Feb. 2026.
+
+[^4]: Bouchard, Yarrow. “Highlights from Ilya Sutskever’s November 2025 Interview with Dwarkesh Patel.” *Effective Altruism Forum*, 26 Nov. 2025, https://forum.effectivealtruism.org/posts/iuKa2iPg7vD9BdZna/highlights-from-ilya-sutskever-s-november-2025-interview.
