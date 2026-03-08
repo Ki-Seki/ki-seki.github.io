@@ -1,5 +1,5 @@
 ---
-title: "A fabulous podcast episode: "I Didn’t Want to Have Kids. My Husband Did. Could Our Marriage Survive?""
+title: "A fabulous podcast episode: I Didn’t Want to Have Kids. My Husband Did. Could Our Marriage Survive?"
 date: 2026-03-08T12:06:44+00:00
 draft: false
 location: "Beijing"
@@ -10,6 +10,6 @@ mood: "Touching"
 
 I couldn’t help but reflect that robots will never be capable of crafting such intricate, complex, authentic, and emotionally resonant stories and conversations. This is what makes humanity truly unique—and it brings me deep comfort.
 
-Helena de Groot’s stories are truly extraordinary.
+[Helena de Groot](https://www.helenadegroot.me/)’s stories are truly extraordinary.
 
 There’s one thing I should always keep in mind: love is fleeting and ever-changing; to hold onto it, one must be willing to take risks.
