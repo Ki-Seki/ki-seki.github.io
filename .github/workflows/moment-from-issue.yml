@@ -54,11 +54,14 @@ jobs:
             // Generate dirname from date and title
             const now = new Date();
             const dateStr = now.toISOString().slice(2, 10).replace(/-/g, '');
-            const titleSlug = title.toLowerCase()
+            let titleSlug = title.toLowerCase()
               .replace(/[^\w\s-]/g, '')
               .replace(/\s+/g, '-')
               .replace(/--+/g, '-')
               .trim();
+            if (titleSlug.length > 50) {
+              titleSlug = titleSlug.slice(0, 50).replace(/-+$/, '');
+            }
             const dirname = `${dateStr}-${titleSlug}`;
 
             // Format date for frontmatter (ISO 8601 with timezone)
