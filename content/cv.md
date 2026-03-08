@@ -125,7 +125,7 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     [Dataset Creation](https://github.com/IAAR-Shanghai/UHGEval-dataset) /
     [WeChat Article](https://mp.weixin.qq.com/s/Go-JexPRbCDWzJHMM9SlyA)
 
-### <font color="lightgray">H3</font> Context Engineering
+### <font color="lightgray">H3</font> Others
 
 - **MemOS: A Memory OS for AI System**
 
@@ -138,26 +138,10 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     *arXiv*, Jul 2025.
 
     [Website](https://memos.openmem.net/) /
-    [arXiv](https://arxiv.org/abs/2507.03724) /
+    [arXiv](https://arxiv.org/abs/2507.03724v3) /
     [GitHub](https://github.com/MemTensor/MemOS) /
     [X Thread](https://x.com/omarsar0/status/1928116365640225222) /
     [WeChat Article](https://mp.weixin.qq.com/s/J6UE9h8iJOh044Umq-Ok1g)
-
-- **Grimoire is All You Need for Enhancing Large Language Models**
-
-    Ding Chen<sup>&ast;</sup>,
-    **Shichao Song<sup>&ast;</sup>**,
-    Qingchen Yu,
-    Zhiyu Li<sup>†</sup>,
-    et al.
-
-    *arXiv*, Jan 2024.
-
-    [arXiv](https://arxiv.org/abs/2401.03385) /
-    [GitHub](https://github.com/IAAR-Shanghai/Grimoire) /
-    [WeChat Article](https://mp.weixin.qq.com/s/uz-BVUm6KCZ0r02K6wd8Sw)
-
-### <font color="lightgray">H3</font> Mechanism Understanding
 
 - **Internal Consistency and Self-Feedback in Large Language Models: A Survey**
 
@@ -174,6 +158,20 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     [Hugging Face](https://huggingface.co/papers/2407.14507) /
     [X Thread](https://x.com/Ki_Seki_here/status/1836020241538908529) /
     [WeChat Article](https://mp.weixin.qq.com/s/fSc0Szi-zO6YVwp2oV8Uhg)
+
+- **Grimoire is All You Need for Enhancing Large Language Models**
+
+    Ding Chen<sup>&ast;</sup>,
+    **Shichao Song<sup>&ast;</sup>**,
+    Qingchen Yu,
+    Zhiyu Li<sup>†</sup>,
+    et al.
+
+    *arXiv*, Jan 2024.
+
+    [arXiv](https://arxiv.org/abs/2401.03385) /
+    [GitHub](https://github.com/IAAR-Shanghai/Grimoire) /
+    [WeChat Article](https://mp.weixin.qq.com/s/uz-BVUm6KCZ0r02K6wd8Sw)
 
 ------
 
