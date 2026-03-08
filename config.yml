@@ -56,11 +56,19 @@ languages:
           url: cv/
           weight: 20
 
+outputFormats:
+  llms:
+    mediaType: "text/plain"
+    baseName: "llms"
+    isPlainText: true
+    notAlternative: true
+
 outputs:
   home:
     - HTML
     - RSS
     - JSON
+    - llms
 
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
