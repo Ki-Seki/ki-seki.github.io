@@ -1,5 +1,5 @@
 ---
-title: Shichao Song (宋世超)
+title: Shichao Song
 showtoc: false
 tocopen: false
 hidemeta: true
@@ -23,7 +23,7 @@ math: true
 
     Supervised by Prof. **Xun Liang**
 
-    2023.09 - Present
+    Sep 2023 - Jun 2028
 
 - **Henan University of Economics and Law**
 
@@ -33,7 +33,7 @@ math: true
 
     GPA: 4.05/5.0, Top 2%
 
-    2019.09 - 2023.06
+    Sep 2019 - Jun 2023
 
 ## <font color="lightgray">H2</font> Work Experience
 
@@ -43,7 +43,7 @@ math: true
 
     Collaborated with Director, **Qing Shao**
 
-    2025.07 - Present
+    Jul 2025 - Present
 
 - **Institute for Advanced Algorithms Research, Shanghai**
 
@@ -51,29 +51,28 @@ math: true
 
     Collaborated with Dr. **Zhiyu Li** and Dr. **Zehao Lin**
 
-    2023.09 - 2025.06
+    Sep 2023 - Jun 2025
 
 ## <font color="lightgray">H2</font> Selected Researches
 
 Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAAAAJ) for complete list of publications.
 
-### <font color="lightgray">H3</font> LLM Evaluation
+### <font color="lightgray">H3</font> Structured Generation
 
-- **xFinder: Robust and Pinpoint Answer Extraction for Large Language Models**
+- **Guided Infilling Modeling: Mining Knowledge from LLMs as Probabilistic Databases**
 
-    Qingchen Yu<sup>&ast;</sup>,
-    Zifan Zheng<sup>&ast;</sup>,
     **Shichao Song<sup>&ast;</sup>**,
-    Zhiyu Li<sup>†</sup>,
+    Qingchen Yu,
+    Huayi Lai,
+    Mengwei Wang,
     et al.
 
-    *ICLR*, 2025.04.
+    *TBD*, xxx xxxx.
 
-    [ICLR](https://iclr.cc/virtual/2025/poster/30821) /
-    [arXiv](https://arxiv.org/abs/2405.11874) /
-    [GitHub](https://github.com/IAAR-Shanghai/xFinder) /
-    [Hugging Face](https://huggingface.co/collections/IAAR-Shanghai/xfinder-664b7b21e94e9a93f25a8412) /
-    [WeChat Article](https://mp.weixin.qq.com/s/C5G-rpen9OM4MmBhrByTIQ)
+    [GitHub](https://github.com/SculptAI) /
+    [Hugging Face](https://huggingface.co/collections/Sculpt-AI/gim-models)
+
+### <font color="lightgray">H3</font> LLM Evaluation
 
 - **TurtleBench: Evaluating Top Language Models via Real-World Yes/No Puzzles**
 
@@ -83,13 +82,30 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     Yunfeng Shi,
     et al.
 
-    *arXiv*, 2024.10.
+    *ICASSP*, May 2026.
 
+    [IEEE](https://cmsworkshops.com/ICASSP2026/papers/accepted_papers.php#:~:text=PERSONALIZED%20FEDERATED%20LEARNING-,3787,-TurtleBench%3A%20Evaluating%20Top) /
     [arXiv](https://arxiv.org/abs/2410.05262) /
     [GitHub](https://github.com/mazzzystar/TurtleBench) /
     [TurtleBench1.5k](https://huggingface.co/datasets/Duguce/TurtleBench1.5k) /
     [Online Game](https://tanghenre.com/) /
     [Blog Post](https://mazzzystar.github.io/2024/08/09/turtle-benchmark-zh/)
+
+- **xFinder: Robust and Pinpoint Answer Extraction for Large Language Models**
+
+    Qingchen Yu<sup>&ast;</sup>,
+    Zifan Zheng<sup>&ast;</sup>,
+    **Shichao Song<sup>&ast;</sup>**,
+    Zhiyu Li<sup>†</sup>,
+    et al.
+
+    *ICLR*, Apr 2025.
+
+    [ICLR](https://iclr.cc/virtual/2025/poster/30821) /
+    [arXiv](https://arxiv.org/abs/2405.11874) /
+    [GitHub](https://github.com/IAAR-Shanghai/xFinder) /
+    [Hugging Face](https://huggingface.co/collections/IAAR-Shanghai/xfinder-664b7b21e94e9a93f25a8412) /
+    [WeChat Article](https://mp.weixin.qq.com/s/C5G-rpen9OM4MmBhrByTIQ)
 
 - **UHGEval: Benchmarking the Hallucination of Chinese Large Language Models via Unconstrained Generation**
 
@@ -99,7 +115,7 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     Zhiyu Li<sup>†</sup>,
     et al.
 
-    *ACL*, 2024.08.
+    *ACL*, Aug 2024.
 
     [ACL Anthology](https://aclanthology.org/2024.acl-long.288/) /
     [arXiv](https://arxiv.org/abs/2311.15296) /
@@ -119,7 +135,7 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     Hanyu Wang,
     et al.
 
-    *arXiv*, 2025.07.
+    *arXiv*, Jul 2025.
 
     [Website](https://memos.openmem.net/) /
     [arXiv](https://arxiv.org/abs/2507.03724) /
@@ -135,7 +151,7 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     Zhiyu Li<sup>†</sup>,
     et al.
 
-    *arXiv*, 2024.01.
+    *arXiv*, Jan 2024.
 
     [arXiv](https://arxiv.org/abs/2401.03385) /
     [GitHub](https://github.com/IAAR-Shanghai/Grimoire) /
@@ -151,7 +167,7 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     Hanyu Wang,
     et al.
 
-    *arXiv*, 2024.07.
+    *arXiv*, Jul 2024.
 
     [arXiv](https://arxiv.org/abs/2407.14507) /
     [GitHub](https://github.com/IAAR-Shanghai/ICSFSurvey) /
@@ -165,5 +181,5 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     <sup>&ast;</sup> Contributed Equally
     <sup>†</sup> Corresponding Author
     <br>
-    Last update: 2025.07 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content/cv.md'>Edit this page</a>
+    Last update: Mar 2026 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content/cv.md'>Edit this page</a>
 </footer>
