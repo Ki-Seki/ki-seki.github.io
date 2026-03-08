@@ -67,7 +67,7 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     Mengwei Wang,
     et al.
 
-    *TBD*, xxx xxxx.
+    *Under Review*.
 
     [GitHub](https://github.com/SculptAI) /
     [Hugging Face](https://huggingface.co/collections/Sculpt-AI/gim-models)
