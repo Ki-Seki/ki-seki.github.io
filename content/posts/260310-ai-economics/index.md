@@ -45,13 +45,13 @@ When faced with the prospect of AI-driven mass unemployment, economists usually 
 
 The Jevons Paradox [^jevons] states that as a technology increases the efficiency with which a resource is used, the demand for that resource actually *increases*. Traditional economists argue that if AI makes coding or writing 100 times faster and cheaper, we will simply demand 100 times more software and content, creating more jobs for human "editors."
 
-But this ignores the fundamental bottleneck of the internet age: **Attention**. 
+But this ignores the fundamental bottleneck of the internet age: **Attention**.
 
 As Herbert Simon famously noted, a wealth of information creates a poverty of attention [^Simon]. Human beings have biological limits; we only have 24 hours in a day. We already have far more supply of content, software, and digital products than we have demand. When AI drives the marginal cost of creating digital goods to zero, supply explodes infinitely, but human attention remains capped. Therefore, the Jevons Paradox breaks. The economy shifts entirely from *production* to the *curation and capture* of limited human attention.
 
 ### 2. The Compute Cost Floor (The Illusion of Open-Source Equality)
 
-Optimists point to open-weight models as the great equalizers. Stratification, they argue, is mitigated because anyone can download a powerful model. 
+Optimists point to open-weight models as the great equalizers. Stratification, they argue, is mitigated because anyone can download a powerful model.
 
 While open weights are incredibly helpful, they only level the playing field to a small extent. The fatal flaw in this optimism is the difference between *knowledge* and *execution*. Deploying a cutting-edge open-weight model—or even using a hosted one at scale—requires massive amounts of money. The physical realities of GPUs, data centers, cooling, and electricity cannot be open-sourced. We are drifting toward a dystopia where the intellectual architecture is democratized, but the hardware required to run it is violently monopolized by the elite.
 
@@ -59,7 +59,7 @@ While open weights are incredibly helpful, they only level the playing field to 
 
 The most common economic defense against the "end of jobs" is Comparative Advantage. This theory suggests that even if an Artificial Superintelligence (ASI) is better at *everything* (Absolute Advantage), it will focus its compute on high-value tasks (curing cancer, physics) and leave lower-value tasks (flipping burgers, basic data entry) to humans because human labor will be relatively cheaper.
 
-This assumes the ASI is just a worker. But an ASI is an inventor. An ASI can design, code, and deploy millions of hyper-efficient, narrow sub-agents or cheap physical droids at near-zero marginal cost. 
+This assumes the ASI is just a worker. But an ASI is an inventor. An ASI can design, code, and deploy millions of hyper-efficient, narrow sub-agents or cheap physical droids at near-zero marginal cost.
 
 If an ASI can build a specialized tool to do a simple job for fractions of a penny, the cost of artificial labor drops below the human biological requirement for food and shelter. Comparative advantage fails because humans become too expensive simply by virtue of needing to eat.
 
@@ -99,21 +99,21 @@ Since all work can be done by AI, this era forces the **Great Decoupling**: surv
 
 ### Phase 4: The Human Premium Era (~40 to 60 Years)
 
-If society survives the "Rumbling" via massive government intervention, all basic human needs—food, housing, healthcare, basic goods—will be managed flawlessly and cheaply by ASI. 
+If society survives the "Rumbling" via massive government intervention, all basic human needs—food, housing, healthcare, basic goods—will be managed flawlessly and cheaply by ASI.
 
 In this phase, the economy transforms entirely. We will prove the "Lump of Labor Fallacy" right, but only because human desire is infinite. The only functioning markets left will be based entirely on the **Human Premium**. People will pay for a handmade wooden chair, a live theatrical performance, a human therapist, or a human-written blog post—not because the AI couldn't do it faster or better, but purely for the authenticity, the friction, and the connection of another human being. No one can stand a world that's completely rigid and unyielding. **We will live entirely within an experience economy.**
 
 ### Phase 5: Post-Scarcity & Techno-Humanism (60+ Years and Beyond)
 
-Eventually, we solve the energy bottleneck (likely via commercial fusion). Energy and compute become functionally infinite. 
+Eventually, we solve the energy bottleneck (likely via commercial fusion). Energy and compute become functionally infinite.
 
 The concept of an "economy" as a system for allocating scarce resources ceases to exist. We enter a Post-Scarcity civilization. **The "end of the story of humans" as laborers transitions into the beginning of humans as pure explorers, philosophers, and creators.**
 
 ## Conclusion
 
-Everything is fleeting. The jobs we hold, the skills we spend decades refining, the economic models we blindly trust—they are all temporary structures built on the shifting sands of technological capability. 
+Everything is fleeting. The jobs we hold, the skills we spend decades refining, the economic models we blindly trust—they are all temporary structures built on the shifting sands of technological capability.
 
-The "Rumbling" of the labor market is coming, and it will challenge the very foundation of human purpose. But recognizing the storm is the first step in surviving it. Before that day comes, the earth still belongs to humans. The transition through these phases relies entirely on our management ability, our political will, and how we choose to distribute the foundational compute. 
+The "Rumbling" of the labor market is coming, and it will challenge the very foundation of human purpose. But recognizing the storm is the first step in surviving it. Before that day comes, the earth still belongs to humans. The transition through these phases relies entirely on our management ability, our political will, and how we choose to distribute the foundational compute.
 
 We are moving toward an era where we must strip away the necessity of labor to find out what human beings actually want to be. It will be terrifying, it will be chaotic, but if we navigate the decoupling successfully, we may well be living in the ultimate experience economy.
 
