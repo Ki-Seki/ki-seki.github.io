@@ -1,9 +1,24 @@
 ---
 date: "2026-03-10T01:45:21-07:00"
 title: "Everything is Fleeting: A Roadmap to the Post-Labor AI Economy"
-tags: ["blog", "economics", "AI", "future"]
+tags: ["economics", "AI", "future"]
 math: false
 ---
+
+> **TL;DR**
+> * LLMs push the boundaries, and the AI tools take the jobs away.
+> * In the future, whether short or long, no one will have a traditional job.
+> * Human attention is capped.
+> * For now, management ability and capital are the ultimate keys to enjoying the benefits of AI.
+> * Skill depreciation will be a major issue in the short term.
+> * The Matthew Effect of AI-driven wealth concentration will accelerate violently.
+> * The middle class begins a rapid and painful erosion.
+> * The "Rumbling" of the labor market is coming, and it will challenge the very foundation of human purpose.
+> * Survival must be permanently decoupled from labor.
+> * We might even expect compute allowance to become a new form of circulating currency.
+> * Labor will no longer be a virtue.
+> * We will live entirely within an experience economy.
+> * The "end of the story of humans" as laborers transitions into the beginning of humans as pure explorers, philosophers, and creators.
 
 ## Introduction
 
@@ -28,7 +43,7 @@ When faced with the prospect of AI-driven mass unemployment, economists usually 
 
 ### 1. The Fallacy of the Jevons Paradox in an Attention Economy
 
-The Jevons Paradox states that as a technology increases the efficiency with which a resource is used, the demand for that resource actually *increases*. Traditional economists argue that if AI makes coding or writing 100 times faster and cheaper, we will simply demand 100 times more software and content, creating more jobs for human "editors."
+The Jevons Paradox [^jevons] states that as a technology increases the efficiency with which a resource is used, the demand for that resource actually *increases*. Traditional economists argue that if AI makes coding or writing 100 times faster and cheaper, we will simply demand 100 times more software and content, creating more jobs for human "editors."
 
 But this ignores the fundamental bottleneck of the internet age: **Attention**. 
 
@@ -70,7 +85,7 @@ In this phase, the winners are the "orchestrators." These are the managers who p
 
 This phase begins when AI models achieve reliable, long-term agency. They will be able to browse the web, execute code, manage budgets, and interact with other autonomous AIs.
 
-Companies will realize they no longer need a marketing department; they need a single "Marketing Agent." Here, the Matthew Effect accelerates violently. The elites who own the massive compute clusters will reap almost all global profits. The "Compute Divide" replaces the digital divide as the primary mechanism of class stratification. If you do not have the capital to afford massive inference compute, you simply cannot compete. The middle class begins a rapid and painful erosion.
+Companies will realize they no longer need a marketing department; they need a single "Marketing Agent." Here, the Matthew Effect accelerates violently. The elites who own the massive compute clusters will reap almost all global profits. The "Compute Divide" replaces the digital divide as the primary mechanism of class stratification. If you do not have the capital to afford massive inference compute, you simply cannot compete. **The middle class begins a rapid and painful erosion.**
 
 ### Phase 3: "The Rumbling" — The Labor Crisis & Decoupling (~30 to 40 Years)
 
@@ -118,3 +133,4 @@ So, you should think further.
 [^Simon]: Simon, Herbert A. "Designing Organizations for an Information-Rich World." *Computers, Communications, and the Public Interest*, edited by Martin Greenberger, The Johns Hopkins Press, 1971, pp. 37-52.
 [^Altman]: Altman, Sam. "Moore's Law for Everything." *Sam Altman's Blog*, 16 Mar. 2021, https://moores.samaltman.com/.
 [^ubc]: Varanasi, Lakshmi, and Kenneth Niemeyer. “OpenAI’s Sam Altman Has a New Idea for a Universal Basic Income.” Business Insider, 12 May 2024, www.businessinsider.com/openai-sam-altman-universal-basic-income-idea-compute-gpt-7-2024-5. Accessed 12 Mar. 2026.
+[^jevons]: Wikipedia contributors. "Jevons paradox." Wikipedia, The Free Encyclopedia. Wikipedia, The Free Encyclopedia, 12 Feb. 2026. Web. 12 Mar. 2026.
