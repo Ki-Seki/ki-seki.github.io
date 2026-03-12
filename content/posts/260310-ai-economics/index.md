@@ -1,7 +1,7 @@
 ---
 date: "2026-03-10T01:45:21-07:00"
 title: "Everything is Fleeting: A Roadmap to the Post-Labor AI Economy"
-tags: ["economics", "AI", "future"]
+tags: ["AI", "economics", "future"]
 math: false
 ---
 
