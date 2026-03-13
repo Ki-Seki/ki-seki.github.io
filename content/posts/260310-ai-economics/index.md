@@ -134,6 +134,10 @@ We are moving toward an era where we must strip away the necessity of labor to f
 
 So, you should think further.
 
+## Acknowledgments
+
+Thanks to Qingchen Yu and Huayi Lai for their feedback and suggestions on this post.
+
 ## Citation
 
 {{< bibtex >}}
