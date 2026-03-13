@@ -1,6 +1,10 @@
 ---
 date: "2026-03-10T01:45:21-07:00"
 title: "Everything is Fleeting: A Roadmap to the Post-Labor AI Economy"
+summary: 'A speculative roadmap of how AI will dismantle the labor market and what comes after.'
+cover:
+    image: "decouple.png"
+    caption: "The Great Decoupling (by [Google Gemini](https://gemini.google.com/))"
 tags: ["AI", "economics", "future"]
 math: false
 ---
