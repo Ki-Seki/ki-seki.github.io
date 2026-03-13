@@ -53,7 +53,7 @@ It is crucial to note that this entire roadmap relies on strict "Ceteris Paribus
 
 **AI as Pure Utility (Anthropocentric Focus [^Anthropocentrism]):** We assume that the economic and societal focus remains strictly on humanity. We do not attribute moral weight, consciousness, or the capacity for "fun" to AI agents. How agents interact among themselves is only relevant insofar as it serves human ends. If society begins granting AI civil rights or prioritizing artificial "well-being," the economic framework fractures into an ethical dilemma that falls outside the scope of this roadmap.
 
-Operating strictly within these three constraints, we can more accurately project the future of labor. But to do so, we must first tear down the outdated economic theories we currently use to comfort ourselves.
+Operating strictly within these four constraints, we can more accurately project the future of labor. But to do so, we must first tear down the outdated economic theories we currently use to comfort ourselves.
 
 ## Dismantling Classical Economic Defenses
 
