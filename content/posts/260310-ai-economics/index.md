@@ -10,6 +10,7 @@ math: false
 ---
 
 > **TL;DR**
+>
 > * LLMs push the boundaries, and the AI tools take the jobs away.
 > * In the future, whether short or long, no one will have a traditional job.
 > * Human attention is capped.
