@@ -1,6 +1,7 @@
 {{- /* Translate button — styled to match PaperMod's go-to-top button */ -}}
-<div id="translate-widget">
-  <button id="translate-btn" aria-haspopup="true" aria-expanded="false" title="Translate this page">
+<div id="translate-widget" hidden>
+  <button id="translate-btn" aria-label="Translate this page" aria-haspopup="listbox"
+    aria-expanded="false" aria-controls="translate-menu" title="Translate this page">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="10"/>
@@ -8,17 +9,18 @@
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
     </svg>
   </button>
-  <div id="translate-menu" role="menu" aria-label="Select language" hidden>
-    <a role="menuitem" data-lang="zh-CN">中文 (Chinese)</a>
-    <a role="menuitem" data-lang="ja">日本語 (Japanese)</a>
-    <a role="menuitem" data-lang="ko">한국어 (Korean)</a>
-    <a role="menuitem" data-lang="fr">Français (French)</a>
-    <a role="menuitem" data-lang="de">Deutsch (German)</a>
-    <a role="menuitem" data-lang="es">Español (Spanish)</a>
-    <a role="menuitem" data-lang="pt">Português (Portuguese)</a>
-    <a role="menuitem" data-lang="ru">Русский (Russian)</a>
-    <a role="menuitem" data-lang="ar">العربية (Arabic)</a>
-  </div>
+  <ul id="translate-menu" role="listbox" aria-label="Select language" hidden>
+    <li><a data-lang="en">English</a></li>
+    <li><a data-lang="zh-CN">中文 (Chinese)</a></li>
+    <li><a data-lang="ja">日本語 (Japanese)</a></li>
+    <li><a data-lang="ko">한국어 (Korean)</a></li>
+    <li><a data-lang="fr">Français (French)</a></li>
+    <li><a data-lang="de">Deutsch (German)</a></li>
+    <li><a data-lang="es">Español (Spanish)</a></li>
+    <li><a data-lang="pt">Português (Portuguese)</a></li>
+    <li><a data-lang="ru">Русский (Russian)</a></li>
+    <li><a data-lang="ar">العربية (Arabic)</a></li>
+  </ul>
 </div>
 
 <style>
@@ -47,10 +49,14 @@
     transition: color 0.5s;
   }
 
-  #translate-btn:hover,
-  #translate-btn:focus {
+  #translate-btn:hover {
     color: var(--primary);
-    outline: 0;
+  }
+
+  #translate-btn:focus-visible {
+    color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary);
+    outline: none;
   }
 
   #translate-btn svg {
@@ -61,6 +67,8 @@
     position: absolute;
     bottom: calc(100% + 0.5rem);
     right: 0;
+    list-style: none;
+    margin: 0;
     background: var(--theme);
     border: 1px solid var(--border);
     border-radius: var(--radius, 8px);
@@ -79,11 +87,16 @@
     transition: color 0.15s ease, background-color 0.15s ease;
   }
 
-  #translate-menu a:hover,
-  #translate-menu a:focus {
+  #translate-menu a:hover {
     color: var(--primary);
     background-color: var(--code-bg);
-    outline: none;
+  }
+
+  #translate-menu a:focus-visible {
+    color: var(--primary);
+    background-color: var(--code-bg);
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
   }
 
   /* Match .list .top-link responsive offset from PaperMod */
@@ -96,23 +109,28 @@
 
 <script>
   (function () {
+    var widget = document.getElementById('translate-widget');
     var btn = document.getElementById('translate-btn');
     var menu = document.getElementById('translate-menu');
 
-    // Build hrefs once on load; verify protocol to guard against unexpected
-    // URL schemes (e.g. javascript:) being passed to the translate URL.
+    // Only show widget when the page URL is http(s) — hides the button on
+    // local file:// previews where translate links can't be built.
     var pageURL = /^https?:\/\//.test(window.location.href)
       ? window.location.href
       : '';
-    if (pageURL) {
-      menu.querySelectorAll('a[data-lang]').forEach(function (a) {
-        a.href = 'https://translate.google.com/translate?sl=auto&tl='
-          + encodeURIComponent(a.dataset.lang)
-          + '&u=' + encodeURIComponent(pageURL);
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-      });
-    }
+    if (!pageURL) { return; }
+
+    // Build hrefs once on load; verify protocol to guard against unexpected
+    // URL schemes (e.g. javascript:) being passed to the translate URL.
+    menu.querySelectorAll('a[data-lang]').forEach(function (a) {
+      a.href = 'https://translate.google.com/translate?sl=auto&tl='
+        + encodeURIComponent(a.dataset.lang)
+        + '&u=' + encodeURIComponent(pageURL);
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    });
+
+    widget.hidden = false;
 
     function openMenu() {
       menu.hidden = false;
