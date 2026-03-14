@@ -1,5 +1,5 @@
 ---
-date: "2026-03-10T01:45:21-07:00"
+date: '2026-03-14T23:52:14+08:00'
 title: "Everything is Fleeting: A Roadmap to the Post-Labor AI Economy"
 summary: 'A speculative roadmap of how AI will dismantle the labor market and what comes after.'
 cover:
