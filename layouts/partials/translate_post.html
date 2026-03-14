@@ -1,0 +1,36 @@
+{{- /* Inline translation section for post pages.
+     Uses Hugo's .Permalink so links are rendered server-side — no JavaScript required. */ -}}
+{{- $permalink := .Permalink }}
+{{- $langs := slice
+  (dict "code" "en"    "name" "English")
+  (dict "code" "zh-CN" "name" "中文")
+  (dict "code" "ja"    "name" "日本語")
+  (dict "code" "ko"    "name" "한국어")
+  (dict "code" "fr"    "name" "Français")
+  (dict "code" "de"    "name" "Deutsch")
+  (dict "code" "es"    "name" "Español")
+  (dict "code" "pt"    "name" "Português")
+  (dict "code" "ru"    "name" "Русский")
+  (dict "code" "ar"    "name" "العربية")
+-}}
+<div class="post-translate">
+  <span class="translate-label" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      width="14" height="14" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    Translate
+  </span>
+  <ul role="list" aria-label="Translate this post">
+    {{- range $langs }}
+    <li>
+      <a href="https://translate.google.com/translate?sl=auto&tl={{ .code }}&u={{ $permalink | urlquery }}"
+        target="_blank" rel="noopener noreferrer"
+        aria-label="{{ .name }} (opens in new tab)">{{ .name }}</a>
+    </li>
+    {{- end }}
+  </ul>
+</div>

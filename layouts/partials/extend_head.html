@@ -37,6 +37,11 @@
 <script defer src="{{ $localTimeJS.RelPermalink }}"></script>
 
 
+{{- if eq .Section "posts" -}}
+  {{- $translateCSS := resources.Get "css/extended/translate-post.css" | minify -}}
+  <link rel="stylesheet" href="{{ $translateCSS.RelPermalink }}">
+{{- end -}}
+
 {{ if eq .Section "moments" }}
   {{- $momentsJS := resources.Get "js/moments.js" | minify -}}
   <script defer src="{{ $momentsJS.RelPermalink }}"></script>

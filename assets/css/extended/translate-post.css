@@ -1,0 +1,54 @@
+/* Inline translation section displayed in the post footer on single post pages. */
+
+.post-translate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+}
+
+.translate-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--secondary);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.post-translate ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.post-translate ul a {
+    display: block;
+    padding: 0 10px;
+    color: var(--secondary);
+    font-size: 13px;
+    line-height: 28px;
+    border-radius: var(--radius);
+    background: var(--theme);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.post-translate ul a:hover {
+    color: var(--primary);
+    background: var(--border);
+}
+
+.post-translate ul a:focus-visible {
+    color: var(--primary);
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
