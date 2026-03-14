@@ -1,74 +1,132 @@
-{{- /* Google Translate widget for free site-wide translation */ -}}
-<div id="google-translate-wrapper">
-  <div id="google_translate_element"></div>
+{{- /* Translate button — opens the current page via Google Translate URL */ -}}
+<div id="translate-widget">
+  <button id="translate-btn" aria-haspopup="true" aria-expanded="false" title="Translate this page">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    <span>Translate</span>
+  </button>
+  <div id="translate-menu" role="menu" aria-label="Select language" hidden>
+    <a role="menuitem" data-lang="zh-CN">中文 (Chinese)</a>
+    <a role="menuitem" data-lang="ja">日本語 (Japanese)</a>
+    <a role="menuitem" data-lang="ko">한국어 (Korean)</a>
+    <a role="menuitem" data-lang="fr">Français (French)</a>
+    <a role="menuitem" data-lang="de">Deutsch (German)</a>
+    <a role="menuitem" data-lang="es">Español (Spanish)</a>
+    <a role="menuitem" data-lang="pt">Português (Portuguese)</a>
+    <a role="menuitem" data-lang="ru">Русский (Russian)</a>
+    <a role="menuitem" data-lang="ar">العربية (Arabic)</a>
+  </div>
 </div>
 
 <style>
-  #google-translate-wrapper {
+  #translate-widget {
     position: fixed;
     bottom: 1.5rem;
     right: 1.5rem;
     z-index: 9999;
   }
 
-  /* Hide the Google Translate top banner */
-  .goog-te-banner-frame,
-  #goog-gt-tt,
-  .goog-te-balloon-frame {
-    display: none !important;
+  #translate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--theme);
+    color: var(--secondary);
+    font-size: 0.78rem;
+    font-family: inherit;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  body {
-    top: 0 !important;
+  #translate-btn:hover,
+  #translate-btn:focus {
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    outline: none;
   }
 
-  /* Style the select dropdown */
-  .goog-te-gadget-simple {
-    background-color: var(--theme) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-    padding: 4px 8px !important;
-    font-size: 0.8rem !important;
-    cursor: pointer !important;
-    opacity: 0.85;
-    transition: opacity 0.2s ease;
+  #translate-menu {
+    position: absolute;
+    bottom: calc(100% + 0.5rem);
+    right: 0;
+    background: var(--theme);
+    border: 1px solid var(--border);
+    border-radius: var(--radius, 8px);
+    padding: 0.35rem 0;
+    min-width: 200px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
 
-  .goog-te-gadget-simple:hover {
-    opacity: 1;
+  #translate-menu a {
+    display: block;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    color: var(--secondary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
 
-  .goog-te-gadget-simple .goog-te-menu-value span:first-child {
-    display: none;
-  }
-
-  .goog-te-gadget-simple img {
-    display: none !important;
-  }
-
-  .goog-te-gadget-simple .goog-te-menu-value {
-    color: var(--primary) !important;
-  }
-
-  .goog-te-gadget-simple .goog-te-menu-value span {
-    color: var(--primary) !important;
-    border: none !important;
+  #translate-menu a:hover,
+  #translate-menu a:focus {
+    color: var(--primary);
+    background-color: var(--code-bg);
+    outline: none;
   }
 </style>
 
-<script type="text/javascript">
-  function googleTranslateElementInit() {
-    new google.translate.TranslateElement(
-      {
-        pageLanguage: 'en',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-        autoDisplay: false,
-      },
-      'google_translate_element'
-    );
-  }
-</script>
-<script type="text/javascript"
-  src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-  defer>
+<script>
+  (function () {
+    var btn = document.getElementById('translate-btn');
+    var menu = document.getElementById('translate-menu');
+
+    // Build hrefs once on load; verify protocol to guard against unexpected
+    // URL schemes (e.g. javascript:) being passed to the translate URL.
+    var pageURL = /^https?:\/\//.test(window.location.href)
+      ? window.location.href
+      : '';
+    if (pageURL) {
+      menu.querySelectorAll('a[data-lang]').forEach(function (a) {
+        a.href = 'https://translate.google.com/translate?sl=auto&tl='
+          + encodeURIComponent(a.dataset.lang)
+          + '&u=' + encodeURIComponent(pageURL);
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+      });
+    }
+
+    function openMenu() {
+      menu.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeMenu() {
+      menu.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      menu.hidden ? openMenu() : closeMenu();
+    });
+
+    document.addEventListener('click', function () {
+      if (!menu.hidden) closeMenu();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !menu.hidden) closeMenu();
+    });
+  })();
 </script>
