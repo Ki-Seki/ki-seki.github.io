@@ -13,15 +13,15 @@ simplicity = "Single, easily digestible main idea with plenty of negative space.
   [styles.conceptual_abstract]
   name = "Conceptual & Abstract"
   use_cases = [
-    "Essays", 
-    "High-level thoughts", 
-    "Roadmaps", 
+    "Essays",
+    "High-level thoughts",
+    "Roadmaps",
     "Philosophical reflections on AI"
   ]
   visual_elements = [
-    "Surrealism", 
-    "Metaphorical imagery", 
-    "3D abstract shapes", 
+    "Surrealism",
+    "Metaphorical imagery",
+    "3D abstract shapes",
     "Soft gradients"
   ]
   composition = "Central focal point or clear directional flow."
@@ -36,17 +36,17 @@ composition, clean background, high conceptual art style, subtle 3D render feel.
   [styles.clean_technical]
   name = "Clean Technical"
   use_cases = [
-    "Algorithms", 
-    "Tutorials", 
-    "Deep dives into models", 
-    "Math", 
+    "Algorithms",
+    "Tutorials",
+    "Deep dives into models",
+    "Math",
     "Architecture"
   ]
   visual_elements = [
-    "Flowcharts", 
-    "Progressive sequences", 
-    "Clean vector lines", 
-    "Nodes", 
+    "Flowcharts",
+    "Progressive sequences",
+    "Clean vector lines",
+    "Nodes",
     "Simple iconography"
   ]
   composition = "Highly structured, usually reading left-to-right or branching out logically."
