@@ -30,14 +30,14 @@
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
+            background: #f1f1f1;
         }
         ::-webkit-scrollbar-thumb {
-            background: #888; 
+            background: #888;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #555; 
+            background: #555;
         }
     </style>
 </head>
@@ -172,23 +172,23 @@ You are Ouroboros, a self-editing HTML application.
 
             // Initialize Interact.js
             setupDraggable();
-            
+
             // Initial Token Estimate
             updateTokenEstimate();
-            
+
             // Watch for DOM changes to update token count
             // Debounce the observer to prevent rapid firing and potential loops
             let timeout;
             const observer = new MutationObserver((mutations) => {
                 // Check if mutations are only from the token counter itself to avoid loops
-                const isTokenUpdate = mutations.every(m => 
-                    m.target === els.tokenCount || 
-                    els.tokenCount.contains(m.target) || 
+                const isTokenUpdate = mutations.every(m =>
+                    m.target === els.tokenCount ||
+                    els.tokenCount.contains(m.target) ||
                     m.target === els.log // also ignore log updates to prevent loop during streaming
                 );
-                
+
                 if (isTokenUpdate) return;
-                
+
                 clearTimeout(timeout);
                 timeout = setTimeout(updateTokenEstimate, 500);
             });
@@ -260,13 +260,13 @@ You are Ouroboros, a self-editing HTML application.
 
             localStorage.setItem('ouroboros_api_key', key);
             localStorage.setItem('ouroboros_model_name', model);
-            
+
             if (base) {
                 localStorage.setItem('ouroboros_api_base', base);
             } else {
                 localStorage.removeItem('ouroboros_api_base');
             }
-            
+
             logMessage('system', 'API Configuration saved securely to localStorage.');
             alert('Settings Saved');
         }
@@ -277,10 +277,10 @@ You are Ouroboros, a self-editing HTML application.
             const timestamp = new Date().toLocaleTimeString();
             const color = actor === 'user' ? 'text-blue-600' : 'text-green-600';
             const label = actor === 'user' ? 'USER' : 'SYSTEM';
-            
+
             entry.innerHTML = `
-                <span class="text-xs text-gray-400">[${timestamp}]</span> 
-                <span class="font-bold ${color}">${label}:</span> 
+                <span class="text-xs text-gray-400">[${timestamp}]</span>
+                <span class="font-bold ${color}">${label}:</span>
                 <span>${text}</span>
             `;
             els.log.appendChild(entry);
@@ -293,9 +293,9 @@ You are Ouroboros, a self-editing HTML application.
             const charCount = htmlContent.length;
             const tokenCount = Math.ceil(charCount / 4);
             const percentage = Math.min((tokenCount / 128000) * 100, 100).toFixed(1);
-            
+
             els.tokenCount.textContent = `${tokenCount.toLocaleString()} / 128k (${percentage}%)`;
-            
+
             if (tokenCount > 96000) { // 75%
                 els.tokenCount.classList.add('text-red-600');
                 els.tokenCount.classList.remove('text-gray-500');
@@ -331,9 +331,9 @@ You are Ouroboros, a self-editing HTML application.
                 // 2. Prepare OpenAI Client
                 const clientConfig = {
                     apiKey: state.apiKey,
-                    dangerouslyAllowBrowser: true 
+                    dangerouslyAllowBrowser: true
                 };
-                
+
                 if (state.apiBase) {
                     clientConfig.baseURL = state.apiBase;
                 }
@@ -353,11 +353,11 @@ You are Ouroboros, a self-editing HTML application.
                 });
 
                 const content = completion.choices[0].message.content;
-                logMessage('system', 'Received response. Executing mutation...'); 
-                
+                logMessage('system', 'Received response. Executing mutation...');
+
                 // 5. Extract Code
                 const codeBlock = content.match(/```(?:javascript)?\s*([\s\S]*?)\s*```/);
-                
+
                 if (codeBlock && codeBlock[1]) {
                     const code = codeBlock[1];
                     executeMutation(code);
@@ -378,10 +378,10 @@ You are Ouroboros, a self-editing HTML application.
 
         function executeMutation(code) {
             try {
-                // Wrap in IIFE to avoid polluting global scope unintentionally, 
+                // Wrap in IIFE to avoid polluting global scope unintentionally,
                 // though we want it to affect DOM.
                 const script = document.createElement('script');
-                script.textContent = `(function() { 
+                script.textContent = `(function() {
                     try {
                         ${code}
                     } catch(e) {

@@ -9,13 +9,13 @@ math: false
 ---
 
 - **Version:** 1.0
-- **Demo Page:** [click here](/features/ouroboros/index.html) 
+- **Demo Page:** [click here](/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
 
 ## 1. Executive Summary
 
-Project Ouroboros is a standalone `.html` file that acts as a boundless, draggable workspace ("Infinite Canvas"). It contains an integrated LLM loop (via OpenAI) that reads the current state of the document's DOM as its context. 
+Project Ouroboros is a standalone `.html` file that acts as a boundless, draggable workspace ("Infinite Canvas"). It contains an integrated LLM loop (via OpenAI) that reads the current state of the document's DOM as its context.
 
 Instead of a conversational chat interface, Ouroboros operates on a state-transition model: The LLM takes the current state of the HTML file (State A) and generates executable JavaScript to mutate it into a new state (State B). This allows the application to create new tools, optimize existing code, or restructure its own interface on the fly.
 
@@ -23,7 +23,7 @@ Instead of a conversational chat interface, Ouroboros operates on a state-transi
 
 The fundamental engine of this application relies on a continuous feedback loop between the DOM and the LLM. Crucially, **everything in the HTML file is included in the LLM context.**
 
-1.  **Read State:** Upon a user query, the application captures its entire current state (the full DOM). 
+1.  **Read State:** Upon a user query, the application captures its entire current state (the full DOM).
     *   *KV Cache Optimization:* To maximize Key-Value (KV) Cache hits on the LLM side, all static content (libraries, core scripts, base CSS) remains at the top of the file structure. We do **not** strip out static CDN links; they are part of the context.
 2.  **Construct Payload:** The app combines the user's prompt with the current DOM snapshot.
     *   *System Prompt:* We do not use the API's "system prompt" feature. Instead, the System Prompt is hardcoded directly into the HTML file itself (e.g., as a hidden element or comment block), ensuring it is always part of the read context.
@@ -33,7 +33,7 @@ The fundamental engine of this application relies on a continuous feedback loop 
 
 ## 3. User Interface & Experience
 
-The UI follows a "Window Manager" paradigm on an **Infinite Canvas**. 
+The UI follows a "Window Manager" paradigm on an **Infinite Canvas**.
 
 *   **Infinite Canvas:** The base `<body>` acts as a boundless desktop environment.
 *   **Widgets (Windows):** Every functional element (terminal, tools, logs) is a self-contained "Widget".
@@ -55,7 +55,7 @@ Because this must be a *single file*, we rely heavily on modern browser APIs and
 * **Styling:** Tailwind CSS (via CDN script) for rapid, inline styling that the LLM can easily read and modify without needing a separate stylesheet.
 * **Interaction (Drag/Drop):** `interact.js` (via CDN) or lightweight custom vanilla JS to handle Widget dragging and resizing efficiently.
 * **LLM Integration:** **CDN-imported OpenAI ESM package** (e.g., via `esm.sh` or `skypack`). This avoids complex build steps while providing a cleaner API surface than raw `fetch()`.
-* **Execution Sandbox:** 
+* **Execution Sandbox:**
     * The LLM's response will be parsed for ```javascript ... ``` code blocks.
     * The code is injected into the DOM as a new `<script>` element to execute, then immediately removed to keep the DOM clean.
 
@@ -63,11 +63,11 @@ Because this must be a *single file*, we rely heavily on modern browser APIs and
 
 This architecture carries unique risks that must be acknowledged and managed.
 
-*   **Token Inflation (The "Bloat" Problem):** If the LLM generates messy DOM elements, the context will hit the token limit rapidly. 
+*   **Token Inflation (The "Bloat" Problem):** If the LLM generates messy DOM elements, the context will hit the token limit rapidly.
     *   *Mitigation:* The "Token Monitor" Widget will track usage.
     *   *Trigger:* When context usage exceeds **75%**, the LLM will be alerted to the high usage in its prompt.
     *   *Strategy:* While automatic pruning is an option, the preferred method is **User-Directed Pruning**. A button or command will allow the user to specify *what* to clean or refactor (e.g., "Summarize the logs", "Remove the unused test widget"), giving the user control over their context window.
-*   **Arbitrary Code Execution (XSS):** The application relies on executing AI-generated code. 
+*   **Arbitrary Code Execution (XSS):** The application relies on executing AI-generated code.
     *   *Mitigation:* Because this is a *local, single-user tool*, standard XSS is less of a threat (you are hacking yourself). However, the LLM must be strictly prompted not to execute malicious web requests.
 *   **Destructive Edits:** The LLM might accidentally delete the prompt box, rendering the app useless.
     *   *Mitigation:* The core app logic (the OpenAI wrapper and the Terminal Widget) will be wrapped in a specific `div` with an `id="ouroboros-core"`. The embedded system prompt will instruct the LLM to *never* delete or alter this specific node.
