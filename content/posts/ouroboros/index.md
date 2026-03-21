@@ -3,7 +3,7 @@ date: '2026-03-21T22:57:11+08:00'
 title: 'Product Requirements Document (PRD): Project "Ouroboros"'
 author:
   - Shichao Song
-summary: ''
+summary: 'An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.'
 tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"]
 math: false
 ---
