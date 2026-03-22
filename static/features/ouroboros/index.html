@@ -246,17 +246,17 @@ You are Ouroboros, a self-editing HTML application.
         function exportHtml() {
             // Get the full HTML
             const htmlContent = document.documentElement.outerHTML;
-            
+
             // Create a Blob containing the HTML with DOCTYPE
             const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], { type: 'text/html' });
-            
+
             // Create a temporary anchor element and trigger download
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'ouroboros_export_' + Date.now() + '.html';
             document.body.appendChild(a);
             a.click();
-            
+
             // Clean up
             document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
