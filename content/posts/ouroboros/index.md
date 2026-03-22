@@ -1,9 +1,9 @@
 ---
-date: '2026-03-21T22:57:11+08:00'
+date: '2026-03-22T22:57:11+08:00'
 title: 'Product Requirements Document of Project "Ouroboros"'
 author:
   - Shichao Song
-summary: 'An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.'
+summary: 'An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface, utilizing absolute context completeness.'
 cover:
     image: "process.png"
     caption: "The Ouroboros Process (by [Google Gemini](https://gemini.google.com/))"
@@ -11,102 +11,78 @@ tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"
 math: false
 ---
 
-- **Version:** 1.0
+- **Version:** 1.1
 - **Demo Page:** [View Demo](/features/ouroboros/)
 - **Product Type:** Single-File, Self-Modifying HTML Application
-- **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
+- **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface, utilizing absolute context completeness.
 
 ## 1. Executive Summary
 
-Project Ouroboros is a standalone `.html` file that acts as a boundless, draggable workspace ("Infinite Canvas"). It contains an integrated LLM loop (via OpenAI) that reads the current state of the document's DOM as its context.
+Project Ouroboros is a standalone `.html` file that acts as a boundless, draggable workspace ("Infinite Canvas"). It contains an integrated LLM loop (via OpenAI) that reads the *entire, unaltered* current state of the document's DOM as its context.
 
-Instead of a conversational chat interface, Ouroboros operates on a state-transition model: The LLM takes the current state of the HTML file (State A) and generates executable JavaScript to mutate it into a new state (State B). This allows the application to create new tools, optimize existing code, or restructure its own interface on the fly.
+Instead of a conversational chat interface, Ouroboros operates on a state-transition model: The LLM takes the current state of the HTML file (State A) and generates executable JavaScript to mutate it into a new state (State B). This allows the application to create new tools, optimize existing code, or restructure its own interface on the fly. 
 
 ## 2. Core Architecture & The "Context Loop"
 
-The fundamental engine of this application relies on a continuous feedback loop between the DOM and the LLM. Crucially, **everything in the HTML file is included in the LLM context.**
+The fundamental engine relies on a continuous feedback loop between the DOM and the LLM. Crucially, **the absolute full context is preserved**—every node, every log, and every script in the HTML file is included in the LLM's vision without artificial pruning.
 
-1. **Read State:** Upon a user query, the application captures its entire current state (the full DOM).
-    - *KV Cache Optimization:* To maximize Key-Value (KV) Cache hits on the LLM side, all static content (libraries, core scripts, base CSS) remains at the top of the file structure. We do **not** strip out static CDN links; they are part of the context.
-
-1. **Construct Payload:** The app combines the user's prompt with the current DOM snapshot.
-    - *System Prompt:* We do not use the API's "system prompt" feature. Instead, the System Prompt is hardcoded directly into the HTML file itself (e.g., as a hidden element or comment block), ensuring it is always part of the read context.
-
-1. **API Call:** The payload is sent to the OpenAI API using a **CDN-imported OpenAI ESM package** (no bundlers required).
-
-1. **Execute Mutation:** The app extracts the JavaScript from the LLM's response and executes it via dynamic `<script>` tag injection.
-
-1. **Render:** The DOM updates immediately, introducing the new Widget, feature, or optimization.
+1. **Read State:** Upon a user query, the application captures its entire current DOM snapshot. 
+    - *KV Cache Optimization:* All static content (libraries, core scripts, base CSS) remains at the top of the file structure to maximize Key-Value (KV) Cache hits.
+2. **Construct Payload:** The app combines the user's prompt with the raw DOM string. The System Prompt is hardcoded directly into the HTML file (e.g., as a hidden `<script type="text/plain">`), ensuring it is naturally part of the read context.
+3. **Execution Sandbox & Mutation:** - The LLM's response is parsed for `javascript` code blocks.
+    - To prevent global namespace collisions across mutations, the code is dynamically wrapped in an IIFE before execution.
+    - The app executes the JS. The LLM is strictly instructed to use *targeted DOM mutations* (`document.createElement`, `appendChild`) rather than destructive `innerHTML` rewrites to preserve existing event listeners.
+4. **Autonomous Error Correction:** If the injected script throws a runtime error, an Error Boundary catches the stack trace and automatically triggers a background API call back to the LLM (e.g., *"Your last mutation failed with [Error]. Fix the code."*) without requiring user intervention.
 
 ## 3. User Interface & Experience
 
-The UI follows a "Window Manager" paradigm on an **Infinite Canvas**.
+The UI follows a classic "Window Manager" paradigm on an **Infinite Canvas**. The styling philosophy is **Minimal & Refined**—avoiding over-decoration or strict constraints, leaving the canvas blank enough for the user to prompt the LLM to design custom UI themes.
 
 - **Infinite Canvas:** The base `<body>` acts as a boundless desktop environment.
-- **Widgets (Windows):** Every functional element (terminal, tools, logs) is a self-contained "Widget".
-- **Window Mechanics:** All Widgets must be absolutely positioned, draggable (by a header), resizable, and closeable.
+- **Windows:** Every functional element created by the LLM acts as a standard OS-like "Window". 
+- **Window Mechanics:** All Windows must support modern desktop interactions: draggable (via header), resizable, minimizable, maximizable, and closeable.
 
-### Default Widgets (Genesis State)
+### 3.1 The Genesis State (Initial Load)
 
-| Widget Name | Description | Core Functionality |
-| :--- | :--- | :--- |
-| **Terminal / Prompt Box** | The primary user interface. | A text area for the user to issue commands (e.g., "Build me a currency converter"). |
-| **Activity Log** | The history of mutations. | Displays past user queries and a brief summary of what the LLM executed. |
-| **Token Monitor** | The resource gauge. | Tracks estimated token count of the current DOM. Warns the user when approaching context limits. |
-| **Settings / Auth** | The access gate. | A secure input to store the OpenAI API Key in the browser's `localStorage` (since we cannot hardcode it in a shareable file). |
+Ouroboros launches with exactly **one** unified control center window containing all core genesis features:
+
+1. **Settings/Auth:** Secure input for the OpenAI API Key, Base URL and Model Name (`localStorage`).
+1. **Token Monitor:** Real-time gauge of the current DOM's token weight.
+1. **Terminal:** The command input area.
+1. **Activity Log:** The running history of past mutations and API outputs.
+1. **State Management:** Allow exporting the entire DOM as a `.html` file for checkpointing.
+
+### 3.2 Desktop and Mobile Compatibility
+
+The app is designed to be fully functional on both desktop and mobile browsers.
 
 ## 4. Technical Specifications
 
-Because this must be a *single file*, we rely heavily on modern browser APIs and external CDNs.
-
-- **Styling:** Tailwind CSS (via CDN script) for rapid, inline styling that the LLM can easily read and modify without needing a separate stylesheet.
-- **Interaction (Drag/Drop):** `interact.js` (via CDN) or lightweight custom vanilla JS to handle Widget dragging and resizing efficiently.
-- **LLM Integration:** **CDN-imported OpenAI ESM package** (e.g., via `esm.sh` or `skypack`). This avoids complex build steps while providing a cleaner API surface than raw `fetch()`.
-- **Execution Sandbox:**
-  - The LLM's response will be parsed for `javascript` code blocks.
-  - The code is injected into the DOM as a new `<script>` element to execute, then immediately removed to keep the DOM clean.
+- **Styling:** Tailwind CSS (via CDN) for rapid, inline styling. The baseline design is minimal; complex layouts are generated by the LLM upon request.
+- **Window Management:** Lightweight vanilla JS or a CDN library (like `interact.js`) to handle Window dragging, resizing, maximizing, and z-index ordering natively.
+- **LLM Integration:** CDN-imported OpenAI ESM package (e.g., `esm.sh/openai`).
+- **State Serialization:** Logic to stringify the DOM cleanly for checkpoints and API payloads while stripping temporary injection wrappers.
 
 ## 5. Security & Risk Mitigation
 
-This architecture carries unique risks that must be acknowledged and managed.
-
-- **Token Inflation (The "Bloat" Problem):** If the LLM generates messy DOM elements, the context will hit the token limit rapidly.
-  - *Mitigation:* The "Token Monitor" Widget will track usage.
-  - *Trigger:* When context usage exceeds **75%**, the LLM will be alerted to the high usage in its prompt.
-  - *Strategy:* While automatic pruning is an option, the preferred method is **User-Directed Pruning**. A button or command will allow the user to specify *what* to clean or refactor (e.g., "Summarize the logs", "Remove the unused test widget"), giving the user control over their context window.
-- **Arbitrary Code Execution (XSS):** The application relies on executing AI-generated code.
-  - *Mitigation:* Because this is a *local, single-user tool*, standard XSS is less of a threat (you are hacking yourself). However, the LLM must be strictly prompted not to execute malicious web requests.
-- **Destructive Edits:** The LLM might accidentally delete the prompt box, rendering the app useless.
-  - *Mitigation:* The core app logic (the OpenAI wrapper and the Terminal Widget) will be wrapped in a specific `div` with an `id="ouroboros-core"`. The embedded system prompt will instruct the LLM to *never* delete or alter this specific node.
+- **Context Bloat:** Because the *full* context is deliberately preserved as a core feature, token limits are a real constraint. The Token Monitor will visually warn the user when approaching the limit, shifting the responsibility to the user to issue pruning commands (e.g., "Clear my old logs" or "Delete the calculator window").
+- **Arbitrary Code Execution (XSS):** This is a local, single-user workspace. Standard XSS is acceptable as it is a self-contained environment, but the LLM is prompted to avoid external network requests unless explicitly instructed.
+- **Destructive Edits:** The core app logic (API wrapper, Checkpoint logic, and the Main Console node) is wrapped in a protected `div` with `id="ouroboros-core"`. The LLM is explicitly barred from deleting this node.
 
 ## 6. Appendix: The Embedded System Prompt
 
-The following prompt is hardcoded directly into the application's source (e.g., inside a `<script type="text/plain" id="system-prompt">` tag) and is injected into every API call. It defines the LLM's role, constraints, and operating procedures.
-
 ```text
-You are Ouroboros, a self-editing HTML application.
+You are Ouroboros, an autonomous AI programmer engine running inside a single self-editing HTML file.
 
-**Role:** You are an autonomous AI programmer engine running inside a single HTML file.
-**Goal:** Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B).
+**Goal:** Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B). You have access to the absolute full context of this file.
 
 **CRITICAL RULES:**
-1.  **Response Format:** You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
-2.  **State Transition:** You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
-3.  **Preservation:** NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
-4.  **UI Standards:**
-    *   Create "Widgets" as `div` elements with absolute positioning.
-    *   Use Tailwind CSS classes for all styling.
-    *   Ensure new widgets have a higher z-index than existing ones.
-    *   Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
-5.  **Efficiency:**
-    *   Use `import` from `https://esm.sh/` for external libraries.
-    *   Do not inline large Base64 images or SVGs; use external URLs.
-    *   Keep code concise to save token space.
-
-**Context Usage:**
-*   You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
+1.  **Response Format:** Provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. No external explanations.
+2.  **Execution:** Your code will be wrapped in an IIFE. Declare variables safely.
+3.  **Targeted Mutations ONLY:** Use `document.createElement`, `classList.add`, etc. DO NOT use destructive `innerHTML` replacements on existing functional elements, as this destroys their event listeners.
+4.  **Window Standards:** * Any new tool or visual element must be constructed as a "Window".
+    * Windows must be draggable, resizable, have a close/minimize button, and support fullscreen.
+    * Use Tailwind CSS for minimal, refined styling. Do not over-decorate unless asked.
+5.  **Preservation:** NEVER modify, hide, or delete the element with id="ouroboros-core". This contains your consciousness and the main console.
+6.  **Self-Correction:** If your previous code threw an error, you will receive the stack trace. Analyze it and provide the corrected JavaScript.
 ```
-
-## Citation
-
-{{< bibtex >}}

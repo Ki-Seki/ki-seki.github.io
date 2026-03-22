@@ -64,18 +64,18 @@
         <!-- Settings / Auth -->
         <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <div class="mb-2">
-                <label class="block text-xs font-semibold text-gray-600 mb-1">OPENAI API KEY</label>
                 <div class="flex gap-2">
-                    <input type="password" id="api-key-input" placeholder="sk-..." class="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                    <input type="password" id="api-key-input" placeholder="API Key (e.g. sk-...)" class="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
                 </div>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">API CONFIGURATION</label>
                 <div class="grid grid-cols-2 gap-2 mb-2">
                     <input type="text" id="api-base-input" placeholder="Base URL (e.g. https://api.openai.com/v1)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
                     <input type="text" id="model-name-input" placeholder="Model (e.g. gpt-4o)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
                 </div>
-                <button id="save-key-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save Settings</button>
+                <div class="flex gap-2">
+                    <button id="save-key-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save Settings</button>
+                </div>
             </div>
         </div>
 
@@ -89,8 +89,10 @@
             <textarea id="user-prompt" placeholder="Command the Ouroboros (e.g., 'Create a calculator logic')..." class="w-full text-sm border border-gray-300 rounded p-2 mb-2 focus:outline-none focus:border-blue-500 min-h-[80px] resize-none"></textarea>
             <div class="flex justify-between items-center">
                 <span class="text-xs text-gray-400">Press Ctrl+Enter to send</span>
-                <button id="execute-btn" class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded transition-colors relative">
-                    <span id="btn-text">Mutate DOM</span>
+                <div class="flex gap-2">
+                    <button id="export-dom-btn" class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded transition-colors" title="Export current state to a new HTML file">Export</button>
+                    <button id="execute-btn" class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded transition-colors relative flex items-center gap-2">
+                        <span>🐍</span><span id="btn-text">Bite</span>
                     <div id="spinner" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                         <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -98,6 +100,7 @@
                         </svg>
                     </div>
                 </button>
+                </div>
             </div>
         </div>
     </div>
@@ -147,6 +150,7 @@ You are Ouroboros, a self-editing HTML application.
             apiBaseInput: document.getElementById('api-base-input'),
             modelNameInput: document.getElementById('model-name-input'),
             saveKeyBtn: document.getElementById('save-key-btn'),
+            exportDomBtn: document.getElementById('export-dom-btn'),
             promptInput: document.getElementById('user-prompt'),
             executeBtn: document.getElementById('execute-btn'),
             btnText: document.getElementById('btn-text'),
@@ -165,6 +169,7 @@ You are Ouroboros, a self-editing HTML application.
 
             // Setup Event Listeners
             els.saveKeyBtn.addEventListener('click', saveApiSettings);
+            els.exportDomBtn.addEventListener('click', exportDOM);
             els.executeBtn.addEventListener('click', handleExecution);
             els.promptInput.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.key === 'Enter') handleExecution();
@@ -271,6 +276,20 @@ You are Ouroboros, a self-editing HTML application.
             alert('Settings Saved');
         }
 
+        function exportDOM() {
+            const htmlContent = '<!DOCTYPE html>\\n' + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ouroboros_state_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            logMessage('system', 'Exported DOM as HTML file.');
+        }
+
         function logMessage(actor, text) {
             const entry = document.createElement('div');
             entry.className = 'mb-2';
@@ -360,9 +379,14 @@ You are Ouroboros, a self-editing HTML application.
 
                 if (codeBlock && codeBlock[1]) {
                     const code = codeBlock[1];
-                    executeMutation(code);
-                    logMessage('system', 'Mutation executed successfully.');
-                    els.promptInput.value = '';
+                    const errorMsg = executeMutation(code);
+                    if (errorMsg) {
+                        logMessage('system', 'Mutation failed. Attempting autonomous correction...');
+                        await handleAutoCorrection(code, errorMsg);
+                    } else {
+                        logMessage('system', 'Mutation executed successfully.');
+                        els.promptInput.value = '';
+                    }
                 } else {
                     logMessage('system', 'Error: No valid JavaScript block found in response.');
                     console.log('Full Response:', content);
@@ -376,25 +400,75 @@ You are Ouroboros, a self-editing HTML application.
             }
         }
 
-        function executeMutation(code) {
+        async function handleAutoCorrection(failedCode, errorText, attempt = 1) {
+            if (attempt > 3) {
+                logMessage('system', 'Auto-correction failed after 3 attempts. Please fix manually.');
+                return;
+            }
+            logMessage('system', `Attempting auto-correction (Attempt ${attempt}/3)...`);
             try {
-                // Wrap in IIFE to avoid polluting global scope unintentionally,
-                // though we want it to affect DOM.
+                const currentDOM = document.documentElement.outerHTML;
+                let systemContext = els.systemPrompt.innerText;
+                
+                const clientConfig = { apiKey: state.apiKey, dangerouslyAllowBrowser: true };
+                if (state.apiBase) clientConfig.baseURL = state.apiBase;
+                const openai = new OpenAI(clientConfig);
+
+                const prompt = `Current DOM State:\n\`\`\`html\n${currentDOM}\n\`\`\`\n\nYour previous code threw this error during execution:\n\`\`\`\n${errorText}\n\`\`\`\n\nFix your JavaScript code so it fulfills the user's intent without throwing errors. Return ONLY the corrected valid JavaScript block.`;
+
+                const completion = await openai.chat.completions.create({
+                    messages: [
+                        { role: 'system', content: systemContext },
+                        { role: 'user', content: prompt }
+                    ],
+                    model: state.modelName
+                });
+
+                const content = completion.choices[0].message.content;
+                const codeBlock = content.match(/```(?:javascript)?\s*([\s\S]*?)\s*```/);
+
+                if (codeBlock && codeBlock[1]) {
+                    const code = codeBlock[1];
+                    const errorMsg = executeMutation(code);
+                    if (errorMsg) {
+                        await handleAutoCorrection(code, errorMsg, attempt + 1);
+                    } else {
+                        logMessage('system', 'Auto-correction executing successfully.');
+                        els.promptInput.value = '';
+                    }
+                } else {
+                    logMessage('system', 'Auto-correction failed: No valid JavaScript returned.');
+                }
+            } catch (e) {
+                logMessage('system', `Auto-correction API error: ${e.message}`);
+            }
+        }
+
+        function executeMutation(code) {
+            let errorText = null;
+            try {
+                window.__ouroborosLastError = null;
                 const script = document.createElement('script');
                 script.textContent = `(function() {
                     try {
                         ${code}
                     } catch(e) {
+                        window.__ouroborosLastError = e;
                         console.error("Mutation Script Error:", e);
-                        alert("Mutation script failed: " + e.message);
                     }
                 })();`;
                 document.body.appendChild(script);
-                // Clean up script tag immediately
                 script.remove();
+                
+                if (window.__ouroborosLastError) {
+                    errorText = window.__ouroborosLastError.toString() + (window.__ouroborosLastError.stack ? '\\n' + window.__ouroborosLastError.stack : '');
+                    delete window.__ouroborosLastError;
+                }
             } catch (e) {
                 console.error("Injection Error:", e);
+                errorText = e.toString();
             }
+            return errorText;
         }
 
         function setLoading(loading) {
