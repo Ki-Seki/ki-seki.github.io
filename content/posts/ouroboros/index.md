@@ -12,7 +12,7 @@ math: false
 ---
 
 - **Version:** 1.0
-- **Demo Page:** [View Demo](/features/ouroboros/index.html)
+- **Demo Page:** [View Demo](/features/ouroboros/)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
 

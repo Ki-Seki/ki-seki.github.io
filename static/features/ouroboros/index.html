@@ -3,61 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ouroboros</title>
+    <title>Ouroboros - Infinite Canvas</title>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Interact.js for drag and drop -->
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden; /* Infinite canvas feel, manage scroll info internally if needed or let browser handle partials */
+            width: 100vw;
             height: 100vh;
-            background-color: #f4f4f4;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
         }
-        .container {
-            text-align: center;
+        .widget {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            touch-action: none;
+            user-select: none;
         }
-        h1 {
-            font-size: 3rem;
-            font-weight: 300;
-            letter-spacing: 0.5rem;
-            text-transform: uppercase;
-            color: #333;
-            margin-bottom: 2rem;
+        .widget-header {
+            cursor: move;
         }
-        p {
-            font-size: 1.2rem;
-            font-weight: 300;
-            color: #666;
-            margin-bottom: 3rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
+        /* Scrollbar styles for logs */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        a {
-            display: inline-block;
-            text-decoration: none;
-            color: #333;
-            border: 1px solid #333;
-            padding: 10px 30px;
-            font-size: 1rem;
-            letter-spacing: 0.2rem;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        a:hover {
-            background-color: #333;
-            color: #fff;
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Ouroboros</h1>
-        <p>A self-modifying, infinite canvas workspace where code evolves itself.</p>
-        <a href="app.html">Enter</a>
+<body class="relative w-full h-full font-sans text-gray-800">
+
+    <!-- GENESIS WIDGET: CORE -->
+    <div id="ouroboros-core" class="draggable resizable absolute top-10 left-10 w-[400px] bg-white rounded-lg border border-gray-300 flex flex-col z-50 widget" style="transform: translate(0px, 0px);" data-x="0" data-y="0">
+        <!-- Header -->
+        <div class="widget-header bg-gray-800 text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
+            <h2 class="font-bold text-sm tracking-wide">OUROBOROS // CORE</h2>
+            <div class="flex gap-2">
+                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+            </div>
+        </div>
+
+        <!-- Token Monitor -->
+        <div class="bg-gray-100 px-4 py-1 text-xs text-gray-500 border-b border-gray-200 flex justify-between items-center">
+            <span>Context Usage</span>
+            <span id="token-count">0 / 128k est.</span>
+        </div>
+
+        <!-- Settings / Auth -->
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <div class="mb-2">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">OPENAI API KEY</label>
+                <div class="flex gap-2">
+                    <input type="password" id="api-key-input" placeholder="sk-..." class="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">API CONFIGURATION</label>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <input type="text" id="api-base-input" placeholder="Base URL (e.g. https://api.openai.com/v1)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                    <input type="text" id="model-name-input" placeholder="Model (e.g. gpt-4o)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                </div>
+                <button id="save-key-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save Settings</button>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="flex-1 p-4 overflow-y-auto min-h-[150px] max-h-[300px] bg-white text-xs font-mono" id="activity-log">
+            <div class="text-gray-400 italic">System initialized. Waiting for input...</div>
+        </div>
+
+        <!-- Terminal / Prompt Box -->
+        <div class="p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+            <textarea id="user-prompt" placeholder="Command the Ouroboros (e.g., 'Create a calculator logic')..." class="w-full text-sm border border-gray-300 rounded p-2 mb-2 focus:outline-none focus:border-blue-500 min-h-[80px] resize-none"></textarea>
+            <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-400">Press Ctrl+Enter to send</span>
+                <button id="execute-btn" class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded transition-colors relative">
+                    <span id="btn-text">Mutate DOM</span>
+                    <div id="spinner" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </div>
     </div>
+
+    <!-- EMBEDDED SYSTEM PROMPT -->
+    <script type="text/plain" id="ouroboros-system_prompt">
+You are Ouroboros, a self-editing HTML application.
+
+**Role:** You are an autonomous AI programmer engine running inside a single HTML file.
+**Goal:** Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B).
+
+**CRITICAL RULES:**
+1.  **Response Format:** You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
+2.  **State Transition:** You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
+3.  **Preservation:** NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
+4.  **UI Standards:**
+    *   Create "Widgets" as `div` elements with absolute positioning.
+    *   Use Tailwind CSS classes for all styling.
+    *   Ensure new widgets have a higher z-index than existing ones.
+    *   Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
+5.  **Efficiency:**
+    *   Use `import` from `https://esm.sh/` for external libraries.
+    *   Do not inline large Base64 images or SVGs; use external URLs.
+    *   Keep code concise to save token space.
+    *   The user text is input.value.
+
+**Context Usage:**
+*   You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
+    </script>
+
+    <!-- MAIN APPLICATION LOGIC -->
+    <script type="module">
+        import OpenAI from 'https://esm.sh/openai@4.28.0?bundle';
+
+        // --- STATE ---
+        const state = {
+            apiKey: localStorage.getItem('ouroboros_api_key') || '',
+            apiBase: localStorage.getItem('ouroboros_api_base') || '',
+            modelName: localStorage.getItem('ouroboros_model_name') || 'gpt-4o',
+            isProcessing: false
+        };
+
+        // --- DOM REFERENCE ---
+        const els = {
+            core: document.getElementById('ouroboros-core'),
+            apiKeyInput: document.getElementById('api-key-input'),
+            apiBaseInput: document.getElementById('api-base-input'),
+            modelNameInput: document.getElementById('model-name-input'),
+            saveKeyBtn: document.getElementById('save-key-btn'),
+            promptInput: document.getElementById('user-prompt'),
+            executeBtn: document.getElementById('execute-btn'),
+            btnText: document.getElementById('btn-text'),
+            spinner: document.getElementById('spinner'),
+            log: document.getElementById('activity-log'),
+            tokenCount: document.getElementById('token-count'),
+            systemPrompt: document.getElementById('ouroboros-system_prompt')
+        };
+
+        // --- INITIALIZATION ---
+        function init() {
+            // Restore Settings
+            if (state.apiKey) els.apiKeyInput.value = state.apiKey;
+            if (state.apiBase) els.apiBaseInput.value = state.apiBase;
+            els.modelNameInput.value = state.modelName;
+
+            // Setup Event Listeners
+            els.saveKeyBtn.addEventListener('click', saveApiSettings);
+            els.executeBtn.addEventListener('click', handleExecution);
+            els.promptInput.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') handleExecution();
+            });
+
+            // Initialize Interact.js
+            setupDraggable();
+
+            // Initial Token Estimate
+            updateTokenEstimate();
+
+            // Watch for DOM changes to update token count
+            // Debounce the observer to prevent rapid firing and potential loops
+            let timeout;
+            const observer = new MutationObserver((mutations) => {
+                // Check if mutations are only from the token counter itself to avoid loops
+                const isTokenUpdate = mutations.every(m =>
+                    m.target === els.tokenCount ||
+                    els.tokenCount.contains(m.target) ||
+                    m.target === els.log // also ignore log updates to prevent loop during streaming
+                );
+
+                if (isTokenUpdate) return;
+
+                clearTimeout(timeout);
+                timeout = setTimeout(updateTokenEstimate, 500);
+            });
+            observer.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+
+            logMessage('system', 'Ouroboros Genesis State loaded.');
+        }
+
+        // --- INTERACTION ---
+        function setupDraggable() {
+            interact('.draggable')
+                .draggable({
+                    allowFrom: '.widget-header',
+                    inertia: true,
+                    modifiers: [
+                        interact.modifiers.restrictRect({
+                            restriction: 'parent',
+                            endOnly: true
+                        })
+                    ],
+                    autoScroll: true,
+                    listeners: {
+                        move: dragMoveListener,
+                    }
+                })
+                .resizable({
+                    edges: { left: true, right: true, bottom: true, top: true },
+                    listeners: {
+                        move: function (event) {
+                            let { x, y } = event.target.dataset;
+                            x = (parseFloat(x) || 0) + event.deltaRect.left;
+                            y = (parseFloat(y) || 0) + event.deltaRect.top;
+
+                            Object.assign(event.target.style, {
+                                width: `${event.rect.width}px`,
+                                height: `${event.rect.height}px`,
+                                transform: `translate(${x}px, ${y}px)`
+                            });
+
+                            Object.assign(event.target.dataset, { x, y });
+                        }
+                    }
+                });
+        }
+
+        function dragMoveListener(event) {
+            var target = event.target;
+            // keep the dragged position in the data-x/data-y attributes
+            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+            // translate the element
+            target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+            // update the posiion attributes
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+        }
+
+        // --- LOGIC ---
+        function saveApiSettings() {
+            const key = els.apiKeyInput.value.trim();
+            const base = els.apiBaseInput.value.trim();
+            const model = els.modelNameInput.value.trim() || 'gpt-4o';
+
+            state.apiKey = key;
+            state.apiBase = base;
+            state.modelName = model;
+
+            localStorage.setItem('ouroboros_api_key', key);
+            localStorage.setItem('ouroboros_model_name', model);
+
+            if (base) {
+                localStorage.setItem('ouroboros_api_base', base);
+            } else {
+                localStorage.removeItem('ouroboros_api_base');
+            }
+
+            logMessage('system', 'API Configuration saved securely to localStorage.');
+            alert('Settings Saved');
+        }
+
+        function logMessage(actor, text) {
+            const entry = document.createElement('div');
+            entry.className = 'mb-2';
+            const timestamp = new Date().toLocaleTimeString();
+            const color = actor === 'user' ? 'text-blue-600' : 'text-green-600';
+            const label = actor === 'user' ? 'USER' : 'SYSTEM';
+
+            entry.innerHTML = `
+                <span class="text-xs text-gray-400">[${timestamp}]</span>
+                <span class="font-bold ${color}">${label}:</span>
+                <span>${text}</span>
+            `;
+            els.log.appendChild(entry);
+            els.log.scrollTop = els.log.scrollHeight;
+        }
+
+        function updateTokenEstimate() {
+            // Rough estimation: 1 token ~= 4 chars of HTML
+            const htmlContent = document.documentElement.outerHTML;
+            const charCount = htmlContent.length;
+            const tokenCount = Math.ceil(charCount / 4);
+            const percentage = Math.min((tokenCount / 128000) * 100, 100).toFixed(1);
+
+            els.tokenCount.textContent = `${tokenCount.toLocaleString()} / 128k (${percentage}%)`;
+
+            if (tokenCount > 96000) { // 75%
+                els.tokenCount.classList.add('text-red-600');
+                els.tokenCount.classList.remove('text-gray-500');
+            } else {
+                els.tokenCount.classList.remove('text-red-600');
+                els.tokenCount.classList.add('text-gray-500');
+            }
+        }
+
+        async function handleExecution() {
+            if (state.isProcessing) return;
+            if (!state.apiKey) {
+                alert('Please enter and save your OpenAI API Key first.');
+                return;
+            }
+            const prompt = els.promptInput.value.trim();
+            if (!prompt) return;
+
+            setLoading(true);
+            logMessage('user', prompt);
+
+            try {
+                // 1. Capture State
+                const currentDOM = document.documentElement.outerHTML;
+                const tokenEstimate = Math.ceil(currentDOM.length / 4);
+                let systemContext = els.systemPrompt.innerText;
+
+                // Add dynamic warning to system prompt if token usage is high
+                if (tokenEstimate > 96000) { // > 75% of 128k
+                    systemContext += "\n\nCRITICAL WARNING: CONTEXT USAGE IS > 75%. YOU MUST PRIORITIZE CODE COMPRESSION AND DELETING UNUSED WIDGETS.";
+                }
+
+                // 2. Prepare OpenAI Client
+                const clientConfig = {
+                    apiKey: state.apiKey,
+                    dangerouslyAllowBrowser: true
+                };
+
+                if (state.apiBase) {
+                    clientConfig.baseURL = state.apiBase;
+                }
+
+                const openai = new OpenAI(clientConfig);
+
+                // 3. Construct Payload
+                const fullPrompt = `Current DOM State:\n\`\`\`html\n${currentDOM}\n\`\`\`\n\nUser Request: ${prompt}`;
+
+                // 4. API Call
+                const completion = await openai.chat.completions.create({
+                    messages: [
+                        { role: 'system', content: systemContext },
+                        { role: 'user', content: fullPrompt }
+                    ],
+                    model: state.modelName
+                });
+
+                const content = completion.choices[0].message.content;
+                logMessage('system', 'Received response. Executing mutation...');
+
+                // 5. Extract Code
+                const codeBlock = content.match(/```(?:javascript)?\s*([\s\S]*?)\s*```/);
+
+                if (codeBlock && codeBlock[1]) {
+                    const code = codeBlock[1];
+                    executeMutation(code);
+                    logMessage('system', 'Mutation executed successfully.');
+                    els.promptInput.value = '';
+                } else {
+                    logMessage('system', 'Error: No valid JavaScript block found in response.');
+                    console.log('Full Response:', content);
+                }
+
+            } catch (error) {
+                console.error(error);
+                logMessage('system', `Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function executeMutation(code) {
+            try {
+                // Wrap in IIFE to avoid polluting global scope unintentionally,
+                // though we want it to affect DOM.
+                const script = document.createElement('script');
+                script.textContent = `(function() {
+                    try {
+                        ${code}
+                    } catch(e) {
+                        console.error("Mutation Script Error:", e);
+                        alert("Mutation script failed: " + e.message);
+                    }
+                })();`;
+                document.body.appendChild(script);
+                // Clean up script tag immediately
+                script.remove();
+            } catch (e) {
+                console.error("Injection Error:", e);
+            }
+        }
+
+        function setLoading(loading) {
+            state.isProcessing = loading;
+            if (loading) {
+                els.btnText.classList.add('invisible');
+                els.spinner.classList.remove('hidden');
+                els.executeBtn.classList.add('cursor-not-allowed', 'opacity-75');
+            } else {
+                els.btnText.classList.remove('invisible');
+                els.spinner.classList.add('hidden');
+                els.executeBtn.classList.remove('cursor-not-allowed', 'opacity-75');
+            }
+        }
+
+        // Start
+        init();
+
+    </script>
 </body>
 </html>
