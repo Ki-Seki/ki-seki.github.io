@@ -409,7 +409,7 @@ You are Ouroboros, a self-editing HTML application.
             try {
                 const currentDOM = document.documentElement.outerHTML;
                 let systemContext = els.systemPrompt.innerText;
-                
+
                 const clientConfig = { apiKey: state.apiKey, dangerouslyAllowBrowser: true };
                 if (state.apiBase) clientConfig.baseURL = state.apiBase;
                 const openai = new OpenAI(clientConfig);
@@ -459,7 +459,7 @@ You are Ouroboros, a self-editing HTML application.
                 })();`;
                 document.body.appendChild(script);
                 script.remove();
-                
+
                 if (window.__ouroborosLastError) {
                     errorText = window.__ouroborosLastError.toString() + (window.__ouroborosLastError.stack ? '\\n' + window.__ouroborosLastError.stack : '');
                     delete window.__ouroborosLastError;

@@ -20,13 +20,13 @@ math: false
 
 Project Ouroboros is a standalone `.html` file that acts as a boundless, draggable workspace ("Infinite Canvas"). It contains an integrated LLM loop (via OpenAI) that reads the *entire, unaltered* current state of the document's DOM as its context.
 
-Instead of a conversational chat interface, Ouroboros operates on a state-transition model: The LLM takes the current state of the HTML file (State A) and generates executable JavaScript to mutate it into a new state (State B). This allows the application to create new tools, optimize existing code, or restructure its own interface on the fly. 
+Instead of a conversational chat interface, Ouroboros operates on a state-transition model: The LLM takes the current state of the HTML file (State A) and generates executable JavaScript to mutate it into a new state (State B). This allows the application to create new tools, optimize existing code, or restructure its own interface on the fly.
 
 ## 2. Core Architecture & The "Context Loop"
 
 The fundamental engine relies on a continuous feedback loop between the DOM and the LLM. Crucially, **the absolute full context is preserved**—every node, every log, and every script in the HTML file is included in the LLM's vision without artificial pruning.
 
-1. **Read State:** Upon a user query, the application captures its entire current DOM snapshot. 
+1. **Read State:** Upon a user query, the application captures its entire current DOM snapshot.
     - *KV Cache Optimization:* All static content (libraries, core scripts, base CSS) remains at the top of the file structure to maximize Key-Value (KV) Cache hits.
 2. **Construct Payload:** The app combines the user's prompt with the raw DOM string. The System Prompt is hardcoded directly into the HTML file (e.g., as a hidden `<script type="text/plain">`), ensuring it is naturally part of the read context.
 3. **Execution Sandbox & Mutation:** - The LLM's response is parsed for `javascript` code blocks.
@@ -39,7 +39,7 @@ The fundamental engine relies on a continuous feedback loop between the DOM and 
 The UI follows a classic "Window Manager" paradigm on an **Infinite Canvas**. The styling philosophy is **Minimal & Refined**—avoiding over-decoration or strict constraints, leaving the canvas blank enough for the user to prompt the LLM to design custom UI themes.
 
 - **Infinite Canvas:** The base `<body>` acts as a boundless desktop environment.
-- **Windows:** Every functional element created by the LLM acts as a standard OS-like "Window". 
+- **Windows:** Every functional element created by the LLM acts as a standard OS-like "Window".
 - **Window Mechanics:** All Windows must support modern desktop interactions: draggable (via header), resizable, minimizable, maximizable, and closeable.
 
 ### 3.1 The Genesis State (Initial Load)
