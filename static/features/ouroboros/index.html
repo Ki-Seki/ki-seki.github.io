@@ -57,7 +57,7 @@
         <!-- Token Monitor -->
         <div class="bg-gray-100 px-4 py-1 text-xs text-gray-500 border-b border-gray-200 flex justify-between items-center">
             <span>Context Usage</span>
-            <span id="token-count">0 / 128k est.</span>
+            <span id="token-count"></span>
         </div>
 
         <!-- Settings / Auth -->
@@ -308,7 +308,7 @@ You are Ouroboros, a self-editing HTML application.
             const tokenCount = Math.ceil(charCount / 4);
             const percentage = Math.min((tokenCount / 128000) * 100, 100).toFixed(1);
 
-            els.tokenCount.textContent = `${tokenCount.toLocaleString()} / 128k (${percentage}%)`;
+            els.tokenCount.textContent = `~ ${tokenCount.toLocaleString()} / 128k (${percentage}%)`;
 
             if (tokenCount > 96000) { // 75%
                 els.tokenCount.classList.add('text-red-600');
