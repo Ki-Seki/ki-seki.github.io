@@ -275,15 +275,11 @@ You are Ouroboros, a self-editing HTML application.
             logMessage('user', prompt);
 
             try {
-                // 1. Capture State
+                // 1. Sync User Prompt to DOM and Capture State
+                els.promptInput.textContent = prompt;
                 const currentDOM = document.documentElement.outerHTML;
                 const tokenEstimate = Math.ceil(currentDOM.length / 4);
-                let systemContext = els.systemPrompt.innerText;
-
-                // Add dynamic warning to system prompt if token usage is high
-                if (tokenEstimate > 96000) { // > 75% of 128k
-                    systemContext += "\n\nCRITICAL WARNING: CONTEXT USAGE IS > 75%. YOU MUST PRIORITIZE CODE COMPRESSION AND DELETING UNUSED WIDGETS.";
-                }
+                console.log('API Query:', currentDOM);
 
                 // 2. Prepare OpenAI Client
                 const clientConfig = {
@@ -294,19 +290,17 @@ You are Ouroboros, a self-editing HTML application.
 
                 const openai = new OpenAI(clientConfig);
 
-                // 3. Construct Payload
-                const fullPrompt = `Current DOM State:\n\`\`\`html\n${currentDOM}\n\`\`\`\n\nUser Request: ${prompt}`;
-
-                // 4. API Call
+                // 3. Create API Call
                 const completion = await openai.chat.completions.create({
                     messages: [
-                        { role: 'system', content: systemContext },
-                        { role: 'user', content: fullPrompt }
+                        { role: 'user', content: currentDOM }
                     ],
+                    temperature: 0.1,
                     model: state.modelName
                 });
 
                 const content = completion.choices[0].message.content;
+                console.log('API Response:', content);
                 logMessage('system', 'Received response. Executing mutation...');
 
                 // 5. Extract Code & Execute
