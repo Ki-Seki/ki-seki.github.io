@@ -266,7 +266,11 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
                 const clientConfig = {
                     apiKey: state.apiKey,
                     dangerouslyAllowBrowser: true,
-                    ...(state.apiBase && { baseURL: state.apiBase })
+                    ...(state.apiBase && { baseURL: state.apiBase }),
+                    defaultHeaders: {
+                        "HTTP-Referer": "https://ki-seki.github.io/posts/260322-ouroboros/",
+                        "X-Title": "Ouroboros"
+                    }
                 };
 
                 const openai = new OpenAI(clientConfig);
