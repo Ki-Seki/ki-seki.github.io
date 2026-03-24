@@ -261,7 +261,6 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
                 // 1. Sync User Prompt to DOM and Capture State
                 els.promptInput.textContent = prompt;
                 const currentDOM = document.documentElement.outerHTML;
-                const tokenEstimate = Math.ceil(currentDOM.length / 4);
                 console.log('API Query:', currentDOM);
 
                 // 2. Prepare OpenAI Client
