@@ -36,17 +36,17 @@ The fundamental engine of this application relies on a continuous feedback loop 
 
 1. **Execute Mutation:** The app extracts the JavaScript from the LLM's response and executes it via dynamic `<script>` tag injection.
 
-1. **Render:** The DOM updates immediately, introducing the new Widget, feature, or optimization.
+1. **Render:** The DOM updates immediately, introducing the new Window, feature, or optimization.
 
 ## 3. User Interface & Experience
 
 The UI follows a "Window Manager" paradigm on an **Infinite Canvas**.
 
 - **Infinite Canvas:** The base `<body>` acts as a boundless desktop environment.
-- **Widgets (Windows):** Every functional element (terminal, tools, logs) is a self-contained "Widget".
-- **Window Mechanics:** All Widgets must be absolutely positioned, draggable (by a header), and resizable.
+- **Windows:** Every functional element (terminal, tools, etc.) is a self-contained "Window".
+- **Window Mechanics:** All Windows must be absolutely positioned, draggable (by a header), and resizable.
 
-There is a default widget present in the genesis state: the **Ouroboros Core** widget. It contains the following four components:
+There is a default window present in the genesis state: the **Ouroboros Core** window. It contains the following four components:
 
 | Component Name            | Functionality                                                                                                                 |
 | :------------------------ | :---------------------------------------------------------------------------------------------------------------------------- |
@@ -60,7 +60,7 @@ There is a default widget present in the genesis state: the **Ouroboros Core** w
 Because this must be a *single file*, we rely heavily on modern browser APIs and external CDNs.
 
 - **Styling:** Tailwind CSS (via CDN script) for rapid, inline styling that the LLM can easily read and modify without needing a separate stylesheet.
-- **Interaction (Drag/Drop):** `interact.js` (via CDN) or lightweight custom vanilla JS to handle Widget dragging and resizing efficiently.
+- **Interaction (Drag/Drop):** `interact.js` (via CDN) or lightweight custom vanilla JS to handle Window dragging and resizing efficiently.
 - **LLM Integration:** **CDN-imported OpenAI ESM package** (e.g., via `esm.sh` or `skypack`). This avoids complex build steps while providing a cleaner API surface than raw `fetch()`.
 - **Execution Sandbox:**
   - The LLM's response will be parsed for `javascript` code blocks.
@@ -71,13 +71,13 @@ Because this must be a *single file*, we rely heavily on modern browser APIs and
 This architecture carries unique risks that must be acknowledged and managed.
 
 - **Token Inflation (The "Bloat" Problem):** If the LLM generates messy DOM elements, the context will hit the token limit rapidly.
-  - *Mitigation:* The "Token Monitor" Widget will track usage.
+  - *Mitigation:* The "Token Monitor" Window will track usage.
   - *Trigger:* When context usage exceeds **75%**, the LLM will be alerted to the high usage in its prompt.
-  - *Strategy:* While automatic pruning is an option, the preferred method is **User-Directed Pruning**. A button or command will allow the user to specify *what* to clean or refactor (e.g., "Summarize the logs", "Remove the unused test widget"), giving the user control over their context window.
+  - *Strategy:* While automatic pruning is an option, the preferred method is **User-Directed Pruning**. A button or command will allow the user to specify *what* to clean or refactor (e.g., "Summarize the logs", "Remove the unused test window"), giving the user control over their context window.
 - **Arbitrary Code Execution (XSS):** The application relies on executing AI-generated code.
   - *Mitigation:* Because this is a *local, single-user tool*, standard XSS is less of a threat (you are hacking yourself). However, the LLM must be strictly prompted not to execute malicious web requests.
 - **Destructive Edits:** The LLM might accidentally delete the prompt box, rendering the app useless.
-  - *Mitigation:* The core app logic (the OpenAI wrapper and the Terminal Widget) will be wrapped in a specific `div` with an `id="ouroboros-core"`. The embedded system prompt will instruct the LLM to *never* delete or alter this specific node.
+  - *Mitigation:* The core app logic (the OpenAI wrapper and the Terminal Window) will be wrapped in a specific `div` with an `id="ouroboros-core"`. The embedded system prompt will instruct the LLM to *never* delete or alter this specific node.
 
 ## 6. Appendix: The Embedded System Prompt
 
@@ -97,10 +97,10 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
 * State Transition: You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
 * Preservation: NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
 * UI Standards:
-  *  Create "Widgets" as `div` elements with absolute positioning.
+  *  Create "Windows" as `div` elements with absolute positioning.
   *  Use Tailwind CSS classes for all styling.
-  *  Ensure new widgets have a higher z-index than existing ones.
-  *  Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
+  *  Ensure new windows have a higher z-index than existing ones.
+  *  Implement drag-and-drop functionality for new windows using the existing `interact.js` or similar mechanism present in the global scope.
 * Efficiency:
   *  Use `import` from `https://esm.sh/` for external libraries.
   *  Do not inline large Base64 images or SVGs; use external URLs.
