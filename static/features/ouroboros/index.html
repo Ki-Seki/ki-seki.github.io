@@ -28,18 +28,12 @@
 
         <!-- Settings / Auth -->
         <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
-            <div class="mb-2">
-                <div class="flex gap-2">
-                    <input type="password" id="api-key-input" placeholder="OpenAI API Key (sk-...)" class="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
-                </div>
+            <div class="flex flex-col gap-2 mb-2">
+                <input type="password" id="api-key-input" placeholder="API Key (e.g. sk-...)" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                <input type="text" id="api-base-input" placeholder="Base URL (e.g. https://api.openai.com/v1)" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                <input type="text" id="model-name-input" placeholder="Model (e.g. google/gemini-3-flash-preview)" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
             </div>
-            <div>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="text" id="api-base-input" placeholder="Base URL (e.g. https://api.openai.com/v1)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
-                    <input type="text" id="model-name-input" placeholder="Model (e.g. google/gemini-3-flash-preview)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
-                </div>
-                <button id="save-key-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save Settings</button>
-            </div>
+            <button id="save-key-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save Settings</button>
         </div>
 
         <!-- Activity Log -->
@@ -112,7 +106,7 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
         const state = {
             apiKey: localStorage.getItem('ouroboros_api_key') || '',
             apiBase: localStorage.getItem('ouroboros_api_base') || '',
-            modelName: localStorage.getItem('ouroboros_model_name') || 'google/gemini-3-flash-preview',
+            modelName: localStorage.getItem('ouroboros_model_name') || '',
             isProcessing: false
         };
 
