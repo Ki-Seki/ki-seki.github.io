@@ -16,13 +16,13 @@ math: false
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
 
-## 1. Executive Summary
+## Executive Summary
 
 Project Ouroboros is a standalone `.html` file that acts as a boundless, draggable workspace ("Infinite Canvas"). It contains an integrated LLM loop (via OpenAI) that reads the current state of the document's DOM as its context.
 
 Instead of a conversational chat interface, Ouroboros operates on a state-transition model: The LLM takes the current state of the HTML file (State A) and generates executable JavaScript to mutate it into a new state (State B). This allows the application to create new tools, optimize existing code, or restructure its own interface on the fly.
 
-## 2. Core Architecture & The "Context Loop"
+## Core Architecture & The "Context Loop"
 
 The fundamental engine of this application relies on a continuous feedback loop between the DOM and the LLM. Crucially, **everything in the HTML file is included in the LLM context.**
 
@@ -38,7 +38,7 @@ The fundamental engine of this application relies on a continuous feedback loop 
 
 1. **Render:** The DOM updates immediately, introducing the new Window, feature, or optimization.
 
-## 3. User Interface & Experience
+## User Interface & Experience
 
 The UI follows a "Window Manager" paradigm on an **Infinite Canvas**.
 
@@ -55,7 +55,7 @@ There is a default window present in the genesis state: the **Ouroboros Core** w
 | **Activity Log**          | Displays past user queries and a brief summary of what the LLM executed.                                                      |
 | **Terminal / Prompt Box** | A text area for the user to issue commands (e.g., "Build me a currency converter").                                           |
 
-## 4. Technical Specifications
+## Technical Specifications
 
 Because this must be a *single file*, we rely heavily on modern browser APIs and external CDNs.
 
@@ -66,7 +66,7 @@ Because this must be a *single file*, we rely heavily on modern browser APIs and
   - The LLM's response will be parsed for `javascript` code blocks.
   - The code is injected into the DOM as a new `<script>` element to execute, then immediately removed to keep the DOM clean.
 
-## 5. Security & Risk Mitigation
+## Security & Risk Mitigation
 
 This architecture carries unique risks that must be acknowledged and managed.
 
@@ -79,7 +79,7 @@ This architecture carries unique risks that must be acknowledged and managed.
 - **Destructive Edits:** The LLM might accidentally delete the prompt box, rendering the app useless.
   - *Mitigation:* The core app logic (the OpenAI wrapper and the Terminal Window) will be wrapped in a specific `div` with an `id="ouroboros-core"`. The embedded system prompt will instruct the LLM to *never* delete or alter this specific node.
 
-## 6. Appendix: The Embedded System Prompt
+## Appendix: The Embedded System Prompt
 
 The following prompt is hardcoded directly into the application's source (inside a `<script type="text/plain" id="ouroboros-system_prompt">` tag) and is injected into every API call. It defines the LLM's role, constraints, and operating procedures.
 
