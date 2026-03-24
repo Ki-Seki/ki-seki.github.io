@@ -3,8 +3,6 @@ date: '2026-03-22T18:21:33+08:00'
 title: 'Product Requirements Document of Ouroboros'
 author:
   - Shichao Song
-  - Qingchen Yu
-  - Huayi Lai
 summary: 'An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.'
 cover:
     image: "process.png"
