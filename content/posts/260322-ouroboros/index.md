@@ -46,14 +46,14 @@ The UI follows a "Window Manager" paradigm on an **Infinite Canvas**.
 - **Widgets (Windows):** Every functional element (terminal, tools, logs) is a self-contained "Widget".
 - **Window Mechanics:** All Widgets must be absolutely positioned, draggable (by a header), and resizable.
 
-### Default Widgets (Genesis State)
+There is a default widget present in the genesis state: the **Ouroboros Core** widget. It contains the following four components:
 
-| Widget Name | Description | Core Functionality |
-| :--- | :--- | :--- |
-| **Terminal / Prompt Box** | The primary user interface. | A text area for the user to issue commands (e.g., "Build me a currency converter"). |
-| **Activity Log** | The history of mutations. | Displays past user queries and a brief summary of what the LLM executed. |
-| **Token Monitor** | The resource gauge. | Tracks estimated token count of the current DOM. Warns the user when approaching context limits. |
-| **Settings / Auth** | The access gate. | A secure input to store the OpenAI API Key in the browser's `localStorage` (since we cannot hardcode it in a shareable file). |
+| Component Name            | Functionality                                                                                                                 |
+| :------------------------ | :---------------------------------------------------------------------------------------------------------------------------- |
+| **Settings / Auth**       | A secure input to store the OpenAI API Key in the browser's `localStorage` (since we cannot hardcode it in a shareable file). |
+| **Token Monitor**         | Tracks estimated token count of the current DOM. Warns the user when approaching context limits.                              |
+| **Activity Log**          | Displays past user queries and a brief summary of what the LLM executed.                                                      |
+| **Terminal / Prompt Box** | A text area for the user to issue commands (e.g., "Build me a currency converter").                                           |
 
 ## 4. Technical Specifications
 
@@ -83,7 +83,7 @@ This architecture carries unique risks that must be acknowledged and managed.
 
 The following prompt is hardcoded directly into the application's source (inside a `<script type="text/plain" id="ouroboros-system_prompt">` tag) and is injected into every API call. It defines the LLM's role, constraints, and operating procedures.
 
-```text
+```markdown
 ## Role
 
 You are Ouroboros, a self-editing HTML application.
@@ -97,14 +97,14 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
 * State Transition: You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
 * Preservation: NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
 * UI Standards:
-  * Create "Widgets" as `div` elements with absolute positioning.
-  * Use Tailwind CSS classes for all styling.
-  * Ensure new widgets have a higher z-index than existing ones.
-  * Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
+  *  Create "Widgets" as `div` elements with absolute positioning.
+  *  Use Tailwind CSS classes for all styling.
+  *  Ensure new widgets have a higher z-index than existing ones.
+  *  Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
 * Efficiency:
-  * Use `import` from `https://esm.sh/` for external libraries.
-  * Do not inline large Base64 images or SVGs; use external URLs.
-  * Keep code concise to save token space.
+  *  Use `import` from `https://esm.sh/` for external libraries.
+  *  Do not inline large Base64 images or SVGs; use external URLs.
+  *  Keep code concise to save token space.
 * Users:
   * Identify the "User Instruction" by looking at the last entry in the #activity-log.
   * Users may have varying levels of technical expertise.
