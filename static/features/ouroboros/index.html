@@ -10,10 +10,10 @@
 </head>
 <body class="bg-gray-100 overflow-hidden relative w-screen h-screen font-sans text-gray-800" style="background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 20px 20px;">
 
-    <!-- GENESIS WIDGET: CORE -->
+    <!-- GENESIS WINDOW: CORE -->
     <div id="ouroboros-core" class="draggable resizable absolute top-10 left-10 w-[400px] bg-white rounded-lg border border-gray-300 shadow-md touch-none select-none flex flex-col z-50" style="transform: translate(0px, 0px);" data-x="0" data-y="0">
         <!-- Header -->
-        <div class="widget-header cursor-move bg-gray-800 text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
+        <div class="window-header cursor-move bg-gray-800 text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
             <h2 class="font-bold text-sm tracking-wide">OUROBOROS // CORE</h2>
             <button id="export-btn" title="Export HTML" class="text-gray-400 hover:text-white transition-colors mr-2">
                 <svg class="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -82,10 +82,10 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
 * State Transition: You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
 * Preservation: NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
 * UI Standards:
-  *  Create "Widgets" as `div` elements with absolute positioning.
+  *  Create "Windows" as `div` elements with absolute positioning.
   *  Use Tailwind CSS classes for all styling.
-  *  Ensure new widgets have a higher z-index than existing ones.
-  *  Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
+  *  Ensure new windows have a higher z-index than existing ones.
+  *  Implement drag-and-drop functionality for new windows using the existing `interact.js` or similar mechanism present in the global scope.
 * Efficiency:
   *  Use `import` from `https://esm.sh/` for external libraries.
   *  Do not inline large Base64 images or SVGs; use external URLs.
@@ -166,7 +166,7 @@ You must provide your solution as a SINGLE, valid JavaScript code block fenced w
         function setupDraggable() {
             interact('.draggable')
                 .draggable({
-                    allowFrom: '.widget-header',
+                    allowFrom: '.window-header',
                     inertia: true,
                     autoScroll: true,
                     listeners: {
