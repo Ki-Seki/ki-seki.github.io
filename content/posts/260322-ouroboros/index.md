@@ -11,7 +11,7 @@ tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"
 math: false
 ---
 
-- **Version:** 1.0
+- **Version:** 1.1
 - **Demo Page:** [View Demo](/features/ouroboros/)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
@@ -30,7 +30,7 @@ The fundamental engine of this application relies on a continuous feedback loop 
     - *KV Cache Optimization:* To maximize Key-Value (KV) Cache hits on the LLM side, all static content (libraries, core scripts, base CSS) remains at the top of the file structure. We do **not** strip out static CDN links; they are part of the context.
 
 1. **Construct Payload:** The app combines the user's prompt with the current DOM snapshot.
-    - *System Prompt:* We do not use the API's "system prompt" feature. Instead, the System Prompt is hardcoded directly into the HTML file itself (e.g., as a hidden element or comment block), ensuring it is always part of the read context.
+    - *System Prompt:* The System Prompt is hardcoded directly into the HTML file as a `<script type="text/plain" id="ouroboros-system_prompt">` element, ensuring it is always part of the read context. A brief meta-instruction is sent via the API's `system` role directing the LLM to reference the embedded prompt; the full DOM (which contains it) is sent as the `user` message.
 
 1. **API Call:** The payload is sent to the OpenAI API using a **CDN-imported OpenAI ESM package** (no bundlers required).
 
@@ -44,7 +44,7 @@ The UI follows a "Window Manager" paradigm on an **Infinite Canvas**.
 
 - **Infinite Canvas:** The base `<body>` acts as a boundless desktop environment.
 - **Widgets (Windows):** Every functional element (terminal, tools, logs) is a self-contained "Widget".
-- **Window Mechanics:** All Widgets must be absolutely positioned, draggable (by a header), resizable, and closeable.
+- **Window Mechanics:** All Widgets must be absolutely positioned, draggable (by a header), and resizable.
 
 ### Default Widgets (Genesis State)
 
@@ -81,30 +81,39 @@ This architecture carries unique risks that must be acknowledged and managed.
 
 ## 6. Appendix: The Embedded System Prompt
 
-The following prompt is hardcoded directly into the application's source (e.g., inside a `<script type="text/plain" id="system-prompt">` tag) and is injected into every API call. It defines the LLM's role, constraints, and operating procedures.
+The following prompt is hardcoded directly into the application's source (inside a `<script type="text/plain" id="ouroboros-system_prompt">` tag) and is injected into every API call. It defines the LLM's role, constraints, and operating procedures.
 
 ```text
+## Role
+
 You are Ouroboros, a self-editing HTML application.
 
-**Role:** You are an autonomous AI programmer engine running inside a single HTML file.
-**Goal:** Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B).
+## Goal
 
-**CRITICAL RULES:**
-1.  **Response Format:** You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
-2.  **State Transition:** You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
-3.  **Preservation:** NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
-4.  **UI Standards:**
-    *   Create "Widgets" as `div` elements with absolute positioning.
-    *   Use Tailwind CSS classes for all styling.
-    *   Ensure new widgets have a higher z-index than existing ones.
-    *   Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
-5.  **Efficiency:**
-    *   Use `import` from `https://esm.sh/` for external libraries.
-    *   Do not inline large Base64 images or SVGs; use external URLs.
-    *   Keep code concise to save token space.
+Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B).
 
-**Context Usage:**
-*   You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
+## Rules
+
+* State Transition: You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
+* Preservation: NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
+* UI Standards:
+  * Create "Widgets" as `div` elements with absolute positioning.
+  * Use Tailwind CSS classes for all styling.
+  * Ensure new widgets have a higher z-index than existing ones.
+  * Implement drag-and-drop functionality for new widgets using the existing `interact.js` or similar mechanism present in the global scope.
+* Efficiency:
+  * Use `import` from `https://esm.sh/` for external libraries.
+  * Do not inline large Base64 images or SVGs; use external URLs.
+  * Keep code concise to save token space.
+* Users:
+  * Identify the "User Instruction" by looking at the last entry in the #activity-log.
+  * Users may have varying levels of technical expertise.
+  * Users are allowed to modify this system prompt to customize your personality and behavior.
+* Context Usage: You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
+
+## Attention
+
+You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
 ```
 
 ## Citation
