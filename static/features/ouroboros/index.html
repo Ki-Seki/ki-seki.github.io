@@ -311,11 +311,20 @@ You must provide your solution as a SINGLE, valid JavaScript code block fenced w
 
         function executeMutation(code) {
             try {
-                const mutantFn = new Function('els', 'state', code);
-                mutantFn(els, state);
+                // Wrap in IIFE to avoid polluting global scope unintentionally
+                const script = document.createElement('script');
+                script.textContent = `(function() {
+                    try {
+                        ${code}
+                    } catch(e) {
+                        console.error("Mutation Script Error:", e);
+                        alert("Mutation script failed: " + e.message);
+                    }
+                })();`;
+                document.body.appendChild(script);
+                script.remove();
             } catch (e) {
-                console.error("Mutation Script Error:", e);
-                alert("Mutation script failed: " + e.message);
+                console.error("Injection Error:", e);
             }
         }
 
