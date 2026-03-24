@@ -91,13 +91,14 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
   *  Do not inline large Base64 images or SVGs; use external URLs.
   *  Keep code concise to save token space.
 * Users:
+  * Identify the "User Instruction" by looking at the last entry in the #activity-log.
   * Users may have varying levels of technical expertise.
   * Users are allowed to modify this system prompt to customize your personality and behavior.
 * Context Usage: You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
 
 ## Attention
 
- You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
+You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
     </script>
 
     <!-- MAIN APPLICATION LOGIC -->
@@ -259,7 +260,6 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
 
             try {
                 // 1. Sync User Prompt to DOM and Capture State
-                els.promptInput.textContent = prompt;
                 const currentDOM = document.documentElement.outerHTML;
                 console.log('API Query:', currentDOM);
 
@@ -279,7 +279,7 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
                 // 3. Create API Call
                 const completion = await openai.chat.completions.create({
                     messages: [
-                        { role: 'system', content: "Follow the embedded system prompt defined in els.systemPrompt.textContent" },
+                        { role: 'system', content: "Follow the embedded system prompt defined in els.systemPrompt.textContent, identify the User Instruction in the last entry of the #activity-log, and respond in a SINGLE, valid JavaScript code block fenced with ```javascript ... ```" },
                         { role: 'user', content: currentDOM }
                     ],
                     temperature: 0.1,
@@ -311,7 +311,8 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
 
         function executeMutation(code) {
             try {
-                new Function(code)();
+                const mutantFn = new Function('els', 'state', code);
+                mutantFn(els, state);
             } catch (e) {
                 console.error("Mutation Script Error:", e);
                 alert("Mutation script failed: " + e.message);
