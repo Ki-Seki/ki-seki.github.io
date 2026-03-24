@@ -3,28 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ouroboros - Infinite Canvas</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐍</text></svg>">
-    <!-- Tailwind CSS for rapid styling -->
+    <title>Ouroboros</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐍%3C/text%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Interact.js for drag and drop -->
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
     <style>
         body {
-            background-color: #f3f4f6;
             background-image: radial-gradient(#d1d5db 1px, transparent 1px);
             background-size: 20px 20px;
-            overflow: hidden; /* Infinite canvas feel, manage scroll info internally if needed or let browser handle partials */
-            width: 100vw;
-            height: 100vh;
-        }
-        .widget {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            touch-action: none;
-            user-select: none;
-        }
-        .widget-header {
-            cursor: move;
         }
         /* Scrollbar styles for logs */
         ::-webkit-scrollbar {
@@ -42,12 +28,12 @@
         }
     </style>
 </head>
-<body class="relative w-full h-full font-sans text-gray-800">
+<body class="bg-gray-100 overflow-hidden relative w-screen h-screen font-sans text-gray-800">
 
     <!-- GENESIS WIDGET: CORE -->
-    <div id="ouroboros-core" class="draggable resizable absolute top-10 left-10 w-[400px] bg-white rounded-lg border border-gray-300 flex flex-col z-50 widget" style="transform: translate(0px, 0px);" data-x="0" data-y="0">
+    <div id="ouroboros-core" class="draggable resizable absolute top-10 left-10 w-[400px] bg-white rounded-lg border border-gray-300 shadow-md touch-none select-none flex flex-col z-50" style="transform: translate(0px, 0px);" data-x="0" data-y="0">
         <!-- Header -->
-        <div class="widget-header bg-gray-800 text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
+        <div class="widget-header cursor-move bg-gray-800 text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
             <h2 class="font-bold text-sm tracking-wide">OUROBOROS // CORE</h2>
             <button id="export-btn" title="Export HTML" class="text-gray-400 hover:text-white transition-colors mr-2">
                 <svg class="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -78,7 +64,6 @@
 
         <!-- Activity Log -->
         <div class="flex-1 p-4 overflow-y-auto min-h-[150px] max-h-[300px] bg-white text-xs font-mono select-text" id="activity-log">
-            <div class="text-gray-400 italic">Waiting for input...</div>
         </div>
 
         <!-- Terminal / Prompt Box -->
@@ -183,24 +168,14 @@ You are Ouroboros, a self-editing HTML application.
             updateTokenEstimate();
 
             // Watch for DOM changes to update token count
-            // Debounce the observer to prevent rapid firing and potential loops
             let timeout;
-            const observer = new MutationObserver((mutations) => {
-                // Check if mutations are only from the token counter itself to avoid loops
-                const isTokenUpdate = mutations.every(m =>
-                    m.target === els.tokenCount ||
-                    els.tokenCount.contains(m.target) ||
-                    m.target === els.log // also ignore log updates to prevent loop during streaming
-                );
-
-                if (isTokenUpdate) return;
-
+            new MutationObserver(mutations => {
+                if (mutations.every(m => els.tokenCount.contains(m.target) || els.log.contains(m.target))) return;
                 clearTimeout(timeout);
                 timeout = setTimeout(updateTokenEstimate, 500);
-            });
-            observer.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+            }).observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
 
-            logMessage('system', 'Ouroboros Genesis State loaded.');
+            logMessage('system', 'Ouroboros loaded.');
         }
 
         // --- INTERACTION ---
@@ -209,14 +184,20 @@ You are Ouroboros, a self-editing HTML application.
                 .draggable({
                     allowFrom: '.widget-header',
                     inertia: true,
-                    modifiers: [],
                     autoScroll: true,
                     listeners: {
-                        move: dragMoveListener,
+                        move: function (event) {
+                            var target = event.target;
+                            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                            target.style.transform = `translate(${x}px, ${y}px)`;
+                            target.dataset.x = x;
+                            target.dataset.y = y;
+                        }
                     }
                 })
                 .resizable({
-                    edges: { left: true, right: true, bottom: true, top: true },
+                    edges: { left: false, right: true, bottom: true, top: false },
                     listeners: {
                         move: function (event) {
                             let { x, y } = event.target.dataset;
@@ -235,95 +216,50 @@ You are Ouroboros, a self-editing HTML application.
                 });
         }
 
-        function dragMoveListener(event) {
-            var target = event.target;
-            // keep the dragged position in the data-x/data-y attributes
-            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-            // translate the element
-            target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-
-            // update the posiion attributes
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-        }
-
         // --- LOGIC ---
         function exportHtml() {
-            // Get the full HTML
-            const htmlContent = document.documentElement.outerHTML;
-
-            // Create a Blob containing the HTML with DOCTYPE
-            const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], { type: 'text/html' });
-
-            // Create a temporary anchor element and trigger download
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'ouroboros_export_' + Date.now() + '.html';
-            document.body.appendChild(a);
+            a.href = URL.createObjectURL(new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html' }));
+            a.download = `ouroboros_${new Date().toLocaleString('sv').replace(/[: ]/g,'-')}.html`;
             a.click();
-
-            // Clean up
-            document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
-            logMessage('system', 'Canvas exported successfully.');
+            logMessage('system', 'Exported successfully.');
         }
 
         function saveApiSettings() {
-            const key = els.apiKeyInput.value.trim();
-            const base = els.apiBaseInput.value.trim();
-            const model = els.modelNameInput.value.trim() || 'gpt-4o';
+            state.apiKey = els.apiKeyInput.value.trim();
+            state.apiBase = els.apiBaseInput.value.trim();
+            state.modelName = els.modelNameInput.value.trim();
 
-            state.apiKey = key;
-            state.apiBase = base;
-            state.modelName = model;
-
-            localStorage.setItem('ouroboros_api_key', key);
-            localStorage.setItem('ouroboros_model_name', model);
-
-            if (base) {
-                localStorage.setItem('ouroboros_api_base', base);
-            } else {
-                localStorage.removeItem('ouroboros_api_base');
-            }
+            localStorage.setItem('ouroboros_api_key', state.apiKey);
+            localStorage.setItem('ouroboros_model_name', state.modelName);
+            state.apiBase ? localStorage.setItem('ouroboros_api_base', state.apiBase) : localStorage.removeItem('ouroboros_api_base');
 
             logMessage('system', 'API Configuration saved securely to localStorage.');
-            alert('Settings Saved');
         }
 
         function logMessage(actor, text) {
-            const entry = document.createElement('div');
-            entry.className = 'mb-2';
+            const isUser = actor === 'user';
+            const color = isUser ? 'text-blue-600' : 'text-green-600';
+            const label = isUser ? 'USER' : 'SYSTEM';
             const timestamp = new Date().toLocaleTimeString();
-            const color = actor === 'user' ? 'text-blue-600' : 'text-green-600';
-            const label = actor === 'user' ? 'USER' : 'SYSTEM';
 
-            entry.innerHTML = `
-                <span class="text-xs text-gray-400">[${timestamp}]</span>
-                <span class="font-bold ${color}">${label}:</span>
-                <span>${text}</span>
-            `;
-            els.log.appendChild(entry);
+            els.log.insertAdjacentHTML('beforeend', `
+                <div class="mb-2">
+                    <span class="text-xs text-gray-400">[${timestamp}]</span>
+                    <span class="font-bold ${color}">${label}:</span>
+                    <span>${text}</span>
+                </div>
+            `);
             els.log.scrollTop = els.log.scrollHeight;
         }
 
         function updateTokenEstimate() {
-            // Rough estimation: 1 token ~= 4 chars of HTML
-            const htmlContent = document.documentElement.outerHTML;
-            const charCount = htmlContent.length;
-            const tokenCount = Math.ceil(charCount / 4);
+            const tokenCount = Math.ceil(document.documentElement.outerHTML.length / 4);
             const percentage = Math.min((tokenCount / 128000) * 100, 100).toFixed(1);
 
             els.tokenCount.textContent = `~ ${tokenCount.toLocaleString()} / 128k (${percentage}%)`;
-
-            if (tokenCount > 96000) { // 75%
-                els.tokenCount.classList.add('text-red-600');
-                els.tokenCount.classList.remove('text-gray-500');
-            } else {
-                els.tokenCount.classList.remove('text-red-600');
-                els.tokenCount.classList.add('text-gray-500');
-            }
+            els.tokenCount.className = tokenCount > 96000 ? 'text-red-600' : 'text-gray-500';
         }
 
         async function handleExecution() {
@@ -352,12 +288,9 @@ You are Ouroboros, a self-editing HTML application.
                 // 2. Prepare OpenAI Client
                 const clientConfig = {
                     apiKey: state.apiKey,
-                    dangerouslyAllowBrowser: true
+                    dangerouslyAllowBrowser: true,
+                    ...(state.apiBase && { baseURL: state.apiBase })
                 };
-
-                if (state.apiBase) {
-                    clientConfig.baseURL = state.apiBase;
-                }
 
                 const openai = new OpenAI(clientConfig);
 
@@ -376,12 +309,10 @@ You are Ouroboros, a self-editing HTML application.
                 const content = completion.choices[0].message.content;
                 logMessage('system', 'Received response. Executing mutation...');
 
-                // 5. Extract Code
-                const codeBlock = content.match(/```(?:javascript)?\s*([\s\S]*?)\s*```/);
-
-                if (codeBlock && codeBlock[1]) {
-                    const code = codeBlock[1];
-                    executeMutation(code);
+                // 5. Extract Code & Execute
+                const codeMatch = content.match(/```(?:javascript)?\s*([\s\S]*?)\s*```/);
+                if (codeMatch?.[1]) {
+                    executeMutation(codeMatch[1]);
                     logMessage('system', 'Mutation executed successfully.');
                     els.promptInput.value = '';
                 } else {
@@ -399,36 +330,19 @@ You are Ouroboros, a self-editing HTML application.
 
         function executeMutation(code) {
             try {
-                // Wrap in IIFE to avoid polluting global scope unintentionally,
-                // though we want it to affect DOM.
-                const script = document.createElement('script');
-                script.textContent = `(function() {
-                    try {
-                        ${code}
-                    } catch(e) {
-                        console.error("Mutation Script Error:", e);
-                        alert("Mutation script failed: " + e.message);
-                    }
-                })();`;
-                document.body.appendChild(script);
-                // Clean up script tag immediately
-                script.remove();
+                new Function(code)();
             } catch (e) {
-                console.error("Injection Error:", e);
+                console.error("Mutation Script Error:", e);
+                alert("Mutation script failed: " + e.message);
             }
         }
 
         function setLoading(loading) {
             state.isProcessing = loading;
-            if (loading) {
-                els.btnText.classList.add('invisible');
-                els.spinner.classList.remove('hidden');
-                els.executeBtn.classList.add('cursor-not-allowed', 'opacity-75');
-            } else {
-                els.btnText.classList.remove('invisible');
-                els.spinner.classList.add('hidden');
-                els.executeBtn.classList.remove('cursor-not-allowed', 'opacity-75');
-            }
+            els.btnText.classList.toggle('invisible', loading);
+            els.spinner.classList.toggle('hidden', !loading);
+            els.executeBtn.classList.toggle('cursor-not-allowed', loading);
+            els.executeBtn.classList.toggle('opacity-75', loading);
         }
 
         // Start
