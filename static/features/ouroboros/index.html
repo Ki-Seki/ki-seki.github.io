@@ -160,6 +160,81 @@ You must provide your solution as a SINGLE, valid JavaScript code block fenced w
             }).observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
 
             logMessage('system', 'Ouroboros loaded.');
+
+            // Show one-time landing intro
+            showLandingIfNeeded();
+        }
+
+        // --- LANDING INTRO ---
+        function showLandingIfNeeded() {
+            if (localStorage.getItem('ouroboros_landing_shown')) return;
+
+            const landing = document.createElement('div');
+            landing.id = 'ouroboros-landing';
+            landing.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm';
+            landing.setAttribute('role', 'dialog');
+            landing.setAttribute('aria-modal', 'true');
+            landing.setAttribute('aria-labelledby', 'landing-title');
+            landing.innerHTML = `
+                <div class="bg-white rounded-xl shadow-2xl max-w-lg w-[90%] p-8">
+                    <h1 id="landing-title" class="text-2xl font-bold text-gray-900 mb-0.5">Welcome to Ouroboros</h1>
+                    <p class="text-base text-gray-500 mb-6">欢迎使用 Ouroboros</p>
+                    <div class="space-y-5">
+                        <div class="flex gap-4 items-start">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs" aria-hidden="true">1</div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">Enter your <strong>API Key</strong>, <strong>Base URL</strong>, and <strong>Model Name</strong> in the settings panel.</p>
+                                <p class="text-sm text-gray-500 mt-0.5">在设置面板中填写您的 <strong>API Key</strong>、<strong>Base URL</strong> 和 <strong>Model Name</strong>。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs" aria-hidden="true">2</div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">Click <strong>Save Settings</strong> to store your configuration locally.</p>
+                                <p class="text-sm text-gray-500 mt-0.5">点击 <strong>Save Settings</strong> 将配置保存到本地。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs" aria-hidden="true">3</div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">Type your request or idea in the command input box.</p>
+                                <p class="text-sm text-gray-500 mt-0.5">在指令输入框中输入您的需求或想法。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs" aria-hidden="true">4</div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">Click <strong>Take a Bite 🐍</strong> or press <kbd class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-300 font-mono text-xs">Ctrl+Enter</kbd> to run.</p>
+                                <p class="text-sm text-gray-500 mt-0.5">点击 <strong>Take a Bite 🐍</strong> 或按 <kbd class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-300 font-mono text-xs">Ctrl+Enter</kbd> 执行。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="landing-close-btn" class="mt-8 w-full bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors">
+                        Got it! &nbsp;/&nbsp; 明白了！
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(landing);
+
+            const closeBtn = document.getElementById('landing-close-btn');
+
+            function closeLanding() {
+                localStorage.setItem('ouroboros_landing_shown', '1');
+                document.removeEventListener('keydown', onKeyDown);
+                landing.remove();
+            }
+
+            function onKeyDown(e) {
+                if (e.key === 'Escape') { closeLanding(); return; }
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    closeBtn.focus();
+                }
+            }
+
+            closeBtn.addEventListener('click', closeLanding);
+            document.addEventListener('keydown', onKeyDown);
+            closeBtn.focus();
         }
 
         // --- INTERACTION ---
