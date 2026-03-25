@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ouroboros</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐍%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-950 text-gray-100 font-sans">
+
+    <!-- LANGUAGE TOGGLE -->
+    <div class="fixed top-4 right-4 z-50">
+        <div class="flex rounded-lg overflow-hidden border border-gray-700 text-xs font-medium">
+            <button id="lang-en" onclick="setLang('en')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 transition-colors">EN</button>
+            <button id="lang-zh" onclick="setLang('zh')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 transition-colors">中文</button>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <section class="flex flex-col items-center justify-center text-center px-6 pt-24 pb-16">
+        <div class="text-6xl mb-6 select-none">🐍</div>
+        <h1 class="text-5xl font-black tracking-tight mb-3">Ouroboros</h1>
+        <p class="text-xl text-gray-400 mb-1 lang-en">A self-editing HTML application powered by AI</p>
+        <p class="text-xl text-gray-400 mb-1 lang-zh hidden">由 AI 驱动的自我编辑 HTML 应用</p>
+        <p class="text-sm text-gray-600 mt-2 lang-en">The snake that eats its own tail — a web app that rewrites itself.</p>
+        <p class="text-sm text-gray-600 mt-2 lang-zh hidden">衔尾蛇——一个能重写自身的网页应用。</p>
+    </section>
+
+    <!-- CAPABILITIES -->
+    <section class="max-w-3xl mx-auto px-6 pb-16">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-500 text-center mb-8 lang-en">What can it do?</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-500 text-center mb-8 lang-zh hidden">它能做什么？</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="capability-card rounded-lg border border-gray-800 bg-gray-900 px-5 py-4 flex gap-3 items-start">
+                <span class="text-xl mt-0.5">🔄</span>
+                <div>
+                    <p class="text-sm font-semibold text-gray-200 lang-en">Self-modification</p>
+                    <p class="text-sm font-semibold text-gray-200 lang-zh hidden">自我修改</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-en">Redesign its own layout, logic, or style — even delete itself.</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-zh hidden">重新设计自身的布局、逻辑或样式，甚至删除自身。</p>
+                </div>
+            </div>
+            <div class="capability-card rounded-lg border border-gray-800 bg-gray-900 px-5 py-4 flex gap-3 items-start">
+                <span class="text-xl mt-0.5">🎨</span>
+                <div>
+                    <p class="text-sm font-semibold text-gray-200 lang-en">Rapid prototyping</p>
+                    <p class="text-sm font-semibold text-gray-200 lang-zh hidden">快速原型设计</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-en">Design and iterate on UI prototypes like Google Stitch.</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-zh hidden">像 Google Stitch 一样快速设计和迭代 UI 原型。</p>
+                </div>
+            </div>
+            <div class="capability-card rounded-lg border border-gray-800 bg-gray-900 px-5 py-4 flex gap-3 items-start">
+                <span class="text-xl mt-0.5">🎮</span>
+                <div>
+                    <p class="text-sm font-semibold text-gray-200 lang-en">Mini-games</p>
+                    <p class="text-sm font-semibold text-gray-200 lang-zh hidden">小游戏</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-en">Build Snake, Tetris, or any browser game on the fly.</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-zh hidden">即时构建贪吃蛇、俄罗斯方块或任意浏览器小游戏。</p>
+                </div>
+            </div>
+            <div class="capability-card rounded-lg border border-gray-800 bg-gray-900 px-5 py-4 flex gap-3 items-start">
+                <span class="text-xl mt-0.5">🤖</span>
+                <div>
+                    <p class="text-sm font-semibold text-gray-200 lang-en">Self-evolving agent</p>
+                    <p class="text-sm font-semibold text-gray-200 lang-zh hidden">自进化 Agent</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-en">Turn the page into a multi-step autonomous workflow agent.</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-zh hidden">将页面变成能执行多步操作的自主工作流 agent。</p>
+                </div>
+            </div>
+            <div class="capability-card rounded-lg border border-gray-800 bg-gray-900 px-5 py-4 flex gap-3 items-start">
+                <span class="text-xl mt-0.5">🖥️</span>
+                <div>
+                    <p class="text-sm font-semibold text-gray-200 lang-en">Simulated OS</p>
+                    <p class="text-sm font-semibold text-gray-200 lang-zh hidden">模拟操作系统</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-en">Evolve it into a Windows-like desktop environment.</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-zh hidden">让它进化成类 Windows 的桌面环境。</p>
+                </div>
+            </div>
+            <div class="capability-card rounded-lg border border-gray-800 bg-gray-900 px-5 py-4 flex gap-3 items-start">
+                <span class="text-xl mt-0.5">📦</span>
+                <div>
+                    <p class="text-sm font-semibold text-gray-200 lang-en">Single-file distribution</p>
+                    <p class="text-sm font-semibold text-gray-200 lang-zh hidden">单文件分发</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-en">Export any evolved app as a standalone HTML file to share.</p>
+                    <p class="text-xs text-gray-500 mt-0.5 lang-zh hidden">将进化后的应用导出为独立 HTML 文件进行分享。</p>
+                </div>
+            </div>
+        </div>
+        <p class="text-xs text-center text-gray-600 mt-5 lang-en">The upper limit of its capabilities depends on the underlying model. Currently <strong class="text-gray-500">Gemini 3 Flash Preview</strong> offers the best speed–quality balance.</p>
+        <p class="text-xs text-center text-gray-600 mt-5 lang-zh hidden">能力上限取决于基模水平。综合来看，目前 <strong class="text-gray-500">Gemini 3 Flash Preview</strong> 是最佳选择。</p>
+    </section>
+
+    <!-- SETUP STEPS -->
+    <section class="max-w-2xl mx-auto px-6 pb-16">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-500 text-center mb-8 lang-en">Getting started</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-500 text-center mb-8 lang-zh hidden">快速上手</h2>
+        <ol class="space-y-5">
+            <li class="flex gap-4 items-start">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-800 border border-gray-700 text-gray-300 flex items-center justify-center font-bold text-sm">1</div>
+                <div class="pt-1">
+                    <p class="text-sm font-medium text-gray-200 lang-en">Enter your <span class="text-blue-400 font-semibold">API Key</span>, <span class="text-blue-400 font-semibold">Base URL</span>, and <span class="text-blue-400 font-semibold">Model Name</span> in the settings panel.</p>
+                    <p class="text-sm font-medium text-gray-200 lang-zh hidden">在设置面板中填写您的 <span class="text-blue-400 font-semibold">API Key</span>、<span class="text-blue-400 font-semibold">Base URL</span> 和 <span class="text-blue-400 font-semibold">Model Name</span>。</p>
+                    <p class="text-xs text-gray-500 mt-1 lang-en">Any OpenAI-compatible API endpoint works — OpenRouter, OpenAI, etc.</p>
+                    <p class="text-xs text-gray-500 mt-1 lang-zh hidden">任何 OpenAI 兼容的 API 均可使用，如 OpenRouter、OpenAI 等。</p>
+                </div>
+            </li>
+            <li class="flex gap-4 items-start">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-800 border border-gray-700 text-gray-300 flex items-center justify-center font-bold text-sm">2</div>
+                <div class="pt-1">
+                    <p class="text-sm font-medium text-gray-200 lang-en">Click <span class="text-green-400 font-semibold">Save Settings</span> to store your configuration in the browser.</p>
+                    <p class="text-sm font-medium text-gray-200 lang-zh hidden">点击 <span class="text-green-400 font-semibold">Save Settings</span>，将配置保存在浏览器本地。</p>
+                </div>
+            </li>
+            <li class="flex gap-4 items-start">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-800 border border-gray-700 text-gray-300 flex items-center justify-center font-bold text-sm">3</div>
+                <div class="pt-1">
+                    <p class="text-sm font-medium text-gray-200 lang-en">Type your request or idea in the <span class="text-yellow-400 font-semibold">command input box</span>.</p>
+                    <p class="text-sm font-medium text-gray-200 lang-zh hidden">在 <span class="text-yellow-400 font-semibold">指令输入框</span> 中输入您的需求或想法。</p>
+                </div>
+            </li>
+            <li class="flex gap-4 items-start">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-800 border border-gray-700 text-gray-300 flex items-center justify-center font-bold text-sm">4</div>
+                <div class="pt-1">
+                    <p class="text-sm font-medium text-gray-200 lang-en">Click <span class="text-orange-400 font-semibold">Take a Bite 🐍</span> or press <kbd class="px-1.5 py-0.5 bg-gray-800 rounded border border-gray-600 font-mono text-xs">Ctrl+Enter</kbd> to run.</p>
+                    <p class="text-sm font-medium text-gray-200 lang-zh hidden">点击 <span class="text-orange-400 font-semibold">Take a Bite 🐍</span> 或按 <kbd class="px-1.5 py-0.5 bg-gray-800 rounded border border-gray-600 font-mono text-xs">Ctrl+Enter</kbd> 执行。</p>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <!-- LAUNCH BUTTON -->
+    <section class="flex flex-col items-center pb-24 px-6">
+        <button id="launch-btn" onclick="launch()" class="bg-white hover:bg-gray-100 text-gray-950 font-bold text-base px-10 py-3.5 rounded-xl transition-colors shadow-lg">
+            <span class="lang-en">Launch Ouroboros 🐍</span>
+            <span class="lang-zh hidden">开始使用 🐍</span>
+        </button>
+        <p class="text-xs text-gray-600 mt-4 lang-en">Your settings are stored locally and never sent anywhere.</p>
+        <p class="text-xs text-gray-600 mt-4 lang-zh hidden">您的配置仅保存在本地，不会上传至任何服务器。</p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="text-center pb-8 text-xs text-gray-700">
+        <a href="https://ki-seki.github.io/posts/260322-ouroboros/" target="_blank" class="hover:text-gray-500 transition-colors lang-en">About Ouroboros</a>
+        <a href="https://ki-seki.github.io/posts/260322-ouroboros/" target="_blank" class="hover:text-gray-500 transition-colors lang-zh hidden">关于 Ouroboros</a>
+        <span class="px-2">|</span>
+        <a href="https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html" target="_blank" class="hover:text-gray-500 transition-colors lang-en">Suggest Changes</a>
+        <a href="https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html" target="_blank" class="hover:text-gray-500 transition-colors lang-zh hidden">提交建议</a>
+    </footer>
+
+    <script>
+        // --- LANGUAGE ---
+        const LANG_KEY = 'ouroboros_lang';
+
+        function setLang(lang) {
+            localStorage.setItem(LANG_KEY, lang);
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+            document.querySelectorAll('.lang-en').forEach(el => el.classList.toggle('hidden', lang !== 'en'));
+            document.querySelectorAll('.lang-zh').forEach(el => el.classList.toggle('hidden', lang !== 'zh'));
+
+            document.getElementById('lang-en').classList.toggle('bg-white', lang === 'en');
+            document.getElementById('lang-en').classList.toggle('text-gray-950', lang === 'en');
+            document.getElementById('lang-zh').classList.toggle('bg-white', lang === 'zh');
+            document.getElementById('lang-zh').classList.toggle('text-gray-950', lang === 'zh');
+        }
+
+        // --- LAUNCH ---
+        function launch() {
+            localStorage.setItem('ouroboros_landing_shown', '1');
+            window.location.href = 'index.html';
+        }
+
+        // --- INIT ---
+        (function () {
+            const saved = localStorage.getItem(LANG_KEY);
+            const preferred = saved || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+            setLang(preferred);
+        })();
+    </script>
+</body>
+</html>
