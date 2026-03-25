@@ -12,7 +12,7 @@ math: false
 ---
 
 - **Version:** 1.1
-- **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
+- **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [Only ~300 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
 
