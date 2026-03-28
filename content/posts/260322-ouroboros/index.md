@@ -14,8 +14,8 @@ tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"
 math: false
 ---
 
-- **Version:** 1.1
-- **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [Only ~300 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
+- **Version:** 1.2
+- **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [<400 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
 
@@ -114,7 +114,7 @@ You are Ouroboros, a self-editing HTML application. Satisfy the user's request b
 You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
 
 ## Capabilities
-Web Browsing: You can fetch real-time web content by executing: `fetch('https://r.jina.ai/' + url)`. Use this whenever the user provides a URL or asks for external info.
+Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (clean reading/summarization), or `fetch('https://corsproxy.io/?url=' + encodeURIComponent(url))` for raw HTML extraction (DOM/structure-sensitive tasks); choose based on intent.
 ```
 
 ### Broader Implications
@@ -145,14 +145,14 @@ After I wrote the PRD above, Gemini 3.1 Pro generated a highly functional versio
 
 Tracking the major iterations of Ouroboros ([static/features/ouroboros](https://github.com/Ki-Seki/ki-seki.github.io/tree/main/static/features/ouroboros)) development, from the initial concept to the current version.
 
-### v1.2 (WIP, current)
+### v1.2 (WIP)
 
 v1.2 focuses on onboarding, discoverability, and safer usage communication.
 
 - **New bilingual landing page (EN/ZH):** Added `/features/ouroboros/landing.html` as a dedicated entry point before the core app.
 - **Security and privacy notice added:** Explicitly documents that AI-generated JavaScript is executed in-browser and API settings are stored in `localStorage`, with guidance to avoid sensitive data.
 - **Better feature framing for non-technical users:** Added capability cards describing practical usage scenarios. Introduced a structured quick-start flow (API setup, save config, prompt, execute) and recommended model callouts.
-- **System prompt capability extension:** Added an explicit web-browsing capability instruction using `fetch('https://r.jina.ai/' + url)` for URL/external-info requests.
+- **System prompt capability extension:** Added an explicit web-browsing capability instruction using jina.ai or corsproxy.io for URL/external-info requests.
 - **Footer wording refinement in demo:** Updated footer CTA from `Suggest Changes` to `Source Code` for clearer intent.
 
 ### v1.1 ([`f102f3b`](https://github.com/Ki-Seki/ki-seki.github.io/commit/f102f3b))

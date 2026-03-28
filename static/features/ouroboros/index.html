@@ -94,7 +94,7 @@ You are Ouroboros, a self-editing HTML application. Satisfy the user's request b
 You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
 
 ## Capabilities
-Web Browsing: You can fetch real-time web content by executing: `fetch('https://r.jina.ai/' + url)`. Use this whenever the user provides a URL or asks for external info.
+Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (clean reading/summarization), or `fetch('https://corsproxy.io/?url=' + encodeURIComponent(url))` for raw HTML extraction (DOM/structure-sensitive tasks); choose based on intent.
     </script>
 
     <!-- MAIN APPLICATION LOGIC -->
