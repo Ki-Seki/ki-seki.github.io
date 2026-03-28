@@ -157,7 +157,7 @@ v1.2 focuses on onboarding, discoverability, and safer usage communication.
 - **New bilingual landing page (EN/ZH):** Added `/features/ouroboros/landing.html` as a dedicated entry point before the core app.
 - **Security and privacy notice added:** Explicitly documents that AI-generated JavaScript is executed in-browser and API settings are stored in `localStorage`, with guidance to avoid sensitive data.
 - **Better feature framing for non-technical users:** Added capability cards describing practical usage scenarios. Introduced a structured quick-start flow (API setup, save config, prompt, execute) and recommended model callouts.
-- **System prompt capability extension:** Added an explicit web-browsing capability instruction using jina.ai or corsproxy.io for URL/external-info requests.
+- **System prompt capability extension:** Added an explicit web-browsing capability instruction using `r.jina.ai` or `corsproxy.io` for URL/external-info requests.
 - **Footer wording refinement in demo:** Updated footer CTA from `Suggest Changes` to `Source Code` for clearer intent.
 
 ### v1.1 ([`f102f3b`](https://github.com/Ki-Seki/ki-seki.github.io/commit/f102f3b))
