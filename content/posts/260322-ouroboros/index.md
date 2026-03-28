@@ -19,6 +19,11 @@ math: false
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
 
+{{< media
+src="https://www.youtube.com/watch?v=b9H8kX_NKn4"
+caption="Ouroboros Demo"
+>}}
+
 ## Executive Summary
 
 Project Ouroboros is a standalone `.html` file that acts as a boundless, draggable workspace ("Infinite Canvas"). It contains an integrated LLM loop (via OpenAI) that reads the current state of the document's DOM as its context.
