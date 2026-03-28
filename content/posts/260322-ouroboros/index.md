@@ -3,6 +3,9 @@ date: '2026-03-22T18:21:33+08:00'
 title: 'Product Requirements Document of Ouroboros'
 author:
   - Shichao Song
+  - Qingchen Yu
+  - Huayi Lai
+  - Xiaonan Zhang
 summary: 'An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.'
 cover:
     image: "process.png"
@@ -11,10 +14,15 @@ tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"
 math: false
 ---
 
-- **Version:** 1.1
-- **Demo Page:** [View Demo](/features/ouroboros/), [Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
+- **Version:** 1.2
+- **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [<400 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
+
+{{< media
+src="https://www.youtube.com/watch?v=b9H8kX_NKn4"
+caption="Ouroboros Demo"
+>}}
 
 ## Executive Summary
 
@@ -87,15 +95,9 @@ The following prompt is hardcoded directly into the application's source (inside
 
 ```markdown
 ## Role
-
-You are Ouroboros, a self-editing HTML application.
-
-## Goal
-
-Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B).
+You are Ouroboros, a self-editing HTML application. Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B).
 
 ## Rules
-
 * State Transition: You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
 * Preservation: NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
 * UI Standards:
@@ -114,8 +116,10 @@ Satisfy the user's request by mutating the current DOM (State A) into a new, fun
 * Context Usage: You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
 
 ## Attention
-
 You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
+
+## Capabilities
+Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (clean reading/summarization), or `fetch('https://corsproxy.io/?url=' + encodeURIComponent(url))` for raw HTML extraction (DOM/structure-sensitive tasks); choose based on intent.
 ```
 
 ### Broader Implications
@@ -140,7 +144,42 @@ Amidst this evolution of algorithms and models, I kept wondering if there were a
 
 However, I never got around to actually building it. I assumed I would need a diffusion-like modeling approach—which was my original plan. After finally finishing *Guided Infilling Modeling: Mining Knowledge from LLMs as Probabilistic Databases*, I decided to test if this idea could work via standard prompting. To my surprise, today's models achieved it on the very first try.
 
-After I wrote the PRD above, Gemini 3.1 Pro generated a highly functional version of Ouroboros in a single shot. Version 1.1 improved upon the original by refining the context management mechanism and significantly compressing the initial token count.
+After I wrote the PRD above, Gemini 3.1 Pro generated a highly functional version of Ouroboros in a single shot.
+
+## Change Log
+
+Tracking the major iterations of Ouroboros ([static/features/ouroboros](https://github.com/Ki-Seki/ki-seki.github.io/tree/main/static/features/ouroboros)) development, from the initial concept to the current version.
+
+### v1.2 (WIP)
+
+v1.2 focuses on onboarding, discoverability, and safer usage communication.
+
+- **New bilingual landing page (EN/ZH):** Added `/features/ouroboros/landing.html` as a dedicated entry point before the core app.
+- **Security and privacy notice added:** Explicitly documents that AI-generated JavaScript is executed in-browser and API settings are stored in `localStorage`, with guidance to avoid sensitive data.
+- **Better feature framing for non-technical users:** Added capability cards describing practical usage scenarios. Introduced a structured quick-start flow (API setup, save config, prompt, execute) and recommended model callouts.
+- **System prompt capability extension:** Added an explicit web-browsing capability instruction using `r.jina.ai` or `corsproxy.io` for URL/external-info requests.
+- **Footer wording refinement in demo:** Updated footer CTA from `Suggest Changes` to `Source Code` for clearer intent.
+
+### v1.1 ([`f102f3b`](https://github.com/Ki-Seki/ki-seki.github.io/commit/f102f3b))
+
+v1.1 is a major synchronization release that aligns the PRD and implementation while simplifying the runtime code.
+
+- **Terminology standardization:** Replaced `Widget` wording with `Window` across documentation and embedded prompt for consistency with the window-manager UX.
+- **Documentation structure cleanup:** Removed numeric heading prefixes, improved section flow, and clarified default core components.
+- **Embedded system prompt redesigned:** Reorganized into structured sections (`Role`, `Rules`, `Attention`), clarified user-instruction source (`#activity-log`), and tightened output-format constraints.
+- **UI simplification in core settings panel:** Consolidated settings inputs into a cleaner vertical layout and removed extra initialization clutter in activity log.
+- **Drag/resize behavior constrained for stability:** Drag handle changed to `.window-header`; resize edges narrowed to right/bottom to reduce accidental layout breakage.
+- **Prompt payload strategy updated:** Switched from custom concatenated prompt text to direct full-DOM user message plus a concise system meta-instruction referencing the embedded prompt.
+- **Client configuration improved for hosted providers:** Added default request headers (`HTTP-Referer`, `X-Title`) and compact conditional `baseURL` configuration.
+- **Execution/logging cleanup:** Simplified code extraction and loading-state toggles, improved console diagnostics, and streamlined export naming to timestamp-based filenames.
+
+### v1.0 ([`a0f0c1a`](https://github.com/Ki-Seki/ki-seki.github.io/commit/a0f0c1a))
+
+Initial public release of Ouroboros as a single-file self-modifying HTML prototype.
+
+- **Core window manager prototype shipped:** Delivered draggable/resizable core window on an infinite-canvas style background.
+- **End-to-end LLM mutation loop implemented:** Included API settings persistence, prompt input, DOM snapshot submission, fenced JavaScript extraction, and runtime mutation execution.
+- **Operational tooling included from day one:** Added token-usage monitor, activity log, keyboard shortcut execution (`Ctrl+Enter`), and HTML export functionality.
 
 ## Citation
 
