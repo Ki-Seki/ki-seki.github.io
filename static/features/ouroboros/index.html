@@ -256,7 +256,7 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
 
             try {
                 // 1. Sync User Prompt to DOM and Capture State
-                const currentDOM = document.documentElement.outerHTML;
+                const currentDOM = document.documentElement.outerHTML.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, s => /!\s*tailwindcss|--tw-border-spacing-x/.test(s) ? '<style>/* Tailwind generated CSS omitted */</style>' : s);
                 console.log('API Query:', currentDOM);
 
                 // 2. Prepare OpenAI Client
