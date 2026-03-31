@@ -14,7 +14,7 @@ tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"
 math: false
 ---
 
-- **Version:** 1.3
+- **Version:** 1.4
 - **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [<400 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
@@ -150,7 +150,12 @@ After I wrote the PRD above, Gemini 3.1 Pro generated a highly functional versio
 
 Tracking the major iterations of Ouroboros ([static/features/ouroboros](https://github.com/Ki-Seki/ki-seki.github.io/tree/main/static/features/ouroboros)) development, from the initial concept to the current version.
 
-### v1.3 (Current)
+### v1.4 (Current)
+
+- **Add CORS notice:** Added a notice about CORS issues when accessing external APIs.
+- **Model temperature:** Removed the `temperature` parameter from the API call.
+
+### v1.3 ([`a034f34`](https://github.com/Ki-Seki/ki-seki.github.io/commit/a034f34))
 
 **Tailwind payload trimming for API context:** Before sending the DOM snapshot to the LLM, Tailwind-generated `<style>` blocks are replaced with a compact placeholder. This can reduce token usage by up to 45%!
 
