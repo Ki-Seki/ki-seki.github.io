@@ -278,7 +278,6 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
                         { role: 'system', content: "Follow the embedded system prompt defined in els.systemPrompt.textContent, identify the User Instruction in the last entry of the #activity-log, and respond in a SINGLE, valid JavaScript code block fenced with ```javascript ... ```" },
                         { role: 'user', content: currentDOM }
                     ],
-                    temperature: 0.1,
                     model: state.modelName
                 });
 
