@@ -131,6 +131,7 @@ params:
     appendFilePath: true # to append file path to Edit link
 
   bingVerification: "6E98D4C7426210BBD6B43BB1C4D3581A"  # Microsoft Bing Webmaster Tools site verification token
+  clarityTagId: "vglavb3ml2"  # Microsoft Clarity analytics tag ID
 
   assets:
     disableHLJS: true
