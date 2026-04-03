@@ -1,5 +1,7 @@
 {{- /* Microsoft Bing Webmaster Tools verification */ -}}
-<meta name="msvalidate.01" content="6E98D4C7426210BBD6B43BB1C4D3581A" />
+{{- with .Site.Params.bingVerification -}}
+<meta name="msvalidate.01" content="{{ . }}">
+{{- end -}}
 
 {{ if or .Params.math .Site.Params.math }}
 <script>
