@@ -1,8 +1,3 @@
-{{- /* Microsoft Bing Webmaster Tools verification */ -}}
-{{- with .Site.Params.bingVerification -}}
-<meta name="msvalidate.01" content="{{ . }}">
-{{- end -}}
-
 {{ if or .Params.math .Site.Params.math }}
 <script>
   window.MathJax = {
