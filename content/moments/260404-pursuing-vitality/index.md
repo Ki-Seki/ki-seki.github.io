@@ -8,5 +8,5 @@ mood: "Complicated"
 
 {{< media
 src="IMG_20260404_125300.jpg"
-caption="[Xifu Haitang](https://zh.wikipedia.org/wiki/%E8%A5%BF%E5%BA%9C%E6%B5%B7%E6%A3%A0) at Taoranting Park (陶然亭公园的西府海棠)"
+caption="Xifu Haitang at Taoranting Park (陶然亭公园的[西府海棠](https://zh.wikipedia.org/wiki/%E8%A5%BF%E5%BA%9C%E6%B5%B7%E6%A3%A0))"
 >}}
