@@ -224,10 +224,15 @@
   display: block;
 }
 
-.moments-feed .moment-content p > a:first-child {
+.moments-feed .moment-content p > a:first-child.media-lightbox-trigger {
   display: block;
 }
 
+@supports selector(a:has(*)) {
+  .moments-feed .moment-content p > a:first-child:has(> img:first-child) {
+    display: block;
+  }
+}
 .moments-feed .moment-content p > img:first-child + br,
 .moments-feed .moment-content p > a:first-child + br {
   display: none;
