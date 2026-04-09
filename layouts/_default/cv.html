@@ -1,0 +1,23 @@
+{{- define "main" }}
+
+<article class="post-single">
+  <header class="post-header">
+    {{ partial "breadcrumbs.html" . }}
+    <h1 class="post-title entry-hint-parent">
+      {{ .Title }}
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+      {{ .Description }}
+    </div>
+    {{- end }}
+  </header>
+
+  {{- if .Content }}
+  <div class="post-content cv-page">
+    {{ .Content }}
+  </div>
+  {{- end }}
+</article>
+
+{{- end }}

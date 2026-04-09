@@ -1,0 +1,120 @@
+/* === CV Page === */
+
+.cv-page h2 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin: 2.75rem auto 1.5rem;
+}
+
+.cv-page h2:first-child {
+  margin-top: 0;
+}
+
+.cv-page h3 {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin: 1.75rem 0 1rem;
+  opacity: 0.7;
+}
+
+/* Remove default list styles and stack entries */
+.cv-page ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Single CV entry */
+.cv-page li {
+  padding-left: 1.1rem;
+  border-left: 2px solid var(--border);
+  margin: 0;
+}
+
+/* Reset paragraph spacing inside entries */
+.cv-page li > p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* Entry title — first paragraph in each list item */
+.cv-page li > p:first-child {
+  font-size: 0.975rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 0.2rem;
+}
+
+/* Detail paragraphs */
+.cv-page li > p:not(:first-child) {
+  font-size: 0.875rem;
+  color: var(--secondary);
+}
+
+/* Last paragraph — dates or link row */
+.cv-page li > p:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+}
+
+/* Link badges */
+.cv-page li p a {
+  display: inline-block;
+  padding: 0.12rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: none;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark .cv-page li p a {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cv-page li p a:hover {
+  background: var(--primary);
+  color: var(--theme);
+  text-decoration: none;
+  box-shadow: none;
+}
+
+/* HR divider */
+.cv-page hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+/* Footer footnotes */
+.cv-footer {
+  font-size: 0.82rem;
+  color: var(--secondary);
+  text-align: center;
+  line-height: 2;
+  margin-top: 1rem;
+}
+
+.cv-footer a {
+  color: var(--secondary);
+  box-shadow: none;
+}
