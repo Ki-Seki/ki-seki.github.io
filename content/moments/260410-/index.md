@@ -8,5 +8,5 @@ mood: "Unhinged"
 
 {{< media
 src="2cc2044e-3c88d5d4-a967-4ce4-8cc6-ea56743c3558.png"
-caption="Image"
+caption="[SBTI](https://sbti.dev/)"
 >}}
