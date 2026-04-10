@@ -1,100 +1,113 @@
 /* === CV Page === */
 
+/* Section headings: prominent with a short accent bar */
 .cv-page h2 {
-  font-size: 0.72rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--secondary);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.5rem;
-  margin: 2.75rem auto 1.5rem;
+  color: var(--primary);
+  margin: 2.75rem 0 1.25rem;
+  padding: 0;
+  letter-spacing: 0;
+  text-transform: none;
+  border: none;
+}
+
+.cv-page h2::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+  margin-top: 0.45rem;
 }
 
 .cv-page h2:first-child {
   margin-top: 0;
 }
 
+/* Subsection headings: italic category label */
 .cv-page h3 {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-style: italic;
   color: var(--secondary);
-  margin: 1.75rem 0 1rem;
-  opacity: 0.7;
+  text-transform: none;
+  letter-spacing: 0;
+  margin: 1.75rem 0 0.6rem;
+  opacity: 1;
 }
 
-/* Remove default list styles and stack entries */
+/* List: no bullets, entries divided by hairlines */
 .cv-page ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 }
 
-/* Single CV entry */
 .cv-page li {
-  padding-left: 1.1rem;
-  border-left: 2px solid var(--border);
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
   margin: 0;
+  border-left: none;
 }
 
-/* Reset paragraph spacing inside entries */
+.cv-page ul > li:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Paragraph reset inside entries */
 .cv-page li > p {
-  margin: 0;
-  line-height: 1.7;
+  margin: 0 0 0.15rem;
+  line-height: 1.65;
 }
 
-/* Entry title — first paragraph in each list item */
+/* Entry title: bold, full-size */
 .cv-page li > p:first-child {
   font-size: 0.975rem;
   font-weight: 600;
   color: var(--primary);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
 }
 
-/* Detail paragraphs */
+/* Detail paragraphs: slightly smaller, muted */
 .cv-page li > p:not(:first-child) {
   font-size: 0.875rem;
   color: var(--secondary);
 }
 
-/* Last paragraph — dates or link row */
+/* Last paragraph: links / date — slightly more spacing above */
 .cv-page li > p:last-child {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
-  margin-top: 0.4rem;
-  font-size: 0.8rem;
+  margin-top: 0.45rem;
+  font-size: 0.85rem;
+  line-height: 1.8;
 }
 
-/* Link badges */
-.cv-page li p a {
-  display: inline-block;
-  padding: 0.12rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--secondary);
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-decoration: none;
+/* Links: plain underline with subtle offset; no box-shadow */
+.cv-page a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
   box-shadow: none;
-  white-space: nowrap;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: text-decoration-color 0.2s ease;
 }
 
-.dark .cv-page li p a {
-  background: rgba(255, 255, 255, 0.08);
+.cv-page a:hover {
+  text-decoration-color: var(--primary);
+  box-shadow: none;
 }
 
-.cv-page li p a:hover {
-  background: var(--primary);
-  color: var(--theme);
+/* Publication links: separate with a middot */
+.cv-page li p a + a::before {
+  content: " · ";
+  color: var(--secondary);
   text-decoration: none;
+}
+
+/* Override PaperMod default link shadow inside post-content */
+.post-content.cv-page a {
   box-shadow: none;
 }
 
@@ -102,16 +115,15 @@
 .cv-page hr {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 2rem 0;
+  margin: 2.5rem 0 1.5rem;
 }
 
-/* Footer footnotes */
+/* Footer */
 .cv-footer {
   font-size: 0.82rem;
   color: var(--secondary);
   text-align: center;
   line-height: 2;
-  margin-top: 1rem;
 }
 
 .cv-footer a {
