@@ -1,59 +1,58 @@
 /* === CV Page === */
 
-/* Section headings: prominent with a short accent bar */
+/* Section headings: small-caps label with full-width rule */
 .cv-page h2 {
-  font-size: 1.15rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--primary);
-  margin: 2.75rem 0 1.25rem;
-  padding: 0;
-  letter-spacing: 0;
-  text-transform: none;
-  border: none;
-}
-
-.cv-page h2::after {
-  content: "";
-  display: block;
-  width: 2rem;
-  height: 3px;
-  background: var(--primary);
-  border-radius: 2px;
-  margin-top: 0.45rem;
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 3rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary);
 }
 
 .cv-page h2:first-child {
   margin-top: 0;
 }
 
-/* Subsection headings: italic category label */
+/* Subsection headings: small inline tag */
 .cv-page h3 {
-  font-size: 0.85rem;
-  font-weight: 500;
-  font-style: italic;
-  color: var(--secondary);
-  text-transform: none;
-  letter-spacing: 0;
-  margin: 1.75rem 0 0.6rem;
-  opacity: 1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 1.75rem 0 0.75rem;
+  display: inline-block;
+  background: var(--code-bg);
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
 }
 
-/* List: no bullets, entries divided by hairlines */
+/* List: no bullets, card-like entries with left accent */
 .cv-page ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .cv-page li {
-  padding: 1rem 0;
-  border-top: 1px solid var(--border);
+  padding: 0.85rem 1rem;
   margin: 0;
-  border-left: none;
+  border-left: 3px solid var(--border);
+  border-top: none;
+  background: var(--code-bg);
+  border-radius: 0 4px 4px 0;
+  transition: border-left-color 0.2s ease;
 }
 
-.cv-page ul > li:last-child {
-  border-bottom: 1px solid var(--border);
+.cv-page li:hover {
+  border-left-color: var(--primary);
 }
 
 /* Paragraph reset inside entries */
@@ -62,40 +61,40 @@
   line-height: 1.65;
 }
 
-/* Entry title: bold, full-size */
+/* Entry title: bold */
 .cv-page li > p:first-child {
-  font-size: 0.975rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 /* Detail paragraphs: slightly smaller, muted */
 .cv-page li > p:not(:first-child) {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: var(--secondary);
 }
 
-/* Last paragraph: links / date — slightly more spacing above */
+/* Last paragraph: links */
 .cv-page li > p:last-child {
-  margin-top: 0.45rem;
-  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
   line-height: 1.8;
 }
 
-/* Links: plain underline with subtle offset; no box-shadow */
-.cv-page a {
+/* Links: no box-shadow override */
+.cv-page a,
+.post-content.cv-page a {
   color: var(--primary);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--border);
-  text-underline-offset: 3px;
+  text-decoration: none;
   box-shadow: none;
-  transition: text-decoration-color 0.2s ease;
+  border-bottom: 1px solid var(--border);
+  transition: border-bottom-color 0.2s ease;
 }
 
-.cv-page a:hover {
-  text-decoration-color: var(--primary);
+.cv-page a:hover,
+.post-content.cv-page a:hover {
+  border-bottom-color: var(--primary);
   box-shadow: none;
 }
 
@@ -103,12 +102,6 @@
 .cv-page li p a + a::before {
   content: " · ";
   color: var(--secondary);
-  text-decoration: none;
-}
-
-/* Override PaperMod default link shadow inside post-content */
-.post-content.cv-page a {
-  box-shadow: none;
 }
 
 /* HR divider */
@@ -129,4 +122,5 @@
 .cv-footer a {
   color: var(--secondary);
   box-shadow: none;
+  border-bottom: none;
 }
