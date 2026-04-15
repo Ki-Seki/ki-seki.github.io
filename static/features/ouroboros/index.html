@@ -97,10 +97,10 @@ You are Ouroboros, a self-editing HTML application. Satisfy the user's request b
 * Context Usage: You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
 
 ## Agentic Mode
-When agentic mode is enabled, you can chain multiple steps to complete complex tasks. After each code block, you may optionally add a brief comment explaining what you just did and whether the task is complete. The system will observe the updated DOM and re-invoke you automatically if needed. Think of each invocation as: observe the current state, then take one action to progress toward the goal.
+When agentic mode is enabled, you can chain multiple steps to complete complex tasks. After each mutation, the system will use a separate LLM verification call to check if the user's request has been fully accomplished. If the verifier determines the task is complete, the loop stops; otherwise, you will be re-invoked with the updated DOM to continue. Focus on making one meaningful change per invocation.
 
 ## Attention
-You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. You may optionally add a brief comment after the code block to explain your progress.
+You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
 
 ## Capabilities
 Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (clean reading/summarization), or `fetch('https://corsproxy.io/?url=' + encodeURIComponent(url))` for raw HTML extraction (DOM/structure-sensitive tasks); choose based on intent.
@@ -315,12 +315,33 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
                         break;
                     }
 
-                    // 5. Observe-then-act: Check if task appears complete
-                    // Extract any comment after the code block to understand LLM's intent
-                    const afterCodeBlock = content.substring(content.lastIndexOf('```') + 3).trim();
-                    const seemsComplete = /\b(done|complete|finished|ready|all set)\b/i.test(afterCodeBlock);
+                    // 5. Verification: Use separate LLM call to check if task is complete
+                    if (!isAgentic) break;
 
-                    if (!isAgentic || seemsComplete) break;
+                    logMessage('system', 'Verifying completion...');
+
+                    // Capture updated DOM state for verification
+                    const updatedDOM = document.documentElement.outerHTML.replace(/<[s]tyle[^>]*>[\s\S]*?<\/[s]tyle>/gi, s => /!\s*tailwindcss|--tw-border-spacing-x/.test(s) ? '<style>/* Tailwind generated CSS omitted */</style>' : s);
+
+                    const verificationCompletion = await openai.chat.completions.create({
+                        messages: [
+                            { role: 'system', content: "You are verifying if a user's request has been fully accomplished. Examine the current DOM state and the user's original instruction in the #activity-log. Respond with ONLY 'YES' if the task is complete, or 'NO' if more work is needed." },
+                            { role: 'user', content: updatedDOM }
+                        ],
+                        model: state.modelName,
+                        temperature: 0
+                    });
+
+                    const verification = verificationCompletion.choices[0].message.content.trim().toUpperCase();
+                    console.log('Verification response:', verification);
+
+                    const isComplete = verification.includes('YES');
+                    if (isComplete) {
+                        logMessage('system', 'Task verified as complete.');
+                        break;
+                    } else {
+                        logMessage('system', 'Task not yet complete, continuing...');
+                    }
                 }
 
                 if (iteration >= state.maxIterations) {
