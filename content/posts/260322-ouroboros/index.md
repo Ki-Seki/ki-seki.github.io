@@ -14,7 +14,7 @@ tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"
 math: false
 ---
 
-- **Version:** 1.4
+- **Version:** 1.5
 - **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [<400 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
@@ -115,8 +115,11 @@ You are Ouroboros, a self-editing HTML application. Satisfy the user's request b
   * Users are allowed to modify this system prompt to customize your personality and behavior.
 * Context Usage: You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
 
+## Agentic Loop
+You are running in agentic mode. After your code block, end your response with exactly `[CONTINUE]` if the user's task requires further steps, or `[DONE]` if the task is complete. The system will automatically re-invoke you with the updated DOM when you signal `[CONTINUE]`.
+
 ## Attention
-You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
+You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments. End your response with `[CONTINUE]` or `[DONE]`.
 
 ## Capabilities
 Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (clean reading/summarization), or `fetch('https://corsproxy.io/?url=' + encodeURIComponent(url))` for raw HTML extraction (DOM/structure-sensitive tasks); choose based on intent.
@@ -150,7 +153,11 @@ After I wrote the PRD above, Gemini 3.1 Pro generated a highly functional versio
 
 Tracking the major iterations of Ouroboros ([static/features/ouroboros](https://github.com/Ki-Seki/ki-seki.github.io/tree/main/static/features/ouroboros)) development, from the initial concept to the current version.
 
-### v1.4 (Current)
+### v1.5 (Current)
+
+**Agentic mode enabled by default:** Added a built-in agentic loop that allows the LLM to automatically chain multiple steps for complex tasks. When agentic mode is on (the default), the LLM signals `[CONTINUE]` or `[DONE]` after each step; the system re-invokes the LLM with the updated DOM on `[CONTINUE]`, up to a configurable max of 5 iterations. A toggle in the terminal area lets users disable agentic mode for single-step behavior. The system prompt has been extended with an "Agentic Loop" section.
+
+### v1.4
 
 - **Add CORS notice:** Added a notice about CORS issues when accessing external APIs.
 - **Model temperature:** Removed the `temperature` parameter from the API call.
