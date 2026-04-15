@@ -294,7 +294,7 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
                     // 3. Create API Call
                     const completion = await openai.chat.completions.create({
                         messages: [
-                            { role: 'system', content: "Follow the embedded system prompt defined in els.systemPrompt.textContent, identify the User Instruction in the last entry of the #activity-log, and respond in a SINGLE, valid JavaScript code block fenced with ```javascript ... ```" },
+                            { role: 'system', content: "Follow the embedded system prompt defined in els.systemPrompt.textContent, identify the User Instruction in the last entry of the #activity-log, and respond in a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. End your response with [CONTINUE] or [DONE]." },
                             { role: 'user', content: currentDOM }
                         ],
                         model: state.modelName
@@ -316,7 +316,12 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
                     }
 
                     // 5. Check for agentic continuation
-                    if (!isAgentic || /\[DONE\]/i.test(content) || !/\[CONTINUE\]/i.test(content)) break;
+                    const hasContinue = /\[CONTINUE\]/i.test(content);
+                    const hasDone = /\[DONE\]/i.test(content);
+                    if (isAgentic && !hasContinue && !hasDone) {
+                        logMessage('system', 'Warning: No [CONTINUE] or [DONE] signal found. Stopping.');
+                    }
+                    if (!isAgentic || hasDone || !hasContinue) break;
                 }
 
                 if (iteration >= state.maxIterations) {
