@@ -16,4 +16,4 @@ I said to myself millions of times, "Don't panic and be confident about failure.
 
 I guess I have to continue talking to myself, again and again: failure is the norm of life.
 
-<div class="iframely-embed"><div class="iframely-responsive" style="height: 170px; padding-bottom: 0;"><a href="https://www.goodreads.com/en/book/show/36135707-how-to-find-love" data-iframely-url="https://iframely.net/MWgWyf4V?theme=dark"></a></div></div><script async src="https://iframely.net/embed.js"></script>
+<div class="iframely-embed"><div class="iframely-responsive" style="height: 170px; padding-bottom: 0;"><a href="https://www.goodreads.com/en/book/show/36135707-how-to-find-love" data-iframely-url="https://iframely.net/MWgWyf4V?theme=light"></a></div></div><script async src="https://iframely.net/embed.js"></script>
