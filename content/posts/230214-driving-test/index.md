@@ -5,7 +5,6 @@ summary: '驾考科目二各分项操作步骤与注意事项'
 tags: ['driving license', 'driving test', 'notes']
 ---
 
-
 ## 启动→前进→倒车→停车
 
 1. 关车门
