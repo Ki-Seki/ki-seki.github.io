@@ -389,10 +389,6 @@
     margin-inline-start: 0;
   }
 
-  .moment-year-separator::before {
-    display: none;
-  }
-
   .moment-year-label {
     margin-inline-start: 0;
   }
