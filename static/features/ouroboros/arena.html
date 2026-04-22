@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OuroArena</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 w-screen h-screen font-sans text-gray-800" style="background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 20px 20px;">
+    <div class="h-full flex flex-col px-4 py-4 gap-3">
+        <header class="bg-gray-800 text-white rounded-lg px-4 py-3 shadow-md">
+            <h1 class="text-lg font-bold tracking-wide">OuroArena 🐍⚔️🐍</h1>
+        </header>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="bg-white rounded-lg border border-gray-300 shadow-sm p-3">
+                <h2 class="text-sm font-bold tracking-wide mb-2">Snake A Config</h2>
+                <div class="flex flex-col gap-2">
+                    <input id="snakeA-api-key" type="password" placeholder="API Key" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                    <input id="snakeA-api-base" type="text" placeholder="Base URL" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                    <input id="snakeA-model-name" type="text" placeholder="Model Name" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                </div>
+                <button id="save-snakeA" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save A</button>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-300 shadow-sm p-3">
+                <h2 class="text-sm font-bold tracking-wide mb-2">Snake B Config</h2>
+                <div class="flex flex-col gap-2">
+                    <input id="snakeB-api-key" type="password" placeholder="API Key" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                    <input id="snakeB-api-base" type="text" placeholder="Base URL" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                    <input id="snakeB-model-name" type="text" placeholder="Model Name" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                </div>
+                <button id="save-snakeB" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save B</button>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-lg border border-gray-300 shadow-sm px-3 py-2">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
+                <label for="broadcast-command" class="text-sm font-bold whitespace-nowrap">⚡ Command:</label>
+                <textarea id="broadcast-command" placeholder="Send one command to both Ouroboros instances..." class="flex-1 text-sm border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 resize-none min-h-[44px] max-h-32"></textarea>
+                <button id="broadcast-btn" class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded transition-colors whitespace-nowrap">Broadcast 🐍🐍</button>
+            </div>
+        </section>
+
+        <main class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <iframe id="snakeA-frame" src="./index.html" title="Snake A" class="w-full h-full min-h-[320px] rounded-lg border border-gray-300 bg-white shadow-sm"></iframe>
+            <iframe id="snakeB-frame" src="./index.html" title="Snake B" class="w-full h-full min-h-[320px] rounded-lg border border-gray-300 bg-white shadow-sm"></iframe>
+        </main>
+
+        <footer class="text-center text-sm text-gray-400 pb-1">
+            <a href="./index.html" class="hover:text-gray-600 transition-colors">Back to Ouroboros</a>
+            <span class="px-1">|</span>
+            <a href="https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/arena.html" target="_blank" class="hover:text-gray-600 transition-colors">Source Code</a>
+        </footer>
+    </div>
+
+    <script>
+        const STORAGE_KEYS = {
+            snakeA: {
+                apiKey: 'arena_snakeA_api_key',
+                apiBase: 'arena_snakeA_api_base',
+                modelName: 'arena_snakeA_model_name'
+            },
+            snakeB: {
+                apiKey: 'arena_snakeB_api_key',
+                apiBase: 'arena_snakeB_api_base',
+                modelName: 'arena_snakeB_model_name'
+            }
+        };
+
+        const snakeA = {
+            frame: document.getElementById('snakeA-frame'),
+            apiKey: document.getElementById('snakeA-api-key'),
+            apiBase: document.getElementById('snakeA-api-base'),
+            modelName: document.getElementById('snakeA-model-name'),
+            saveButton: document.getElementById('save-snakeA'),
+            keys: STORAGE_KEYS.snakeA
+        };
+
+        const snakeB = {
+            frame: document.getElementById('snakeB-frame'),
+            apiKey: document.getElementById('snakeB-api-key'),
+            apiBase: document.getElementById('snakeB-api-base'),
+            modelName: document.getElementById('snakeB-model-name'),
+            saveButton: document.getElementById('save-snakeB'),
+            keys: STORAGE_KEYS.snakeB
+        };
+
+        const commandInput = document.getElementById('broadcast-command');
+        const broadcastBtn = document.getElementById('broadcast-btn');
+
+        function readConfig(snake) {
+            return {
+                apiKey: snake.apiKey.value.trim(),
+                apiBase: snake.apiBase.value.trim(),
+                modelName: snake.modelName.value.trim()
+            };
+        }
+
+        function injectConfig(frame, config) {
+            const doc = frame.contentDocument;
+            if (!doc) return;
+
+            const apiKeyInput = doc.getElementById('api-key-input');
+            const apiBaseInput = doc.getElementById('api-base-input');
+            const modelNameInput = doc.getElementById('model-name-input');
+            const saveBtn = doc.getElementById('save-key-btn');
+            if (!apiKeyInput || !apiBaseInput || !modelNameInput || !saveBtn) return;
+
+            apiKeyInput.value = config.apiKey;
+            apiBaseInput.value = config.apiBase;
+            modelNameInput.value = config.modelName;
+            saveBtn.click();
+        }
+
+        function saveSnakeConfig(snake) {
+            const config = readConfig(snake);
+            localStorage.setItem(snake.keys.apiKey, config.apiKey);
+            localStorage.setItem(snake.keys.apiBase, config.apiBase);
+            localStorage.setItem(snake.keys.modelName, config.modelName);
+            injectConfig(snake.frame, config);
+        }
+
+        function loadSnakeConfig(snake) {
+            snake.apiKey.value = localStorage.getItem(snake.keys.apiKey) || '';
+            snake.apiBase.value = localStorage.getItem(snake.keys.apiBase) || '';
+            snake.modelName.value = localStorage.getItem(snake.keys.modelName) || '';
+        }
+
+        function restoreSnakeIntoFrame(snake) {
+            injectConfig(snake.frame, readConfig(snake));
+        }
+
+        function broadcastCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+
+            [snakeA.frame, snakeB.frame].forEach((frame) => {
+                const doc = frame.contentDocument;
+                if (!doc) return;
+
+                const promptInput = doc.getElementById('user-prompt');
+                const executeBtn = doc.getElementById('execute-btn');
+                if (!promptInput || !executeBtn) return;
+
+                promptInput.value = command;
+                executeBtn.click();
+            });
+        }
+
+        [snakeA, snakeB].forEach((snake) => {
+            loadSnakeConfig(snake);
+            snake.saveButton.addEventListener('click', () => saveSnakeConfig(snake));
+            snake.frame.addEventListener('load', () => restoreSnakeIntoFrame(snake));
+        });
+
+        broadcastBtn.addEventListener('click', broadcastCommand);
+        commandInput.addEventListener('keydown', (event) => {
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault();
+                broadcastCommand();
+            }
+        });
+    </script>
+</body>
+</html>
