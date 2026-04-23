@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OuroArena</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+
+        /* ── Chips ── */
+        .chip { display:inline-flex; align-items:center; font-size:.65rem; font-weight:500;
+                padding:2px 7px; border-radius:999px; white-space:nowrap; }
+        .chip-idle     { background:#f3f4f6; color:#9ca3af; }
+        .chip-thinking { background:#fef3c7; color:#d97706; animation:pulse 1.5s ease-in-out infinite; }
+        .chip-done     { background:#dcfce7; color:#16a34a; }
+        .chip-error    { background:#fee2e2; color:#ef4444; }
+        .chip-latency  { background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-family:monospace; }
+
+        /* ── Icon button ── */
+        .ibtn { display:flex; align-items:center; justify-content:center;
+                padding:6px; border-radius:8px; border:none; background:none;
+                color:#9ca3af; cursor:pointer; transition:background .12s, color .12s; }
+        .ibtn:hover { background:#f3f4f6; color:#374151; }
+
+        /* ── Vote buttons ── */
+        .vbtn { border:none; cursor:pointer; font-size:.75rem; font-weight:600;
+                padding:7px 18px; border-radius:10px; color:#fff;
+                transition:transform .12s, box-shadow .12s; }
+        .vbtn:not(:disabled):hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,.18); }
+        .vbtn:not(:disabled):active { transform:none; }
+        .vbtn:disabled { opacity:.35; cursor:not-allowed; }
+        .vbtn-left { background: #2563eb; }
+        .vbtn-right{ background: #e11d48; }
+        .vbtn-tie { background: #64748b; }
+        .vbtn-skip { background:transparent; color:#9ca3af; }
+        .vbtn-skip:not(:disabled):hover { background:white; color:#4b5563; transform:none; box-shadow:none; }
+
+        /* ── History cards ── */
+        .hcard { background:#fff; border:1px solid #f3f4f6; border-radius:10px;
+                 padding:10px 12px; transition:border-color .15s, box-shadow .15s; }
+        .hcard:hover { border-color:#dbeafe; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+        .hbadge { font-size:.65rem; font-weight:600; padding:2px 8px;
+                  border-radius:999px; border:1px solid; white-space:nowrap; }
+        .hbadge-left { background:#eff6ff; color:#2563eb; border-color:#bfdbfe; }
+        .hbadge-right{ background:#fff1f2; color:#e11d48; border-color:#fecdd3; }
+        .hbadge-tie  { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+        .hbadge-skip { background:#f9fafb; color:#9ca3af; border-color:#e5e7eb; }
+
+        /* ── Preset prompt pills ── */
+        .preset-btn { border:1px solid #e5e7eb; background:#f9fafb; color:#6b7280; font-size:.68rem;
+                      padding:3px 9px; border-radius:999px; cursor:pointer; white-space:nowrap;
+                      transition:background .12s, border-color .12s, color .12s; }
+        .preset-btn:hover { background:#f3f4f6; border-color:#9ca3af; color:#374151; }
+
+        /* ── History panel ── */
+        #history-panel { transition: transform .3s cubic-bezier(.4,0,.2,1); }
+        .slide-in { transform: translateX(0) !important; }
+
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+    </style>
+</head>
+<body class="bg-slate-50 w-screen h-screen overflow-hidden flex flex-col text-gray-800">
+
+    <!-- CONFIG MODAL -->
+    <div id="config-modal" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 overflow-hidden">
+            <div class="px-6 py-5 bg-gray-950 text-white">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">&#x2694;&#xFE0F;</span>
+                    <div>
+                        <h1 class="text-lg font-bold tracking-tight">OuroArena</h1>
+                        <p class="text-gray-400 text-xs mt-0.5">Side-by-side LLM battle arena</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-center text-gray-400">Configure two models to battle side by side.</p>
+                <!-- Left -->
+                <div class="border border-gray-200 rounded-xl p-4 space-y-2 hover:border-gray-300 transition-colors">
+                    <p class="text-sm font-semibold text-gray-700">Left Model</p>
+                    <input id="left-api-key"    type="password" placeholder="API Key"                               class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-gray-50">
+                    <input id="left-api-base"   type="text"     placeholder="Base URL (https://api.openai.com/v1)" class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-gray-50">
+                    <input id="left-model-name" type="text"     placeholder="Model name"                           class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-gray-50">
+                </div>
+                <!-- Right -->
+                <div class="border border-gray-200 rounded-xl p-4 space-y-2 hover:border-gray-300 transition-colors">
+                    <p class="text-sm font-semibold text-gray-700">Right Model</p>
+                    <input id="right-api-key"    type="password" placeholder="API Key"                               class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-gray-50">
+                    <input id="right-api-base"   type="text"     placeholder="Base URL (https://api.openai.com/v1)" class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-gray-50">
+                    <input id="right-model-name" type="text"     placeholder="Model name"                           class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-gray-50">
+                </div>
+                <button id="start-battle-btn" class="w-full bg-gray-950 hover:bg-gray-800 text-white font-semibold py-3 rounded-xl transition-colors text-sm">
+                    Enter the Arena &#x2694;&#xFE0F;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN ARENA -->
+    <div id="arena" class="hidden flex flex-col h-screen">
+
+        <!-- Header -->
+        <header class="flex items-center justify-between px-4 bg-white border-b border-gray-100 flex-shrink-0" style="height:44px">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-gray-900 text-sm tracking-tight">OuroArena</span>
+                <span id="battle-count-badge" class="chip chip-idle tabular-nums">0 battles</span>
+            </div>
+            <div class="flex items-center gap-0.5">
+                <button id="settings-btn" title="Configure models" class="ibtn">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <!-- History icon: clock -->
+                <button id="history-btn" title="Battle history" class="ibtn">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Side labels -->
+        <div class="grid grid-cols-2 gap-2 px-2 pt-2 pb-1 flex-shrink-0" style="height:34px">
+            <div class="flex items-center gap-2 px-1 overflow-hidden">
+                <span id="left-model-label" class="text-xs font-semibold text-gray-600 truncate"></span>
+                <span id="left-status"  class="chip chip-idle">idle</span>
+                <span id="left-latency" class="hidden chip chip-latency"></span>
+                <div class="ml-auto flex items-center gap-1 flex-shrink-0">
+                    <button id="left-fullscreen" title="Fullscreen" class="ibtn" style="padding:2px">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 px-1 overflow-hidden">
+                <span id="right-model-label" class="text-xs font-semibold text-gray-600 truncate"></span>
+                <span id="right-status"  class="chip chip-idle">idle</span>
+                <span id="right-latency" class="hidden chip chip-latency"></span>
+                <div class="ml-auto flex items-center gap-1 flex-shrink-0">
+                    <button id="right-fullscreen" title="Fullscreen" class="ibtn" style="padding:2px">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Iframes -->
+        <main class="flex-1 min-h-0 grid grid-cols-2 gap-2 px-2 pb-1">
+            <iframe id="left-frame"  src="./index.html" title="Left model"  class="w-full h-full rounded-lg border border-gray-200 bg-white shadow-sm"></iframe>
+            <iframe id="right-frame" src="./index.html" title="Right model" class="w-full h-full rounded-lg border border-gray-200 bg-white shadow-sm"></iframe>
+        </main>
+
+        <!-- Command bar -->
+        <div class="flex-shrink-0 px-2 pt-2 pb-1 bg-white border-t border-gray-100">
+            <!-- Preset prompts -->
+            <div class="flex gap-1.5 flex-wrap mb-1.5">
+                <button class="preset-btn">Who are you &amp; what can you do?</button>
+                <button class="preset-btn">Make a Flappy Bird game in a single HTML file</button>
+                <button class="preset-btn">Build a visual LLM workflow builder with runnable nodes</button>
+                <button class="preset-btn">Create a mind-blowing visual effects demo</button>
+                <button class="preset-btn">Build a hyper-realistic YouTube prototype</button>
+            </div>
+            <div class="flex gap-2 items-end">
+                <textarea id="broadcast-command" rows="2"
+                    placeholder="Send one instruction to both models... (Ctrl+Enter)"
+                    class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent resize-none bg-gray-50 placeholder-gray-400"></textarea>
+                <button id="broadcast-btn"
+                    class="flex-shrink-0 bg-gray-950 hover:bg-gray-800 disabled:opacity-50 text-white text-sm font-semibold px-5 rounded-xl transition-colors whitespace-nowrap"
+                    style="height:56px">
+                    &#x26A1; Battle
+                </button>
+            </div>
+        </div>
+
+        <!-- Vote bar -->
+        <div id="vote-bar" class="hidden flex-shrink-0 border-t border-gray-100 bg-gray-50" style="padding:10px 8px">
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+                <span class="text-xs text-gray-400 font-medium tracking-wide">Which is better?</span>
+                <button id="vote-left" class="vbtn vbtn-left flex items-center gap-1.5">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+                    Left wins
+                </button>
+                <button id="vote-tie" class="vbtn vbtn-tie">Both OK</button>
+                <button id="vote-right" class="vbtn vbtn-right flex items-center gap-1.5">
+                    Right wins
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <button id="skip-vote" class="vbtn vbtn-skip">Skip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div id="history-panel" class="fixed top-0 right-0 h-full bg-white border-l border-gray-200 shadow-2xl z-40 flex flex-col" style="width:22rem; transform:translateX(100%)">
+        <div class="flex items-center justify-between px-4 border-b border-gray-100 flex-shrink-0" style="height:44px">
+            <h2 class="font-semibold text-gray-900 text-sm">History</h2>
+            <div class="flex items-center gap-1">
+                <button id="export-btn" class="text-xs bg-gray-950 hover:bg-gray-800 text-white px-3 py-1.5 rounded-lg transition-colors font-medium">Export</button>
+                <button id="close-history-btn" class="ibtn">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="history-list" class="flex-1 overflow-y-auto p-3 space-y-2">
+            <p class="text-xs text-gray-400 text-center pt-8">No battles yet.</p>
+        </div>
+    </div>
+
+    <script>
+    /* ── Storage keys ── */
+    const SK = {
+        left:  { apiKey:'arena_left_api_key',  apiBase:'arena_left_api_base',  modelName:'arena_left_model_name'  },
+        right: { apiKey:'arena_right_api_key', apiBase:'arena_right_api_base', modelName:'arena_right_model_name' },
+    };
+
+    /* ── State ── */
+    let battles          = [];
+    let currentBattle    = null;
+    let battleInProgress = false;
+
+    /* ── DOM ── */
+    const $  = id => document.getElementById(id);
+    const configModal      = $('config-modal');
+    const arenaEl          = $('arena');
+    const leftFrame        = $('left-frame');
+    const rightFrame       = $('right-frame');
+    const broadcastCmd     = $('broadcast-command');
+    const broadcastBtn     = $('broadcast-btn');
+    const voteBar          = $('vote-bar');
+    const leftStatus       = $('left-status');
+    const rightStatus      = $('right-status');
+    const leftLatency      = $('left-latency');
+    const rightLatency     = $('right-latency');
+    const leftModelLabel   = $('left-model-label');
+    const rightModelLabel  = $('right-model-label');
+    const historyPanel     = $('history-panel');
+    const historyList      = $('history-list');
+    const battleCountBadge = $('battle-count-badge');
+    const leftIn  = { apiKey:$('left-api-key'),  apiBase:$('left-api-base'),  modelName:$('left-model-name')  };
+    const rightIn = { apiKey:$('right-api-key'), apiBase:$('right-api-base'), modelName:$('right-model-name') };
+
+    /* ── Config persistence ── */
+    function loadConfig() {
+        Object.entries(SK.left ).forEach(([f,k]) => { if(leftIn[f])  leftIn[f].value  = localStorage.getItem(k)||''; });
+        Object.entries(SK.right).forEach(([f,k]) => { if(rightIn[f]) rightIn[f].value = localStorage.getItem(k)||''; });
+    }
+    function saveConfig() {
+        Object.entries(SK.left ).forEach(([f,k]) => localStorage.setItem(k, leftIn[f].value.trim()));
+        Object.entries(SK.right).forEach(([f,k]) => localStorage.setItem(k, rightIn[f].value.trim()));
+    }
+    function getConfig(which) {
+        const i = which === 'left' ? leftIn : rightIn;
+        return { apiKey:i.apiKey.value.trim(), apiBase:i.apiBase.value.trim(), modelName:i.modelName.value.trim() };
+    }
+
+    /* ── Isolate each iframe's localStorage to prevent cross-frame contamination ── */
+    function isolateLocalStorage(win) {
+        if (win._arenaIsolated) return;
+        win._arenaIsolated = true;
+        const store = Object.create(null);
+        const mock = {
+            getItem:    k => k in store ? store[k] : null,
+            setItem:    (k, v) => { store[k] = String(v); },
+            removeItem: k => { delete store[k]; },
+            clear:      () => { Object.keys(store).forEach(k => delete store[k]); },
+            key:        i => Object.keys(store)[i] ?? null,
+            get length() { return Object.keys(store).length; }
+        };
+        try {
+            Object.defineProperty(win, 'localStorage', { get: () => mock, configurable: true });
+        } catch (e) {
+            try { win.localStorage = mock; } catch {}
+        }
+    }
+
+    /* ── Frame helpers ── */
+    function injectConfig(frame, cfg) {
+        const doc = frame.contentDocument; if (!doc) return;
+        isolateLocalStorage(frame.contentWindow);
+        const ak=doc.getElementById('api-key-input'), ab=doc.getElementById('api-base-input'),
+              mn=doc.getElementById('model-name-input'), sv=doc.getElementById('save-key-btn');
+        if (!ak || !sv) return;
+        ak.value = cfg.apiKey ?? '';
+        if (ab) ab.value = cfg.apiBase ?? '';
+        if (mn) mn.value = cfg.modelName ?? '';
+        sv.click();
+    }
+    function zoomFrame(frame) {
+        const doc = frame.contentDocument; if (!doc || !doc.head) return;
+        let s = doc.getElementById('_arena_zoom');
+        if (!s) { s = doc.createElement('style'); s.id = '_arena_zoom'; doc.head.appendChild(s); }
+        s.textContent = 'body{zoom:0.78;}';
+    }
+    function patchConsole(frame) {
+        const win = frame.contentWindow; if (!win) return;
+        const orig = win.console.log.bind(win.console);
+        win.console.log = (...args) => {
+            if (args[0] === 'API Response:') frame._capturedResponse = args[1] ?? null;
+            orig(...args);
+        };
+    }
+    function reloadFrames() {
+        resetStatusUI();
+        [[leftFrame, 'left'], [rightFrame, 'right']].forEach(([fr, which]) => {
+            fr.addEventListener('load', () => { injectConfig(fr, getConfig(which)); zoomFrame(fr); patchConsole(fr); }, {once:true});
+            fr.src = './index.html';
+        });
+    }
+
+    /* ── Status UI ── */
+    const STATUS_STATES = new Set(['idle','thinking','done','error']);
+    function setStatus(el, state) {
+        el.className = 'chip chip-' + (STATUS_STATES.has(state) ? state : 'idle');
+        el.textContent = state;
+    }
+    function resetStatusUI() {
+        setStatus(leftStatus,  'idle');
+        setStatus(rightStatus, 'idle');
+        leftLatency.classList.add('hidden');
+        rightLatency.classList.add('hidden');
+        voteBar.classList.add('hidden');
+        document.querySelectorAll('#vote-bar button').forEach(b => { b.disabled = false; });
+    }
+
+    /* ── Latency tracker ── */
+    function trackFrameLatency(frame) {
+        return new Promise(resolve => {
+            const doc = frame.contentDocument; if (!doc) return resolve(null);
+            const spinner = doc.getElementById('spinner'); if (!spinner) return resolve(null);
+            let started = null;
+            const ob = new MutationObserver(() => {
+                const hidden = spinner.classList.contains('hidden');
+                if (started === null && !hidden) { started = performance.now(); }
+                else if (started !== null && hidden) { ob.disconnect(); resolve(Math.round(performance.now() - started)); }
+            });
+            ob.observe(spinner, {attributes:true, attributeFilter:['class']});
+            setTimeout(() => { ob.disconnect(); resolve(null); }, 300000);
+        });
+    }
+
+    /* ── Capture HTML state ── */
+    function captureHTML(frame) {
+        try { return frame.contentDocument?.documentElement?.outerHTML ?? null; } catch { return null; }
+    }
+
+    /* ── Broadcast battle ── */
+    async function broadcast() {
+        const instruction = broadcastCmd.value.trim();
+        if (!instruction || battleInProgress) return;
+
+        battleInProgress = true;
+        broadcastBtn.disabled = true;
+        broadcastBtn.innerHTML = '&#x26A1; Waiting…';
+        resetStatusUI();
+
+        const beforeLeft  = captureHTML(leftFrame);
+        const beforeRight = captureHTML(rightFrame);
+        const lCfg = getConfig('left');
+        const rCfg = getConfig('right');
+
+        currentBattle = {
+            id: crypto.randomUUID(), timestamp: new Date().toISOString(), instruction,
+            leftModel:  { apiBase:lCfg.apiBase, modelName:lCfg.modelName, latency:null },
+            rightModel: { apiBase:rCfg.apiBase, modelName:rCfg.modelName, latency:null },
+            vote: null,
+            beforeState: { left:beforeLeft,  right:beforeRight },
+            afterState:  { left:null,        right:null        },
+            response:    { left:null,        right:null        },
+        };
+
+        const lp = trackFrameLatency(leftFrame);
+        const rp = trackFrameLatency(rightFrame);
+        leftFrame._capturedResponse  = null;
+        rightFrame._capturedResponse = null;
+
+        const sides = [
+            { frame:leftFrame,  model:currentBattle.leftModel,  statusEl:leftStatus,  latencyEl:leftLatency,  side:'left',  p:lp },
+            { frame:rightFrame, model:currentBattle.rightModel, statusEl:rightStatus, latencyEl:rightLatency, side:'right', p:rp },
+        ];
+
+        let done = 0;
+        sides.forEach(({frame, model, statusEl, latencyEl, side, p}) => {
+            const doc = frame.contentDocument; if (!doc) return;
+            const inp = doc.getElementById('user-prompt');
+            const btn = doc.getElementById('execute-btn');
+            if (!inp || !btn) return;
+            inp.value = instruction; btn.click();
+            setStatus(statusEl, 'thinking');
+            p.then(ms => {
+                currentBattle.afterState[side] = captureHTML(frame);
+                currentBattle.response[side] = frame._capturedResponse ?? null;
+                model.latency = ms;
+                setStatus(statusEl, ms !== null ? 'done' : 'error');
+                if (ms !== null) { latencyEl.textContent = ms + 'ms'; latencyEl.classList.remove('hidden'); }
+                if (++done === 2) {
+                    broadcastBtn.disabled = false;
+                    broadcastBtn.innerHTML = '&#x26A1; Battle';
+                    battleInProgress = false;
+                    voteBar.classList.remove('hidden');
+                }
+            });
+        });
+    }
+
+    /* ── Vote ── */
+    function castVote(vote) {
+        if (!currentBattle) return;
+        currentBattle.vote = vote;
+        document.querySelectorAll('#vote-bar button').forEach(b => { b.disabled = true; });
+        battles.push({...currentBattle});
+        updateBattleCount();
+        renderHistory();
+        currentBattle = null;
+    }
+
+    /* ── History ── */
+    function updateBattleCount() {
+        const n = battles.length;
+        battleCountBadge.textContent = n + ' battle' + (n !== 1 ? 's' : '');
+    }
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function renderHistory() {
+        if (!battles.length) {
+            historyList.innerHTML = '<p class="text-xs text-gray-400 text-center pt-8">No battles yet.</p>';
+            return;
+        }
+        const badgeClass = { left:'hbadge-left', right:'hbadge-right', tie:'hbadge-tie', skip:'hbadge-skip' };
+        const badgeLabel = { left:'← wins',      right:'→ wins',       tie:'Both OK',    skip:'Skipped'     };
+        historyList.innerHTML = battles.slice().reverse().map(b => {
+            const ln = b.leftModel?.modelName  || 'left';
+            const rn = b.rightModel?.modelName || 'right';
+            const ll = b.leftModel?.latency  != null ? b.leftModel.latency  + 'ms' : '--';
+            const rl = b.rightModel?.latency != null ? b.rightModel.latency + 'ms' : '--';
+            const bc = badgeClass[b.vote] || 'hbadge-skip';
+            const bl = badgeLabel[b.vote] || 'No vote';
+            return `<div class="hcard">
+                <div class="flex items-start justify-between gap-2 mb-1.5">
+                    <span class="text-xs text-gray-400 font-mono leading-none pt-0.5">${escHtml(new Date(b.timestamp).toLocaleString())}</span>
+                    <span class="hbadge ${bc}">${bl}</span>
+                </div>
+                <p class="text-xs text-gray-700 leading-relaxed mb-1.5" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escHtml(b.instruction)}</p>
+                <div class="flex gap-3 text-xs font-mono" style="color:#9ca3af">
+                    <span>← ${escHtml(ln)} ${ll}</span>
+                    <span>→ ${escHtml(rn)} ${rl}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    /* ── Export (no API keys) ── */
+    function exportBattles() {
+        const url = URL.createObjectURL(new Blob([JSON.stringify(battles, null, 2)], {type:'application/json'}));
+        const a = Object.assign(document.createElement('a'), {
+            href: url,
+            download: 'ouroarena-' + new Date().toLocaleString('sv').replace(/[: ]/g, '-') + '.json'
+        });
+        a.click(); URL.revokeObjectURL(url);
+    }
+
+    /* ── Wire-up ── */
+    $('start-battle-btn').addEventListener('click', () => {
+        saveConfig();
+        leftModelLabel.textContent  = leftIn.modelName.value.trim()  || 'Left';
+        rightModelLabel.textContent = rightIn.modelName.value.trim() || 'Right';
+        configModal.classList.add('hidden');
+        arenaEl.classList.remove('hidden');
+        reloadFrames(); updateBattleCount(); renderHistory();
+    });
+    $('settings-btn').addEventListener('click', () => configModal.classList.remove('hidden'));
+    configModal.addEventListener('click', e => {
+        if (e.target === configModal.firstElementChild) configModal.classList.add('hidden');
+    });
+    $('history-btn').addEventListener('click', () => { historyPanel.classList.add('slide-in'); renderHistory(); });
+    $('close-history-btn').addEventListener('click', () => historyPanel.classList.remove('slide-in'));
+    $('export-btn').addEventListener('click', exportBattles);
+    broadcastBtn.addEventListener('click', broadcast);
+    broadcastCmd.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); broadcast(); }
+    });
+    $('vote-left').addEventListener('click',  () => castVote('left'));
+    $('vote-right').addEventListener('click', () => castVote('right'));
+    $('vote-tie').addEventListener('click',   () => castVote('tie'));
+    $('skip-vote').addEventListener('click',  () => castVote('skip'));
+    $('left-fullscreen').addEventListener('click',  () => leftFrame.requestFullscreen?.());
+    $('right-fullscreen').addEventListener('click', () => rightFrame.requestFullscreen?.());
+
+    document.querySelectorAll('.preset-btn').forEach(btn =>
+        btn.addEventListener('click', () => { broadcastCmd.value = btn.textContent.trim(); broadcastCmd.focus(); })
+    );
+
+    loadConfig();
+    </script>
+</body>
+</html>

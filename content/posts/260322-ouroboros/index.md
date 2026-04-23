@@ -14,8 +14,8 @@ tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"
 math: false
 ---
 
-- **Version:** 1.4
-- **Links:** [View Demo](/features/ouroboros/), [Landing Page](/features/ouroboros/landing.html), [<400 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
+- **Version:** 1.5
+- **Links:** [View Demo](/features/ouroboros/), [OuroArena](/features/ouroboros/arena.html), [Landing Page](/features/ouroboros/landing.html), [<400 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
 - **Core Concept:** An agentic DOM workspace where an LLM has full read/write/delete privileges over its own source code and visual interface.
 
@@ -150,7 +150,20 @@ After I wrote the PRD above, Gemini 3.1 Pro generated a highly functional versio
 
 Tracking the major iterations of Ouroboros ([static/features/ouroboros](https://github.com/Ki-Seki/ki-seki.github.io/tree/main/static/features/ouroboros)) development, from the initial concept to the current version.
 
-### v1.4 (Current)
+### v1.5 (Current)
+
+**Add OuroArena:** A companion battle arena (`arena.html`) for side-by-side LLM evaluation — no modifications to `index.html` required.
+
+- **Config modal on entry:** Models are configured upfront via a modal; names are displayed in the arena header from the start.
+- **Left/Right layout:** Two independent Ouroboros iframes shown side by side with explicit left/right labeling.
+- **Vote bar:** After each battle, vote left wins / both OK / right wins / skip.
+- **Battle history panel:** Slide-in panel with chronological battle records (model names, latency, vote); exports as JSON.
+- **Preset prompt pills:** One-click prompts for common evaluation tasks (e.g. "Make a Flappy Bird game in a single HTML file").
+- **Per-model status chips:** Live idle / thinking / done / error chips with response latency in milliseconds.
+- **LLM response capture:** Each battle record stores the raw LLM response via `console.log` interception.
+- **localStorage isolation:** Each iframe gets an in-memory mock `localStorage` to prevent cross-frame state contamination.
+
+### v1.4 ([`b52b0c0`](https://github.com/Ki-Seki/ki-seki.github.io/commit/b52b0c0))
 
 - **Add CORS notice:** Added a notice about CORS issues when accessing external APIs.
 - **Model temperature:** Removed the `temperature` parameter from the API call.
