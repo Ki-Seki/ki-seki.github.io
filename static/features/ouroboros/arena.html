@@ -256,7 +256,7 @@
     function isolateLocalStorage(win) {
         if (win._arenaIsolated) return;
         win._arenaIsolated = true;
-        const store = {};
+        const store = Object.create(null);
         const mock = {
             getItem:    k => k in store ? store[k] : null,
             setItem:    (k, v) => { store[k] = String(v); },
@@ -279,9 +279,9 @@
         const ak=doc.getElementById('api-key-input'), ab=doc.getElementById('api-base-input'),
               mn=doc.getElementById('model-name-input'), sv=doc.getElementById('save-key-btn');
         if (!ak || !sv) return;
-        if (cfg.apiKey)    ak.value = cfg.apiKey;
-        if (cfg.apiBase)   ab.value = cfg.apiBase;
-        if (cfg.modelName) mn.value = cfg.modelName;
+        ak.value = cfg.apiKey ?? '';
+        if (ab) ab.value = cfg.apiBase ?? '';
+        if (mn) mn.value = cfg.modelName ?? '';
         sv.click();
     }
     function zoomFrame(frame) {
@@ -427,7 +427,7 @@
         }
         const badgeClass = { left:'hbadge-left', right:'hbadge-right', tie:'hbadge-tie', skip:'hbadge-skip' };
         const badgeLabel = { left:'← wins',      right:'→ wins',       tie:'Both OK',    skip:'Skipped'     };
-        historyList.innerHTML = battles.toReversed().map(b => {
+        historyList.innerHTML = battles.slice().reverse().map(b => {
             const ln = b.leftModel?.modelName  || 'left';
             const rn = b.rightModel?.modelName || 'right';
             const ll = b.leftModel?.latency  != null ? b.leftModel.latency  + 'ms' : '--';
