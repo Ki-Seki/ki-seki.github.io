@@ -152,16 +152,16 @@ Tracking the major iterations of Ouroboros ([static/features/ouroboros](https://
 
 ### v1.5 (Current)
 
-**OuroArena full redesign:** The companion battle arena (`arena.html`) was rewritten from a rough prototype into a polished evaluation tool.
+**Add OuroArena:** A companion battle arena (`arena.html`) for side-by-side LLM evaluation — no modifications to `index.html` required.
 
-- **Config modal on entry:** Models are configured upfront via a modal before entering the arena; names are displayed in the header from the start — no blind A/B reveal.
-- **Left/Right instead of A/B:** Renamed all concepts from blind alpha/beta to explicit left/right labels.
-- **Vote bar:** After each battle a vote bar appears — left wins, right wins, both OK, or skip.
-- **Battle history panel:** A slide-in panel tracks all battles chronologically with model names, latency, and vote result, and exports the full record as JSON.
+- **Config modal on entry:** Models are configured upfront via a modal; names are displayed in the arena header from the start.
+- **Left/Right layout:** Two independent Ouroboros iframes shown side by side with explicit left/right labeling.
+- **Vote bar:** After each battle, vote left wins / both OK / right wins / skip.
+- **Battle history panel:** Slide-in panel with chronological battle records (model names, latency, vote); exports as JSON.
 - **Preset prompt pills:** One-click prompts for common evaluation tasks (e.g. "Make a Flappy Bird game in a single HTML file").
-- **Per-model status chips:** Live idle / thinking / done / error chips with response latency displayed in milliseconds.
-- **LLM response capture:** Each battle record stores the raw LLM response text via `console.log` interception — no modifications to `index.html` required.
-- **localStorage isolation:** Each iframe receives an in-memory mock `localStorage` to prevent cross-frame state contamination.
+- **Per-model status chips:** Live idle / thinking / done / error chips with response latency in milliseconds.
+- **LLM response capture:** Each battle record stores the raw LLM response via `console.log` interception.
+- **localStorage isolation:** Each iframe gets an in-memory mock `localStorage` to prevent cross-frame state contamination.
 
 ### v1.4
 
