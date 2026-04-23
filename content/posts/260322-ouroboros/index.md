@@ -163,7 +163,7 @@ Tracking the major iterations of Ouroboros ([static/features/ouroboros](https://
 - **LLM response capture:** Each battle record stores the raw LLM response via `console.log` interception.
 - **localStorage isolation:** Each iframe gets an in-memory mock `localStorage` to prevent cross-frame state contamination.
 
-### v1.4
+### v1.4 ([`b52b0c0`](https://github.com/Ki-Seki/ki-seki.github.io/commit/b52b0c0))
 
 - **Add CORS notice:** Added a notice about CORS issues when accessing external APIs.
 - **Model temperature:** Removed the `temperature` parameter from the API call.
