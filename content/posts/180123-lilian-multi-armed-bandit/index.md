@@ -33,7 +33,7 @@ If we have learned all the information about the environment, we are able to fin
 * The exploration–exploitation dilemma arises because information is incomplete.
 * Optimal long‑term strategy requires balancing short‑term risk and long‑term gain.
 
-## 
+##
 
 {{% admonition type="quote" title="What is Multi-Armed Bandit?" open=true %}}
 The [multi-armed bandit](https://en.wikipedia.org/wiki/Multi-armed_bandit) problem is a classic problem that well demonstrates the exploration vs exploitation dilemma. Imagine you are in a casino facing multiple slot machines and each is configured with an unknown probability of how likely you can get a reward at one play. The question is: *What is the best strategy to achieve highest long-term rewards?*
@@ -86,7 +86,7 @@ Actions:
 Define an immediate value / expected reward function of a specific action:
 
 * $Q(a) = \mathbb{E} [r \vert a] = 1 * \theta_a + 0 * (1-\theta_a)$
-* We prefer $\mathbb{E} [r \vert a]$ rather than $Pr(r=1 \vert a)$. 
+* We prefer $\mathbb{E} [r \vert a]$ rather than $Pr(r=1 \vert a)$.
 * If it is a Gaussian bandit, the reward can be a continuous value and the expected reward is not the same as the probability of getting a reward (r=1).
 
 If at time step t, we take action on the i-th machine:
@@ -104,8 +104,8 @@ $$
 
 Bernoulli multi-armed bandit is simplified Markov decision process because:
 
-* There is no state transition. 
-* The reward only depends on the current action, 
+* There is no state transition.
+* The reward only depends on the current action,
 * not the history of actions and rewards.
 
 Our objective:
