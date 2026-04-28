@@ -20,7 +20,7 @@ mainsections:
 
 minify:
   disableXML: false
-  minifyOutput: true
+  minifyOutput: false
 
 pagination:
   disableAliases: false
