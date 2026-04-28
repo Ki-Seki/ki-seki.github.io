@@ -19,6 +19,7 @@ The algorithms are implemented for Bernoulli bandit in [lilianweng/multi-armed-b
 
 ## Exploitation vs Exploration
 
+{{% admonition type="quote" title="Exploitation vs Exploration" open=true %}}
 The exploration vs exploitation dilemma exists in many aspects of our life. Say, your favorite restaurant is right around the corner. If you go there every day, you would be confident of what you will get, but miss the chances of discovering an even better option. If you try new places all the time, very likely you are gonna have to eat unpleasant food from time to time. Similarly, online advisors try to balance between the known most attractive ads and the new ads that might be even more successful.
 
 {{< media
@@ -27,9 +28,14 @@ caption="A real-life example of the exploration vs exploitation dilemma: where t
 >}}
 
 If we have learned all the information about the environment, we are able to find the best strategy by even just simulating brute-force, let alone many other smart approaches. The dilemma comes from the *incomplete* information: we need to gather enough information to make best overall decisions while keeping the risk under control. With exploitation, we take advantage of the best option we know. With exploration, we take some risk to collect information about unknown options. The best long-term strategy may involve short-term sacrifices. For example, one exploration trial could be a total failure, but it warns us of not taking that action too often in the future.
+{{% /admonition %}}
 
-## What is Multi-Armed Bandit?
+* The exploration–exploitation dilemma arises because information is incomplete.
+* Optimal long‑term strategy requires balancing short‑term risk and long‑term gain.
 
+## 
+
+{{% admonition type="quote" title="What is Multi-Armed Bandit?" open=true %}}
 The [multi-armed bandit](https://en.wikipedia.org/wiki/Multi-armed_bandit) problem is a classic problem that well demonstrates the exploration vs exploitation dilemma. Imagine you are in a casino facing multiple slot machines and each is configured with an unknown probability of how likely you can get a reward at one play. The question is: *What is the best strategy to achieve highest long-term rewards?*
 
 In this post, we will only discuss the setting of having an infinite number of trials. The restriction on a finite number of trials introduces a new type of exploration problem. For instance, if the number of trials is smaller than the number of slot machines, we cannot even try every machine to estimate the reward probability (!) and hence we have to behave smartly w.r.t. a limited set of knowledge and resources (i.e. time).
@@ -40,9 +46,13 @@ caption="An illustration of how a Bernoulli multi-armed bandit works. The reward
 >}}
 
 A naive approach can be that you continue to playing with one machine for many many rounds so as to eventually estimate the "true" reward probability according to the [law of large numbers](https://en.wikipedia.org/wiki/Law_of_large_numbers). However, this is quite wasteful and surely does not guarantee the best long-term reward.
+{{% /admonition %}}
+
+Bernoulli multi-armed bandit = Each arm has binary rewards (0 or 1)
 
 ### Definition
 
+{{% admonition type="quote" title="Definition" open=true %}}
 Now let's give it a scientific definition.
 
 A Bernoulli multi-armed bandit can be described as a tuple of $\langle \mathcal{A}, \mathcal{R} \rangle$, where:
@@ -67,17 +77,98 @@ Our loss function is the total regret we might have by not selecting the optimal
 $$
 \mathcal{L}_T = \mathbb{E} \Big[ \sum_{t=1}^T \big( \theta^{*} - Q(a_t) \big) \Big]
 $$
+{{% /admonition %}}
+
+Actions:
+
+* $a \in \mathcal{A} = \{1, 2, \dots, K\}$
+
+Define an immediate value / expected reward function of a specific action:
+
+* $Q(a) = \mathbb{E} [r \vert a] = 1 * \theta_a + 0 * (1-\theta_a)$
+* We prefer $\mathbb{E} [r \vert a]$ rather than $Pr(r=1 \vert a)$. 
+* If it is a Gaussian bandit, the reward can be a continuous value and the expected reward is not the same as the probability of getting a reward (r=1).
+
+If at time step t, we take action on the i-th machine:
+
+*  $Q(a_t=i) = \theta_i$
+
+Define the reward function:
+
+$$
+r = \mathcal{R}(a) = \begin{cases}
+1 & \text{with probability } \theta_a \\
+0 & \text{with probability } 1-\theta_a
+\end{cases}
+$$
+
+Bernoulli multi-armed bandit is simplified Markov decision process because:
+
+* There is no state transition. 
+* The reward only depends on the current action, 
+* not the history of actions and rewards.
+
+Our objective:
+
+$\max \sum_{t=1}^T r_t$
+
+The optimal strategy is to always select the optimal action $a^{*}$ with the highest reward probability $\theta^{*}$:
+
+$$
+\begin{align}
+  \max_{a \in \mathcal{A}} Q(a) &= \max_{1 \leq i \leq K} \theta_i \\
+  Q(a^{*}) &= \theta^{*}
+\end{align}
+$$
+
+In different distribution settings, the $\theta^{*}$ can be defined differently. It can be regarded as an abstract environment parameter.
+
+| Reward Distribution | $θ_i$ Meaning          |
+| ------------------- | ---------------------- |
+| Bernoulli           | Win probability        |
+| Gaussian            | Mean $μ_i$             |
+| Poisson             | Event rate $λ_i$       |
+| Exponential         | Rate parameter $1/λ_i$ |
+
+Let's finally see the Loss / Regret function:
+
+$$
+\mathcal{L}_T = \mathbb{E} \Big[ \sum_{t=1}^T \big( \theta^{*} - Q(a_t) \big) \Big]
+$$
+
+It's quite intuitive except another expectation operator $\mathbb{E}$ outside the summation.
+
+* Expectation in $Q(a)$: because the reward is stochastic
+* Expectation in $\mathcal{L}_T$: mainly because the action trajectory is stochastic due to the exploration/policy strategy.
+
+There are three sources of randomness in the multi-armed bandit problem:
+
+| Source of Randomness      | Impact                                    | Included in Q(a)?   | Affects Regret?       |
+| ------------------------- | ----------------------------------------- | ------------------- | --------------------- |
+| **reward randomness**     | r is random                               | ✔ Included in Q(a) | ✔ Affects estimation |
+| **policy randomness**     | policy itself is random                   | ✘                  | ✔                    |
+| **estimation randomness** | reward noise leads to different estimates | ✘                  | ✔                    |
 
 ### Bandit Strategies
 
+{{% admonition type="quote" title="Strategies" open=true %}}
 Based on how we do exploration, there several ways to solve the multi-armed bandit.
 
 - No exploration: the most naive approach and a bad one.
 - Exploration at random
 - Exploration smartly with preference to uncertainty
+{{% /admonition %}}
+
+| Category                                   | Strategy Name                    | How It Works                                                                         |
+| ------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------ |
+| **No exploration**                         | **Greedy**                       | Always pick the arm with the highest current estimated value $\hat{Q}(a)$            |
+| **Random exploration**                     | **ε‑Greedy**                     | With prob. $1-\varepsilon$ pick best arm; with prob. $\varepsilon$ pick a random arm |
+| **Smart exploration (uncertainty‑driven)** | **UCB (Upper Confidence Bound)** | Pick arm maximizing $\hat{Q}(a) + \text{uncertainty bonus}$                          |
+| **Smart exploration (probabilistic)**      | **Thompson Sampling**            | Sample a parameter from each arm’s posterior; pick the arm with the highest sample   |
 
 ## ε-Greedy Algorithm
 
+{{% admonition type="quote" title="ε-Greedy Algorithm" open=true %}}
 The ε-greedy algorithm takes the best action most of the time, but does random exploration occasionally. The action value is estimated according to the past experience by averaging the rewards associated with the target action a that we have observed so far (up to the current time step t):
 
 $$
@@ -89,6 +180,10 @@ where $\mathbb{1}$ is a binary indicator function and $N_t(a)$ is how many times
 According to the ε-greedy algorithm, with a small probability $\epsilon$ we take a random action, but otherwise (which should be the most of the time, probability 1-$\epsilon$) we pick the best action that we have learnt so far: $\hat{a}^{*}_t = \arg\max_{a \in \mathcal{A}} \hat{Q}_t(a)$.
 
 Check my [toy implementation](https://github.com/lilianweng/multi-armed-bandit/blob/master/solvers.py#L45).
+{{% /admonition %}}
+
+* $\hat{Q}_t(a)$ is the algorithm’s **estimate** of the true value $Q(a)$, and it is used to guide **exploitation**.
+* $\hat{Q}_t(a)$ represents the algorithm’s **belief** about the value of action $a$, not the true value itself.
 
 ## Upper Confidence Bounds
 
