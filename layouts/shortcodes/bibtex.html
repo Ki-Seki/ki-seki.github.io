@@ -16,7 +16,8 @@
 {{- end -}}
 {{- $author := .Get "author" | default $pageAuthor -}}
 
-{{- $authorKey := $author | lower | replaceRE "[^a-zA-Z]" "" -}}
+{{- $firstAuthor := index (split $author " and ") 0 -}}
+{{- $authorKey := $firstAuthor | lower | replaceRE "[^a-zA-Z]" "" -}}
 {{- $titleKey := $title | lower | replaceRE "[^a-zA-Z0-9]" "" | truncate 15 "" -}}
 {{- $bib_key := .Get "key" | default (printf "%s%s%s" $authorKey $year $titleKey) -}}
 

@@ -42,6 +42,27 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
+      - name: Generate features sitemap
+        run: |
+          base_url="${{ steps.pages.outputs.base_url }}"
+          base_url="${base_url%/}"
+          sitemap="static/features/sitemap.xml"
+          mkdir -p "$(dirname "${sitemap}")"
+          {
+            printf '<?xml version="1.0" encoding="UTF-8"?>\n'
+            printf '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            if [ -d "static/features" ]; then
+              find static/features -name "*.html" | sort | while IFS= read -r file; do
+                rel="${file#static/}"
+                printf '  <url>\n'
+                printf '    <loc>%s/%s</loc>\n' "${base_url}" "${rel}"
+                printf '  </url>\n'
+              done
+            fi
+            printf '</urlset>\n'
+          } > "${sitemap}"
+          echo "Generated ${sitemap}:"
+          cat "${sitemap}"
       - name: Build with Hugo
         run: |
           hugo \

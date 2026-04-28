@@ -224,10 +224,15 @@
   display: block;
 }
 
-.moments-feed .moment-content p > a:first-child {
+.moments-feed .moment-content p > a:first-child.media-lightbox-trigger {
   display: block;
 }
 
+@supports selector(a:has(*)) {
+  .moments-feed .moment-content p > a:first-child:has(> img:first-child) {
+    display: block;
+  }
+}
 .moments-feed .moment-content p > img:first-child + br,
 .moments-feed .moment-content p > a:first-child + br {
   display: none;
@@ -312,41 +317,27 @@
   font-size: 0.95rem;
 }
 
-.moments-pagination {
+.moments-page > .page-footer {
   margin-top: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.9rem;
-  color: var(--secondary);
 }
 
-.moments-pagination__link {
-  color: var(--theme);
-  background: var(--primary);
-  padding: 0.35rem 0.9rem;
-  border-radius: 999px;
-  font-weight: 500;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.moment-year-separator {
+  position: relative;
+  margin-inline-start: -1.75rem;
 }
 
-.moments-pagination__link:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(17, 17, 26, 0.08);
+.moment-year-label {
+  display: inline-block;
+  margin-inline-start: 1.75rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+  opacity: 0.15;
 }
 
-.moments-pagination__status {
-  flex: 1;
-  text-align: center;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.moments-pagination__placeholder {
-  width: 110px;
-  height: 1px;
+.moments-feed .moment-year-separator:first-child {
+  margin-top: -0.5rem;
 }
 
 .moment-meta--single {
@@ -374,6 +365,14 @@
   .moment-marker {
     inset-inline-start: -1.8rem;
   }
+
+  .moment-year-separator {
+    margin-inline-start: -1.25rem;
+  }
+
+  .moment-year-label {
+    margin-inline-start: 1.25rem;
+  }
 }
 
 @media (max-width: 520px) {
@@ -386,17 +385,12 @@
     display: none;
   }
 
-  .moments-pagination {
-    flex-direction: column;
-    gap: 0.75rem;
+  .moment-year-separator {
+    margin-inline-start: 0;
   }
 
-  .moments-pagination__status {
-    width: 100%;
-  }
-
-  .moments-pagination__placeholder {
-    display: none;
+  .moment-year-label {
+    margin-inline-start: 0;
   }
 
   .moment-open {

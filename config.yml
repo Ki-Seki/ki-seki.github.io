@@ -130,6 +130,8 @@ params:
     Text: "Suggest Changes" # edit text
     appendFilePath: true # to append file path to Edit link
 
+  clarityTagId: "vglavb3ml2"  # Microsoft Clarity analytics tag ID
+
   assets:
     disableHLJS: true
     favicon: favicons/icons8-capybara-32.png

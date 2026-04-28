@@ -11,10 +11,25 @@
     {{ end }}
   </header>
 
-  {{ $paginator := .Paginate (.Pages.ByDate.Reverse) }}
+  {{ $allPages := .Pages.ByDate.Reverse }}
+  {{ $paginator := .Paginate $allPages }}
 
   <div class="moments-feed">
+    {{ $currentYear := "" }}
+    {{ if gt $paginator.PageNumber 1 }}
+      {{ $prevLastIndex := sub (mul (sub $paginator.PageNumber 1) $paginator.PagerSize) 1 }}
+      {{ if lt $prevLastIndex (len $allPages) }}
+        {{ $currentYear = (index $allPages $prevLastIndex).Date.Format "2006" }}
+      {{ end }}
+    {{ end }}
     {{ range $index, $page := $paginator.Pages }}
+      {{ $year := $page.Date.Format "2006" }}
+      {{ if ne $year $currentYear }}
+        {{ $currentYear = $year }}
+        <div class="moment-year-separator" aria-label="Year {{ $year }}">
+          <span class="moment-year-label">{{ $year }}</span>
+        </div>
+      {{ end }}
       {{ $contentID := printf "moment-content-%d" (add $index 1) }}
       {{ $imageCount := len (findRE "{{< media" .RawContent) }}
       {{ $isLong := or (gt $page.WordCount 150) (gt $imageCount 3) }}
@@ -56,21 +71,26 @@
   </div>
 
   {{ if gt $paginator.TotalPages 1 }}
-    <nav class="moments-pagination" aria-label="Moments navigation">
+  <footer class="page-footer">
+    <nav class="pagination" aria-label="Moments navigation">
       {{ if $paginator.HasPrev }}
-        <a class="moments-pagination__link prev" href="{{ $paginator.Prev.URL | absURL }}" rel="prev">← Newer notes</a>
-      {{ else }}
-        <span class="moments-pagination__placeholder"></span>
+      <a class="prev" href="{{ $paginator.Prev.URL | absURL }}" rel="prev">
+        «&nbsp;{{ i18n "prev_page" }}&nbsp;
+        {{ if (.Param "ShowPageNums") }}
+        {{ sub $paginator.PageNumber 1 }}/{{ $paginator.TotalPages }}
+        {{ end }}
+      </a>
       {{ end }}
-
-      <span class="moments-pagination__status">Page {{ $paginator.PageNumber }} of {{ $paginator.TotalPages }}</span>
-
       {{ if $paginator.HasNext }}
-        <a class="moments-pagination__link next" href="{{ $paginator.Next.URL | absURL }}" rel="next">Older notes →</a>
-      {{ else }}
-        <span class="moments-pagination__placeholder"></span>
+      <a class="next" href="{{ $paginator.Next.URL | absURL }}" rel="next">
+        {{ i18n "next_page" }}&nbsp;
+        {{ if (.Param "ShowPageNums") }}
+        {{ add 1 $paginator.PageNumber }}/{{ $paginator.TotalPages }}
+        {{ end }}&nbsp;»
+      </a>
       {{ end }}
     </nav>
+  </footer>
   {{ end }}
 </section>
 {{ end }}

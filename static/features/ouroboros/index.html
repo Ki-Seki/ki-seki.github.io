@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ouroboros</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐍%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+</head>
+<body class="bg-gray-100 overflow-hidden relative w-screen h-screen font-sans text-gray-800" style="background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 20px 20px;">
+
+    <!-- GENESIS WINDOW: CORE -->
+    <div id="ouroboros-core" class="draggable resizable absolute top-10 left-10 w-[400px] bg-white rounded-lg border border-gray-300 shadow-md touch-none select-none flex flex-col z-50" style="transform: translate(0px, 0px);" data-x="0" data-y="0">
+        <!-- Header -->
+        <div class="window-header cursor-move bg-gray-800 text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
+            <h2 class="font-bold text-sm tracking-wide">OUROBOROS // CORE</h2>
+            <button id="export-btn" title="Export HTML" class="text-gray-400 hover:text-white transition-colors mr-2">
+                <svg class="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            </button>
+        </div>
+
+        <!-- Token Monitor -->
+        <div class="bg-gray-100 px-4 py-1 text-xs text-gray-500 border-b border-gray-200 flex justify-between items-center">
+            <span>Context Usage</span>
+            <span id="token-count"></span>
+        </div>
+
+        <!-- Settings / Auth -->
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <div class="flex flex-col gap-2 mb-2">
+                <input type="password" id="api-key-input" placeholder="API Key (e.g. sk-...)" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                <input type="text" id="api-base-input" placeholder="Base URL (e.g. https://api.openai.com/v1)" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+                <input type="text" id="model-name-input" placeholder="Model (e.g. google/gemini-3-flash-preview)" class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500">
+            </div>
+            <button id="save-key-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">Save Settings</button>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="flex-1 p-4 overflow-y-auto min-h-[150px] max-h-[300px] bg-white text-xs font-mono select-text" id="activity-log">
+        </div>
+
+        <!-- Terminal / Prompt Box -->
+        <div class="p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+            <textarea id="user-prompt" placeholder="Command the Ouroboros (e.g., 'Create a calculator logic')..." class="w-full text-sm border border-gray-300 rounded p-2 mb-2 focus:outline-none focus:border-blue-500 min-h-[80px] resize-none"></textarea>
+            <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-400">Press Ctrl+Enter to send</span>
+                <button id="execute-btn" class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded transition-colors relative">
+                    <span id="btn-text">Take a Bite 🐍</span>
+                    <div id="spinner" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE FOOTER -->
+    <div class="fixed bottom-4 left-0 w-full text-center z-40 px-4 pointer-events-none">
+        <span class="text-sm text-gray-400 pointer-events-auto">
+            <a href="https://ki-seki.github.io/posts/260322-ouroboros/" target="_blank" class="hover:text-gray-600 transition-colors">About Ouroboros</a>
+            <span class="px-1">|</span>
+            <a href="https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html" target="_blank" class="hover:text-gray-600 transition-colors">Source Code</a>
+        </span>
+    </div>
+
+    <!-- EMBEDDED SYSTEM PROMPT -->
+    <script type="text/plain" id="ouroboros-system_prompt">
+## Role
+You are Ouroboros, a self-editing HTML application. Satisfy the user's request by mutating the current DOM (State A) into a new, functional state (State B).
+
+## Rules
+* State Transition: You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
+* Preservation: NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
+* UI Standards:
+  *  Create "Windows" as `div` elements with absolute positioning.
+  *  Use Tailwind CSS classes for all styling.
+  *  Ensure new windows have a higher z-index than existing ones.
+  *  Implement drag-and-drop functionality for new windows using the existing `interact.js` or similar mechanism present in the global scope.
+* Efficiency:
+  *  Use `import` from `https://esm.sh/` for external libraries.
+  *  Do not inline large Base64 images or SVGs; use external URLs.
+  *  Keep code concise to save token space.
+* Users:
+  * Identify the "User Instruction" by looking at the last entry in the #activity-log.
+  * Users may have varying levels of technical expertise.
+  * Users are allowed to modify this system prompt to customize your personality and behavior.
+* Context Usage: You are aware of the current token usage. If usage is >75%, prioritize compact code and suggest removing unused DOM elements.
+
+## Attention
+You must provide your solution as a SINGLE, valid JavaScript code block fenced with ```javascript ... ```. Do not provide natural language explanations outside of code comments.
+
+## Capabilities
+Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (clean reading/summarization), or `fetch('https://corsproxy.io/?url=' + encodeURIComponent(url))` for raw HTML extraction (DOM/structure-sensitive tasks); choose based on intent.
+    </script>
+
+    <!-- MAIN APPLICATION LOGIC -->
+    <script type="module">
+        import OpenAI from 'https://esm.sh/openai@4.28.0?bundle';
+
+        // --- STATE ---
+        const state = {
+            apiKey: localStorage.getItem('ouroboros_api_key') || '',
+            apiBase: localStorage.getItem('ouroboros_api_base') || '',
+            modelName: localStorage.getItem('ouroboros_model_name') || '',
+            isProcessing: false
+        };
+
+        // --- DOM REFERENCE ---
+        const els = {
+            core: document.getElementById('ouroboros-core'),
+            apiKeyInput: document.getElementById('api-key-input'),
+            apiBaseInput: document.getElementById('api-base-input'),
+            modelNameInput: document.getElementById('model-name-input'),
+            saveKeyBtn: document.getElementById('save-key-btn'),
+            promptInput: document.getElementById('user-prompt'),
+            executeBtn: document.getElementById('execute-btn'),
+            exportBtn: document.getElementById('export-btn'),
+            btnText: document.getElementById('btn-text'),
+            spinner: document.getElementById('spinner'),
+            log: document.getElementById('activity-log'),
+            tokenCount: document.getElementById('token-count'),
+            systemPrompt: document.getElementById('ouroboros-system_prompt')
+        };
+
+        // --- INITIALIZATION ---
+        function init() {
+            // Restore Settings
+            if (state.apiKey) els.apiKeyInput.value = state.apiKey;
+            if (state.apiBase) els.apiBaseInput.value = state.apiBase;
+            els.modelNameInput.value = state.modelName;
+
+            // Setup Event Listeners
+            els.saveKeyBtn.addEventListener('click', saveApiSettings);
+            els.executeBtn.addEventListener('click', handleExecution);
+            els.exportBtn.addEventListener('click', exportHtml);
+            els.promptInput.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') handleExecution();
+            });
+
+            // Initialize Interact.js
+            setupDraggable();
+
+            // Initial Token Estimate
+            updateTokenEstimate();
+
+            // Watch for DOM changes to update token count
+            let timeout;
+            new MutationObserver(mutations => {
+                if (mutations.every(m => els.tokenCount.contains(m.target) || els.log.contains(m.target))) return;
+                clearTimeout(timeout);
+                timeout = setTimeout(updateTokenEstimate, 500);
+            }).observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+
+            logMessage('system', 'Ouroboros loaded.');
+        }
+
+        // --- INTERACTION ---
+        function setupDraggable() {
+            interact('.draggable')
+                .draggable({
+                    allowFrom: '.window-header',
+                    inertia: true,
+                    autoScroll: true,
+                    listeners: {
+                        move: function (event) {
+                            var target = event.target;
+                            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                            target.style.transform = `translate(${x}px, ${y}px)`;
+                            target.dataset.x = x;
+                            target.dataset.y = y;
+                        }
+                    }
+                })
+                .resizable({
+                    edges: { left: false, right: true, bottom: true, top: false },
+                    listeners: {
+                        move: function (event) {
+                            let { x, y } = event.target.dataset;
+                            x = (parseFloat(x) || 0) + event.deltaRect.left;
+                            y = (parseFloat(y) || 0) + event.deltaRect.top;
+
+                            Object.assign(event.target.style, {
+                                width: `${event.rect.width}px`,
+                                height: `${event.rect.height}px`,
+                                transform: `translate(${x}px, ${y}px)`
+                            });
+
+                            Object.assign(event.target.dataset, { x, y });
+                        }
+                    }
+                });
+        }
+
+        // --- LOGIC ---
+        function exportHtml() {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html' }));
+            a.download = `ouroboros_${new Date().toLocaleString('sv').replace(/[: ]/g,'-')}.html`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            logMessage('system', 'Exported successfully.');
+        }
+
+        function saveApiSettings() {
+            state.apiKey = els.apiKeyInput.value.trim();
+            state.apiBase = els.apiBaseInput.value.trim();
+            state.modelName = els.modelNameInput.value.trim();
+
+            localStorage.setItem('ouroboros_api_key', state.apiKey);
+            localStorage.setItem('ouroboros_model_name', state.modelName);
+            state.apiBase ? localStorage.setItem('ouroboros_api_base', state.apiBase) : localStorage.removeItem('ouroboros_api_base');
+
+            logMessage('system', 'API Configuration saved securely to localStorage.');
+        }
+
+        function logMessage(actor, text) {
+            const isUser = actor === 'user';
+            const color = isUser ? 'text-blue-600' : 'text-green-600';
+            const label = isUser ? 'USER' : 'SYSTEM';
+            const timestamp = new Date().toLocaleTimeString();
+
+            els.log.insertAdjacentHTML('beforeend', `
+                <div class="mb-2">
+                    <span class="text-xs text-gray-400">[${timestamp}]</span>
+                    <span class="font-bold ${color}">${label}:</span>
+                    <span>${text}</span>
+                </div>
+            `);
+            els.log.scrollTop = els.log.scrollHeight;
+        }
+
+        function updateTokenEstimate() {
+            const tokenCount = Math.ceil(document.documentElement.outerHTML.length / 4);
+            const percentage = Math.min((tokenCount / 128000) * 100, 100).toFixed(1);
+
+            els.tokenCount.textContent = `~ ${tokenCount.toLocaleString()} / 128k (${percentage}%)`;
+            els.tokenCount.className = tokenCount > 96000 ? 'text-red-600' : 'text-gray-500';
+        }
+
+        async function handleExecution() {
+            if (state.isProcessing) return;
+            if (!state.apiKey) {
+                alert('Please enter and save your OpenAI API Key first.');
+                return;
+            }
+            const prompt = els.promptInput.value.trim();
+            if (!prompt) return;
+
+            setLoading(true);
+            logMessage('user', prompt);
+
+            try {
+                // 1. Sync User Prompt to DOM and Capture State
+                const currentDOM = document.documentElement.outerHTML.replace(/<[s]tyle[^>]*>[\s\S]*?<\/[s]tyle>/gi, s => /!\s*tailwindcss|--tw-border-spacing-x/.test(s) ? '<style>/* Tailwind generated CSS omitted */</style>' : s);
+                console.log('API Query:', currentDOM);
+
+                // 2. Prepare OpenAI Client
+                const clientConfig = {
+                    apiKey: state.apiKey,
+                    dangerouslyAllowBrowser: true,
+                    ...(state.apiBase && { baseURL: state.apiBase }),
+                    defaultHeaders: {
+                        "HTTP-Referer": "https://ki-seki.github.io/features/ouroboros/",
+                        "X-Title": "Ouroboros"
+                    }
+                };
+
+                const openai = new OpenAI(clientConfig);
+
+                // 3. Create API Call
+                const completion = await openai.chat.completions.create({
+                    messages: [
+                        { role: 'system', content: "Follow the embedded system prompt defined in els.systemPrompt.textContent, identify the User Instruction in the last entry of the #activity-log, and respond in a SINGLE, valid JavaScript code block fenced with ```javascript ... ```" },
+                        { role: 'user', content: currentDOM }
+                    ],
+                    model: state.modelName
+                });
+
+                const content = completion.choices[0].message.content;
+                console.log('API Response:', content);
+                logMessage('system', 'Received response. Executing mutation...');
+
+                // 5. Extract Code & Execute
+                const codeMatch = content.match(/```(?:javascript)?\s*([\s\S]*?)\s*```/);
+                if (codeMatch?.[1]) {
+                    executeMutation(codeMatch[1]);
+                    logMessage('system', 'Mutation executed successfully.');
+                    els.promptInput.value = '';
+                } else {
+                    logMessage('system', 'Error: No valid JavaScript block found in response.');
+                    console.log('Full Response:', content);
+                }
+
+            } catch (error) {
+                console.error(error);
+                logMessage('system', `Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function executeMutation(code) {
+            try {
+                // Wrap in IIFE to avoid polluting global scope unintentionally
+                const script = document.createElement('script');
+                script.textContent = `(function() {
+                    try {
+                        ${code}
+                    } catch(e) {
+                        console.error("Mutation Script Error:", e);
+                        alert("Mutation script failed: " + e.message);
+                    }
+                })();`;
+                document.body.appendChild(script);
+                script.remove();
+            } catch (e) {
+                console.error("Injection Error:", e);
+            }
+        }
+
+        function setLoading(loading) {
+            state.isProcessing = loading;
+            els.btnText.classList.toggle('invisible', loading);
+            els.spinner.classList.toggle('hidden', !loading);
+            els.executeBtn.classList.toggle('cursor-not-allowed', loading);
+            els.executeBtn.classList.toggle('opacity-75', loading);
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

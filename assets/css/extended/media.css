@@ -2,6 +2,28 @@
   text-align: center;
 }
 
+.post-content .media-figure > figcaption,
+.moment-content .media-figure > figcaption {
+  margin: 0.75rem 0 0;
+  color: var(--secondary);
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.post-content .media-figure > figcaption > p,
+.moment-content .media-figure > figcaption > p {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.moment-content .media-figure > figcaption a {
+  box-shadow: 0 1px 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 .post-content a.media-lightbox-trigger {
   box-shadow: none;
   text-decoration: none;
