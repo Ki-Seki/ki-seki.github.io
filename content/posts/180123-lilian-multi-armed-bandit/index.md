@@ -1,21 +1,17 @@
 ---
 date: '2018-01-23T00:00:00+00:00'
-title: 'The Multi-Armed Bandit Problem and Its Solutions'
+title: 'Fully Annotated Guide to "The Multi-Armed Bandit Problem and Its Solutions"'
 author:
-  - Lilian Weng
-summary: 'An introduction to the multi-armed bandit problem and its solutions, including ε-Greedy, UCB, and Thompson Sampling algorithms.'
+  - Shichao Song
+summary: "The multi-armed bandit problem is a classic exploration–exploitation dilemma in reinforcement learning. Lilian Weng's post is an excellent introduction, but some mathematical details and motivations can be cryptic. This article annotates it with step-by-step explanations and supplementary notes."
 cover:
   image: "bandit_experiment.png"
-tags:
-  - "exploration"
-  - "reinforcement-learning"
-  - "math"
+  caption: "Comparison of bandit algorithms on a 10-arm Bernoulli bandit over 10,000 steps. Original image from Lilian Weng's post."
+tags: ["exploration", "reinforcement-learning", "math", "multi-armed-bandit"]
 math: true
 ---
 
-> **Original post**: [The Multi-Armed Bandit Problem and Its Solutions](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/) by Lilian Weng.
-
-The algorithms are implemented for Bernoulli bandit in [lilianweng/multi-armed-bandit](http://github.com/lilianweng/multi-armed-bandit).
+This article provides a comprehensive annotated guide to Lilian Weng's ["The Multi-Armed Bandit Problem and Its Solutions"](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/).
 
 ## Exploitation vs Exploration
 
@@ -33,7 +29,7 @@ If we have learned all the information about the environment, we are able to fin
 * The exploration–exploitation dilemma arises because information is incomplete.
 * Optimal long‑term strategy requires balancing short‑term risk and long‑term gain.
 
-##
+## What is Multi-Armed Bandit?
 
 {{% admonition type="quote" title="What is Multi-Armed Bandit?" open=true %}}
 The [multi-armed bandit](https://en.wikipedia.org/wiki/Multi-armed_bandit) problem is a classic problem that well demonstrates the exploration vs exploitation dilemma. Imagine you are in a casino facing multiple slot machines and each is configured with an unknown probability of how likely you can get a reward at one play. The question is: *What is the best strategy to achieve highest long-term rewards?*
@@ -402,20 +398,9 @@ caption="Summary of bandit solution strategies"
 >}}
 {{% /admonition %}}
 
+## Citation
 
----
-
-Cited as:
-
-```bibtex
-@article{weng2018bandit,
-  title   = "The Multi-Armed Bandit Problem and Its Solutions",
-  author  = "Weng, Lilian",
-  journal = "lilianweng.github.io",
-  year    = "2018",
-  url     = "https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/"
-}
-```
+{{< bibtex >}}
 
 ## References
 
