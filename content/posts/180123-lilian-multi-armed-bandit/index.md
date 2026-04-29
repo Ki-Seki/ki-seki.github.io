@@ -351,19 +351,19 @@ $$
 \end{aligned}
 $$
 
-- **The formula defines an *ideal probability*, not the algorithm.**  
+- **The formula defines an *ideal probability*, not the algorithm.**
   It says “$\pi(a \; \vert \; h_t)$ is the probability that action *a* is truly the best,” but it does **not** describe how to compute that probability.
-- **The probability is taken over the *posterior distributions* of Q(a).**  
+- **The probability is taken over the *posterior distributions* of Q(a).**
   Q(a) is treated as a random variable with uncertainty, so the formula is about comparing *random draws* of Q(a), not fixed values.
-- **The expectation form is just a mathematical rewrite.**  
+- **The expectation form is just a mathematical rewrite.**
   \(\mathbb{E}_{\mathcal{R} \vert h_t} [ \mathbb{1}(a = \arg\max_{a \in \mathcal{A}} Q(a)) ]\) means “the chance that a random draw of all Q’s makes action *a* the largest,” but still does not specify how to obtain those draws. \(\mathcal{R}\) is the randomness coming from the posterior distributions of the action values \(Q(a)\).
-- **Thompson Sampling uses sampling as the practical way to realize this probability.**  
+- **Thompson Sampling uses sampling as the practical way to realize this probability.**
   By drawing one sample from each posterior and taking the argmax, the algorithm ensures that the frequency of selecting action *a* matches exactly the probability defined by the formula.
 
 ---
 
-Thompson Sampling is to greedy selection what a VAE is to a standard autoencoder: 
-* both replace a single deterministic estimate with sampling from a learned distribution. 
+Thompson Sampling is to greedy selection what a VAE is to a standard autoencoder:
+* both replace a single deterministic estimate with sampling from a learned distribution.
 * This stochasticity lets them explore more possibilities and avoid getting trapped in narrow, overconfident solutions.
 
 ---
