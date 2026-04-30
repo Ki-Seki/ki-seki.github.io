@@ -172,12 +172,12 @@
       vertical-align: middle;
       text-align: left;
     }
-    
+
     th {
       white-space: normal;
       word-break: break-word;
     }
-    
+
     td {
       white-space: normal;
     }
@@ -502,7 +502,7 @@
       const choice = s.lastArm == null ? 'N/A' : 'Arm ' + (s.lastArm + 1);
       const outcomeClass = s.lastReward == null ? '' : (s.lastReward ? 'reward-good' : 'reward-bad');
       const outcomeText = s.lastReward == null ? 'No pull yet' : (s.lastReward ? 'Reward = 1' : 'Reward = 0');
-      
+
       return {
         steps: s.pulls,
         reward: avgReward,
@@ -516,34 +516,34 @@
     function renderCombinedTable() {
       const rows = [];
       const n = state.probs.length;
-      
+
       // Metrics rows
       const metrics = ['Steps', 'Avg Reward', 'Regret', 'Last Arm', 'Last Reward'];
       const epsKpi = renderKpi('eps');
       const ucbKpi = renderKpi('ucb');
       const tsKpi = renderKpi('ts');
-      
+
       rows.push(
         '<tr><td>Avg Reward</td><td>N/A</td><td class="kpi-cell">' + epsKpi.reward + '</td>' +
         '<td class="kpi-cell">' + ucbKpi.reward + '</td><td class="kpi-cell">' + tsKpi.reward + '</td></tr>'
       );
-      
+
       rows.push(
         '<tr><td>Regret</td><td>N/A</td><td class="kpi-cell">' + epsKpi.regret + '</td>' +
         '<td class="kpi-cell">' + ucbKpi.regret + '</td><td class="kpi-cell">' + tsKpi.regret + '</td></tr>'
       );
-      
+
       rows.push(
         '<tr><td>Last Arm</td><td>N/A</td><td class="kpi-cell">' + epsKpi.arm + '</td>' +
         '<td class="kpi-cell">' + ucbKpi.arm + '</td><td class="kpi-cell">' + tsKpi.arm + '</td></tr>'
       );
-      
+
       rows.push(
         '<tr><td>Last Reward</td><td>N/A</td><td class="kpi-cell ' + epsKpi.outcome.cls + '">' + epsKpi.outcome.text + '</td>' +
         '<td class="kpi-cell ' + ucbKpi.outcome.cls + '">' + ucbKpi.outcome.text + '</td>' +
         '<td class="kpi-cell ' + tsKpi.outcome.cls + '">' + tsKpi.outcome.text + '</td></tr>'
       );
-      
+
       // Arm rows
       for (let i = 0; i < n; i++) {
         rows.push(
@@ -556,7 +556,7 @@
           '</tr>'
         );
       }
-      
+
       document.getElementById('combined-table').innerHTML = rows.join('');
     }
 
@@ -573,7 +573,7 @@
       canvas.style.width = displayW + 'px';
       canvas.style.height = displayH + 'px';
       ctx.scale(dpr, dpr);
-      
+
       const w = displayW;
       const h = displayH;
       ctx.clearRect(0, 0, w, h);
