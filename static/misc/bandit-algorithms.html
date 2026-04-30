@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bandit Demo: epsilon-Greedy, UCB1, Thompson Sampling</title>
+  <style>
+    :root {
+      --bg: #f6f1e7;
+      --ink: #1e1c1a;
+      --muted: #6f665b;
+      --panel: #fffdf8;
+      --line: #e8decb;
+      --eps: #c15b07;
+      --ucb: #0d7a56;
+      --ts: #1c4e9a;
+      --true: #7c7367;
+      --good: #136d45;
+      --bad: #8d2f2f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      color: var(--ink);
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      line-height: 1.4;
+      background:
+        radial-gradient(circle at 12% 2%, #fff6d8 0%, transparent 45%),
+        radial-gradient(circle at 92% 98%, #e8f0ff 0%, transparent 40%),
+        var(--bg);
+    }
+
+    .wrap {
+      max-width: 100%;
+      margin: 0 auto;
+      display: grid;
+      gap: 0.85rem;
+      padding: 0 0.5rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.85rem;
+      box-shadow: 0 10px 24px rgba(25, 20, 10, 0.05);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.05rem, 2vw, 1.4rem);
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin: 0.2rem 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.85rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+      align-items: end;
+    }
+
+    .control label {
+      display: block;
+      font-size: 0.77rem;
+      color: var(--muted);
+      margin-bottom: 0.18rem;
+    }
+
+    input, button {
+      width: 100%;
+      border: 1px solid #cbbfa9;
+      border-radius: 8px;
+      padding: 0.45rem 0.55rem;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-run {
+      background: #1e1c1a;
+      color: #fff;
+      border-color: #1e1c1a;
+    }
+
+    .kpis-table {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .kpis-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    .kpis-table th, .kpis-table td {
+      border-bottom: 1px solid #efe7d8;
+      padding: 0.4rem 0.35rem;
+      text-align: left;
+    }
+
+    .kpis-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #fffcf5;
+      color: #4d453b;
+      font-weight: 700;
+    }
+
+    .kpis-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .kpis-table td:first-child {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .kpis-table .kpi-cell {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .kpis-table .kpi-cell.reward-good {
+      color: var(--good);
+    }
+
+    .kpis-table .kpi-cell.reward-bad {
+      color: var(--bad);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      min-width: 400px;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid #efe7d8;
+      padding: 0.35rem 0.3rem;
+      vertical-align: middle;
+      text-align: left;
+    }
+    
+    th {
+      white-space: normal;
+      word-break: break-word;
+    }
+    
+    td {
+      white-space: normal;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #fffcf5;
+      color: #4d453b;
+      font-weight: 700;
+    }
+
+    .bar {
+      width: 100%;
+      min-width: 60px;
+      height: 8px;
+      border-radius: 999px;
+      background: #f1ecdf;
+      overflow: hidden;
+      margin-bottom: 3px;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      transition: width 0.18s linear;
+    }
+
+    .fill.true { background: var(--true); }
+    .fill.eps { background: var(--eps); }
+    .fill.ucb { background: var(--ucb); }
+    .fill.ts { background: var(--ts); }
+
+    .picked {
+      box-shadow: 0 0 0 2px rgba(30, 28, 26, 0.25);
+      border-radius: 4px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 220px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 0.4rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.3rem;
+    }
+    .dot.eps { background: var(--eps); }
+    .dot.ucb { background: var(--ucb); }
+    .dot.ts { background: var(--ts); }
+
+    @media (max-width: 500px) {
+      .top { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .kpis { grid-template-columns: 1fr; }
+      canvas { height: 180px; }
+    }
+
+    @media (max-width: 650px) {
+      body { padding: 0.7rem; }
+      .panel { padding: 0.6rem; }
+      .controls { grid-template-columns: 1fr; }
+      .control label { font-size: 0.7rem; }
+      input, button { padding: 0.35rem 0.45rem; font-size: 0.85rem; }
+      canvas { height: 160px; }
+      table { font-size: 0.7rem; }
+      th, td { padding: 0.3rem 0.25rem; }
+      .kpis-table th, .kpis-table td { padding: 0.3rem 0.25rem; font-size: 0.7rem; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0.6rem; }
+      .panel { padding: 0.6rem; }
+      .wrap { gap: 0.6rem; }
+      h1 { font-size: 1rem; }
+      .subtitle { font-size: 0.8rem; }
+      .controls { grid-template-columns: 1fr; gap: 0.4rem; }
+      .control label { font-size: 0.75rem; }
+      input, button { padding: 0.4rem 0.5rem; font-size: 0.85rem; }
+      .top { gap: 0.6rem; }
+      canvas { height: 180px; }
+      table { font-size: 0.75rem; }
+      th, td { padding: 0.35rem 0.25rem; }
+      .kpis-table th, .kpis-table td { padding: 0.35rem 0.25rem; font-size: 0.75rem; }
+      .bar { min-width: 60px; }
+    }
+    @media (max-width: 980px) {
+      .top { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .kpis { grid-template-columns: 1fr; }
+      canvas { height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <h1>Multi-Armed Bandit Playground <a href="/misc/bandit-algorithms.html" target="_blank" style="font-size:0.75rem;font-weight:400;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0.2rem 0.5rem;margin-left:0.5rem;vertical-align:middle;">&#8599; Open</a></h1>
+      <p class="subtitle"></p>
+    </section>
+
+    <section class="panel">
+      <div class="controls">
+        <div class="control">
+          <label for="arms">Arms</label>
+          <input id="arms" type="number" min="2" max="10" value="5">
+        </div>
+        <div class="control">
+          <label for="epsVal">epsilon</label>
+          <input id="epsVal" type="number" min="0" max="1" step="0.01" value="0.10">
+        </div>
+        <div class="control">
+          <label for="ucbC">UCB c</label>
+          <input id="ucbC" type="number" min="0.1" max="4" step="0.1" value="1.4">
+        </div>
+        <div class="control">
+          <label for="speed">Steps/frame</label>
+          <input id="speed" type="number" min="1" max="80" step="1" value="6">
+        </div>
+        <div class="control"><button id="reset">Reset</button></div>
+        <div class="control"><button id="step">Step</button></div>
+        <div class="control"><button id="run" class="btn-run">Run</button></div>
+        <div class="control">
+          <label>Total steps</label>
+          <input id="totalSteps" type="text" value="0" readonly>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>True Q</th>
+              <th style="color: var(--eps);">epsilon-Greedy</th>
+              <th style="color: var(--ucb);">UCB1</th>
+              <th style="color: var(--ts);">Thompson Sampling</th>
+            </tr>
+          </thead>
+          <tbody id="combined-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin:0 0 0.45rem 0;font-size:1rem;">Cumulative Regret</h2>
+      <canvas id="regret" width="1000" height="220"></canvas>
+      <div class="legend">
+        <span><span class="dot eps"></span>epsilon-Greedy</span>
+        <span><span class="dot ucb"></span>UCB1</span>
+        <span><span class="dot ts"></span>Thompson Sampling</span>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      probs: [],
+      best: 0,
+      t: 0,
+      running: false,
+      epsilon: 0.1,
+      ucbC: 1.4,
+      speed: 6,
+      algos: {}
+    };
+
+    const COLORS = {
+      eps: '#c15b07',
+      ucb: '#0d7a56',
+      ts: '#1c4e9a'
+    };
+
+    function rand(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function argmax(arr) {
+      let idx = 0;
+      for (let i = 1; i < arr.length; i++) {
+        if (arr[i] > arr[idx]) idx = i;
+      }
+      return idx;
+    }
+
+    function sampleBernoulli(p) {
+      return Math.random() < p ? 1 : 0;
+    }
+
+    function sampleNormal() {
+      const u1 = Math.random() || Number.EPSILON;
+      const u2 = Math.random() || Number.EPSILON;
+      return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    }
+
+    function sampleGamma(k) {
+      if (k < 1) {
+        return sampleGamma(k + 1) * Math.pow(Math.random(), 1 / k);
+      }
+      const d = k - 1 / 3;
+      const c = 1 / Math.sqrt(9 * d);
+      while (true) {
+        const x = sampleNormal();
+        let v = 1 + c * x;
+        if (v <= 0) continue;
+        v = v * v * v;
+        const u = Math.random();
+        if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+        if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+      }
+    }
+
+    function sampleBeta(a, b) {
+      const x = sampleGamma(a);
+      const y = sampleGamma(b);
+      return x / (x + y);
+    }
+
+    function makeSolver(name) {
+      const n = state.probs.length;
+      return {
+        name,
+        counts: Array(n).fill(0),
+        sums: Array(n).fill(0),
+        alpha: Array(n).fill(1),
+        beta: Array(n).fill(1),
+        est: Array(n).fill(0),
+        pulls: 0,
+        reward: 0,
+        regret: 0,
+        regretHistory: [0],
+        lastArm: null,
+        lastReward: null
+      };
+    }
+
+    function resetSimulation() {
+      const n = Math.max(2, Math.min(10, Number(document.getElementById('arms').value) || 5));
+      state.epsilon = Number(document.getElementById('epsVal').value) || 0.1;
+      state.ucbC = Number(document.getElementById('ucbC').value) || 1.4;
+      state.speed = Math.max(1, Number(document.getElementById('speed').value) || 6);
+      state.probs = Array.from({ length: n }, () => Number(rand(0.05, 0.95).toFixed(2)));
+      state.best = Math.max(...state.probs);
+      state.t = 0;
+      state.algos = {
+        eps: makeSolver('epsilon-Greedy'),
+        ucb: makeSolver('UCB1'),
+        ts: makeSolver('Thompson Sampling')
+      };
+      renderAll();
+    }
+
+    function chooseEps(s) {
+      if (Math.random() < state.epsilon) return Math.floor(Math.random() * state.probs.length);
+      return argmax(s.est);
+    }
+
+    function chooseUcb(s) {
+      for (let i = 0; i < s.counts.length; i++) {
+        if (s.counts[i] === 0) return i;
+      }
+      const t = Math.max(1, s.pulls);
+      const values = s.est.map((q, i) => q + state.ucbC * Math.sqrt(Math.log(t) / s.counts[i]));
+      return argmax(values);
+    }
+
+    function chooseTs(s) {
+      const draws = s.alpha.map((a, i) => sampleBeta(a, s.beta[i]));
+      return argmax(draws);
+    }
+
+    function stepSolver(s, chooser) {
+      const arm = chooser(s);
+      const reward = sampleBernoulli(state.probs[arm]);
+      s.pulls += 1;
+      s.lastArm = arm;
+      s.lastReward = reward;
+      s.counts[arm] += 1;
+      s.sums[arm] += reward;
+      s.est[arm] = s.sums[arm] / s.counts[arm];
+      s.alpha[arm] += reward;
+      s.beta[arm] += 1 - reward;
+      s.reward += reward;
+      s.regret += state.best - state.probs[arm];
+      s.regretHistory.push(s.regret);
+    }
+
+    function step() {
+      state.t += 1;
+      stepSolver(state.algos.eps, chooseEps);
+      stepSolver(state.algos.ucb, chooseUcb);
+      stepSolver(state.algos.ts, chooseTs);
+    }
+
+    function barCell(val, cls, isPicked) {
+      const pct = Math.max(0, Math.min(100, val * 100));
+      return '<div class="' + (isPicked ? 'picked' : '') + '"><div class="bar"><div class="fill ' + cls + '" style="width:' + pct.toFixed(1) + '%"></div></div>' + pct.toFixed(1) + '%</div>';
+    }
+
+    function renderKpi(key) {
+      const s = state.algos[key];
+      const avgReward = s.pulls > 0 ? (s.reward / s.pulls).toFixed(3) : '0.000';
+      const choice = s.lastArm == null ? 'N/A' : 'Arm ' + (s.lastArm + 1);
+      const outcomeClass = s.lastReward == null ? '' : (s.lastReward ? 'reward-good' : 'reward-bad');
+      const outcomeText = s.lastReward == null ? 'No pull yet' : (s.lastReward ? 'Reward = 1' : 'Reward = 0');
+      
+      return {
+        steps: s.pulls,
+        reward: avgReward,
+        regret: s.regret.toFixed(2),
+        arm: choice,
+        outcome: { text: outcomeText, cls: outcomeClass },
+        lastArm: s.lastArm
+      };
+    }
+
+    function renderCombinedTable() {
+      const rows = [];
+      const n = state.probs.length;
+      
+      // Metrics rows
+      const metrics = ['Steps', 'Avg Reward', 'Regret', 'Last Arm', 'Last Reward'];
+      const epsKpi = renderKpi('eps');
+      const ucbKpi = renderKpi('ucb');
+      const tsKpi = renderKpi('ts');
+      
+      rows.push(
+        '<tr><td>Avg Reward</td><td>N/A</td><td class="kpi-cell">' + epsKpi.reward + '</td>' +
+        '<td class="kpi-cell">' + ucbKpi.reward + '</td><td class="kpi-cell">' + tsKpi.reward + '</td></tr>'
+      );
+      
+      rows.push(
+        '<tr><td>Regret</td><td>N/A</td><td class="kpi-cell">' + epsKpi.regret + '</td>' +
+        '<td class="kpi-cell">' + ucbKpi.regret + '</td><td class="kpi-cell">' + tsKpi.regret + '</td></tr>'
+      );
+      
+      rows.push(
+        '<tr><td>Last Arm</td><td>N/A</td><td class="kpi-cell">' + epsKpi.arm + '</td>' +
+        '<td class="kpi-cell">' + ucbKpi.arm + '</td><td class="kpi-cell">' + tsKpi.arm + '</td></tr>'
+      );
+      
+      rows.push(
+        '<tr><td>Last Reward</td><td>N/A</td><td class="kpi-cell ' + epsKpi.outcome.cls + '">' + epsKpi.outcome.text + '</td>' +
+        '<td class="kpi-cell ' + ucbKpi.outcome.cls + '">' + ucbKpi.outcome.text + '</td>' +
+        '<td class="kpi-cell ' + tsKpi.outcome.cls + '">' + tsKpi.outcome.text + '</td></tr>'
+      );
+      
+      // Arm rows
+      for (let i = 0; i < n; i++) {
+        rows.push(
+          '<tr>' +
+            '<td>Arm ' + (i + 1) + '</td>' +
+            '<td>' + barCell(state.probs[i], 'true', false) + '</td>' +
+            '<td>' + barCell(state.algos.eps.est[i], 'eps', state.algos.eps.lastArm === i) + '</td>' +
+            '<td>' + barCell(state.algos.ucb.est[i], 'ucb', state.algos.ucb.lastArm === i) + '</td>' +
+            '<td>' + barCell(state.algos.ts.alpha[i] / (state.algos.ts.alpha[i] + state.algos.ts.beta[i]), 'ts', state.algos.ts.lastArm === i) + '</td>' +
+          '</tr>'
+        );
+      }
+      
+      document.getElementById('combined-table').innerHTML = rows.join('');
+    }
+
+    function drawRegret() {
+      const canvas = document.getElementById('regret');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const displayW = rect.width;
+      const displayH = 220;
+
+      canvas.width = displayW * dpr;
+      canvas.height = displayH * dpr;
+      canvas.style.width = displayW + 'px';
+      canvas.style.height = displayH + 'px';
+      ctx.scale(dpr, dpr);
+      
+      const w = displayW;
+      const h = displayH;
+      ctx.clearRect(0, 0, w, h);
+
+      const series = [
+        { data: state.algos.eps.regretHistory, color: COLORS.eps },
+        { data: state.algos.ucb.regretHistory, color: COLORS.ucb },
+        { data: state.algos.ts.regretHistory, color: COLORS.ts }
+      ];
+
+      const maxLen = Math.max(...series.map((s) => s.data.length));
+      const maxY = Math.max(1, ...series.flatMap((s) => s.data));
+
+      ctx.strokeStyle = '#ddd4c5';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = 10 + (h - 20) * (i / 4);
+        ctx.beginPath();
+        ctx.moveTo(42, y);
+        ctx.lineTo(w - 10, y);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#6f665b';
+      ctx.font = 'bold 12px IBM Plex Sans, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('0', 18, h - 10);
+      ctx.fillText(maxY.toFixed(1), 8, 18);
+      ctx.fillText('1', 42, h - 10);
+      ctx.fillText(String(Math.max(1, maxLen - 1)), w - 48, h - 10);
+
+      series.forEach((s) => {
+        ctx.beginPath();
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = 2;
+        s.data.forEach((val, i) => {
+          const x = 42 + ((w - 52) * i) / Math.max(1, maxLen - 1);
+          const y = 10 + (h - 20) * (1 - val / maxY);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      });
+    }
+
+    function renderAll() {
+      renderCombinedTable();
+      drawRegret();
+      document.getElementById('totalSteps').value = String(state.t);
+    }
+
+    function tick() {
+      if (state.running) {
+        for (let i = 0; i < state.speed; i++) step();
+        renderAll();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    document.getElementById('reset').addEventListener('click', () => {
+      resetSimulation();
+    });
+
+    document.getElementById('step').addEventListener('click', () => {
+      step();
+      renderAll();
+    });
+
+    document.getElementById('run').addEventListener('click', (e) => {
+      state.running = !state.running;
+      e.target.textContent = state.running ? 'Pause' : 'Run';
+      e.target.classList.toggle('btn-run', !state.running);
+    });
+
+    ['epsVal', 'ucbC', 'speed'].forEach((id) => {
+      document.getElementById(id).addEventListener('change', () => {
+        state.epsilon = Number(document.getElementById('epsVal').value) || 0.1;
+        state.ucbC = Number(document.getElementById('ucbC').value) || 1.4;
+        state.speed = Math.max(1, Number(document.getElementById('speed').value) || 6);
+      });
+    });
+
+    resetSimulation();
+    tick();
+  </script>
+</body>
+</html>

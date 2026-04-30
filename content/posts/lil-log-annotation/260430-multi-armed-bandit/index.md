@@ -162,6 +162,14 @@ Based on how we do exploration, there several ways to solve the multi-armed band
 | **Smart exploration (uncertainty‑driven)** | **UCB (Upper Confidence Bound)** | Pick arm maximizing $\hat{Q}(a) + \text{uncertainty bonus}$                          |
 | **Smart exploration (probabilistic)**      | **Thompson Sampling**            | Sample a parameter from each arm’s posterior; pick the arm with the highest sample   |
 
+<iframe
+  src="/misc/bandit-algorithms.html"
+  title="Bandit algorithm interactive demo"
+  width="100%"
+  height="1000px"
+  style="display: block; border: 1px solid #e6e6e6; border-radius: 10px; background: #fff;"
+></iframe>
+
 ## ε-Greedy Algorithm
 
 {{% admonition type="quote" title="ε-Greedy Algorithm" open=true %}}
