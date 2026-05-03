@@ -17,7 +17,7 @@ math: true
 
 ## <font color="lightgray">H2</font> Education
 
-- **Renmin University of China**
+- **[Renmin University of China](https://en.ruc.edu.cn/)**
 
     Ph.D. in Computer Application Technology
 
@@ -25,7 +25,7 @@ math: true
 
     Sep 2023 - Jun 2028
 
-- **Henan University of Economics and Law**
+- **[Henan University of Economics and Law](https://www.huel.edu.cn/index.htm)**
 
     B.Mgt. in E-commerce
 
@@ -37,21 +37,29 @@ math: true
 
 ## <font color="lightgray">H2</font> Work Experience
 
-- **Ant Group**
+- **[Ant Group](https://www.antgroup.com/en)**
 
-    Research Intern at Ant Research
+    Research Intern at [AntResearch](https://www.antresearch.com/)
 
     Collaborated with Director, **Qing Shao**
 
-    Jul 2025 - Present
+    Jul 2025 - May 2026
 
-- **Institute for Advanced Algorithms Research, Shanghai**
+- **[MemTensor](https://www.memtensor.com.cn/)**
+
+    Software Engineer Intern
+
+    Collaborated with Dr. **Zhiyu Li**
+
+    May 2025 - Jul 2025
+
+- **[Institute for Advanced Algorithms Research, Shanghai](https://www.iaar.ac.cn/)**
 
     Research Intern at the Large Language Model Center
 
     Collaborated with Dr. **Zhiyu Li** and Dr. **Zehao Lin**
 
-    Sep 2023 - Jun 2025
+    Sep 2023 - Apr 2025
 
 ## <font color="lightgray">H2</font> Selected Researches
 
@@ -179,5 +187,5 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     <sup>&ast;</sup> Contributed Equally
     <sup>†</sup> Corresponding Author
     <br>
-    Last update: Mar 2026 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content/cv.md'>Edit this page</a>
+    Last update: May 2026 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content/cv.md'>Edit this page</a>
 </footer>
