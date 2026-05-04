@@ -116,6 +116,8 @@ params:
       url: https://scholar.google.com/citations?user=6t4_yXMAAAAJ
     - name: github
       url: https://github.com/Ki-Seki
+    - name: gallery
+      url: https://ki-seki.github.io/gallery/
     - name: X
       url: https://x.com/songsc_
     - name: huggingface
