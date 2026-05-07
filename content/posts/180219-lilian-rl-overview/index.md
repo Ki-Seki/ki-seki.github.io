@@ -161,7 +161,6 @@ There's no fixed convention on their notations, so I list some possible notation
 | ------------ | ------------- | --------------- |
 | Scenario 1   | $R(s, a, s')$ | $R(s, a)$       |
 | Scenario 2   | $r$           | $\mathbb{E}[r]$ |
-| In MA bandit | $R(a)$        | $Q(a)$          |
 
 {{% admonition type="quote" title="Policy" open=true %}}
 #### Policy
@@ -182,7 +181,7 @@ $$
 \end{cases}
 $$
 
-
+{{% admonition type="quote" title="State-Value and Action-Value Function" open=true %}}
 #### Value Function
 
 Value function measures the goodness of a state or how rewarding a state or an action is by a prediction of future reward. The future reward, also known as **return**, is a total sum of discounted rewards going forward. Let's compute the return $G_t$ starting from time t:
@@ -221,7 +220,11 @@ The difference between action-value and state-value is the action **advantage** 
 $$
 A_{\pi}(s, a) = Q_{\pi}(s, a) - V_{\pi}(s)
 $$
+{{% /admonition %}}
 
+TODO: Use GRPO as example
+
+{{% admonition type="quote" title="Optimal Value and Policy" open=true %}}
 #### Optimal Value and Policy
 
 The optimal value function produces the maximum return:
@@ -239,6 +242,9 @@ $$
 $$
 
 And of course, we have $V_{\pi_{*}}(s)=V_{*}(s)$ and $Q_{\pi_{*}}(s, a) = Q_{*}(s, a)$.
+{{% /admonition %}}
+
+Obvious.
 
 ### Markov Decision Processes
 
