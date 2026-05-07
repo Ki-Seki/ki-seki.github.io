@@ -14,13 +14,13 @@ math: true
 
 > **Original post**: [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/) by Lilian Weng.
 
-Updated on 2020-09-03: Updated the algorithm of [SARSA](#sarsa-on-policy-td-control) and [Q-learning](#q-learning-off-policy-td-control) so that the difference is more pronounced.
-Updated on 2021-09-19: Thanks to 爱吃猫的鱼, we have this post in [Chinese](https://paperexplained.cn/articles/article/detail/33/).
-
+{{% admonition type="quote" title="Background" open=true %}}
 A couple of exciting news in Artificial Intelligence (AI) has just happened in recent years. AlphaGo defeated the best professional human player in the game of Go. Very soon the extended algorithm AlphaGo Zero beat AlphaGo by 100-0 without supervised learning on human knowledge. Top professional game players lost to the bot developed by OpenAI on DOTA2 1v1 competition. After knowing these, it is pretty hard not to be curious about the magic behind these algorithms --- Reinforcement Learning (RL). I'm writing this post to briefly go over the field. We will first introduce several fundamental concepts and then dive into classic approaches to solving RL problems. Hopefully, this post could be a good starting point for newbies, bridging the future study on the cutting-edge research.
+{{% /admonition %}}
 
 ## What is Reinforcement Learning?
 
+{{% admonition type="quote" title="Problem Setup" open=true %}}
 Say, we have an agent in an unknown environment and this agent can obtain some rewards by interacting with the environment. The agent ought to take actions so as to maximize cumulative rewards. In reality, the scenario could be a bot playing a game to achieve high scores, or a robot trying to complete physical tasks with physical items; and not just limited to these.
 
 {{< media
@@ -29,9 +29,11 @@ caption="An agent interacts with the environment, trying to take smart actions t
 >}}
 
 The goal of Reinforcement Learning (RL) is to learn a good strategy for the agent from experimental trials and relative simple feedback received. With the optimal strategy, the agent is capable to actively adapt to the environment to maximize future rewards.
+{{% /admonition %}}
 
 ### Key Concepts
 
+{{% admonition type="quote" title="Env, Model, State, Action, Transition Prob and Reward" open=true %}}
 Now Let's formally define a set of key concepts in RL.
 
 The agent is acting in an **environment**. How the environment reacts to certain actions is defined by a **model** which we may or may not know. The agent can stay in one of many **states** ($s \in \mathcal{S}$) of the environment, and choose to take one of many **actions** ($a \in \mathcal{A}$) to switch from one state to another. Which state the agent will arrive in is decided by transition probabilities between states ($P$). Once an action is taken, the environment delivers a **reward** ($r \in \mathcal{R}$) as feedback.
@@ -40,26 +42,75 @@ The model defines the reward function and transition probabilities. We may or ma
 
 - **Know the model**: planning with perfect information; do model-based RL. When we fully know the environment, we can find the optimal solution by [Dynamic Programming](https://en.wikipedia.org/wiki/Dynamic_programming) (DP). Do you still remember "longest increasing subsequence" or "traveling salesmen problem" from your Algorithms 101 class? LOL. This is not the focus of this post though.
 - **Does not know the model**: learning with incomplete information; do model-free RL or try to learn the model explicitly as part of the algorithm. Most of the following content serves the scenarios when the model is unknown.
+{{% /admonition %}}
 
+More about model-based content:
+
+We say model-based RL when the transition probabilities are knowable or we can write down the Bellman equations. Let's use LIS (Longest Increasing Subsequence) as an example.
+
+Bellman equation for the value function is:
+
+$$
+V(s) = \max_a \sum_{s'} P(s'|s,a)[R + \gamma V(s')]
+$$
+
+In LIS, the transition probability is deterministic, meaning that if we take action a in state s, we will always arrive at the same state s' and get the same reward R. Thus
+
+$$
+P(s'|s,a) = 1.
+$$
+
+And the reward is also deterministic,
+
+$$
+R(s, a) = 1.
+$$
+
+As for the gamma, we can set it to be 1 because we do not need to discount future rewards in this case.
+
+$$
+\gamma = 1.
+$$
+
+So,
+
+$$
+V(s) = \max_a [1 + V(s')]
+$$
+
+This is exactly the same as the DP solution for LIS:
+
+$$
+dp[i] = 1 + \max_{j < i,\, a[j] < a[i]} dp[j]
+$$
+
+{{% admonition type="quote" title="Policy and Value Function" open=true %}}
 The agent's **policy** $\pi(s)$ provides the guideline on what is the optimal action to take in a certain state with [**the goal to maximize the total rewards**]. Each state is associated with a **value** function $V(s)$ predicting the expected amount of future rewards we are able to receive in this state by acting the corresponding policy. In other words, the value function quantifies how good a state is. Both policy and value functions are what we try to learn in reinforcement learning.
 
 {{< media
 src="RL_algorithm_categorization.png"
 caption="Summary of approaches in RL based on whether we want to model the value, policy, or the environment. (Image source: reproduced from David Silver's RL course [lecture 1](https://youtu.be/2pWv7GOvuf0).)"
 >}}
+{{% /admonition %}}
 
+{{% admonition type="quote" title="Interaction between agent and env" open=true %}}
 The interaction between the agent and the environment involves a sequence of actions and observed rewards in time, $t=1, 2, \dots, T$. During the process, the agent accumulates the knowledge about the environment, learns the optimal policy, and makes decisions on which action to take next so as to efficiently learn the best policy. Let's label the state, action, and reward at time step t as $S_t$, $A_t$, and $R_t$, respectively. Thus the interaction sequence is fully described by one **episode** (also known as "trial" or "trajectory") and the sequence ends at the terminal state $S_T$:
 
 $$
 S_1, A_1, R_2, S_2, A_2, \dots, S_T
 $$
+{{% /admonition %}}
 
+{{% admonition type="quote" title="Common Terms" open=true %}}
 Terms you will encounter a lot when diving into different categories of RL algorithms:
 
 - **Model-based**: Rely on the model of the environment; either the model is known or the algorithm learns it explicitly.
 - **Model-free**: No dependency on the model during learning.
 - **On-policy**: Use the deterministic outcomes or samples from the target policy to train the algorithm.
 - **Off-policy**: Training on a distribution of transitions or episodes produced by a different behavior policy rather than that produced by the target policy.
+{{% /admonition %}}
+
+{{% admonition type="quote" title="Model, transition function, state-transition function and expected reward function" open=true %}}
 
 #### Model: Transition and Reward
 
@@ -84,13 +135,53 @@ The reward function R predicts the next reward triggered by one action:
 $$
 R(s, a) = \mathbb{E} [R_{t+1} \vert S_t = s, A_t = a] = \sum_{r\in\mathcal{R}} r \sum_{s' \in \mathcal{S}} P(s', r \vert s, a)
 $$
+{{% /admonition %}}
 
+If you're familar with Multi-armed Bernoulli Bandit problems ([Learn it here](https://ki-seki.github.io/posts/260430-multi-armed-bandit/)), you may understand formulas above as a generalization of the bandit setting.
+
+Bandit problem is stateless, so
+
+$$
+P_{ss'}^a = P(s' \vert s, a)  = 1
+$$
+
+And the reward function is simply the expected reward of taking action a:
+
+$$
+R(s, a) = \sum_{r\in\mathcal{R}} r \sum_{s' \in \{s'\}} P(s', r \vert s, a) = \sum_{r\in\mathcal{R}} r P(r \vert s, a) \\= 1 \cdot P(r=1 \vert s, a) + 0 \cdot P(r=0 \vert s, a) = \theta_a
+$$
+
+---
+
+Here is one thing we should pay attention to, the difference between reward function and expected reward function.
+
+There's no fixed convention on their notations, so I list some possible notations for both of them in the table below:
+
+|              | Reward        | Expected Reward |
+| ------------ | ------------- | --------------- |
+| Scenario 1   | $R(s, a, s')$ | $R(s, a)$       |
+| Scenario 2   | $r$           | $\mathbb{E}[r]$ |
+| In MA bandit | $R(a)$        | $Q(a)$          |
+
+{{% admonition type="quote" title="Policy" open=true %}}
 #### Policy
 
 Policy, as the agent's behavior function $\pi$, tells us which action to take in state s. It is a mapping from state s to action a and can be either deterministic or stochastic:
 
 - Deterministic: $\pi(s) = a$.
 - Stochastic: $\pi(a \vert s) = \mathbb{P}_\pi [A=a \vert S=s]$.
+{{% /admonition %}}
+
+The relation between deterministic and stochastic policy:
+
+$$
+\pi(a\mid s) =
+\begin{cases}
+1 & a = \pi(s) \\
+0 & a \neq \pi(s)
+\end{cases}
+$$
+
 
 #### Value Function
 
