@@ -110,10 +110,9 @@ Terms you will encounter a lot when diving into different categories of RL algor
 - **Off-policy**: Training on a distribution of transitions or episodes produced by a different behavior policy rather than that produced by the target policy.
 {{% /admonition %}}
 
-{{% admonition type="quote" title="Model, transition function, state-transition function and expected reward function" open=true %}}
-
 #### Model: Transition and Reward
 
+{{% admonition type="quote" title="Model, transition function, state-transition function and expected reward function" open=true %}}
 The model is a descriptor of the environment. With the model, we can learn or infer how the environment would interact with and provide feedback to the agent. The model has two major parts, transition probability function $P$ and reward function $R$.
 
 Let's say when we are in state s, we decide to take action a to arrive in the next state s' and obtain reward r. This is known as one **transition** step, represented by a tuple (s, a, s', r).
@@ -162,9 +161,9 @@ There's no fixed convention on their notations, so I list some possible notation
 | Scenario 1   | $R(s, a, s')$ | $R(s, a)$       |
 | Scenario 2   | $r$           | $\mathbb{E}[r]$ |
 
-{{% admonition type="quote" title="Policy" open=true %}}
 #### Policy
 
+{{% admonition type="quote" title="Deterministic and Stochastic Policy" open=true %}}
 Policy, as the agent's behavior function $\pi$, tells us which action to take in state s. It is a mapping from state s to action a and can be either deterministic or stochastic:
 
 - Deterministic: $\pi(s) = a$.
@@ -181,9 +180,9 @@ $$
 \end{cases}
 $$
 
-{{% admonition type="quote" title="State-Value and Action-Value Function" open=true %}}
 #### Value Function
 
+{{% admonition type="quote" title="Future reward / Return" open=true %}}
 Value function measures the goodness of a state or how rewarding a state or an action is by a prediction of future reward. The future reward, also known as **return**, is a total sum of discounted rewards going forward. Let's compute the return $G_t$ starting from time t:
 
 $$
@@ -196,7 +195,34 @@ The discounting factor $\gamma \in [0, 1]$ penalize the rewards in the future, b
 - The future rewards do not provide immediate benefits; i.e. As human beings, we might prefer to have fun today rather than 5 years later ;).
 - Discounting provides mathematical convenience; i.e., we don't need to track future steps forever to compute return.
 - We don't need to worry about the infinite loops in the state transition graph.
+{{% /admonition %}}
 
+Let's furturemore clarify the last two points.
+
+- If we do not discount the future rewards, then the return is simply the sum of all future rewards. Then it will never converge. But with discounting factor $\gamma < 1$, the return is a geometric series and it converges to a finite value.
+- If there is no discount factor, the agent will decide that staying in that loop forever is the "optimal" strategy because the total reward will eventually reach infinity.
+
+---
+
+Proof of convergence of return with discounting factor:
+
+Assume there exists some positive finite constant $R_{\max}$ such that $|R_t| \le R_{\max}$ for all $t$.
+
+Then we have:
+
+$$
+\begin{aligned}
+|G_t| &= |R_{t+1} + \gamma R_{t+2} + \dots| \\
+&\leq |R_{t+1}| + |\gamma R_{t+2}| + \dots & \text{ ; triangle inequality } \\
+&\leq |R_{max}| + |\gamma R_{max}| + \dots \\
+&\leq R_{max} + \gamma R_{max} + \dots \\
+&= R_{max} \sum_{k=0}^{\infty} \gamma^k \\
+&= \frac{R_{max}}{1 - \gamma} & \text{ ; infinite geometric series } \\
+&< \infty
+\end{aligned}
+$$
+
+{{% admonition type="quote" title="State-Value Function, Action-Value Function and Advantage Function" open=true %}}
 The **state-value** of a state s is the expected return if we are in this state at time t, $S_t = s$:
 
 $$
@@ -224,9 +250,9 @@ $$
 
 TODO: Use GRPO as example
 
-{{% admonition type="quote" title="Optimal Value and Policy" open=true %}}
 #### Optimal Value and Policy
 
+{{% admonition type="quote" title="Optimal Value and Policy" open=true %}}
 The optimal value function produces the maximum return:
 
 $$
