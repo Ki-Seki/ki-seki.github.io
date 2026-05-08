@@ -222,7 +222,7 @@ $$
 \end{aligned}
 $$
 
-{{% admonition type="quote" title="State-Value Function, Action-Value Function and Advantage Function" open=true %}}
+{{% admonition type="quote" title="State-Value Function, Action-Value Function and Action Advantage Function" open=true %}}
 The **state-value** of a state s is the expected return if we are in this state at time t, $S_t = s$:
 
 $$
@@ -248,7 +248,35 @@ A_{\pi}(s, a) = Q_{\pi}(s, a) - V_{\pi}(s)
 $$
 {{% /admonition %}}
 
-TODO: Use GRPO as example
+Summary so far:
+
+- **Policy** weights your choices.
+- **Transition Probability** weights the environment's outcomes.
+- **Value Functions** are the result of averaging these weighted rewards over time.
+
+---
+
+Let's use GRPO as the example to rewrite some functions above.
+
+GRPO is stateless, so we have:
+
+$$
+\begin{aligned}
+G_t &= R_{t+1} \text{ ; since there is no state transition} \\
+Q_{\pi}(a) &= \mathbb{E}_{\pi}[G_t \vert A_t = a] \approx r_a \\
+V_{\pi}(s) &= \mathbb{E}_{\pi}[G_t \vert S_t = s] = \sum_{a \in \mathcal{A}} Q_{\pi}(a) \pi(a \vert s) = \sum_{a \in \mathcal{A}} r_a \frac{1}{|\mathcal{A}|} = \bar{r} \\
+A_{\pi}(s, a) &= Q_{\pi}(s, a) - V_{\pi}(s) = r_a - \bar{r}
+\end{aligned}
+$$
+
+This is very close to the real GRPO advantage function:
+
+{{< media
+src="GRPO_Advantage.png"
+caption="GRPO Advantage Function (Image source: [DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300).)"
+>}}
+
+Except that the real GRPO advantage is z-score normalized.
 
 #### Optimal Value and Policy
 
@@ -274,6 +302,7 @@ Obvious.
 
 ### Markov Decision Processes
 
+{{% admonition type="quote" title="Markov Property" open=true %}}
 In more formal terms, almost all the RL problems can be framed as **Markov Decision Processes** (MDPs). All states in MDP has "Markov" property, referring to the fact that the future only depends on the current state, not the history:
 
 $$
@@ -281,7 +310,9 @@ $$
 $$
 
 Or in other words, the future and the past are **conditionally independent** given the present, as the current state encapsulates all the statistics we need to decide the future.
+{{% /admonition %}}
 
+{{% admonition type="quote" title="Elements of an MDP" open=true %}}
 {{< media
 src="agent_environment_MDP.png"
 caption="The agent-environment interaction in a Markov decision process. (Image source: Sec. 3.1 Sutton & Barto (2017).)"
@@ -299,6 +330,7 @@ A Markov deicison process consists of five elements $\mathcal{M} = \langle \math
 src="mdp_example.jpg"
 caption="A fun example of Markov decision process: a typical work day. (Image source: [randomant.net/reinforcement-learning-concepts](https://randomant.net/reinforcement-learning-concepts/))"
 >}}
+{{% /admonition %}}
 
 ### Bellman Equations
 
