@@ -14,3 +14,4 @@ repos:
     hooks:
     - id: markdownlint
       args: [ --dot ]
+      language_version: system

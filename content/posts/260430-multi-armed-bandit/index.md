@@ -53,10 +53,10 @@ Now let's give it a scientific definition.
 
 A Bernoulli multi-armed bandit can be described as a tuple of $\langle \mathcal{A}, \mathcal{R} \rangle$, where:
 
-- We have $K$ machines with reward probabilities, $\{ \theta_1, \dots, \theta_K \}$.
-- At each time step t, we take an action a on one slot machine and receive a reward r.
-- $\mathcal{A}$ is a set of actions, each referring to the interaction with one slot machine. The value of action a is the expected reward, $Q(a) = \mathbb{E} [r \vert a] = \theta$. If action $a_t$ at the time step t is on the i-th machine, then $Q(a_t) = \theta_i$.
-- $\mathcal{R}$ is a reward function. In the case of Bernoulli bandit, we observe a reward r in a *stochastic* fashion. At the time step t, $r_t = \mathcal{R}(a_t)$ may return reward 1 with a probability $Q(a_t)$ or 0 otherwise.
+* We have $K$ machines with reward probabilities, $\{ \theta_1, \dots, \theta_K \}$.
+* At each time step t, we take an action a on one slot machine and receive a reward r.
+* $\mathcal{A}$ is a set of actions, each referring to the interaction with one slot machine. The value of action a is the expected reward, $Q(a) = \mathbb{E} [r \vert a] = \theta$. If action $a_t$ at the time step t is on the i-th machine, then $Q(a_t) = \theta_i$.
+* $\mathcal{R}$ is a reward function. In the case of Bernoulli bandit, we observe a reward r in a *stochastic* fashion. At the time step t, $r_t = \mathcal{R}(a_t)$ may return reward 1 with a probability $Q(a_t)$ or 0 otherwise.
 
 It is a simplified version of [Markov decision process](https://en.wikipedia.org/wiki/Markov_decision_process), as there is no state $\mathcal{S}$.
 
@@ -87,7 +87,7 @@ Define an immediate value / expected reward function of a specific action:
 
 If at time step t, we take action on the i-th machine:
 
-*  $Q(a_t=i) = \theta_i$
+* $Q(a_t=i) = \theta_i$
 
 Define the reward function:
 
@@ -150,9 +150,9 @@ There are three sources of randomness in the multi-armed bandit problem:
 {{% admonition type="quote" title="Strategies" open=true %}}
 Based on how we do exploration, there several ways to solve the multi-armed bandit.
 
-- No exploration: the most naive approach and a bad one.
-- Exploration at random
-- Exploration smartly with preference to uncertainty
+* No exploration: the most naive approach and a bad one.
+* Exploration at random
+* Exploration smartly with preference to uncertainty
 {{% /admonition %}}
 
 | Category                                   | Strategy Name                    | How It Works                                                                         |
@@ -196,6 +196,7 @@ Random exploration gives us an opportunity to try out options that we have not k
 {{% /admonition %}}
 
 UCB is designed to be optimistic under uncertainty:
+
 * If an arm has high estimated value → good
 * If an arm has high uncertainty → also good
 * If an arm has both → UCB will pick it even if its true value is not the best
@@ -233,10 +234,10 @@ $$
 
 Given one target action $a$, let us consider:
 
-- $r_t(a)$ as the random variables,
-- $Q(a)$ as the true mean,
-- $\hat{Q}_t(a)$ as the sample mean,
-- And $u$ as the upper confidence bound, $u = U_t(a)$
+* $r_t(a)$ as the random variables,
+* $Q(a)$ as the true mean,
+* $\hat{Q}_t(a)$ as the sample mean,
+* And $u$ as the upper confidence bound, $u = U_t(a)$
 
 Then we have,
 
@@ -302,7 +303,6 @@ caption="When the expected reward has a Gaussian distribution. $\sigma(a_i)$ is 
 Check my toy implementation of [UCB1](https://github.com/lilianweng/multi-armed-bandit/blob/master/solvers.py#L76) and [Bayesian UCB](https://github.com/lilianweng/multi-armed-bandit/blob/master/solvers.py#L99) with Beta prior on θ.
 {{% /admonition %}}
 
-
 * $X \sim \mathcal N(\mu,\sigma^2) \Rightarrow P(X > \mu + z_\alpha \sigma) = \alpha$
 * $Q_t(a) \sim \mathcal N(\hat{Q}_t(a), \sigma^2(a)) \Rightarrow P(Q_t(a) > \hat{Q}_t(a) + z_\alpha \sigma(a)) = \alpha$
 * When $\alpha=0.05$, we have $z_\alpha \approx 1.645$ and thus the upper confidence bound is $\hat{Q}_t(a) + 1.645 \sigma(a)$, which means that the true value is below the upper confidence bound with a probability at least $1-5\%=95\%$.
@@ -334,8 +334,8 @@ For the Bernoulli bandit, it is natural to assume that $Q(a)$ follows a [Beta](h
 
 First, let us initialize the Beta parameters α and β based on some prior knowledge or belief for every action. For example,
 
-- α = 1 and β = 1; we expect the reward probability to be 50% but we are not very confident.
-- α = 1000 and β = 9000; we strongly believe that the reward probability is 10%.
+* α = 1 and β = 1; we expect the reward probability to be 50% but we are not very confident.
+* α = 1000 and β = 9000; we strongly believe that the reward probability is 10%.
 
 At each time t, we sample an expected reward, $\tilde{Q}(a)$, from the prior distribution $\text{Beta}(\alpha_i, \beta_i)$ for every action. The best action is selected among samples: $a^{TS}_t = \arg\max_{a \in \mathcal{A}} \tilde{Q}(a)$. After the true reward is observed, we can update the Beta distribution accordingly, which is essentially doing Bayesian inference to compute the posterior with the known prior and the likelihood of getting the sampled data.
 
@@ -359,18 +359,19 @@ $$
 \end{aligned}
 $$
 
-- **The formula defines an *ideal probability*, not the algorithm.**
+* **The formula defines an *ideal probability*, not the algorithm.**
   It says “$\pi(a \; \vert \; h_t)$ is the probability that action *a* is truly the best,” but it does **not** describe how to compute that probability.
-- **The probability is taken over the *posterior distributions* of Q(a).**
+* **The probability is taken over the *posterior distributions* of Q(a).**
   Q(a) is treated as a random variable with uncertainty, so the formula is about comparing *random draws* of Q(a), not fixed values.
-- **The expectation form is just a mathematical rewrite.**
+* **The expectation form is just a mathematical rewrite.**
   \(\mathbb{E}_{\mathcal{R} \vert h_t} [ \mathbb{1}(a = \arg\max_{a \in \mathcal{A}} Q(a)) ]\) means “the chance that a random draw of all Q’s makes action *a* the largest,” but still does not specify how to obtain those draws. \(\mathcal{R}\) is the randomness coming from the posterior distributions of the action values \(Q(a)\).
-- **Thompson Sampling uses sampling as the practical way to realize this probability.**
+* **Thompson Sampling uses sampling as the practical way to realize this probability.**
   By drawing one sample from each posterior and taking the argmax, the algorithm ensures that the frequency of selecting action *a* matches exactly the probability defined by the formula.
 
 ---
 
 Thompson Sampling is to greedy selection what a VAE is to a standard autoencoder:
+
 * both replace a single deterministic estimate with sampling from a learned distribution.
 * This stochasticity lets them explore more possibilities and avoid getting trapped in narrow, overconfident solutions.
 
@@ -379,8 +380,6 @@ Thompson Sampling is to greedy selection what a VAE is to a standard autoencoder
 Below is a good learning resource for understanding the Beta distribution.
 
 <div class="iframely-embed"><div class="iframely-responsive" style="padding-bottom: 61.5385%; padding-top: 120px;"><a href="https://hai-mn.github.io/posts/2021-04-11-beta-distribution-in-intuitive-explanation/" data-iframely-url="https://iframely.net/wpGiNi85?theme=light"></a></div></div><script async src="https://iframely.net/embed.js"></script>
-
-
 
 ## Case Study
 
