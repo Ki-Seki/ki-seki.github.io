@@ -366,8 +366,8 @@ $$
 
 Bear in mind that:
 
-- state value function is 
-- the weighted average of action value function 
+- state value function is
+- the weighted average of action value function
 - over the action distribution defined by the policy $\pi$
 
 $$
