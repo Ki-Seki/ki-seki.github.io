@@ -6,7 +6,7 @@ author:
 summary: "The multi-armed bandit problem is a classic exploration–exploitation dilemma in reinforcement learning. Lilian Weng's post is an excellent introduction, but some mathematical details and motivations can be cryptic. This article annotates it with step-by-step explanations and supplementary notes."
 cover:
   image: "multi-armed-bandit.png"
-  caption: "Multi-armed bandit"
+  caption: "Multi-armed bandit (by [ChatGPT Images 2.0](https://openai.com/index/introducing-chatgpt-images-2-0/))"
 tags: ["exploration", "reinforcement-learning", "math", "multi-armed-bandit"]
 math: true
 ---
