@@ -12,6 +12,8 @@ tags: []
 - [ ] [各种协议的介绍](https://www.techfens.com/posts/kexueshangwang.html)
 - [ ] [各种基础知识](https://zhaotizi.site/)
 - [ ] https://bwgvps.github.io/build-v2ray-on-bandwagonhost-vps/
+- [ ] 节点管理面板：例如x-ui，s-ui，3x-ui等等
+- [ ] 教程：https://www.vircs.com/blogs/1
 
 ## 计算机网络基础知识
 
