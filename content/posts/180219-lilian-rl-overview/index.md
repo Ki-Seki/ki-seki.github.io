@@ -1,14 +1,16 @@
 ---
-date: '2018-02-19T00:00:00+00:00'
-title: 'A (Long) Peek into Reinforcement Learning'
+date: '2026-05-09T00:00:00+00:00'
+title: 'Fully Annotated Guide to "A (Long) Peek into Reinforcement Learning"'
 author:
-  - Lilian Weng
-summary: 'A comprehensive overview of reinforcement learning, covering Markov decision processes, Q-learning, policy gradient, model-based RL, and more.'
+  - Shichao Song
+summary: 'This is a fully annotated guide to Lilian Weng’s post A (Long) Peek into Reinforcement Learning. It covers the key concepts, mathematical formulations, and common approaches in reinforcement learning (RL). The guide is structured to help readers understand the fundamental ideas and algorithms in RL, with detailed explanations and examples.'
 cover:
-  image: "RL_illustration.png"
+  image: "RL_illustration_new.png"
+  caption: "Reinforcement Learning illustration (by [Google Gemini](https://gemini.google.com/))"
 tags:
   - "reinforcement-learning"
   - "math"
+  - "lilian-weng"
 math: true
 ---
 
@@ -842,19 +844,9 @@ AlphaGo Zero simplified AlphaGo by removing supervised learning and merging sepa
 
 I know this is a long read, but hopefully worth it. If you notice mistakes and errors in this post, don’t hesitate to contact me at [lilian dot wengweng at gmail dot com]. See you in the next post! :)
 
----
+## Citation
 
-Cited as:
-
-```bibtex
-@article{weng2018bandit,
-  title   = "A (Long) Peek into Reinforcement Learning",
-  author  = "Weng, Lilian",
-  journal = "lilianweng.github.io",
-  year    = "2018",
-  url     = "https://lilianweng.github.io/posts/2018-02-19-rl-overview/"
-}
-```
+{{< bibtex >}}
 
 ## References
 
@@ -881,7 +873,3 @@ Cited as:
 [11] Frank Sehnke, et al. Parameter-exploring policy gradients. Neural Networks 23.4 (2010): 551-559.
 
 [12] Csaba Szepesvári. Algorithms for reinforcement learning. 1st Edition. Synthesis lectures on artificial intelligence and machine learning 4.1 (2010): 1-103.
-
----
-
-If you notice mistakes and errors in this post, please don’t hesitate to contact me at [lilian dot wengweng at gmail dot com] and I would be super happy to correct them right away!
