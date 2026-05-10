@@ -254,6 +254,12 @@ Summary so far:
 - **Transition Probability** weights the environment's outcomes.
 - **Value Functions** are the result of averaging these weighted rewards over time.
 
+The relation between immediate reward, return, and value functions:
+
+- Immediate reward: at state s, take action a, get reward r.
+- Return: the total discounted reward starting from state s and action a, following policy $\pi$.
+- Value functions: another forms of return, but with different conditions. State-value function is the expected return given state s, while action-value function is the expected return given state s and action a.
+
 ---
 
 Let's use GRPO as the example to rewrite some functions above.
@@ -298,7 +304,7 @@ $$
 And of course, we have $V_{\pi_{*}}(s)=V_{*}(s)$ and $Q_{\pi_{*}}(s, a) = Q_{*}(s, a)$.
 {{% /admonition %}}
 
-Obvious.
+Best policy → best value functions → best return.
 
 ### Markov Decision Processes
 
@@ -334,6 +340,7 @@ caption="A fun example of Markov decision process: a typical work day. (Image so
 
 ### Bellman Equations
 
+{{% admonition type="quote" title="Bellman Equations" open=true %}}
 Bellman equations refer to a set of equations that decompose the value function into the immediate reward plus the discounted future values.
 
 $$
@@ -355,9 +362,21 @@ Q(s, a)
 &= \mathbb{E} [R_{t+1} + \gamma \mathbb{E}_{a\sim\pi} Q(S_{t+1}, a) \mid S_t = s, A_t = a]
 \end{aligned}
 $$
+{{% /admonition %}}
+
+Bear in mind that:
+
+- state value function is 
+- the weighted average of action value function 
+- over the action distribution defined by the policy $\pi$
+
+$$
+V_{\pi}(s) = \sum_{a \in \mathcal{A}} Q_{\pi}(s, a) \pi(a \vert s)
+$$
 
 #### Bellman Expectation Equations
 
+{{% admonition type="quote" title="Bellman Expectation Equations" open=true %}}
 The recursive update process can be further decomposed to be equations built on both state-value and action-value functions. As we go further in future action steps, we extend V and Q alternatively by following the policy $\pi$.
 
 {{< media
@@ -373,9 +392,22 @@ V_{\pi}(s) &= \sum_{a \in \mathcal{A}} \pi(a \vert s) \big( R(s, a) + \gamma \su
 Q_{\pi}(s, a) &= R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a \sum_{a' \in \mathcal{A}} \pi(a' \vert s') Q_{\pi} (s', a')
 \end{aligned}
 $$
+{{% /admonition %}}
+
+$$
+\begin{aligned}
+& Q_{\pi}(s, a) \\
+&= \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a] \\
+&= \mathbb{E}_{\pi}[R(S_t, A_t) + \gamma G_{t+1} \vert S_t = s, A_t = a] \\
+&= R(s, a) + \mathbb{E}_{\pi}[\gamma G_{t+1} \vert S_t = s, A_t = a] \\
+&= R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a V_{\pi} (s')
+\end{aligned}
+$$
+
 
 #### Bellman Optimality Equations
 
+{{% admonition type="quote" title="Bellman Optimality Equations" open=true %}}
 If we are only interested in the optimal values, rather than computing the expectation following a policy, we could jump right into the maximum returns during the alternative updates without using a policy. RECAP: the optimal values $V_*$ and $Q_*$ are the best returns we can obtain, defined in [the section on optimal value and policy](#optimal-value-and-policy).
 
 $$
@@ -390,6 +422,15 @@ $$
 Unsurprisingly they look very similar to Bellman expectation equations.
 
 If we have complete information of the environment, this turns into a planning problem, solvable by DP. Unfortunately, in most scenarios, we do not know $P_{ss’}^a$ or $R(s, a)$, so we cannot solve MDPs by directly applying Bellmen equations, but it lays the theoretical foundation for many RL algorithms.
+{{% /admonition %}}
+
+The key equation is the Bellman optimality equation for Q-value:
+
+$$
+Q_*(s, a) = R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a \max_{a' \in \mathcal{A}} Q_*(s', a')
+$$
+
+It connects the environment (transition probability and reward) with the optimal action-value function.
 
 ## Common Approaches
 
