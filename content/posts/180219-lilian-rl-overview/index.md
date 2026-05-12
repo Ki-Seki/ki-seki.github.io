@@ -158,10 +158,10 @@ Here is one thing we should pay attention to, the difference between reward func
 
 There's no fixed convention on their notations, so I list some possible notations for both of them in the table below:
 
-|              | Reward        | Expected Reward |
-| ------------ | ------------- | --------------- |
-| Scenario 1   | $R(s, a, s')$ | $R(s, a)$       |
-| Scenario 2   | $r$           | $\mathbb{E}[r]$ |
+|            | Immediate Reward | Expected Reward |
+| ---------- | ---------------- | --------------- |
+| Scenario 1 | $R(s, a, s')$    | $R(s, a)$       |
+| Scenario 2 | $r$              | $\mathbb{E}[r]$ |
 
 #### Policy
 
@@ -436,10 +436,13 @@ It connects the environment (transition probability and reward) with the optimal
 
 ## Common Approaches
 
+{{% admonition type="quote" title="Common Quote" open=true %}}
 Now it is the time to go through the major approaches and classic algorithms for solving RL problems. In future posts, I plan to dive into each approach further.
+{{% /admonition %}}
 
 ### Dynamic Programming
 
+{{% admonition type="quote" title="Policy Evaluation, Improvement and Iteration" open=true %}}
 When the model is fully known, following Bellman equations, we can use [Dynamic Programming](https://en.wikipedia.org/wiki/Dynamic_programming) (DP) to iteratively evaluate value functions and improve policy.
 
 #### Policy Evaluation
@@ -483,6 +486,76 @@ Q_\pi(s, \pi'(s))
 &= Q_\pi(s, \arg\max_{a \in \mathcal{A}} Q_\pi(s, a)) \\
 &= \max_{a \in \mathcal{A}} Q_\pi(s, a) \geq Q_\pi(s, \pi(s)) = V_\pi(s)
 \end{aligned}
+$$
+{{% /admonition %}}
+
+- Policy evaluation:
+  - $V_{t+1}(s) = \sum_a \pi(a \vert s) \sum_{s', r} P(s', r \vert s, a) (r + \gamma V_t(s'))$
+  - $Q_\pi(s, a) = \sum_{s', r} P(s', r \vert s, a) (r + \gamma V_\pi(s'))$
+- Policy improvement:
+  - $\pi'(s) = \arg\max_{a \in \mathcal{A}} Q_\pi(s, a)$
+- Policy iteration:
+  - $\pi_0 \xrightarrow[]{\text{evaluation}} V_{\pi_0} \xrightarrow[]{\text{improve}}\pi_1$
+
+---
+
+Derivation of policy evaluation mainly decomposes it into the $\langle \mathcal{S}, \mathcal{A}, P, R, \gamma \rangle$ components.
+
+For state-value:
+
+$$
+\begin{align}
+V_{t+1}(s)
+&= \mathbb{E}_\pi \big[ r + \gamma V_t(s') \,\big|\, S_t = s \big] &\text{ , by definition of } V_\pi \\
+&= \sum_a \pi(a|s) \, \mathbb{E}\big[ r + \gamma V_t(s') \,\big|\, s, a \big] & \text{ , expectation over actions} \\
+&= \sum_a \pi(a|s) \sum_{s',r} P(s',r \mid s,a) \, \big[ r + \gamma V_t(s') \big] & \text{ , expectation over } s, a \rightarrow s', r \\
+\end{align}
+$$
+
+For action-value:
+
+$$
+\begin{align}
+Q_\pi(s, a) &= \mathbb{E} [R_{t+1} + \gamma V_\pi(S_{t+1}) \vert S_t=s, A_t=a] \\
+&= \sum_{s', r} P(s', r \vert s, a) (r + \gamma V_\pi(s'))
+\end{align}
+$$
+
+---
+
+Pseudo code of policy iteration:
+
+$$
+\begin{array}{l}
+\textbf{Algorithm: Policy Iteration} \\ 
+\textbf{Input: } \text{State space } \mathcal{S}, \text{ Action space } \mathcal{A}, \\
+\quad \text{Transition probabilities } P(s', r \mid s,a) \\
+\quad \text{Reward function } r=R(s,a,s'), \\
+\quad \text{Discount factor } \gamma, \\
+\quad \text{Initial policy } \pi_0 \\ 
+\textbf{Output: } \text{Optimal policy } \pi^*, \text{ Optimal value function } V^* \\
+\pi \leftarrow \pi_0 \\ 
+\textbf{Repeat:} \\ 
+\quad \text{Policy Evaluation:} \\ 
+\quad \quad V(s) \leftarrow \sum_a \pi(a|s) \sum_{s', r} P(s', r|s,a)\,[r + \gamma V(s')] \\
+\quad \quad Q(s, a) \leftarrow \sum_{s', r} P(s', r|s,a)\,[r + \gamma V(s')] \\
+\quad \text{Policy Improvement:} \\ 
+\quad \quad \pi'(s) \leftarrow \arg\max_{a \in \mathcal{A}} Q_\pi(s, a) \\ 
+\quad \text{If } \pi' = \pi \\ 
+\quad \text{Or } \|V_{t+1} - V_t\| < \epsilon \text{ (value function converged)} \\ 
+\quad \text{Or iteration count } > N_{\max} \text{ (iteration limit)} \\
+\quad \quad \text{Then stop and return } (\pi, V) \\ 
+\quad \text{Else } \pi \leftarrow \pi' \\ 
+\textbf{Until convergence}
+\end{array}
+$$
+
+---
+
+Relation between $P(s'|s,a)$, $P(s', r|s,a)$, and $R(s,a,s')$:
+
+$$
+P(s'|s,a) = \sum_{r = R(s, a, s') \in \mathcal{R}} P(s', r|s,a)
 $$
 
 ### Monte-Carlo Methods
