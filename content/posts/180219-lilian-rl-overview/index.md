@@ -527,25 +527,25 @@ Pseudo code of policy iteration:
 
 $$
 \begin{array}{l}
-\textbf{Algorithm: Policy Iteration} \\ 
+\textbf{Algorithm: Policy Iteration} \\
 \textbf{Input: } \text{State space } \mathcal{S}, \text{ Action space } \mathcal{A}, \\
 \quad \text{Transition probabilities } P(s', r \mid s,a) \\
 \quad \text{Reward function } r=R(s,a,s'), \\
 \quad \text{Discount factor } \gamma, \\
-\quad \text{Initial policy } \pi_0 \\ 
+\quad \text{Initial policy } \pi_0 \\
 \textbf{Output: } \text{Optimal policy } \pi^*, \text{ Optimal value function } V^* \\
-\pi \leftarrow \pi_0 \\ 
-\textbf{Repeat:} \\ 
-\quad \text{Policy Evaluation:} \\ 
+\pi \leftarrow \pi_0 \\
+\textbf{Repeat:} \\
+\quad \text{Policy Evaluation:} \\
 \quad \quad V(s) \leftarrow \sum_a \pi(a|s) \sum_{s', r} P(s', r|s,a)\,[r + \gamma V(s')] \\
 \quad \quad Q(s, a) \leftarrow \sum_{s', r} P(s', r|s,a)\,[r + \gamma V(s')] \\
-\quad \text{Policy Improvement:} \\ 
-\quad \quad \pi'(s) \leftarrow \arg\max_{a \in \mathcal{A}} Q_\pi(s, a) \\ 
-\quad \text{If } \pi' = \pi \\ 
-\quad \text{Or } \|V_{t+1} - V_t\| < \epsilon \text{ (value function converged)} \\ 
+\quad \text{Policy Improvement:} \\
+\quad \quad \pi'(s) \leftarrow \arg\max_{a \in \mathcal{A}} Q_\pi(s, a) \\
+\quad \text{If } \pi' = \pi \\
+\quad \text{Or } \|V_{t+1} - V_t\| < \epsilon \text{ (value function converged)} \\
 \quad \text{Or iteration count } > N_{\max} \text{ (iteration limit)} \\
-\quad \quad \text{Then stop and return } (\pi, V) \\ 
-\quad \text{Else } \pi \leftarrow \pi' \\ 
+\quad \quad \text{Then stop and return } (\pi, V) \\
+\quad \text{Else } \pi \leftarrow \pi' \\
 \textbf{Until convergence}
 \end{array}
 $$
