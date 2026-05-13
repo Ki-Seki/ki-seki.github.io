@@ -87,7 +87,7 @@ dp[i] = 1 + \max_{j < i,\, a[j] < a[i]} dp[j]
 $$
 
 {{% admonition type="quote" title="Policy and Value Function" open=true %}}
-The agent's **policy** $\pi(s)$ provides the guideline on what is the optimal action to take in a certain state with [**the goal to maximize the total rewards**]. Each state is associated with a **value** function $V(s)$ predicting the expected amount of future rewards we are able to receive in this state by acting the corresponding policy. In other words, the value function quantifies how good a state is. Both policy and value functions are what we try to learn in reinforcement learning.
+The agent's **policy** $\pi(s)$ provides the guideline on what is the optimal action to take in a certain state with **the goal to maximize the total rewards**. Each state is associated with a **value** function $V(s)$ predicting the expected amount of future rewards we are able to receive in this state by acting the corresponding policy. In other words, the value function quantifies how good a state is. Both policy and value functions are what we try to learn in reinforcement learning.
 
 {{< media
 src="RL_algorithm_categorization.png"
@@ -102,6 +102,23 @@ $$
 S_1, A_1, R_2, S_2, A_2, \dots, S_T
 $$
 {{% /admonition %}}
+
+In multi-armed bandit problems, there is no state transition, so the episode is simply:
+
+$$S, A, R, S_T \; \text{with } S=S_T$$
+
+And the learning process is across multiple episodes.
+
+---
+
+Why is the index of reward $t+1$?
+
+{{< media
+src="dep_structure.png"
+caption="Two common types of dependency structures in MDP episodes."
+>}}
+
+
 
 {{% admonition type="quote" title="Common Terms" open=true %}}
 Terms you will encounter a lot when diving into different categories of RL algorithms:
@@ -560,7 +577,8 @@ $$
 
 ### Monte-Carlo Methods
 
-First, let's recall that $V(s) = \mathbb{E}[ G_t \vert S_t=s]$. Monte-Carlo (MC) methods uses a simple idea: It learns from episodes of raw experience without modeling the environmental dynamics and computes the observed mean return as an approximation of the expected return. To compute the empirical return $G_t$, MC methods need to learn from [**complete**] episodes $S_1, A_1, R_2, \dots, S_T$ to compute $G_t = \sum_{k=0}^{T-t-1} \gamma^k R_{t+k+1}$ and all the episodes must eventually terminate.
+{{% admonition type="quote" title="Monte-Carlo Methods" open=true %}}
+First, let's recall that $V(s) = \mathbb{E}[ G_t \vert S_t=s]$. Monte-Carlo (MC) methods uses a simple idea: It learns from episodes of raw experience without modeling the environmental dynamics and computes the observed mean return as an approximation of the expected return. To compute the empirical return $G_t$, MC methods need to learn from **complete** episodes $S_1, A_1, R_2, \dots, S_T$ to compute $G_t = \sum_{k=0}^{T-t-1} \gamma^k R_{t+k+1}$ and all the episodes must eventually terminate.
 
 The empirical mean return for state s is:
 
@@ -568,7 +586,7 @@ $$
 V(s) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s] G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s]}
 $$
 
-where $\mathbb{1}[S_t = s]$ is a binary indicator function. We may count the visit of state s every time so that there could exist multiple visits of one state in one episode ("every-visit"), or only count it the first time we encounter a state in one episode ("first-visit"). This way of approximation can be easily extended to action-value functions by counting (s, a) pair.
+where $\mathbb{1}[S_t = s]$ is a binary indicator function. We may count the visit of state $s$ every time so that there could exist multiple visits of one state in one episode ("every-visit"), or only count it the first time we encounter a state in one episode ("first-visit"). This way of approximation can be easily extended to action-value functions by counting (s, a) pair.
 
 $$
 Q(s, a) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a] G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a]}
@@ -579,19 +597,50 @@ To learn the optimal policy by MC, we iterate it by following a similar idea to 
 {{< media
 src="MC_control.png"
 caption="Monte Carlo control algorithm"
+width="150px"
 >}}
 
-Improve the policy greedily with respect to the current value function: π(s) = arg maxa ∈ 𝒜Q(s,a).
-Generate a new episode with the new policy π (i.e. using algorithms like [ε-greedy](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/#%CE%B5-greedy-algorithm) helps us balance between exploitation and exploration.)
-Estimate Q using the new episode: $q_\pi(s, a) = \frac{\sum_{t=1}^T \big( \mathbb{1}[S_t = s, A_t = a] \sum_{k=0}^{T-t-1} \gamma^k R_{t+k+1} \big)}{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a]}$
+1. Improve the policy greedily with respect to the current value function: $\pi(s) = \arg\max_{a \in \mathcal{A}} Q(s, a)$.
+2. Generate a new episode with the new policy $\pi$ (i.e. using algorithms like [ε-greedy](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/#%CE%B5-greedy-algorithm) helps us balance between exploitation and exploration.)
+3. Estimate Q using the new episode: $Q_\pi(s, a) = \frac{\sum_{t=1}^T \big( \mathbb{1}[S_t = s, A_t = a] \sum_{k=0}^{T-t-1} \gamma^k R_{t+k+1} \big)}{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a]}$
+{{% /admonition %}}
+
+Monte Carlo is a **model-free** method, we no longer need the transition probabilities $P(s', r \mid s,a)$ or the reward function $R(s,a,s')$ as inputs. Instead, we rely on generating complete episodes to calculate the empirical returns.
+
+$$\begin{array}{l}
+\textbf{Algorithm: Monte Carlo Control} \\
+\textbf{Input: } \text{State space } \mathcal{S}, \text{ Action space } \mathcal{A}, \\
+\quad \text{Discount factor } \gamma, \\
+\quad \text{Exploration parameter } \epsilon \\
+\textbf{Output: } \text{Optimal policy } \pi^*, \text{ Optimal action-value function } Q^* \\
+\text{Initialize } Q(s,a) \text{ arbitrarily for all } s \in \mathcal{S}, a \in \mathcal{A} \\
+\pi \leftarrow \text{initial } \epsilon\text{-greedy policy} \\
+\textbf{Repeat:} \\
+\quad \text{Episode Generation:} \\
+\quad \quad \text{Generate a complete episode } S_1, A_1, R_2, \dots, S_T \text{ following } \pi \\
+\quad \text{Policy Evaluation:} \\
+\quad \quad \text{For each } (s,a) \text{ in the episode:} \\
+\quad \quad \quad Q_\pi(s, a) \leftarrow \frac{\sum_{t=1}^T \big( \mathbb{1}[S_t = s, A_t = a] \sum_{k=0}^{T-t-1} \gamma^k R_{t+k+1} \big)}{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a]} \\
+\quad \text{Policy Improvement:} \\
+\quad \quad \pi'(s) \leftarrow \arg\max_{a \in \mathcal{A}} Q_\pi(s, a) \text{ (Greedy improvement)} \\
+\quad \quad \pi \leftarrow \epsilon\text{-greedy}(\pi') \text{ (Balance exploitation and exploration)} \\
+\quad \text{If } \|Q_{i+1} - Q_i\| < \delta \text{ (action-value function converged)} \\
+\quad \text{Or episode count } > N_{\max} \text{ (iteration limit)} \\
+\quad \quad \text{Then stop and return } (\pi, Q) \\
+\textbf{Until convergence}
+\end{array}$$
 
 ### Temporal-Difference Learning
 
+{{% admonition type="quote" title="Background" open=true %}}
 Similar to Monte-Carlo methods, Temporal-Difference (TD) Learning is model-free and learns from episodes of experience. However, TD learning can learn from incomplete episodes and hence we don’t need to track the episode up to termination. TD learning is so important that Sutton &amp; Barto (2017) in their RL book describes it as “one idea … central and novel to reinforcement learning”.
+{{% /admonition %}}
 
 #### Bootstrapping
 
+{{% admonition type="quote" title="Bootstrapping" open=true %}}
 TD learning methods update targets with regard to existing estimates rather than exclusively relying on actual rewards and complete returns as in MC methods. This approach is known as bootstrapping.
+{{% /admonition %}}
 
 #### Value Estimation
 
@@ -664,6 +713,11 @@ caption="Deep Q-Network algorithm"
 >}}
 
 There are many extensions of DQN to improve the original design, such as DQN with dueling architecture (Wang et al. 2016) which estimates state-value function V(s) and advantage function A(s, a) with shared network parameters.
+
+{{< media
+src="td_mc_dp.png"
+caption="Comparison of TD, MC, and DP"
+>}}
 
 ### Combining TD and MC Learning
 
