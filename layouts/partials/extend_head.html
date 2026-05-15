@@ -9,10 +9,11 @@
     },
     options: {
       skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-    }
+    },
+    loader: {load: ['ui/lazy']}
   };
 </script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+<script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 {{ end }}
 
 {{- /* Load Font Awesome for admonition icons */ -}}
