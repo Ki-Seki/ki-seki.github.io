@@ -601,7 +601,7 @@ width="150px"
 >}}
 
 1. Improve the policy greedily with respect to the current value function: $\pi(s) = \arg\max_{a \in \mathcal{A}} Q(s, a)$.
-2. Generate a new episode with the new policy $\pi$ (i.e. using algorithms like [ε-greedy](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/#%CE%B5-greedy-algorithm) helps us balance between exploitation and exploration.)
+2. Generate a new episode with the new policy $\pi$ (i.e. using algorithms like [$\epsilon$-greedy](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/#%CE%B5-greedy-algorithm) helps us balance between exploitation and exploration.)
 3. Estimate Q using the new episode: $Q_\pi(s, a) = \frac{\sum_{t=1}^T \big( \mathbb{1}[S_t = s, A_t = a] \sum_{k=0}^{T-t-1} \gamma^k R_{t+k+1} \big)}{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a]}$
 {{% /admonition %}}
 
@@ -652,13 +652,14 @@ You improve your estimate using your own previous estimate.
 
 #### Value Estimation
 
+{{% admonition type="quote" title="Value Estimation" open=true %}}
 The key idea in TD learning is to update the value function $V(S_t)$ towards an estimated return $R_{t+1} + \gamma V(S_{t+1})$ (known as “**TD target**”). To what extent we want to update the value function is controlled by the learning rate hyperparameter $\alpha$:
 
 $$
 \begin{aligned}
-V(S_t) &amp;\leftarrow (1- \alpha) V(S_t) + \alpha G_t \\
-V(S_t) &amp;\leftarrow V(S_t) + \alpha (G_t - V(S_t)) \\
-V(S_t) &amp;\leftarrow V(S_t) + \alpha (R_{t+1} + \gamma V(S_{t+1}) - V(S_t))
+V(S_t) &\leftarrow (1- \alpha) V(S_t) + \alpha G_t \\
+V(S_t) &\leftarrow V(S_t) + \alpha (G_t - V(S_t)) \\
+V(S_t) &\leftarrow V(S_t) + \alpha (R_{t+1} + \gamma V(S_{t+1}) - V(S_t))
 \end{aligned}
 $$
 Similarly, for action-value estimation:
@@ -666,17 +667,18 @@ Similarly, for action-value estimation:
 $$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t))$$
 
 Next, let’s dig into the fun part on how to learn optimal policy in TD learning (aka “TD control”). Be prepared, you are gonna see many famous names of classic algorithms in this section.
+{{% /admonition %}}
 
 #### SARSA: On-Policy TD control
 
-“SARSA” refers to the procedure of updaing Q-value by following a sequence of …, St, At, Rt + 1, St + 1, At + 1, …. The idea follows the same route of GPI. Within one episode, it works as follows:
+“SARSA” refers to the procedure of updaing Q-value by following a sequence of …, $S_t$, $A_t$, $R_{t+1}$, $S_{t+1}$, $A_{t+1}$, …. The idea follows the same route of GPI. Within one episode, it works as follows:
 
-Initialize t = 0.
-Start with S0 and choose action A0 = arg maxa ∈ 𝒜Q(S0,a), where [ϵ-greedy](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/#%ce%b5-greedy-algorithm) is commonly applied.
-At time t, after applying action At, we observe reward Rt + 1 and get into the next state St + 1.
-Then pick the next action in the same way as in step 2: At + 1 = arg maxa ∈ 𝒜Q(St + 1,a).
-Update the Q-value function: $ Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)) $.
-Set t = t + 1 and repeat from step 3.
+1. Initialize $t = 0$.
+2. Start with $S_0$ and choose action $A_0 = \arg\max_{a \in \mathcal{A}} Q(S_0, a)$, where [$\epsilon$-greedy](https://lilianweng.github.io/posts/2018-01-23-multi-armed-bandit/#%ce%b5-greedy-algorithm) is commonly applied.
+3. At time $t$, after applying action $A_t$, we observe reward $R_{t+1}$ and get into the next state $S_{t+1}$.
+4. Then pick the next action in the same way as in step 2: $A_{t+1} = \arg\max_{a \in \mathcal{A}} Q(S_{t+1}, a)$.
+5. Update the Q-value function: $Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t))$.
+6. Set $t = t + 1$ and repeat from step 3.
 
 In each step of SARSA, we need to choose the next action according to the current policy.
 
@@ -684,14 +686,14 @@ In each step of SARSA, we need to choose the next action according to the curren
 
 The development of Q-learning (Watkins &amp; Dayan, 1992) is a big breakout in the early days of Reinforcement Learning. Within one episode, it works as follows:
 
-Initialize t = 0.
-Starts with S0.
-At time step t, we pick the action according to Q values, At = arg maxa ∈ 𝒜Q(St,a) and ϵ-greedy is commonly applied.
-After applying action At, we observe reward Rt + 1 and get into the next state St + 1.
-Update the Q-value function: Q(St,At) ← Q(St,At) + α(Rt + 1+γmaxa ∈ 𝒜Q(St + 1,a)−Q(St,At)).
-t = t + 1 and repeat from step 3.
+1. Initialize $t = 0$.
+2. Starts with $S_0$.
+3. At time step $t$, we pick the action according to Q values, $A_t = \arg\max_{a \in \mathcal{A}} Q(S_t, a)$ and $\epsilon$-greedy is commonly applied.
+4. After applying action $A_t$, we observe reward $R_{t+1}$ and get into the next state $S_{t+1}$.
+5. Update the Q-value function: $Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, a) - Q(S_t, A_t))$.
+6. $t = t + 1$ and repeat from step 3.
 
-The key difference from SARSA is that Q-learning does not follow the current policy to pick the second action At + 1. It estimates Q\* out of the best Q values, but which action (denoted as a\*) leads to this maximal Q does not matter and in the next step Q-learning may not follow a\*.
+The key difference from SARSA is that Q-learning does not follow the current policy to pick the second action $A_{t+1}$. It estimates $Q^*$ out of the best Q values, but which action (denoted as $a^*$) leads to this maximal Q does not matter and in the next step Q-learning may not follow $a^*$.
 
 {{< media
 src="sarsa_vs_q_learning.png"
@@ -700,19 +702,19 @@ caption="SARSA vs Q-learning comparison"
 
 #### Deep Q-Network
 
-Theoretically, we can memorize Q*(.) for all state-action pairs in Q-learning, like in a gigantic table. However, it quickly becomes computationally infeasible when the state and action space are large. Thus people use functions (i.e. a machine learning model) to approximate Q values and this is called function approximation. For example, if we use a function with parameter θ to calculate Q values, we can label Q value function as Q(s,a;θ).
+Theoretically, we can memorize $Q^*(.)$ for all state-action pairs in Q-learning, like in a gigantic table. However, it quickly becomes computationally infeasible when the state and action space are large. Thus people use functions (i.e. a machine learning model) to approximate Q values and this is called function approximation. For example, if we use a function with parameter $\theta$ to calculate Q values, we can label Q value function as $Q(s, a; \theta)$.
 
-Unfortunately Q-learning may suffer from instability and divergence when combined with an nonlinear Q-value function approximation and bootstrapping (See Problems #2).
+Unfortunately Q-learning may suffer from instability and divergence when combined with a nonlinear Q-value function approximation and bootstrapping (See Problems #2).
 
 Deep Q-Network (“DQN”; Mnih et al. 2015) aims to greatly improve and stabilize the training procedure of Q-learning by two innovative mechanisms:
 
-Experience Replay: All the episode steps et = (St,At,Rt,St + 1) are stored in one replay memory Dt = . Dt has experience tuples over many episodes. During Q-learning updates, samples are drawn at random from the replay memory and thus one sample could be used multiple times. Experience replay improves data efficiency, removes correlations in the observation sequences, and smooths over changes in the data distribution.
-Periodically Updated Target: Q is optimized towards target values that are only periodically updated. The Q network is cloned and kept frozen as the optimization target every C steps (C is a hyperparameter). This modification makes the training more stable as it overcomes the short-term oscillations.
+**Experience Replay**: All the episode steps $e_t = (S_t, A_t, R_t, S_{t+1})$ are stored in one replay memory $D_t = \{ e_1, \dots, e_t \}$. $D_t$ has experience tuples over many episodes. During Q-learning updates, samples are drawn at random from the replay memory and thus one sample could be used multiple times. Experience replay improves data efficiency, removes correlations in the observation sequences, and smooths over changes in the data distribution.
+**Periodically Updated Target**: Q is optimized towards target values that are only periodically updated. The Q network is cloned and kept frozen as the optimization target every $C$ steps ($C$ is a hyperparameter). This modification makes the training more stable as it overcomes the short-term oscillations.
 
 The loss function looks like this:
 
-ℒ(θ) = 𝔼(s,a,r,s′) ∼ U(D)\[(r + γmaxa′Q(s′,a′;θ−) − Q(s,a;θ))2\]
-where U(D) is a uniform distribution over the replay memory D; θ− is the parameters of the frozen target Q-network.
+$$\mathcal{L}(\theta) = \mathbb{E}_{(s, a, r, s') \sim U(D)} \Big[ \big( r + \gamma \max_{a'} Q(s', a'; \theta^{-}) - Q(s, a; \theta) \big)^2 \Big]$$
+where $U(D)$ is a uniform distribution over the replay memory $D$; $\theta^{-}$ is the parameters of the frozen target Q-network.
 
 In addition, it is also found to be helpful to clip the error term to be between [-1, 1]. (I always get mixed feeling with parameter clipping, as many studies have shown that it works empirically but it makes the math much less pretty. :/)
 
@@ -721,7 +723,7 @@ src="DQN_algorithm.png"
 caption="Deep Q-Network algorithm"
 >}}
 
-There are many extensions of DQN to improve the original design, such as DQN with dueling architecture (Wang et al. 2016) which estimates state-value function V(s) and advantage function A(s, a) with shared network parameters.
+There are many extensions of DQN to improve the original design, such as DQN with dueling architecture (Wang et al. 2016) which estimates state-value function $V(s)$ and advantage function $A(s, a)$ with shared network parameters.
 
 {{< media
 src="td_mc_dp.png"
@@ -732,48 +734,35 @@ caption="Comparison of TD, MC, and DP"
 
 In the previous section on value estimation in TD learning, we only trace one step further down the action chain when calculating the TD target. One can easily extend it to take multiple steps to estimate the return.
 
-Let’s label the estimated return following n steps as Gt(n), n = 1, …, ∞, then:
+Let’s label the estimated return following $n$ steps as $G_t^{(n)}$, $n = 1, \dots, \infty$, then:
 
-n
-Gt
-Notes
-
-n = 1
-Gt(1) = Rt + 1 + γV(St + 1)
-TD learning
-
-n = 2
-Gt(2) = Rt + 1 + γRt + 2 + γ2V(St + 2)
-
-…
-
-n = n
-$ G_t^{(n)} = R_{t+1} + \gamma R_{t+2} + \dots + \gamma^{n-1} R_{t+n} + \gamma^n V(S_{t+n}) $
-
-…
-
-n = ∞
-$G_t^{(\infty)} = R_{t+1} + \gamma R_{t+2} + \dots + \gamma^{T-t-1} R_T + \gamma^{T-t} V(S_T) $
-MC estimation
+| $n$ | $G_t^{(n)}$ | Notes |
+|-----|-------------|-------|
+| $n = 1$ | $G_t^{(1)} = R_{t+1} + \gamma V(S_{t+1})$ | TD learning |
+| $n = 2$ | $G_t^{(2)} = R_{t+1} + \gamma R_{t+2} + \gamma^2 V(S_{t+2})$ | |
+| $\dots$ | | |
+| $n = n$ | $G_t^{(n)} = R_{t+1} + \gamma R_{t+2} + \dots + \gamma^{n-1} R_{t+n} + \gamma^n V(S_{t+n})$ | |
+| $\dots$ | | |
+| $n = \infty$ | $G_t^{(\infty)} = R_{t+1} + \gamma R_{t+2} + \dots + \gamma^{T-t-1} R_T + \gamma^{T-t} V(S_T)$ | MC estimation |
 
 The generalized n-step TD learning still has the same form for updating the value function:
 
-V(St) ← V(St) + α(Gt(n)−V(St))
+$$V(S_t) \leftarrow V(S_t) + \alpha (G_t^{(n)} - V(S_t))$$
 {{< media
 src="TD_lambda.png"
 caption="TD(λ) eligibility traces diagram"
 >}}
-We are free to pick any n in TD learning as we like. Now the question becomes what is the best n? Which Gt(n) gives us the best return approximation? A common yet smart solution is to apply a weighted sum of all possible n-step TD targets rather than to pick a single best n. The weights decay by a factor λ with n, λn − 1; the intuition is similar to why we want to discount future rewards when computing the return: the more future we look into the less confident we would be. To make all the weight (n → ∞) sum up to 1, we multiply every weight by (1-λ), because:
+We are free to pick any $n$ in TD learning as we like. Now the question becomes what is the best $n$? Which $G_t^{(n)}$ gives us the best return approximation? A common yet smart solution is to apply a weighted sum of all possible n-step TD targets rather than to pick a single best $n$. The weights decay by a factor $\lambda$ with $n$, $\lambda^{n-1}$; the intuition is similar to why we want to discount future rewards when computing the return: the more future we look into the less confident we would be. To make all the weight ($n \rightarrow \infty$) sum up to 1, we multiply every weight by $(1-\lambda)$, because:
 
 $$
 \begin{aligned}
-\text{let } S &amp;= 1 + \lambda + \lambda^2 + \dots \\
-S &amp;= 1 + \lambda(1 + \lambda + \lambda^2 + \dots) \\
-S &amp;= 1 + \lambda S \\
-S &amp;= 1 / (1-\lambda)
+\text{let } S &= 1 + \lambda + \lambda^2 + \dots \\
+S &= 1 + \lambda(1 + \lambda + \lambda^2 + \dots) \\
+S &= 1 + \lambda S \\
+S &= 1 / (1-\lambda)
 \end{aligned}
 $$
-This weighted sum of many n-step returns is called λ-return $G_t^{\lambda} = (1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_t^{(n)}$. TD learning that adopts λ-return for value updating is labeled as TD(λ). The original version we introduced above is equivalent to TD(0).
+This weighted sum of many n-step returns is called $\lambda$-return $G_t^{\lambda} = (1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_t^{(n)}$. TD learning that adopts $\lambda$-return for value updating is labeled as TD($\lambda$). The original version we introduced above is equivalent to TD(0).
 
 {{< media
 src="TD_MC_DP_backups.png"
@@ -782,121 +771,114 @@ caption="Comparison of TD, MC, and DP backup diagrams"
 
 ### Policy Gradient
 
-All the methods we have introduced above aim to learn the state/action value function and then to select actions accordingly. Policy Gradient methods instead learn the policy directly with a parameterized function respect to θ, π(a|s;θ). Let’s define the reward function (opposite of loss function) as the expected return and train the algorithm with the goal to maximize the reward function. My next post described why the policy gradient theorem works (proof) and introduced a number of policy gradient algorithms.
+All the methods we have introduced above aim to learn the state/action value function and then to select actions accordingly. Policy Gradient methods instead learn the policy directly with a parameterized function respect to $\theta$, $\pi(a|s; \theta)$. Let’s define the reward function (opposite of loss function) as the expected return and train the algorithm with the goal to maximize the reward function. My next post described why the policy gradient theorem works (proof) and introduced a number of policy gradient algorithms.
 
 In discrete space:
 
-𝒥(θ) = Vπθ(S1) = 𝔼πθ[V1]
-where S1 is the initial starting state.
+$$\mathcal{J}(\theta) = V_{\pi_\theta}(S_1) = \mathbb{E}_{\pi_\theta}[V_1]$$
+where $S_1$ is the initial starting state.
 
 Or in continuous space:
 
-𝒥(θ) = ∑s ∈ 𝒮dπθ(s)Vπθ(s) = ∑s ∈ 𝒮(dπθ(s)∑a ∈ 𝒜π(a|s,θ)Qπ(s,a))
-where dπθ(s) is stationary distribution of Markov chain for πθ. If you are unfamiliar with the definition of a “stationary distribution,” please check this reference.
+$$\mathcal{J}(\theta) = \sum_{s \in \mathcal{S}} d_{\pi_\theta}(s) V_{\pi_\theta}(s) = \sum_{s \in \mathcal{S}} \Big( d_{\pi_\theta}(s) \sum_{a \in \mathcal{A}} \pi(a|s, \theta) Q_\pi(s, a) \Big)$$
+where $d_{\pi_\theta}(s)$ is stationary distribution of Markov chain for $\pi_\theta$. If you are unfamiliar with the definition of a “stationary distribution,” please check this reference.
 
-Using gradient ascent we can find the best θ that produces the highest return. It is natural to expect policy-based methods are more useful in continuous space, because there is an infinite number of actions and/or states to estimate the values for in continuous space and hence value-based approaches are computationally much more expensive.
+Using gradient ascent we can find the best $\theta$ that produces the highest return. It is natural to expect policy-based methods are more useful in continuous space, because there is an infinite number of actions and/or states to estimate the values for in continuous space and hence value-based approaches are computationally much more expensive.
 
 #### Policy Gradient Theorem
 
-Computing the gradient numerically can be done by perturbing θ by a small amount ε in the k-th dimension. It works even when J(θ) is not differentiable (nice!), but unsurprisingly very slow.
+Computing the gradient numerically can be done by perturbing $\theta$ by a small amount $\epsilon$ in the k-th dimension. It works even when $\mathcal{J}(\theta)$ is not differentiable (nice!), but unsurprisingly very slow.
 
 $$
 \frac{\partial \mathcal{J}(\theta)}{\partial \theta_k} \approx \frac{\mathcal{J}(\theta + \epsilon u_k) - \mathcal{J}(\theta)}{\epsilon}
 $$
 Or analytically,
 
-𝒥(θ) = 𝔼πθ[r] = ∑s ∈ 𝒮dπθ(s)∑a ∈ 𝒜π(a|s;θ)R(s,a)
-Actually we have nice theoretical support for (replacing d(.) with dπ(.)):
+$$\mathcal{J}(\theta) = \mathbb{E}_{\pi_\theta}[r] = \sum_{s \in \mathcal{S}} d_{\pi_\theta}(s) \sum_{a \in \mathcal{A}} \pi(a|s; \theta) R(s, a)$$
+Actually we have nice theoretical support for (replacing $d(.)$ with $d_\pi(.)$):
 
-𝒥(θ) = ∑s ∈ 𝒮dπθ(s)∑a ∈ 𝒜π(a|s;θ)Qπ(s,a) ∝ ∑s ∈ 𝒮d(s)∑a ∈ 𝒜π(a|s;θ)Qπ(s,a)
+$$\mathcal{J}(\theta) = \sum_{s \in \mathcal{S}} d_{\pi_\theta}(s) \sum_{a \in \mathcal{A}} \pi(a|s; \theta) Q_\pi(s, a) \propto \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a|s; \theta) Q_\pi(s, a)$$
 Check Sec 13.1 in Sutton &amp; Barto (2017) for why this is the case.
 
 Then,
 
 $$
 \begin{aligned}
-\mathcal{J}(\theta) &amp;= \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a \vert s; \theta) Q_\pi(s, a) \\
-\nabla \mathcal{J}(\theta) &amp;= \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \nabla \pi(a \vert s; \theta) Q_\pi(s, a) \\
-&amp;= \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a \vert s; \theta) \frac{\nabla \pi(a \vert s; \theta)}{\pi(a \vert s; \theta)} Q_\pi(s, a) \\
-&amp; = \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a \vert s; \theta) \nabla \ln \pi(a \vert s; \theta) Q_\pi(s, a) \\
-&amp; = \mathbb{E}_{\pi_\theta} [\nabla \ln \pi(a \vert s; \theta) Q_\pi(s, a)]
+\mathcal{J}(\theta) &= \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a \vert s; \theta) Q_\pi(s, a) \\
+\nabla \mathcal{J}(\theta) &= \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \nabla \pi(a \vert s; \theta) Q_\pi(s, a) \\
+&= \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a \vert s; \theta) \frac{\nabla \pi(a \vert s; \theta)}{\pi(a \vert s; \theta)} Q_\pi(s, a) \\
+&= \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a \vert s; \theta) \nabla \ln \pi(a \vert s; \theta) Q_\pi(s, a) \\
+&= \mathbb{E}_{\pi_\theta} [\nabla \ln \pi(a \vert s; \theta) Q_\pi(s, a)]
 \end{aligned}
 $$
 This result is named “Policy Gradient Theorem” which lays the theoretical foundation for various policy gradient algorithms:
 
-∇𝒥(θ) = 𝔼πθ[∇lnπ(a|s,θ)Qπ(s,a)]
+$$\nabla \mathcal{J}(\theta) = \mathbb{E}_{\pi_\theta}[\nabla \ln \pi(a|s, \theta) Q_\pi(s, a)]$$
 
 #### REINFORCE
 
-REINFORCE, also known as Monte-Carlo policy gradient, relies on Qπ(s,a), an estimated return by MC methods using episode samples, to update the policy parameter θ.
+REINFORCE, also known as Monte-Carlo policy gradient, relies on $Q_\pi(s, a)$, an estimated return by MC methods using episode samples, to update the policy parameter $\theta$.
 
-A commonly used variation of REINFORCE is to subtract a baseline value from the return Gt to reduce the variance of gradient estimation while keeping the bias unchanged. For example, a common baseline is state-value, and if applied, we would use A(s,a) = Q(s,a) − V(s) in the gradient ascent update.
+A commonly used variation of REINFORCE is to subtract a baseline value from the return $G_t$ to reduce the variance of gradient estimation while keeping the bias unchanged. For example, a common baseline is state-value, and if applied, we would use $A(s, a) = Q(s, a) - V(s)$ in the gradient ascent update.
 
-Initialize θ at random
-Generate one episode S1, A1, R2, S2, A2, …, ST
-For t=1, 2, … , T:
-
-Estimate the the return G_t since the time step t.
-θ ← θ + αγtGt∇ln π(At|St,θ).
+1. Initialize $\theta$ at random
+2. Generate one episode $S_1, A_1, R_2, S_2, A_2, \dots, S_T$
+3. For $t=1, 2, \dots, T$:
+   - Estimate the the return $G_t$ since the time step $t$.
+   - $\theta \leftarrow \theta + \alpha \gamma^t G_t \nabla \ln \pi(A_t|S_t, \theta)$.
 
 #### Actor-Critic
 
 If the value function is learned in addition to the policy, we would get Actor-Critic algorithm.
 
-Critic: updates value function parameters w and depending on the algorithm it could be action-value Q(a|s;w) or state-value V(s;w).
-Actor: updates policy parameters θ, in the direction suggested by the critic, π(a|s;θ).
+- **Critic**: updates value function parameters $w$ and depending on the algorithm it could be action-value $Q(a|s; w)$ or state-value $V(s; w)$.
+- **Actor**: updates policy parameters $\theta$, in the direction suggested by the critic, $\pi(a|s; \theta)$.
 
 Let’s see how it works in an action-value actor-critic algorithm.
 
-Initialize s, θ, w at random; sample a ∼ π(a|s;θ).
-For t = 1… T:
+1. Initialize $s, \theta, w$ at random; sample $a \sim \pi(a|s; \theta)$.
+2. For $t = 1 \dots T$:
+   - Sample reward $r_t \sim R(s, a)$ and next state $s’ \sim P(s’|s, a)$.
+   - Then sample the next action $a’ \sim \pi(s’, a’; \theta)$.
+   - Update policy parameters: $\theta \leftarrow \theta + \alpha_\theta Q(s, a; w) \nabla_\theta \ln \pi(a|s; \theta)$.
+   - Compute the correction for action-value at time $t$: $G_{t:t+1} = r_t + \gamma Q(s’, a’; w) - Q(s, a; w)$ and use it to update value function parameters: $w \leftarrow w + \alpha_w G_{t:t+1} \nabla_w Q(s, a; w)$.
+   - Update $a \leftarrow a’$ and $s \leftarrow s’$.
 
-Sample reward rt ∼ R(s,a) and next state s’ ∼ P(s’|s,a).
-Then sample the next action a’ ∼ π(s’,a’;θ).
-Update policy parameters: θ ← θ + αθQ(s,a;w)∇θln π(a|s;θ).
-Compute the correction for action-value at time t:
-Gt : t + 1 = rt + γQ(s’,a’;w) − Q(s,a;w)
-and use it to update value function parameters:
-$w \leftarrow w + \alpha_w G_{t:t+1} \nabla_w Q(s, a; w) $.
-Update a ← a’ and s ← s’.
-
-αθ and αw are two learning rates for policy and value function parameter updates, respectively.
+$\alpha_\theta$ and $\alpha_w$ are two learning rates for policy and value function parameter updates, respectively.
 
 #### A3C
 
 Asynchronous Advantage Actor-Critic (Mnih et al., 2016), short for A3C, is a classic policy gradient method with the special focus on parallel training.
 
-In A3C, the critics learn the state-value function, V(s;w), while multiple actors are trained in parallel and get synced with global parameters from time to time. Hence, A3C is good for parallel training by default, i.e. on one machine with multi-core CPU.
+In A3C, the critics learn the state-value function, $V(s; w)$, while multiple actors are trained in parallel and get synced with global parameters from time to time. Hence, A3C is good for parallel training by default, i.e. on one machine with multi-core CPU.
 
-The loss function for state-value is to minimize the mean squared error, 𝒥v(w) = (Gt−V(s;w))2 and we use gradient descent to find the optimal w. This state-value function is used as the baseline in the policy gradient update.
+The loss function for state-value is to minimize the mean squared error, $\mathcal{J}_v(w) = (G_t - V(s; w))^2$ and we use gradient descent to find the optimal $w$. This state-value function is used as the baseline in the policy gradient update.
 
 Here is the algorithm outline:
 
-We have global parameters, θ and w; similar thread-specific parameters, θ’ and w'.
-Initialize the time step t = 1
-While T &lt;= T_MAX:
+We have global parameters, $\theta$ and $w$; similar thread-specific parameters, $\theta’$ and $w’$.
+Initialize the time step $t = 1$
+While $T \leq T_{MAX}$:
 
-Reset gradient: dθ = 0 and dw = 0.
-Synchronize thread-specific parameters with global ones: θ’ = θ and w’ = w.
-tstart = t and get st.
-While (st ≠ TERMINAL) and (t − tstart &lt;  = tmax):
+1. Reset gradient: $d\theta = 0$ and $dw = 0$.
+2. Synchronize thread-specific parameters with global ones: $\theta’ = \theta$ and $w’ = w$.
+3. $t_{start} = t$ and get $s_t$.
+4. While ($s_t \neq$ TERMINAL) and ($t - t_{start} \leq t_{max}$):
+   - Pick the action $a_t \sim \pi(a_t|s_t; \theta’)$ and receive a new reward $r_t$ and a new state $s_{t+1}$.
+   - Update $t = t + 1$ and $T = T + 1$.
+5. Initialize the variable that holds the return estimation
+$$R = \begin{cases}
+0 & \text{if } s_t \text{ is TERMINAL} \\
+V(s_t; w’) & \text{otherwise}
+\end{cases}$$
+6. For $i = t - 1, \dots, t_{start}$:
+   - $R \leftarrow r_i + \gamma R$; here $R$ is a MC measure of $G_i$.
+   - Accumulate gradients w.r.t. $\theta’$: $d\theta \leftarrow d\theta + \nabla_{\theta’} \log \pi(a_i|s_i; \theta’)(R - V(s_i; w’))$;
+   - Accumulate gradients w.r.t. $w’$: $dw \leftarrow dw + \nabla_{w’}(R - V(s_i; w’))^2$.
 
-Pick the action at ∼ π(at|st;θ’) and receive a new reward rt and a new state st + 1.
-Update t = t + 1 and T = T + 1.
+7. Update synchronously $\theta$ using $d\theta$, and $w$ using $dw$.
 
-Initialize the variable that holds the return estimation $$R = \begin{cases}
-0 &amp; \text{if } s_t \text{ is TERMINAL} \
-V(s_t; w’) &amp; \text{otherwise}
-\end{cases}$$.
-For i = t − 1, …, tstart:
-
-R ← ri + γR; here R is a MC measure of Gi.
-Accumulate gradients w.r.t. θ’: dθ ← dθ + ∇θ’log π(ai|si;θ’)(R−V(si;w’));
-Accumulate gradients w.r.t. w’: dw ← dw + ∇w’(R−V(si;w’))2.
-
-Update synchronously θ using dθ, and w using dw.
-
-A3C enables the parallelism in multiple agent training. The gradient accumulation step (6.2) can be considered as a reformation of minibatch-based stochastic gradient update: the values of w or θ get corrected by a little bit in the direction of each training thread independently.
+A3C enables the parallelism in multiple agent training. The gradient accumulation step (6.2) can be considered as a reformation of minibatch-based stochastic gradient update: the values of $w$ or $\theta$ get corrected by a little bit in the direction of each training thread independently.
 
 ### Evolution Strategies
 
@@ -904,21 +886,21 @@ Evolution Strategies (ES) is a type of model-agnostic optimization approach. It 
 
 Say, we start with a population of random solutions. All of them are capable of interacting with the environment and only candidates with high fitness scores can survive (only the fittest can survive in a competition for limited resources). A new generation is then created by recombining the settings (gene mutation) of high-fitness survivors. This process is repeated until the new solutions are good enough.
 
-Very different from the popular MDP-based approaches as what we have introduced above, ES aims to learn the policy parameter θ without value approximation. Let’s assume the distribution over the parameter θ is an isotropic multivariate Gaussian with mean μ and fixed covariance σ2I. The gradient of F(θ) is calculated:
+Very different from the popular MDP-based approaches as what we have introduced above, ES aims to learn the policy parameter $\theta$ without value approximation. Let’s assume the distribution over the parameter $\theta$ is an isotropic multivariate Gaussian with mean $\mu$ and fixed covariance $\sigma^2 I$. The gradient of $F(\theta)$ is calculated:
 
 $$
 \begin{aligned}
-&amp; \nabla_\theta \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} F(\theta) \\
-=&amp; \nabla_\theta \int_\theta F(\theta) \Pr(\theta) &amp;&amp; \text{Pr(.) is the Gaussian density function.} \\
-=&amp; \int_\theta F(\theta) \Pr(\theta) \frac{\nabla_\theta \Pr(\theta)}{\Pr(\theta)} \\
-=&amp; \int_\theta F(\theta) \Pr(\theta) \nabla_\theta \log \Pr(\theta) \\
-=&amp; \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} [F(\theta) \nabla_\theta \log \Pr(\theta)] &amp;&amp; \text{Similar to how we do policy gradient update.} \\
-=&amp; \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} \Big[ F(\theta) \nabla_\theta \log \Big( \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(\theta - \mu)^2}{2 \sigma^2 }} \Big) \Big] \\
-=&amp; \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} \Big[ F(\theta) \nabla_\theta \Big( -\log \sqrt{2\pi\sigma^2} - \frac{(\theta - \mu)^2}{2 \sigma^2} \Big) \Big] \\
-=&amp; \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} \Big[ F(\theta) \frac{\theta - \mu}{\sigma^2} \Big]
+& \nabla_\theta \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} F(\theta) \\
+=& \nabla_\theta \int_\theta F(\theta) \Pr(\theta) && \text{Pr(.) is the Gaussian density function.} \\
+=& \int_\theta F(\theta) \Pr(\theta) \frac{\nabla_\theta \Pr(\theta)}{\Pr(\theta)} \\
+=& \int_\theta F(\theta) \Pr(\theta) \nabla_\theta \log \Pr(\theta) \\
+=& \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} [F(\theta) \nabla_\theta \log \Pr(\theta)] && \text{Similar to how we do policy gradient update.} \\
+=& \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} \Big[ F(\theta) \nabla_\theta \log \Big( \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(\theta - \mu)^2}{2 \sigma^2 }} \Big) \Big] \\
+=& \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} \Big[ F(\theta) \nabla_\theta \Big( -\log \sqrt{2\pi\sigma^2} - \frac{(\theta - \mu)^2}{2 \sigma^2} \Big) \Big] \\
+=& \mathbb{E}_{\theta \sim N(\mu, \sigma^2)} \Big[ F(\theta) \frac{\theta - \mu}{\sigma^2} \Big]
 \end{aligned}
 $$
-We can rewrite this formula in terms of a “mean” parameter θ (different from the θ above; this θ is the base gene for further mutation), ϵ ∼ N(0,I) and therefore θ + ϵσ ∼ N(θ,σ2). ϵ controls how much Gaussian noises should be added to create mutation:
+We can rewrite this formula in terms of a “mean” parameter $\theta$ (different from the $\theta$ above; this $\theta$ is the base gene for further mutation), $\epsilon \sim N(0, I)$ and therefore $\theta + \epsilon\sigma \sim N(\theta, \sigma^2)$. $\epsilon$ controls how much Gaussian noises should be added to create mutation:
 
 $$
 \nabla_\theta \mathbb{E}_{\epsilon \sim N(0, I)} F(\theta + \sigma \epsilon) = \frac{1}{\sigma} \mathbb{E}_{\epsilon \sim N(0, I)} [F(\theta + \sigma \epsilon) \epsilon]
@@ -930,10 +912,10 @@ caption="Evolution strategies and RL parallel training"
 
 ES, as a black-box optimization algorithm, is another approach to RL problems (In my original writing, I used the phrase “a nice alternative”; Seita pointed me to this discussion and thus I updated my wording.). It has a couple of good characteristics (Salimans et al., 2017) keeping it fast and easy to train:
 
-ES does not need value function approximation;
-ES does not perform gradient back-propagation;
-ES is invariant to delayed or long-term rewards;
-ES is highly parallelizable with very little data communication.
+- ES does not need value function approximation;
+- ES does not perform gradient back-propagation;
+- ES is invariant to delayed or long-term rewards;
+- ES is highly parallelizable with very little data communication.
 
 ## Known Problems
 
@@ -941,7 +923,7 @@ ES is highly parallelizable with very little data communication.
 
 The problem of exploration vs exploitation dilemma has been discussed in my previous post. When the RL problem faces an unknown environment, this issue is especially a key to finding a good solution: without enough exploration, we cannot learn the environment well enough; without enough exploitation, we cannot complete our reward optimization task.
 
-Different RL algorithms balance between exploration and exploitation in different ways. In MC methods, Q-learning or many on-policy algorithms, the exploration is commonly implemented by ε-greedy; In ES, the exploration is captured by the policy parameter perturbation. Please keep this into consideration when developing a new RL algorithm.
+Different RL algorithms balance between exploration and exploitation in different ways. In MC methods, Q-learning or many on-policy algorithms, the exploration is commonly implemented by $\epsilon$-greedy; In ES, the exploration is captured by the policy parameter perturbation. Please keep this into consideration when developing a new RL algorithm.
 
 ### Deadly Triad Issue
 
@@ -958,13 +940,13 @@ caption="AlphaGo Zero Go board configuration"
 
 With all the knowledge of RL above, let’s take a look at how AlphaGo Zero works. The main component is a deep CNN over the game board configuration (precisely, a ResNet with batch normalization and ReLU). This network outputs two values:
 
-(p,v) = fθ(s)
+$(p, v) = f_\theta(s)$
 
-s: the game board configuration, 19 x 19 x 17 stacked feature planes; 17 features for each position, 8 past configurations (including current) for the current player + 8 past configurations for the opponent + 1 feature indicating the color (1=black, 0=white). We need to code the color specifically because the network is playing with itself and the colors of current player and opponents are switching between steps.
-p: the probability of selecting a move over 19^2 + 1 candidates (19^2 positions on the board, in addition to passing).
-v: the winning probability given the current setting.
+- $s$: the game board configuration, $19 \times 19 \times 17$ stacked feature planes; 17 features for each position, 8 past configurations (including current) for the current player + 8 past configurations for the opponent + 1 feature indicating the color (1=black, 0=white). We need to code the color specifically because the network is playing with itself and the colors of current player and opponents are switching between steps.
+- $p$: the probability of selecting a move over $19^2 + 1$ candidates ($19^2$ positions on the board, in addition to passing).
+- $v$: the winning probability given the current setting.
 
-During self-play, MCTS further improves the action probability distribution π ∼ p(.) and then the action at is sampled from this improved policy. The reward zt is a binary value indicating whether the current player eventually wins the game. Each move generates an episode tuple (st,πt,zt) and it is saved into the replay memory. The details on MCTS are skipped for the sake of space in this post; please read the original paper if you are interested.
+During self-play, MCTS further improves the action probability distribution $\pi \sim p(.)$ and then the action $a_t$ is sampled from this improved policy. The reward $z_t$ is a binary value indicating whether the current player eventually wins the game. Each move generates an episode tuple $(s_t, \pi_t, z_t)$ and it is saved into the replay memory. The details on MCTS are skipped for the sake of space in this post; please read the original paper if you are interested.
 
 {{< media
 src="alphago-zero-selfplay.png"
@@ -973,8 +955,8 @@ caption="AlphaGo Zero self-play training pipeline"
 
 The network is trained with the samples in the replay memory to minimize the loss:
 
-ℒ = (z−v)2 − π⊤log p + c∥θ∥2
-where c is a hyperparameter controlling the intensity of L2 penalty to avoid overfitting.
+$$\mathcal{L} = (z - v)^2 - \pi^\top \log p + c \| \theta \|^2$$
+where $c$ is a hyperparameter controlling the intensity of L2 penalty to avoid overfitting.
 
 AlphaGo Zero simplified AlphaGo by removing supervised learning and merging separated policy and value networks into one. It turns out that AlphaGo Zero achieved largely improved performance with a much shorter training time! I strongly recommend reading these two papers side by side and compare the difference, super fun.
 
