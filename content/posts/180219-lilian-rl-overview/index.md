@@ -642,9 +642,17 @@ Similar to Monte-Carlo methods, Temporal-Difference (TD) Learning is model-free 
 TD learning methods update targets with regard to existing estimates rather than exclusively relying on actual rewards and complete returns as in MC methods. This approach is known as bootstrapping.
 {{% /admonition %}}
 
+The name comes from the phrase:
+
+> "Pull yourself up by your own bootstraps."
+
+Meaning:
+
+You improve your estimate using your own previous estimate.
+
 #### Value Estimation
 
-The key idea in TD learning is to update the value function V(St) towards an estimated return Rt + 1 + γV(St + 1) (known as “TD target”). To what extent we want to update the value function is controlled by the learning rate hyperparameter α:
+The key idea in TD learning is to update the value function $V(S_t)$ towards an estimated return $R_{t+1} + \gamma V(S_{t+1})$ (known as “**TD target**”). To what extent we want to update the value function is controlled by the learning rate hyperparameter $\alpha$:
 
 $$
 \begin{aligned}
@@ -655,7 +663,8 @@ V(S_t) &amp;\leftarrow V(S_t) + \alpha (R_{t+1} + \gamma V(S_{t+1}) - V(S_t))
 $$
 Similarly, for action-value estimation:
 
-Q(St,At) ← Q(St,At) + α(Rt + 1+γQ(St + 1,At + 1)−Q(St,At))
+$$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t))$$
+
 Next, let’s dig into the fun part on how to learn optimal policy in TD learning (aka “TD control”). Be prepared, you are gonna see many famous names of classic algorithms in this section.
 
 #### SARSA: On-Policy TD control
