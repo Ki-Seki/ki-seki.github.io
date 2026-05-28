@@ -171,11 +171,11 @@ class GitHubApi(private val owner: String, private val repo: String, private val
         val indexBlobSha = createBlob(indexMd.toByteArray(Charsets.UTF_8))
 
         val allEntries = mutableListOf(
-            TreeEntry("content/moments/$dirName/index.md", sha = indexBlobSha)
+            TreeEntry(path = "content/moments/$dirName/index.md", mode = "100644", type = "blob", sha = indexBlobSha)
         )
         for (img in draft.images) {
             val blobSha = createBlob(img.bytes)
-            allEntries.add(TreeEntry("content/moments/$dirName/${img.filename}", sha = blobSha))
+            allEntries.add(TreeEntry(path = "content/moments/$dirName/${img.filename}", mode = "100644", type = "blob", sha = blobSha))
         }
 
         val treeSha = createTree(baseSha, allEntries)
