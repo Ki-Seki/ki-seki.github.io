@@ -161,7 +161,9 @@ class GitHubApi(private val owner: String, private val repo: String, private val
         val baseBranch = getDefaultBranch()
         val baseSha = getHeadSha(baseBranch)
         val dirName = buildDirName(draft.date.toLocalDate(), draft.title)
-        val branchName = "moment/$dirName"
+        // Add timestamp to ensure unique branch names
+        val timestamp = System.currentTimeMillis()
+        val branchName = "moment/$dirName-$timestamp"
 
         createBranch(branchName, baseSha)
 
