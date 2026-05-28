@@ -13,13 +13,16 @@ import java.time.format.DateTimeFormatter
 
 // --- Slug & Filename Generation ---
 
-fun titleToSlug(title: String): String =
-    title.lowercase()
+fun titleToSlug(title: String): String {
+    val slug = title.lowercase()
         .replace(Regex("[^\\w\\s-]"), "")
         .replace(Regex("\\s+"), "-")
         .replace(Regex("-+"), "-")
         .trim()
         .let { if (it.length > 50) it.take(50).trimEnd('-') else it }
+    // Fallback to date-only slug if result is empty (e.g., CJK titles)
+    return slug.ifEmpty { "moment" }
+}
 
 fun formatDatePrefix(date: LocalDate): String =
     date.format(DateTimeFormatter.ofPattern("yyMMdd"))

@@ -113,7 +113,9 @@ class EditorViewModel(private val settingsRepo: SettingsRepository) : ViewModel(
                 val bytes = GitHubApi.compressImage(context, uri)
                 val filename = makeImageFilename(originalName, bytes)
                 images = images + DraftImage(filename, bytes)
-            } catch (_: Exception) { }
+            } catch (e: Exception) {
+                uploadState = UploadState.Error("Failed to add image: ${e.message}")
+            }
         }
     }
 

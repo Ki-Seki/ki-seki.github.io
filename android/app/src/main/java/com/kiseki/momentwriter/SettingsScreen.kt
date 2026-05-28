@@ -133,7 +133,6 @@ fun SettingsScreen(onBack: () -> Unit, settingsRepo: SettingsRepository) {
                 onClick = {
                     scope.launch {
                         settingsRepo.save(AppSettings(token, owner, repo, defaultLocation))
-                        snackbarHostState.showSnackbar("Settings saved")
                         onBack()
                     }
                 },

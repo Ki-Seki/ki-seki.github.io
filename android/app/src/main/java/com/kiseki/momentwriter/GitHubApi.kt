@@ -143,11 +143,11 @@ class GitHubApi(private val owner: String, private val repo: String, private val
         checkResponse(response, "updateRef")
     }
 
-    suspend fun createPullRequest(title: String, body: String, head: String, base: String): PRResp {
+    suspend fun createPullRequest(title: String, body: String, head: String, baseBranch: String): PRResp {
         val request = Request.Builder()
             .url("$base/pulls")
             .githubHeaders()
-            .jsonBody(PRReq(title, body, head, base))
+            .jsonBody(PRReq(title, body, head, baseBranch))
             .build()
         val response = client.newCall(request).await()
         checkResponse(response, "createPR")
@@ -184,26 +184,29 @@ class GitHubApi(private val owner: String, private val repo: String, private val
             title = "post: add moment, $dirName",
             body = "New moment: ${draft.title}\n\nLocation: ${draft.location}\nMood: ${draft.mood}",
             head = branchName,
-            base = baseBranch
+            baseBranch = baseBranch
         )
     }
 
     private fun buildIndexMd(draft: MomentDraft): String = buildString {
         appendLine("---")
-        appendLine("title: \"${draft.title}\"")
+        appendLine("title: \"${escapeYamlString(draft.title)}\"")
         appendLine("date: ${formatDateWithOffset(draft.date)}")
         appendLine("draft: false")
-        appendLine("location: \"${draft.location}\"")
-        appendLine("mood: \"${draft.mood}\"")
+        appendLine("location: \"${escapeYamlString(draft.location)}\"")
+        appendLine("mood: \"${escapeYamlString(draft.mood)}\"")
         appendLine("---")
         appendLine()
         append(draft.content)
     }
 
+    private fun escapeYamlString(s: String): String =
+        s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
+
     private fun formatDateWithOffset(dt: LocalDateTime): String {
         val zoned = dt.atZone(ZoneId.systemDefault())
         val offset = zoned.offset
-        return "${dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'))}$offset"
+        return "${dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))}$offset"
     }
 
     companion object {
