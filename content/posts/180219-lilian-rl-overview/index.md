@@ -14,6 +14,8 @@ tags:
 math: true
 ---
 
+<!-- TODO: 语法检查 -->
+
 > **Original post**: [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/) by Lilian Weng.
 
 {{% admonition type="quote" title="Background" open=true %}}
@@ -669,8 +671,34 @@ $$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+
 Next, let’s dig into the fun part on how to learn optimal policy in TD learning (aka “TD control”). Be prepared, you are gonna see many famous names of classic algorithms in this section.
 {{% /admonition %}}
 
+MC state value estimation:
+
+$$V(s) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s] G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s]}$$
+
+MC target:
+
+$$G_t = \underbrace{R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \dots}_{\text{Real rewards from episode}}$$
+
+TD target:
+
+$$G_t \approx \underbrace{R_{t+1}}_{\text{Real reward}} + \underbrace{\gamma V(S_{t+1})}_{\text{Estimated part}}$$
+
+When we say “target” in RL, we mean:
+
+> This is the future return we want to know.
+> But the true return is unknown (and may never be fully observed),
+> we must estimate it—using either full returns (MC) or bootstrapped estimates (TD).
+
+---
+
+{{< media
+src="td_mc_dp.png"
+caption="Comparison between TD, MC and DP."
+>}}
+
 #### SARSA: On-Policy TD control
 
+{{% admonition type="quote" title="SARSA" open=true %}}
 “SARSA” refers to the procedure of updaing Q-value by following a sequence of …, $S_t$, $A_t$, $R_{t+1}$, $S_{t+1}$, $A_{t+1}$, …. The idea follows the same route of GPI. Within one episode, it works as follows:
 
 1. Initialize $t = 0$.
@@ -681,9 +709,18 @@ Next, let’s dig into the fun part on how to learn optimal policy in TD learnin
 6. Set $t = t + 1$ and repeat from step 3.
 
 In each step of SARSA, we need to choose the next action according to the current policy.
+{{% /admonition %}}
+
+In SARSA, behavior plicy (sampling action) = target policy (learning Q values):
+
+$$
+\pi(a|s)=\epsilon\frac{1}{|\mathcal{A}|} + (1-\epsilon)\,\mathbf{1}[a=\arg\max_{a'}Q(s,a')]
+$$
+
 
 #### Q-Learning: Off-policy TD control
 
+{{% admonition type="quote" title="Q-Learning" open=true %}}
 The development of Q-learning (Watkins &amp; Dayan, 1992) is a big breakout in the early days of Reinforcement Learning. Within one episode, it works as follows:
 
 1. Initialize $t = 0$.
@@ -699,13 +736,45 @@ The key difference from SARSA is that Q-learning does not follow the current pol
 src="sarsa_vs_q_learning.png"
 caption="SARSA vs Q-learning comparison"
 >}}
+{{% /admonition %}}
+
+$$
+\begin{aligned}
+\text{SARSA: } Q(S_t, A_t) &\leftarrow Q(S_t, A_t) + \alpha ({\color{red} R_{t+1} + \gamma Q(S_{t+1}, \underbrace{A_{t+1}}_{ \epsilon\text{-greedy policy}})} - Q(S_t, A_t)) \\
+\text{Q-learning: } Q(S_t, A_t) &\leftarrow Q(S_t, A_t) + \alpha ({\color{red} R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, \underbrace{a}_{ \text{greedy policy}})} - Q(S_t, A_t))
+\end{aligned}
+$$
+
+P.S. Red part is the TD target.
+
+---
+
+Q-learning behavior policy ($\epsilon$-greedy):
+
+$$
+\mu(a|s)=\frac{\epsilon}{|\mathcal{A}|} + (1-\epsilon)\,\mathbf{1}[a=\arg\max_{a'}Q(s,a')]
+$$
+
+Q-learning target policy (greedy):
+
+$$
+\pi(a|s)=\mathbf{1}[a=\arg\max_{a'}Q(s,a')]
+$$
 
 #### Deep Q-Network
 
+{{% admonition type="quote" title="Q-Table and Q-Network" open=true %}}
 Theoretically, we can memorize $Q^*(.)$ for all state-action pairs in Q-learning, like in a gigantic table. However, it quickly becomes computationally infeasible when the state and action space are large. Thus people use functions (i.e. a machine learning model) to approximate Q values and this is called function approximation. For example, if we use a function with parameter $\theta$ to calculate Q values, we can label Q value function as $Q(s, a; \theta)$.
 
 Unfortunately Q-learning may suffer from instability and divergence when combined with a nonlinear Q-value function approximation and bootstrapping (See Problems #2).
+{{% /admonition %}}
 
+{{< media
+src="q_table_network.png"
+caption="Q-Table vs Q-Network"
+>}}
+
+{{% admonition type="quote" title="DQN" open=true %}}
 Deep Q-Network (“DQN”; Mnih et al. 2015) aims to greatly improve and stabilize the training procedure of Q-learning by two innovative mechanisms:
 
 **Experience Replay**: All the episode steps $e_t = (S_t, A_t, R_t, S_{t+1})$ are stored in one replay memory $D_t = \{ e_1, \dots, e_t \}$. $D_t$ has experience tuples over many episodes. During Q-learning updates, samples are drawn at random from the replay memory and thus one sample could be used multiple times. Experience replay improves data efficiency, removes correlations in the observation sequences, and smooths over changes in the data distribution.
@@ -724,14 +793,19 @@ caption="Deep Q-Network algorithm"
 >}}
 
 There are many extensions of DQN to improve the original design, such as DQN with dueling architecture (Wang et al. 2016) which estimates state-value function $V(s)$ and advantage function $A(s, a)$ with shared network parameters.
+{{% /admonition %}}
 
-{{< media
-src="td_mc_dp.png"
-caption="Comparison of TD, MC, and DP"
->}}
+$$
+\begin{aligned}
+\text{Q-learning target: }& Q(S_t, A_t) \approx R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, a) \\
+\text{Q-learning update (tabular): }& Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, a) - Q(S_t, A_t)) \\
+\text{Q-learning update (DQN): }& \theta \leftarrow \theta + \eta \nabla_\theta \mathbb{E} \Big[ \big( R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a; \theta^{-}) - Q(S_t, A_t; \theta) \big)^2 \Big]
+\end{aligned}
+$$
 
 ### Combining TD and MC Learning
 
+{{% admonition type="quote" title="Generalized n-step TD learning" open=true %}}
 In the previous section on value estimation in TD learning, we only trace one step further down the action chain when calculating the TD target. One can easily extend it to take multiple steps to estimate the return.
 
 Let’s label the estimated return following $n$ steps as $G_t^{(n)}$, $n = 1, \dots, \infty$, then:
@@ -748,9 +822,12 @@ Let’s label the estimated return following $n$ steps as $G_t^{(n)}$, $n = 1, \
 The generalized n-step TD learning still has the same form for updating the value function:
 
 $$V(S_t) \leftarrow V(S_t) + \alpha (G_t^{(n)} - V(S_t))$$
+{{% /admonition %}}
+
+{{% admonition type="quote" title="TD($\lambda$)" open=true %}}
 {{< media
 src="TD_lambda.png"
-caption="TD(λ) eligibility traces diagram"
+caption="TD($\lambda$) eligibility traces diagram"
 >}}
 We are free to pick any $n$ in TD learning as we like. Now the question becomes what is the best $n$? Which $G_t^{(n)}$ gives us the best return approximation? A common yet smart solution is to apply a weighted sum of all possible n-step TD targets rather than to pick a single best $n$. The weights decay by a factor $\lambda$ with $n$, $\lambda^{n-1}$; the intuition is similar to why we want to discount future rewards when computing the return: the more future we look into the less confident we would be. To make all the weight ($n \rightarrow \infty$) sum up to 1, we multiply every weight by $(1-\lambda)$, because:
 
@@ -768,22 +845,85 @@ This weighted sum of many n-step returns is called $\lambda$-return $G_t^{\lambd
 src="TD_MC_DP_backups.png"
 caption="Comparison of TD, MC, and DP backup diagrams"
 >}}
+{{% /admonition %}}
+
+The algorithmic details of TD($\lambda$) here. But we don't expalin why here.
+
+TD($\lambda$) update (backward view)
+This is the *actual algorithm*:
+
+Eligibility trace:
+
+\[
+e_t(s)=\gamma\lambda e_{t-1}(s)+\mathbf{1}[S_t=s]
+\]
+
+TD error:
+
+\[
+\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)
+\]
+
+Value update:
+
+\[
+V(s) \leftarrow V(s) + \alpha\,\delta_t\, e_t(s)
+\]
+
+---
+
+Why backward view = forward view (equivalence)
+
+\[
+G_t^\lambda - V(S_t)
+= \sum_{k=t}^{\infty} (\gamma\lambda)^{k-t}\,\delta_k
+\]
+
+Meaning:
+
+- Forward view λ‑return = weighted mixture of all n‑step returns  
+- Backward view = weighted mixture of all future TD errors  
+- **Weights are identical** → \((\gamma\lambda)^{k-t}\)
+
+So:
+
+> **Forward view defines what TD(λ) should learn.  
+> Backward view implements the same weights efficiently.**
+
 
 ### Policy Gradient
 
+{{% admonition type="quote" title="Learn the Policy Directly" open=true %}}
 All the methods we have introduced above aim to learn the state/action value function and then to select actions accordingly. Policy Gradient methods instead learn the policy directly with a parameterized function respect to $\theta$, $\pi(a|s; \theta)$. Let’s define the reward function (opposite of loss function) as the expected return and train the algorithm with the goal to maximize the reward function. My next post described why the policy gradient theorem works (proof) and introduced a number of policy gradient algorithms.
+{{% /admonition %}}
 
+没啥好说的
+
+{{% admonition type="quote" title="Discrete Objective" open=true %}}
 In discrete space:
 
 $$\mathcal{J}(\theta) = V_{\pi_\theta}(S_1) = \mathbb{E}_{\pi_\theta}[V_1]$$
 where $S_1$ is the initial starting state.
+{{% /admonition %}}
 
+回顾标准的状态价值函数：
+
+$$V_{\pi}(s) = \mathbb{E}_{\pi}[G_t \vert S_t = s]$$
+
+令 $s = S_1$，$\pi = \pi_\theta$，
+
+$$\mathcal{J}(\theta) = V_{\pi_\theta}(S_1) = \mathbb{E}_{\pi_\theta}[G_1 \vert S_1]=\mathbb{E}_{\pi_\theta}\left[ \mathbb{E}_{\pi_\theta}[G_t \vert S_t = s] \right]=\mathbb{E}_{\pi_\theta}[V_1]$$
+
+{{% admonition type="quote" title="Continuous Objective" open=true %}}
 Or in continuous space:
 
 $$\mathcal{J}(\theta) = \sum_{s \in \mathcal{S}} d_{\pi_\theta}(s) V_{\pi_\theta}(s) = \sum_{s \in \mathcal{S}} \Big( d_{\pi_\theta}(s) \sum_{a \in \mathcal{A}} \pi(a|s, \theta) Q_\pi(s, a) \Big)$$
 where $d_{\pi_\theta}(s)$ is stationary distribution of Markov chain for $\pi_\theta$. If you are unfamiliar with the definition of a “stationary distribution,” please check this reference.
+{{% /admonition %}}
 
+{{% admonition type="quote" title="Using Gradient Ascent" open=true %}}
 Using gradient ascent we can find the best $\theta$ that produces the highest return. It is natural to expect policy-based methods are more useful in continuous space, because there is an infinite number of actions and/or states to estimate the values for in continuous space and hence value-based approaches are computationally much more expensive.
+{{% /admonition %}}
 
 #### Policy Gradient Theorem
 
@@ -961,6 +1101,55 @@ where $c$ is a hyperparameter controlling the intensity of L2 penalty to avoid o
 AlphaGo Zero simplified AlphaGo by removing supervised learning and merging separated policy and value networks into one. It turns out that AlphaGo Zero achieved largely improved performance with a much shorter training time! I strongly recommend reading these two papers side by side and compare the difference, super fun.
 
 I know this is a long read, but hopefully worth it. If you notice mistakes and errors in this post, don’t hesitate to contact me at [lilian dot wengweng at gmail dot com]. See you in the next post! :)
+
+## Key Formulas at a Glance
+
+<table>
+<thead><tr><th>Name</th><th>Formula</th></tr></thead>
+<tbody>
+<!-- Fundamental Definitions -->
+<tr><td colspan="2"><strong>Fundamental Definitions</strong></td></tr>
+<tr><td>Transition Probability</td><td>$P(s’, r \vert s, a) = \mathbb{P} [S_{t+1} = s’, R_{t+1} = r \vert S_t = s, A_t = a]$</td></tr>
+<tr><td>Discounted Return</td><td>$G_t = R_{t+1} + \gamma R_{t+2} + \dots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}$</td></tr>
+<tr><td>State-Value Function</td><td>$V_{\pi}(s) = \mathbb{E}_{\pi}[G_t \vert S_t = s]$</td></tr>
+<tr><td>Action-Value Function</td><td>$Q_{\pi}(s, a) = \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]$</td></tr>
+<tr><td>Advantage Function</td><td>$A_{\pi}(s, a) = Q_{\pi}(s, a) - V_{\pi}(s)$</td></tr>
+<tr><td>Optimal Value Functions</td><td>$V_{*}(s) = \max_{\pi} V_{\pi}(s), \quad Q_{*}(s, a) = \max_{\pi} Q_{\pi}(s, a)$</td></tr>
+<!-- Bellman Equations -->
+<tr><td colspan="2"><strong>Bellman Equations</strong></td></tr>
+<tr><td>Bellman Expectation for $V_\pi$</td><td>$V_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a \vert s) \big( R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a V_{\pi} (s’) \big)$</td></tr>
+<tr><td>Bellman Expectation for $Q_\pi$</td><td>$Q_{\pi}(s, a) = R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a \sum_{a’ \in \mathcal{A}} \pi(a’ \vert s’) Q_{\pi} (s’, a’)$</td></tr>
+<tr><td>Bellman Optimality for $V_*$</td><td>$V_{*}(s) = \max_{a \in \mathcal{A}} \big( R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a V_{*}(s’) \big)$</td></tr>
+<tr><td>Bellman Optimality for $Q_*$</td><td>$Q_{*}(s, a) = R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a \max_{a’ \in \mathcal{A}} Q_{*}(s’, a’)$</td></tr>
+<!-- Dynamic Programming -->
+<tr><td colspan="2"><strong>Dynamic Programming</strong></td></tr>
+<tr><td>Policy Evaluation</td><td>$V_{t+1}(s) = \sum_a \pi(a \vert s) \sum_{s’, r} P(s’, r \vert s, a) \big(r + \gamma V_t(s’)\big)$</td></tr>
+<tr><td>Policy Improvement</td><td>$Q_\pi(s, a) = \sum_{s’, r} P(s’, r \vert s, a) \big(r + \gamma V_\pi(s’)\big)$</td></tr>
+<!-- Monte-Carlo Methods -->
+<tr><td colspan="2"><strong>Monte-Carlo Methods</strong></td></tr>
+<tr><td>MC State-Value Estimate</td><td>$V(s) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s] \, G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s]}$</td></tr>
+<tr><td>MC Action-Value Estimate</td><td>$Q(s, a) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a] \, G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a]}$</td></tr>
+<!-- Temporal-Difference Learning -->
+<tr><td colspan="2"><strong>Temporal-Difference Learning</strong></td></tr>
+<tr><td>TD(0) Value Update</td><td>$V(S_t) \leftarrow V(S_t) + \alpha \big(R_{t+1} + \gamma V(S_{t+1}) - V(S_t)\big)$</td></tr>
+<tr><td>SARSA (On-Policy)</td><td>$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \big(R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)\big)$</td></tr>
+<tr><td>Q-Learning (Off-Policy)</td><td>$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \big(R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, a) - Q(S_t, A_t)\big)$</td></tr>
+<tr><td>DQN Loss</td><td>$\mathcal{L}(\theta) = \mathbb{E}_{(s, a, r, s’) \sim U(D)} \Big[ \big( r + \gamma \max_{a’} Q(s’, a’; \theta^{-}) - Q(s, a; \theta) \big)^2 \Big]$</td></tr>
+<tr><td>$n$-Step Return</td><td>$G_t^{(n)} = R_{t+1} + \gamma R_{t+2} + \dots + \gamma^{n-1} R_{t+n} + \gamma^n V(S_{t+n})$</td></tr>
+<tr><td>$\lambda$-Return</td><td>$G_t^{\lambda} = (1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_t^{(n)}$</td></tr>
+<!-- Policy Gradient Methods -->
+<tr><td colspan="2"><strong>Policy Gradient Methods</strong></td></tr>
+<tr><td>Policy Gradient Theorem</td><td>$\nabla \mathcal{J}(\theta) = \mathbb{E}_{\pi_\theta}[\nabla \ln \pi(a \vert s, \theta) \, Q_\pi(s, a)]$</td></tr>
+<tr><td>REINFORCE Update</td><td>$\theta \leftarrow \theta + \alpha \gamma^t G_t \nabla \ln \pi(A_t \vert S_t, \theta)$</td></tr>
+<tr><td>Actor-Critic Policy Update</td><td>$\theta \leftarrow \theta + \alpha_\theta \, Q(s, a; w) \, \nabla_\theta \ln \pi(a \vert s; \theta)$</td></tr>
+<tr><td>Actor-Critic TD Correction</td><td>$G_{t:t+1} = r_t + \gamma Q(s’, a’; w) - Q(s, a; w)$</td></tr>
+<tr><td>A3C Return Estimation</td><td>$R = \begin{cases} 0 & \text{if } s_t \text{ is TERMINAL} \\ V(s_t; w’) & \text{otherwise} \end{cases}$</td></tr>
+<tr><td>ES Gradient</td><td>$\nabla_\theta \mathbb{E}_{\epsilon \sim N(0, I)} F(\theta + \sigma \epsilon) = \frac{1}{\sigma} \mathbb{E}_{\epsilon \sim N(0, I)} [F(\theta + \sigma \epsilon) \, \epsilon]$</td></tr>
+<!-- Case Study -->
+<tr><td colspan="2"><strong>Case Study: AlphaGo Zero</strong></td></tr>
+<tr><td>AlphaGo Zero Loss</td><td>$\mathcal{L} = (z - v)^2 - \pi^\top \log p + c \| \theta \|^2$</td></tr>
+</tbody>
+</table>
 
 ## Citation
 
