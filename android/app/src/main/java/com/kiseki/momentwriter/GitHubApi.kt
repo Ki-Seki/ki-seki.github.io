@@ -26,7 +26,10 @@ import kotlin.coroutines.resumeWithException
 class GitHubApi(private val owner: String, private val repo: String, private val token: String) {
 
     private val client = OkHttpClient()
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true  // Ensure default values are included in JSON
+    }
     private val base = "https://api.github.com/repos/$owner/$repo"
     private val jsonMedia = "application/json; charset=utf-8".toMediaType()
 
