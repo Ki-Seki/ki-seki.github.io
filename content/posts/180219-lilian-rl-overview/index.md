@@ -881,13 +881,13 @@ G_t^\lambda - V(S_t)
 
 Meaning:
 
-- Forward view λ‑return = weighted mixture of all n‑step returns  
-- Backward view = weighted mixture of all future TD errors  
+- Forward view λ‑return = weighted mixture of all n‑step returns
+- Backward view = weighted mixture of all future TD errors
 - **Weights are identical** → \((\gamma\lambda)^{k-t}\)
 
 So:
 
-> **Forward view defines what TD(λ) should learn.  
+> **Forward view defines what TD(λ) should learn.
 > Backward view implements the same weights efficiently.**
 
 
