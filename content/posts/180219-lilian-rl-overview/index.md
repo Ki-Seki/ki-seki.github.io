@@ -934,7 +934,7 @@ Using gradient ascent we can find the best $\theta$ that produces the highest re
 
 Example: 7‑DoF Robotic Arm
 
-**Action:**  
+**Action:**
 \[
 a \in \mathbb{R}^7
 \]
@@ -944,9 +944,9 @@ a \in \mathbb{R}^7
 
 **Value‑based RL (Q‑learning / DQN)**
 
-- Must learn \(Q(s,a)\) where \(a\) is a 7‑dim continuous vector.  
-- Requires \(\arg\max_a Q(s,a)\) → **impossible** (high‑dim non‑convex optimization).  
-- Q‑network input is huge → unstable.  
+- Must learn \(Q(s,a)\) where \(a\) is a 7‑dim continuous vector.
+- Requires \(\arg\max_a Q(s,a)\) → **impossible** (high‑dim non‑convex optimization).
+- Q‑network input is huge → unstable.
 - No natural exploration in continuous actions.
 
 → Not practical for robotic arms.
@@ -955,16 +955,16 @@ a \in \mathbb{R}^7
 
 **Policy‑based RL (Policy Gradient / PPO / SAC)**
 
-- Learn \(\pi(a|s)\) directly.  
-- Network outputs Gaussian parameters:  
+- Learn \(\pi(a|s)\) directly.
+- Network outputs Gaussian parameters:
   \[
   \mu_\theta(s),\ \sigma_\theta(s) \in \mathbb{R}^7
   \]
-- Action sampled as:  
+- Action sampled as:
   \[
   a = \mu_\theta(s) + \sigma_\theta(s)\epsilon
   \]
-- No argmax needed; exploration comes from \(\sigma\).  
+- No argmax needed; exploration comes from \(\sigma\).
 - Stable and standard for continuous control.
 
 → The dominant approach for robotic manipulators.
