@@ -897,44 +897,96 @@ So:
 All the methods we have introduced above aim to learn the state/action value function and then to select actions accordingly. Policy Gradient methods instead learn the policy directly with a parameterized function respect to $\theta$, $\pi(a|s; \theta)$. Let’s define the reward function (opposite of loss function) as the expected return and train the algorithm with the goal to maximize the reward function. My next post described why the policy gradient theorem works (proof) and introduced a number of policy gradient algorithms.
 {{% /admonition %}}
 
-没啥好说的
+- Value-based RL: learn the value function $V$ or $Q$, and select actions indirectly through them.
+- Policy Gradient RL: directly learn a parameterized policy $\pi(a \mid s; \theta)$ with the objective of maximizing the expected return.
 
-{{% admonition type="quote" title="Discrete Objective" open=true %}}
+{{% admonition type="quote" title="Objective" open=true %}}
 In discrete space:
 
 $$\mathcal{J}(\theta) = V_{\pi_\theta}(S_1) = \mathbb{E}_{\pi_\theta}[V_1]$$
 where $S_1$ is the initial starting state.
-{{% /admonition %}}
 
-回顾标准的状态价值函数：
-
-$$V_{\pi}(s) = \mathbb{E}_{\pi}[G_t \vert S_t = s]$$
-
-令 $s = S_1$，$\pi = \pi_\theta$，
-
-$$\mathcal{J}(\theta) = V_{\pi_\theta}(S_1) = \mathbb{E}_{\pi_\theta}[G_1 \vert S_1]=\mathbb{E}_{\pi_\theta}\left[ \mathbb{E}_{\pi_\theta}[G_t \vert S_t = s] \right]=\mathbb{E}_{\pi_\theta}[V_1]$$
-
-{{% admonition type="quote" title="Continuous Objective" open=true %}}
 Or in continuous space:
 
 $$\mathcal{J}(\theta) = \sum_{s \in \mathcal{S}} d_{\pi_\theta}(s) V_{\pi_\theta}(s) = \sum_{s \in \mathcal{S}} \Big( d_{\pi_\theta}(s) \sum_{a \in \mathcal{A}} \pi(a|s, \theta) Q_\pi(s, a) \Big)$$
-where $d_{\pi_\theta}(s)$ is stationary distribution of Markov chain for $\pi_\theta$. If you are unfamiliar with the definition of a “stationary distribution,” please check this reference.
+where $d_{\pi_\theta}(s)$ is stationary distribution of Markov chain for $\pi_\theta$. If you are unfamiliar with the definition of a “stationary distribution,” please check this [reference](https://jeremykun.com/2015/04/06/markov-chain-monte-carlo-without-all-the-bullshit/).
 {{% /admonition %}}
+
+Errata 1:
+
+Here, the equality $V_{\pi_\theta}(S_1) = \mathbb{E}_{\pi_\theta}[V_1]$ is not strictly rigorous and should be viewed as a slight abuse of notation.
+
+We only need to understand that we aim to maximize $\mathcal{J}(\theta)$, which is the expected return starting from the initial state $S_1$.
+
+---
+
+Errata 2:
+
+The second formula is also in discrete space.
+
+---
+
+Stationary distribution $d_{\pi_\theta}(s)$ is the probability of $s$ when the Markov chain system evelves for a long time and converges.
 
 {{% admonition type="quote" title="Using Gradient Ascent" open=true %}}
 Using gradient ascent we can find the best $\theta$ that produces the highest return. It is natural to expect policy-based methods are more useful in continuous space, because there is an infinite number of actions and/or states to estimate the values for in continuous space and hence value-based approaches are computationally much more expensive.
 {{% /admonition %}}
 
+Example: 7‑DoF Robotic Arm
+
+**Action:**  
+\[
+a \in \mathbb{R}^7
+\]
+(continuous joint velocities/torques).
+
+---
+
+**Value‑based RL (Q‑learning / DQN)**
+
+- Must learn \(Q(s,a)\) where \(a\) is a 7‑dim continuous vector.  
+- Requires \(\arg\max_a Q(s,a)\) → **impossible** (high‑dim non‑convex optimization).  
+- Q‑network input is huge → unstable.  
+- No natural exploration in continuous actions.
+
+→ Not practical for robotic arms.
+
+---
+
+**Policy‑based RL (Policy Gradient / PPO / SAC)**
+
+- Learn \(\pi(a|s)\) directly.  
+- Network outputs Gaussian parameters:  
+  \[
+  \mu_\theta(s),\ \sigma_\theta(s) \in \mathbb{R}^7
+  \]
+- Action sampled as:  
+  \[
+  a = \mu_\theta(s) + \sigma_\theta(s)\epsilon
+  \]
+- No argmax needed; exploration comes from \(\sigma\).  
+- Stable and standard for continuous control.
+
+→ The dominant approach for robotic manipulators.
+
+
 #### Policy Gradient Theorem
 
+{{% admonition type="quote" title="Get gradient directly" open=true %}}
 Computing the gradient numerically can be done by perturbing $\theta$ by a small amount $\epsilon$ in the k-th dimension. It works even when $\mathcal{J}(\theta)$ is not differentiable (nice!), but unsurprisingly very slow.
 
 $$
 \frac{\partial \mathcal{J}(\theta)}{\partial \theta_k} \approx \frac{\mathcal{J}(\theta + \epsilon u_k) - \mathcal{J}(\theta)}{\epsilon}
 $$
+
 Or analytically,
 
 $$\mathcal{J}(\theta) = \mathbb{E}_{\pi_\theta}[r] = \sum_{s \in \mathcal{S}} d_{\pi_\theta}(s) \sum_{a \in \mathcal{A}} \pi(a|s; \theta) R(s, a)$$
+{{% /admonition %}}
+
+Because it is impossible for us to get the gradient of $d_{\pi_\theta}$, we have to use the perturbation-based estimation trick.
+
+{{% admonition type="quote" title="Policy Gradient Theorem derivation" open=true %}}
 Actually we have nice theoretical support for (replacing $d(.)$ with $d_\pi(.)$):
 
 $$\mathcal{J}(\theta) = \sum_{s \in \mathcal{S}} d_{\pi_\theta}(s) \sum_{a \in \mathcal{A}} \pi(a|s; \theta) Q_\pi(s, a) \propto \sum_{s \in \mathcal{S}} d(s) \sum_{a \in \mathcal{A}} \pi(a|s; \theta) Q_\pi(s, a)$$
@@ -954,9 +1006,13 @@ $$
 This result is named “Policy Gradient Theorem” which lays the theoretical foundation for various policy gradient algorithms:
 
 $$\nabla \mathcal{J}(\theta) = \mathbb{E}_{\pi_\theta}[\nabla \ln \pi(a|s, \theta) Q_\pi(s, a)]$$
+{{% /admonition %}}
+
+The core is we can get rid of the $\theta$-parameterized stational distribution and then we can use sampling to get input-output pairs to get gradients.
 
 #### REINFORCE
 
+{{% admonition type="quote" title="REINFORCE" open=true %}}
 REINFORCE, also known as Monte-Carlo policy gradient, relies on $Q_\pi(s, a)$, an estimated return by MC methods using episode samples, to update the policy parameter $\theta$.
 
 A commonly used variation of REINFORCE is to subtract a baseline value from the return $G_t$ to reduce the variance of gradient estimation while keeping the bias unchanged. For example, a common baseline is state-value, and if applied, we would use $A(s, a) = Q(s, a) - V(s)$ in the gradient ascent update.
@@ -966,6 +1022,38 @@ A commonly used variation of REINFORCE is to subtract a baseline value from the 
 3. For $t=1, 2, \dots, T$:
    - Estimate the the return $G_t$ since the time step $t$.
    - $\theta \leftarrow \theta + \alpha \gamma^t G_t \nabla \ln \pi(A_t|S_t, \theta)$.
+{{% /admonition %}}
+
+$$
+\begin{aligned}
+\text{Policy Gradient Theorem:}&\quad
+\nabla J(\theta)
+= \mathbb{E}_{\pi_\theta}\!\left[\nabla_\theta \log \pi_\theta(A_t \mid S_t)\, Q_\pi(S_t,A_t)\right] \\
+\text{Monte-Carlo estimate:}&\quad
+Q_\pi(S_t,A_t)
+\approx G_t = \sum_{k=t}^T \gamma^{k-t} R_k \\
+\text{Then:}&\quad
+\nabla J(\theta)
+\approx \mathbb{E}_{\pi_\theta}\!\left[\nabla_\theta \log \pi_\theta(A_t \mid S_t)\, G_t\right] \\
+\text{Sample-based estimate:}&\quad
+\nabla J(\theta)
+\approx \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(A_t \mid S_t)\, G_t \\
+\text{REINFORCE update:}&\quad
+\theta
+\leftarrow \theta + \alpha \sum_{t=1}^{T}
+   \nabla_\theta \log \pi_\theta(A_t \mid S_t)\, G_t \\
+\text{With baseline } b(S_t):&\quad
+\theta
+\leftarrow \theta + \alpha \sum_{t=1}^{T}
+   \nabla_\theta \log \pi_\theta(A_t \mid S_t)\, \big(G_t - b(S_t)\big).
+\end{aligned}
+$$
+
+---
+
+Why applying subtraction?
+
+
 
 #### Actor-Critic
 
