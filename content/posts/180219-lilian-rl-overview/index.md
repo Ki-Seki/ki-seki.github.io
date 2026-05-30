@@ -1149,6 +1149,99 @@ caption="Evolution strategies and RL parallel training"
 >}}
 {{% /admonition %}}
 
+Errata: The original formula in the post is wrong. I have updated it to the correct one.
+
+$$
+\begin{aligned}
+& \color{red}{J(\mu)=\mathbb E_{\theta\sim N(\mu,\sigma^2I)}[F(\theta)]} \\ \\
+& \color{red}{\nabla_\mu J(\mu)}
+\\
+=&
+\color{red}{
+\nabla_\mu
+\int
+F(\theta)
+\,p(\theta;\mu)
+\,d\theta
+}
+\\
+=&
+\color{red}{
+\int
+F(\theta)
+\,\nabla_\mu p(\theta;\mu)
+\,d\theta
+}
+\qquad
+\text{\color{red}{(move gradient inside the integral)}}
+\\
+=&
+\int
+F(\theta)
+\,p(\theta;\mu)
+\,
+\frac{\nabla_\mu p(\theta;\mu)}
+     {p(\theta;\mu)}
+\,d\theta
+\\
+=&
+\int
+F(\theta)
+\,p(\theta;\mu)
+\,
+\nabla_\mu
+\log p(\theta;\mu)
+\,d\theta
+\\
+=&
+\mathbb E_{\theta\sim N(\mu,\sigma^2I)}
+\Big[
+F(\theta)
+\nabla_\mu
+\log p(\theta;\mu)
+\Big]
+\\
+=&
+\mathbb E_{\theta\sim N(\mu,\sigma^2I)}
+\Bigg[
+F(\theta)
+\nabla_\mu
+\log
+\Bigg(
+\frac{1}
+     {\sqrt{2\pi\sigma^2}}
+e^{-\frac{(\theta-\mu)^2}{2\sigma^2}}
+\Bigg)
+\Bigg]
+\\
+=&
+\mathbb E_{\theta\sim N(\mu,\sigma^2I)}
+\Bigg[
+F(\theta)
+\nabla_\mu
+\Bigg(
+-\log\sqrt{2\pi\sigma^2}
+-\frac{(\theta-\mu)^2}{2\sigma^2}
+\Bigg)
+\Bigg]
+\\
+=&
+\mathbb E_{\theta\sim N(\mu,\sigma^2I)}
+\Bigg[
+F(\theta)
+\frac{\theta-\mu}{\sigma^2}
+\Bigg]
+\end{aligned}
+$$
+
+---
+
+Based on the reparameterization trick, we can sample $\epsilon \sim N(0, I)$ and estimate the gradient with:
+
+$$
+\nabla_\theta \mathbb{E}_{\epsilon \sim N(0, I)} F(\theta + \sigma \epsilon) = \frac{1}{\sigma} \mathbb{E}_{\epsilon \sim N(0, I)} [F(\theta + \sigma \epsilon) \epsilon]
+$$
+
 {{% admonition type="quote" title="Characteristics of ES" open=true %}}
 ES, as a black-box optimization algorithm, is another approach to RL problems (In my original writing, I used the phrase “a nice alternative”; Seita pointed me to this discussion and thus I updated my wording.). It has a couple of good characteristics (Salimans et al., 2017) keeping it fast and easy to train:
 
@@ -1158,13 +1251,19 @@ ES, as a black-box optimization algorithm, is another approach to RL problems (I
 - ES is highly parallelizable with very little data communication.
 {{% /admonition %}}
 
+No further explanation needed.
+
 ## Known Problems
 
 ### Exploration-Exploitation Dilemma
 
+{{% admonition type="quote" title="Exploration-Exploitation Dilemma" open=true %}}
 The problem of exploration vs exploitation dilemma has been discussed in my previous post. When the RL problem faces an unknown environment, this issue is especially a key to finding a good solution: without enough exploration, we cannot learn the environment well enough; without enough exploitation, we cannot complete our reward optimization task.
 
 Different RL algorithms balance between exploration and exploitation in different ways. In MC methods, Q-learning or many on-policy algorithms, the exploration is commonly implemented by $\epsilon$-greedy; In ES, the exploration is captured by the policy parameter perturbation. Please keep this into consideration when developing a new RL algorithm.
+{{% /admonition %}}
+
+And in auto-research and heuristic-learning paradigms, the exploration is implemented by LLMs' creativity and randomness in generating new solutions.
 
 ### Deadly Triad Issue
 
