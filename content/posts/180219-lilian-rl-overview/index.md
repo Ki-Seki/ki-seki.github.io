@@ -1049,14 +1049,9 @@ Q_\pi(S_t,A_t)
 \end{aligned}
 $$
 
----
-
-Why applying subtraction?
-
-
-
 #### Actor-Critic
 
+{{% admonition type="quote" title="Actor-Critic" open=true %}}
 If the value function is learned in addition to the policy, we would get Actor-Critic algorithm.
 
 - **Critic**: updates value function parameters $w$ and depending on the algorithm it could be action-value $Q(a|s; w)$ or state-value $V(s; w)$.
@@ -1073,9 +1068,13 @@ Let’s see how it works in an action-value actor-critic algorithm.
    - Update $a \leftarrow a’$ and $s \leftarrow s’$.
 
 $\alpha_\theta$ and $\alpha_w$ are two learning rates for policy and value function parameter updates, respectively.
+{{% /admonition %}}
+
+In essence, this is the combination of DQN and REINFORCE.
 
 #### A3C
 
+{{% admonition type="quote" title="A3C" open=true %}}
 Asynchronous Advantage Actor-Critic (Mnih et al., 2016), short for A3C, is a classic policy gradient method with the special focus on parallel training.
 
 In A3C, the critics learn the state-value function, $V(s; w)$, while multiple actors are trained in parallel and get synced with global parameters from time to time. Hence, A3C is good for parallel training by default, i.e. on one machine with multi-core CPU.
@@ -1107,13 +1106,24 @@ V(s_t; w’) & \text{otherwise}
 7. Update synchronously $\theta$ using $d\theta$, and $w$ using $dw$.
 
 A3C enables the parallelism in multiple agent training. The gradient accumulation step (6.2) can be considered as a reformation of minibatch-based stochastic gradient update: the values of $w$ or $\theta$ get corrected by a little bit in the direction of each training thread independently.
+{{% /admonition %}}
+
+{{< media
+src="a3c.png"
+caption="A3C parallel training ([source](https://awjuliani.medium.com/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2))"
+>}}
 
 ### Evolution Strategies
 
+{{% admonition type="quote" title="Genetic Algorithm" open=true %}}
 Evolution Strategies (ES) is a type of model-agnostic optimization approach. It learns the optimal solution by imitating Darwin’s theory of the evolution of species by natural selection. Two prerequisites for applying ES: (1) our solutions can freely interact with the environment and see whether they can solve the problem; (2) we are able to compute a fitness score of how good each solution is. We don’t have to know the environment configuration to solve the problem.
 
 Say, we start with a population of random solutions. All of them are capable of interacting with the environment and only candidates with high fitness scores can survive (only the fittest can survive in a competition for limited resources). A new generation is then created by recombining the settings (gene mutation) of high-fitness survivors. This process is repeated until the new solutions are good enough.
+{{% /admonition %}}
 
+Randomly generate policies! This is just like the [auto-research](https://github.com/karpathy/autoresearch) and [heuristic-learning](https://trinkle23897.github.io/learning-beyond-gradients/) paradigms in recent days.
+
+{{% admonition type="quote" title="Gradient calculation" open=true %}}
 Very different from the popular MDP-based approaches as what we have introduced above, ES aims to learn the policy parameter $\theta$ without value approximation. Let’s assume the distribution over the parameter $\theta$ is an isotropic multivariate Gaussian with mean $\mu$ and fixed covariance $\sigma^2 I$. The gradient of $F(\theta)$ is calculated:
 
 $$
@@ -1137,13 +1147,16 @@ $$
 src="EA_RL_parallel.png"
 caption="Evolution strategies and RL parallel training"
 >}}
+{{% /admonition %}}
 
+{{% admonition type="quote" title="Characteristics of ES" open=true %}}
 ES, as a black-box optimization algorithm, is another approach to RL problems (In my original writing, I used the phrase “a nice alternative”; Seita pointed me to this discussion and thus I updated my wording.). It has a couple of good characteristics (Salimans et al., 2017) keeping it fast and easy to train:
 
 - ES does not need value function approximation;
 - ES does not perform gradient back-propagation;
 - ES is invariant to delayed or long-term rewards;
 - ES is highly parallelizable with very little data communication.
+{{% /admonition %}}
 
 ## Known Problems
 
