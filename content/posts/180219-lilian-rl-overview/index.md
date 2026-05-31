@@ -155,7 +155,7 @@ R(s, a) = \mathbb{E} [R_{t+1} \vert S_t = s, A_t = a] = \sum_{r\in\mathcal{R}} r
 $$
 {{% /admonition %}}
 
-If you're familar with Multi-armed Bernoulli Bandit problems ([Learn it here](https://ki-seki.github.io/posts/260430-multi-armed-bandit/)), you may understand formulas above as a generalization of the bandit setting.
+If you're familiar with Multi-armed Bernoulli Bandit problems ([Learn it here](https://ki-seki.github.io/posts/260430-multi-armed-bandit/)), you may understand formulas above as a generalization of the bandit setting.
 
 Bandit problem is stateless, so
 
@@ -216,7 +216,7 @@ The discounting factor $\gamma \in [0, 1]$ penalize the rewards in the future, b
 - We don't need to worry about the infinite loops in the state transition graph.
 {{% /admonition %}}
 
-Let's furturemore clarify the last two points.
+Let's furthermore clarify the last two points.
 
 - If we do not discount the future rewards, then the return is simply the sum of all future rewards. Then it will never converge. But with discounting factor $\gamma < 1$, the return is a geometric series and it converges to a finite value.
 - If there is no discount factor, the agent will decide that staying in that loop forever is the "optimal" strategy because the total reward will eventually reach infinity.
@@ -233,10 +233,10 @@ $$
 \begin{aligned}
 |G_t| &= |R_{t+1} + \gamma R_{t+2} + \dots| \\
 &\leq |R_{t+1}| + |\gamma R_{t+2}| + \dots & \text{ ; triangle inequality } \\
-&\leq |R_{max}| + |\gamma R_{max}| + \dots \\
-&\leq R_{max} + \gamma R_{max} + \dots \\
-&= R_{max} \sum_{k=0}^{\infty} \gamma^k \\
-&= \frac{R_{max}}{1 - \gamma} & \text{ ; infinite geometric series } \\
+&\leq |R_{\max}| + |\gamma R_{\max}| + \dots \\
+&\leq R_{\max} + \gamma R_{\max} + \dots \\
+&= R_{\max} \sum_{k=0}^{\infty} \gamma^k \\
+&= \frac{R_{\max}}{1 - \gamma} & \text{ ; infinite geometric series } \\
 &< \infty
 \end{aligned}
 $$
@@ -277,7 +277,7 @@ The relation between immediate reward, return, and value functions:
 
 - Immediate reward: at state s, take action a, get reward r.
 - Return: the total discounted reward starting from state s and action a, following policy $\pi$.
-- Value functions: another forms of return, but with different conditions. State-value function is the expected return given state s, while action-value function is the expected return given state s and action a.
+- Value functions: other forms of return, but with different conditions. State-value function is the expected return given state s, while action-value function is the expected return given state s and action a.
 
 ---
 
@@ -572,7 +572,7 @@ $$
 Relation between $P(s'|s,a)$, $P(s', r|s,a)$, and $R(s,a,s')$:
 
 $$
-P(s'|s,a) = \sum_{r = R(s, a, s') \in \mathcal{R}} P(s', r|s,a)
+P(s'|s,a) = \sum_{r \in \mathcal{R}} P(s', r|s,a)
 $$
 
 ### Monte-Carlo Methods
@@ -709,7 +709,7 @@ caption="Comparison between TD, MC and DP."
 In each step of SARSA, we need to choose the next action according to the current policy.
 {{% /admonition %}}
 
-In SARSA, behavior plicy (sampling action) = target policy (learning Q values):
+In SARSA, behavior policy (sampling action) = target policy (learning Q values):
 
 $$
 \pi(a|s)=\epsilon\frac{1}{|\mathcal{A}|} + (1-\epsilon)\,\mathbf{1}[a=\arg\max_{a'}Q(s,a')]
@@ -845,7 +845,7 @@ caption="Comparison of TD, MC, and DP backup diagrams"
 >}}
 {{% /admonition %}}
 
-The algorithmic details of TD($\lambda$) here. But we don't expalin why here.
+Here are the algorithmic details of TD($\lambda$). But we don't explain why here.
 
 TD($\lambda$) update (backward view)
 This is the *actual algorithm*:
@@ -924,7 +924,7 @@ The second formula is also in discrete space.
 
 ---
 
-Stationary distribution $d_{\pi_\theta}(s)$ is the probability of $s$ when the Markov chain system evelves for a long time and converges.
+Stationary distribution $d_{\pi_\theta}(s)$ is the probability of $s$ when the Markov chain system evolves for a long time and converges.
 
 {{% admonition type="quote" title="Using Gradient Ascent" open=true %}}
 Using gradient ascent we can find the best $\theta$ that produces the highest return. It is natural to expect policy-based methods are more useful in continuous space, because there is an infinite number of actions and/or states to estimate the values for in continuous space and hence value-based approaches are computationally much more expensive.
@@ -1006,7 +1006,7 @@ This result is named “Policy Gradient Theorem” which lays the theoretical fo
 $$\nabla \mathcal{J}(\theta) = \mathbb{E}_{\pi_\theta}[\nabla \ln \pi(a|s, \theta) Q_\pi(s, a)]$$
 {{% /admonition %}}
 
-The core is we can get rid of the $\theta$-parameterized stational distribution and then we can use sampling to get input-output pairs to get gradients.
+The core is we can get rid of the $\theta$-parameterized stationary distribution and then we can use sampling to get input-output pairs to get gradients.
 
 #### REINFORCE
 
