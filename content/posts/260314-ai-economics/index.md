@@ -5,7 +5,7 @@ summary: 'A speculative roadmap of how AI will dismantle the labor market and wh
 cover:
     image: "decouple.png"
     caption: "The Great Decoupling (by [Google Gemini](https://gemini.google.com/))"
-tags: ["AI", "economics", "future"]
+tags: ["ai", "economics", "future"]
 math: false
 ---
 

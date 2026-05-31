@@ -2,7 +2,7 @@
 date: '2023-02-14T10:59:00+08:00'
 title: '驾考科目二分项笔记'
 summary: '驾考科目二各分项操作步骤与注意事项'
-tags: ['driving license', 'driving test', 'notes']
+tags: ['driving-license', 'driving-test', 'notes']
 ---
 
 ## 启动→前进→倒车→停车

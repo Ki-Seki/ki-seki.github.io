@@ -8,7 +8,7 @@ cover:
   image: "Single_Step_Spec_Sample.png"
   caption: "Diagram of the probability transition process in speculative sampling."
 tags:
-  - speculative decoding
+  - speculative-decoding
   - math
 math: true
 ---
