@@ -14,9 +14,7 @@ tags:
 math: true
 ---
 
-<!-- TODO: 语法检查 -->
-
-> **Original post**: [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/) by Lilian Weng.
+This is a fully annotated guide to Lilian Weng's post [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). I added an extra section, [*Key Formulas at a Glance*](#key-formulas-at-a-glance), to summarize the key formulas in the post for quick reference.
 
 {{% admonition type="quote" title="Background" open=true %}}
 A couple of exciting news in Artificial Intelligence (AI) has just happened in recent years. AlphaGo defeated the best professional human player in the game of Go. Very soon the extended algorithm AlphaGo Zero beat AlphaGo by 100-0 without supervised learning on human knowledge. Top professional game players lost to the bot developed by OpenAI on DOTA2 1v1 competition. After knowing these, it is pretty hard not to be curious about the magic behind these algorithms --- Reinforcement Learning (RL). I'm writing this post to briefly go over the field. We will first introduce several fundamental concepts and then dive into classic approaches to solving RL problems. Hopefully, this post could be a good starting point for newbies, bridging the future study on the cutting-edge research.
@@ -1267,10 +1265,16 @@ And in auto-research and heuristic-learning paradigms, the exploration is implem
 
 ### Deadly Triad Issue
 
+{{% admonition type="quote" title="Deadly Triad Issue" open=true %}}
+
 We do seek the efficiency and flexibility of TD methods that involve bootstrapping. However, when off-policy, nonlinear function approximation, and bootstrapping are combined in one RL algorithm, the training could be unstable and hard to converge. This issue is known as the deadly triad (Sutton &amp; Barto, 2017). Many architectures using deep learning models were proposed to resolve the problem, including DQN to stabilize the training with experience replay and occasionally frozen target network.
+{{% /admonition %}}
+
+This [post](https://k4ntz.medium.com/why-is-there-a-deadly-triad-issue-and-how-to-handle-it-e1839b1a8b40) explains the deadly triad issue in more details.
 
 ## Case Study: AlphaGo Zero
 
+{{% admonition type="quote" title="AlphaGo Zero" open=true %}}
 The game of Go has been an extremely hard problem in the field of Artificial Intelligence for decades until recent years. AlphaGo and AlphaGo Zero are two programs developed by a team at DeepMind. Both involve deep Convolutional Neural Networks (CNN) and Monte Carlo Tree Search (MCTS) and both have been approved to achieve the level of professional human Go players. Different from AlphaGo that relied on supervised learning from expert human moves, AlphaGo Zero used only reinforcement learning and self-play without human knowledge beyond the basic rules.
 
 {{< media
@@ -1301,6 +1305,34 @@ where $c$ is a hyperparameter controlling the intensity of L2 penalty to avoid o
 AlphaGo Zero simplified AlphaGo by removing supervised learning and merging separated policy and value networks into one. It turns out that AlphaGo Zero achieved largely improved performance with a much shorter training time! I strongly recommend reading these two papers side by side and compare the difference, super fun.
 
 I know this is a long read, but hopefully worth it. If you notice mistakes and errors in this post, don’t hesitate to contact me at [lilian dot wengweng at gmail dot com]. See you in the next post! :)
+{{% /admonition %}}
+
+There is strong connection between UCT in MCTS and [UCB1 in MAB](https://ki-seki.github.io/posts/260430-multi-armed-bandit/#ucb1).
+
+UCT in MCTS:
+
+$$
+\mathrm{UCT}(v) = \frac{w_v}{n_v}+c\sqrt{\frac{\ln n_u}{n_v}}
+$$
+
+UCB1 in MAB:
+
+$$
+U_t(a) = \sqrt{\frac{2 \log t}{N_t(a)}} \text{  and  }
+a^{UCB1}_t = \arg\max_{a \in \mathcal{A}} Q(a) + \sqrt{\frac{2 \log t}{N_t(a)}}
+$$
+
+| Aspect                  | UCT in MCTS                                     | UCB1 in MAB                                 |
+| ----------------------- | ----------------------------------------------- | ------------------------------------------- |
+| General Form            | $\frac{w_v}{n_v} + c\sqrt{\frac{\ln n_u}{n_v}}$ | $Q(a) + \sqrt{\frac{2\ln t}{N_t(a)}}$       |
+| Exploitation Term       | $\frac{w_v}{n_v}$                               | $Q(a)$                                      |
+| Exploration Term        | $c\sqrt{\frac{\ln n_u}{n_v}}$                   | $\sqrt{\frac{2\ln t}{N_t(a)}}$              |
+| Denominator (visits)    | $n_v$                                           | $N_t(a)$                                    |
+| Logarithmic Growth Term | $\ln n_u$                                       | $\ln t$                                     |
+| Selection Rule          | Choose child with max UCT                       | Choose arm with max UCB1                    |
+| Theoretical Basis       | Hoeffding inequality                            | Hoeffding inequality                        |
+| Goal                    | Balance exploration/exploitation in tree search | Balance exploration/exploitation in bandits |
+| Exploration Coefficient | Tunable $c$                                     | Fixed $\sqrt{2}$                            |
 
 ## Key Formulas at a Glance
 
