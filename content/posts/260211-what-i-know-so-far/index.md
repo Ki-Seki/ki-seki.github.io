@@ -6,7 +6,7 @@ cover:
     image: "human_and_ai.png"
     caption: "快速的 AI 时代和温暖的人心（[Google Gemini](https://gemini.google.com/) 生成）"
 tags:
-  - AI
+  - ai
   - life
 ---
 

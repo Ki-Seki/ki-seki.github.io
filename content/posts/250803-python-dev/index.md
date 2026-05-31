@@ -1,7 +1,7 @@
 ---
 date: '2025-08-03T18:45:17+08:00'
 title: 'Python Package Design: API, Dependency and Code Structure'
-tags: ["python", "package", "API", "dependency", "structure"]
+tags: ["python", "package", "api", "dependency", "structure"]
 ---
 
 Python—a language well-suited for fast prototyping in the AI field—has become increasingly popular these days. Creating a well-designed Python package at the right time can make your work more impactful and more likely to be adopted.

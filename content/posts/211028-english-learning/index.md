@@ -2,7 +2,7 @@
 date: '2021-10-28T19:28:00+08:00'
 title: '英语学习方法论'
 summary: '应 @Duguce 的邀请，所复盘的大学英语自学心路历程'
-tags: ['English learning', 'methodology']
+tags: ['english-learning', 'methodology']
 ---
 
 注意：此内容长时间未更新，请斟酌使用文中提到的思路，方法。
