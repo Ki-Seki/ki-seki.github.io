@@ -3,7 +3,7 @@ date: '2026-05-31T22:20:53+08:00'
 title: 'Fully Annotated Guide to "A (Long) Peek into Reinforcement Learning"'
 author:
   - Shichao Song
-summary: 'This is a fully annotated guide to Lilian Weng's post A (Long) Peek into Reinforcement Learning.'
+summary: "This is a fully annotated guide to Lilian Weng's post A (Long) Peek into Reinforcement Learning."
 cover:
   image: "RL_illustration_new.png"
   caption: "Reinforcement Learning illustration (by [Google Gemini](https://gemini.google.com/))"
@@ -14,7 +14,9 @@ tags:
 math: true
 ---
 
-This is a fully annotated guide to Lilian Weng's post [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). I added an extra section, [*Key Formulas at a Glance*](#key-formulas-at-a-glance), to summarize the key formulas in the post for quick reference.
+This is a fully annotated guide to Lilian Weng's post [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). I also added an extra section, [*Key Formulas at a Glance*](#key-formulas-at-a-glance), to summarize the key formulas in the post for quick reference.
+
+I recommend reading the [Multi-armed Bandit post](https://ki-seki.github.io/posts/260430-multi-armed-bandit/) first if you are new to RL.
 
 {{% admonition type="quote" title="Background" open=true %}}
 A couple of exciting news in Artificial Intelligence (AI) has just happened in recent years. AlphaGo defeated the best professional human player in the game of Go. Very soon the extended algorithm AlphaGo Zero beat AlphaGo by 100-0 without supervised learning on human knowledge. Top professional game players lost to the bot developed by OpenAI on DOTA2 1v1 competition. After knowing these, it is pretty hard not to be curious about the magic behind these algorithms --- Reinforcement Learning (RL). I'm writing this post to briefly go over the field. We will first introduce several fundamental concepts and then dive into classic approaches to solving RL problems. Hopefully, this post could be a good starting point for newbies, bridging the future study on the cutting-edge research.
