@@ -2,7 +2,7 @@
 date: '2021-08-17T16:44:00+08:00'
 title: 'Python 爬虫学习笔记'
 summary: '在慕课网学习 Scrapy 时所作的笔记，后来不断发展，内容更丰富，不仅限于 Scrapy 的内容。'
-tags: ['Python', 'Scrapy', 'web crawling']
+tags: ['python', 'scrapy', 'web-crawling']
 ---
 
 ## 爬虫相关基础知识

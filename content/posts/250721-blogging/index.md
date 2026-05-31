@@ -1,7 +1,7 @@
 ---
 date: "2025-07-21T01:59:43+08:00"
 title: "Why I Started Blogging Again"
-tags: ["blog", "academia", "AI"]
+tags: ["blog", "academia", "ai"]
 math: false
 ---
 
