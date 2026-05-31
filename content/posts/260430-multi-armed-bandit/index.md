@@ -7,7 +7,7 @@ summary: "The multi-armed bandit problem is a classic exploration–exploitation
 cover:
   image: "multi-armed-bandit.png"
   caption: "Multi-armed bandit (by [ChatGPT Images 2.0](https://openai.com/index/introducing-chatgpt-images-2-0/))"
-tags: ["exploration", "reinforcement-learning", "math", "multi-armed-bandit"]
+tags: ["exploration", "reinforcement-learning", "math", "multi-armed-bandit", "lilian-weng"]
 math: true
 ---
 

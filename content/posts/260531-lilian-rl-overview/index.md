@@ -3,7 +3,7 @@ date: '2026-05-31T22:20:53+08:00'
 title: 'Fully Annotated Guide to "A (Long) Peek into Reinforcement Learning"'
 author:
   - Shichao Song
-summary: 'This is a fully annotated guide to Lilian Weng’s post A (Long) Peek into Reinforcement Learning.'
+summary: "This is a fully annotated guide to Lilian Weng's post A (Long) Peek into Reinforcement Learning."
 cover:
   image: "RL_illustration_new.png"
   caption: "Reinforcement Learning illustration (by [Google Gemini](https://gemini.google.com/))"
@@ -14,7 +14,9 @@ tags:
 math: true
 ---
 
-This is a fully annotated guide to Lilian Weng's post [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). I added an extra section, [*Key Formulas at a Glance*](#key-formulas-at-a-glance), to summarize the key formulas in the post for quick reference.
+This is a fully annotated guide to Lilian Weng's post [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). I also added an extra section, *Key Formulas at a Glance*, to summarize the key formulas in the post for quick reference.
+
+I recommend reading the [Multi-armed Bandit post](https://ki-seki.github.io/posts/260430-multi-armed-bandit/) first if you are new to RL.
 
 {{% admonition type="quote" title="Background" open=true %}}
 A couple of exciting news in Artificial Intelligence (AI) has just happened in recent years. AlphaGo defeated the best professional human player in the game of Go. Very soon the extended algorithm AlphaGo Zero beat AlphaGo by 100-0 without supervised learning on human knowledge. Top professional game players lost to the bot developed by OpenAI on DOTA2 1v1 competition. After knowing these, it is pretty hard not to be curious about the magic behind these algorithms --- Reinforcement Learning (RL). I'm writing this post to briefly go over the field. We will first introduce several fundamental concepts and then dive into classic approaches to solving RL problems. Hopefully, this post could be a good starting point for newbies, bridging the future study on the cutting-edge research.
@@ -118,8 +120,6 @@ src="dep_structure.png"
 caption="Two common types of dependency structures in MDP episodes."
 >}}
 
-
-
 {{% admonition type="quote" title="Common Terms" open=true %}}
 Terms you will encounter a lot when diving into different categories of RL algorithms:
 
@@ -142,7 +142,7 @@ $$
 P(s', r \vert s, a)  = \mathbb{P} [S_{t+1} = s', R_{t+1} = r \vert S_t = s, A_t = a]
 $$
 
-Thus the state-transition function can be defined as a function of $P(s’, r \vert s, a)$:
+Thus the state-transition function can be defined as a function of $P(s', r \vert s, a)$:
 
 $$
 P_{ss'}^a = P(s' \vert s, a)  = \mathbb{P} [S_{t+1} = s' \vert S_t = s, A_t = a] = \sum_{r \in \mathcal{R}} P(s', r \vert s, a)
@@ -254,7 +254,7 @@ $$
 Q_{\pi}(s, a) = \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]
 $$
 
-Additionally, since we follow the target policy $\pi$, we can make use of the probility distribution over possible actions and the Q-values to recover the state-value:
+Additionally, since we follow the target policy $\pi$, we can make use of the probability distribution over possible actions and the Q-values to recover the state-value:
 
 $$
 V_{\pi}(s) = \sum_{a \in \mathcal{A}} Q_{\pi}(s, a) \pi(a \vert s)
@@ -423,7 +423,6 @@ $$
 \end{aligned}
 $$
 
-
 #### Bellman Optimality Equations
 
 {{% admonition type="quote" title="Bellman Optimality Equations" open=true %}}
@@ -440,7 +439,7 @@ $$
 
 Unsurprisingly they look very similar to Bellman expectation equations.
 
-If we have complete information of the environment, this turns into a planning problem, solvable by DP. Unfortunately, in most scenarios, we do not know $P_{ss’}^a$ or $R(s, a)$, so we cannot solve MDPs by directly applying Bellmen equations, but it lays the theoretical foundation for many RL algorithms.
+If we have complete information of the environment, this turns into a planning problem, solvable by DP. Unfortunately, in most scenarios, we do not know $P_{ss'}^a$ or $R(s, a)$, so we cannot solve MDPs by directly applying Bellmen equations, but it lays the theoretical foundation for many RL algorithms.
 {{% /admonition %}}
 
 The key equation is the Bellman optimality equation for Q-value:
@@ -474,7 +473,7 @@ $$
 
 #### Policy Improvement
 
-Based on the value functions, Policy Improvement generates a better policy $\pi’ \geq \pi$ by acting greedily.
+Based on the value functions, Policy Improvement generates a better policy $\pi' \geq \pi$ by acting greedily.
 
 $$
 Q_\pi(s, a)
@@ -495,7 +494,7 @@ $$
 
 In GPI, the value function is approximated repeatedly to be closer to the true value of the current policy and in the meantime, the policy is improved repeatedly to approach optimality. This policy iteration process works and always converges to the optimality, but why this is the case?
 
-Say, we have a policy $\pi$ and then generate an improved version $\pi’$ by greedily taking actions, $\pi’(s) = \arg\max_{a \in \mathcal{A}} Q_\pi(s, a)$. The value of this improved $\pi’$ is guaranteed to be better because:
+Say, we have a policy $\pi$ and then generate an improved version $\pi'$ by greedily taking actions, $\pi'(s) = \arg\max_{a \in \mathcal{A}} Q_\pi(s, a)$. The value of this improved $\pi'$ is guaranteed to be better because:
 
 $$
 \begin{aligned}
@@ -633,7 +632,7 @@ $$\begin{array}{l}
 ### Temporal-Difference Learning
 
 {{% admonition type="quote" title="Background" open=true %}}
-Similar to Monte-Carlo methods, Temporal-Difference (TD) Learning is model-free and learns from episodes of experience. However, TD learning can learn from incomplete episodes and hence we don’t need to track the episode up to termination. TD learning is so important that Sutton &amp; Barto (2017) in their RL book describes it as “one idea … central and novel to reinforcement learning”.
+Similar to Monte-Carlo methods, Temporal-Difference (TD) Learning is model-free and learns from episodes of experience. However, TD learning can learn from incomplete episodes and hence we don't need to track the episode up to termination. TD learning is so important that Sutton &amp; Barto (2017) in their RL book describes it as “one idea … central and novel to reinforcement learning”.
 {{% /admonition %}}
 
 #### Bootstrapping
@@ -666,7 +665,7 @@ Similarly, for action-value estimation:
 
 $$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t))$$
 
-Next, let’s dig into the fun part on how to learn optimal policy in TD learning (aka “TD control”). Be prepared, you are gonna see many famous names of classic algorithms in this section.
+Next, let's dig into the fun part on how to learn optimal policy in TD learning (aka “TD control”). Be prepared, you are gonna see many famous names of classic algorithms in this section.
 {{% /admonition %}}
 
 MC state value estimation:
@@ -714,7 +713,6 @@ In SARSA, behavior policy (sampling action) = target policy (learning Q values):
 $$
 \pi(a|s)=\epsilon\frac{1}{|\mathcal{A}|} + (1-\epsilon)\,\mathbf{1}[a=\arg\max_{a'}Q(s,a')]
 $$
-
 
 #### Q-Learning: Off-policy TD control
 
@@ -806,7 +804,7 @@ $$
 {{% admonition type="quote" title="Generalized n-step TD learning" open=true %}}
 In the previous section on value estimation in TD learning, we only trace one step further down the action chain when calculating the TD target. One can easily extend it to take multiple steps to estimate the return.
 
-Let’s label the estimated return following $n$ steps as $G_t^{(n)}$, $n = 1, \dots, \infty$, then:
+Let's label the estimated return following $n$ steps as $G_t^{(n)}$, $n = 1, \dots, \infty$, then:
 
 | $n$ | $G_t^{(n)}$ | Notes |
 |-----|-------------|-------|
@@ -888,11 +886,10 @@ So:
 > **Forward view defines what TD(λ) should learn.
 > Backward view implements the same weights efficiently.**
 
-
 ### Policy Gradient
 
 {{% admonition type="quote" title="Learn the Policy Directly" open=true %}}
-All the methods we have introduced above aim to learn the state/action value function and then to select actions accordingly. Policy Gradient methods instead learn the policy directly with a parameterized function respect to $\theta$, $\pi(a|s; \theta)$. Let’s define the reward function (opposite of loss function) as the expected return and train the algorithm with the goal to maximize the reward function. My next post described why the policy gradient theorem works (proof) and introduced a number of policy gradient algorithms.
+All the methods we have introduced above aim to learn the state/action value function and then to select actions accordingly. Policy Gradient methods instead learn the policy directly with a parameterized function respect to $\theta$, $\pi(a|s; \theta)$. Let's define the reward function (opposite of loss function) as the expected return and train the algorithm with the goal to maximize the reward function. My next post described why the policy gradient theorem works (proof) and introduced a number of policy gradient algorithms.
 {{% /admonition %}}
 
 - Value-based RL: learn the value function $V$ or $Q$, and select actions indirectly through them.
@@ -966,7 +963,6 @@ a \in \mathbb{R}^7
 - Stable and standard for continuous control.
 
 → The dominant approach for robotic manipulators.
-
 
 #### Policy Gradient Theorem
 
@@ -1055,15 +1051,15 @@ If the value function is learned in addition to the policy, we would get Actor-C
 - **Critic**: updates value function parameters $w$ and depending on the algorithm it could be action-value $Q(a|s; w)$ or state-value $V(s; w)$.
 - **Actor**: updates policy parameters $\theta$, in the direction suggested by the critic, $\pi(a|s; \theta)$.
 
-Let’s see how it works in an action-value actor-critic algorithm.
+Let's see how it works in an action-value actor-critic algorithm.
 
 1. Initialize $s, \theta, w$ at random; sample $a \sim \pi(a|s; \theta)$.
 2. For $t = 1 \dots T$:
-   - Sample reward $r_t \sim R(s, a)$ and next state $s’ \sim P(s’|s, a)$.
-   - Then sample the next action $a’ \sim \pi(a’|s’; \theta)$.
+   - Sample reward $r_t \sim R(s, a)$ and next state $s' \sim P(s'|s, a)$.
+   - Then sample the next action $a' \sim \pi(a'|s'; \theta)$.
    - Update policy parameters: $\theta \leftarrow \theta + \alpha_\theta Q(s, a; w) \nabla_\theta \ln \pi(a|s; \theta)$.
-   - Compute the correction for action-value at time $t$: $G_{t:t+1} = r_t + \gamma Q(s’, a’; w) - Q(s, a; w)$ and use it to update value function parameters: $w \leftarrow w + \alpha_w G_{t:t+1} \nabla_w Q(s, a; w)$.
-   - Update $a \leftarrow a’$ and $s \leftarrow s’$.
+   - Compute the correction for action-value at time $t$: $G_{t:t+1} = r_t + \gamma Q(s', a'; w) - Q(s, a; w)$ and use it to update value function parameters: $w \leftarrow w + \alpha_w G_{t:t+1} \nabla_w Q(s, a; w)$.
+   - Update $a \leftarrow a'$ and $s \leftarrow s'$.
 
 $\alpha_\theta$ and $\alpha_w$ are two learning rates for policy and value function parameter updates, respectively.
 {{% /admonition %}}
@@ -1081,25 +1077,25 @@ The loss function for state-value is to minimize the mean squared error, $\mathc
 
 Here is the algorithm outline:
 
-We have global parameters, $\theta$ and $w$; similar thread-specific parameters, $\theta’$ and $w’$.
+We have global parameters, $\theta$ and $w$; similar thread-specific parameters, $\theta'$ and $w'$.
 Initialize the time step $t = 1$
 While $T \leq T_{MAX}$:
 
 1. Reset gradient: $d\theta = 0$ and $dw = 0$.
-2. Synchronize thread-specific parameters with global ones: $\theta’ = \theta$ and $w’ = w$.
+2. Synchronize thread-specific parameters with global ones: $\theta' = \theta$ and $w' = w$.
 3. $t_{start} = t$ and get $s_t$.
 4. While ($s_t \neq$ TERMINAL) and ($t - t_{start} \leq t_{max}$):
-   - Pick the action $a_t \sim \pi(a_t|s_t; \theta’)$ and receive a new reward $r_t$ and a new state $s_{t+1}$.
+   - Pick the action $a_t \sim \pi(a_t|s_t; \theta')$ and receive a new reward $r_t$ and a new state $s_{t+1}$.
    - Update $t = t + 1$ and $T = T + 1$.
 5. Initialize the variable that holds the return estimation
 $$R = \begin{cases}
 0 & \text{if } s_t \text{ is TERMINAL} \\
-V(s_t; w’) & \text{otherwise}
+V(s_t; w') & \text{otherwise}
 \end{cases}$$
 6. For $i = t - 1, \dots, t_{start}$:
    - $R \leftarrow r_i + \gamma R$; here $R$ is a MC measure of $G_i$.
-   - Accumulate gradients w.r.t. $\theta’$: $d\theta \leftarrow d\theta + \nabla_{\theta’} \log \pi(a_i|s_i; \theta’)(R - V(s_i; w’))$;
-   - Accumulate gradients w.r.t. $w’$: $dw \leftarrow dw + \nabla_{w’}(R - V(s_i; w’))^2$.
+   - Accumulate gradients w.r.t. $\theta'$: $d\theta \leftarrow d\theta + \nabla_{\theta'} \log \pi(a_i|s_i; \theta')(R - V(s_i; w'))$;
+   - Accumulate gradients w.r.t. $w'$: $dw \leftarrow dw + \nabla_{w'}(R - V(s_i; w'))^2$.
 
 7. Update synchronously $\theta$ using $d\theta$, and $w$ using $dw$.
 
@@ -1114,7 +1110,7 @@ caption="A3C parallel training ([source](https://awjuliani.medium.com/simple-rei
 ### Evolution Strategies
 
 {{% admonition type="quote" title="Genetic Algorithm" open=true %}}
-Evolution Strategies (ES) is a type of model-agnostic optimization approach. It learns the optimal solution by imitating Darwin’s theory of the evolution of species by natural selection. Two prerequisites for applying ES: (1) our solutions can freely interact with the environment and see whether they can solve the problem; (2) we are able to compute a fitness score of how good each solution is. We don’t have to know the environment configuration to solve the problem.
+Evolution Strategies (ES) is a type of model-agnostic optimization approach. It learns the optimal solution by imitating Darwin's theory of the evolution of species by natural selection. Two prerequisites for applying ES: (1) our solutions can freely interact with the environment and see whether they can solve the problem; (2) we are able to compute a fitness score of how good each solution is. We don't have to know the environment configuration to solve the problem.
 
 Say, we start with a population of random solutions. All of them are capable of interacting with the environment and only candidates with high fitness scores can survive (only the fittest can survive in a competition for limited resources). A new generation is then created by recombining the settings (gene mutation) of high-fitness survivors. This process is repeated until the new solutions are good enough.
 {{% /admonition %}}
@@ -1122,7 +1118,7 @@ Say, we start with a population of random solutions. All of them are capable of 
 Randomly generate policies! This is just like the [auto-research](https://github.com/karpathy/autoresearch) and [heuristic-learning](https://trinkle23897.github.io/learning-beyond-gradients/) paradigms in recent days.
 
 {{% admonition type="quote" title="Gradient calculation" open=true %}}
-Very different from the popular MDP-based approaches as what we have introduced above, ES aims to learn the policy parameter $\theta$ without value approximation. Let’s assume the distribution over the parameter $\theta$ is an isotropic multivariate Gaussian with mean $\mu$ and fixed covariance $\sigma^2 I$. The gradient of $F(\theta)$ is calculated:
+Very different from the popular MDP-based approaches as what we have introduced above, ES aims to learn the policy parameter $\theta$ without value approximation. Let's assume the distribution over the parameter $\theta$ is an isotropic multivariate Gaussian with mean $\mu$ and fixed covariance $\sigma^2 I$. The gradient of $F(\theta)$ is calculated:
 
 $$
 \begin{aligned}
@@ -1282,7 +1278,7 @@ src="go_config.png"
 caption="AlphaGo Zero Go board configuration"
 >}}
 
-With all the knowledge of RL above, let’s take a look at how AlphaGo Zero works. The main component is a deep CNN over the game board configuration (precisely, a ResNet with batch normalization and ReLU). This network outputs two values:
+With all the knowledge of RL above, let's take a look at how AlphaGo Zero works. The main component is a deep CNN over the game board configuration (precisely, a ResNet with batch normalization and ReLU). This network outputs two values:
 
 $(p, v) = f_\theta(s)$
 
@@ -1304,7 +1300,7 @@ where $c$ is a hyperparameter controlling the intensity of L2 penalty to avoid o
 
 AlphaGo Zero simplified AlphaGo by removing supervised learning and merging separated policy and value networks into one. It turns out that AlphaGo Zero achieved largely improved performance with a much shorter training time! I strongly recommend reading these two papers side by side and compare the difference, super fun.
 
-I know this is a long read, but hopefully worth it. If you notice mistakes and errors in this post, don’t hesitate to contact me at [lilian dot wengweng at gmail dot com]. See you in the next post! :)
+I know this is a long read, but hopefully worth it. If you notice mistakes and errors in this post, don't hesitate to contact me at [lilian dot wengweng at gmail dot com]. See you in the next post! :)
 {{% /admonition %}}
 
 There is strong connection between UCT in MCTS and [UCB1 in MAB](https://ki-seki.github.io/posts/260430-multi-armed-bandit/#ucb1).
@@ -1341,7 +1337,7 @@ $$
 <tbody>
 <!-- Fundamental Definitions -->
 <tr><td colspan="2"><strong>Fundamental Definitions</strong></td></tr>
-<tr><td>Transition Probability</td><td>$P(s’, r \vert s, a) = \mathbb{P} [S_{t+1} = s’, R_{t+1} = r \vert S_t = s, A_t = a]$</td></tr>
+<tr><td>Transition Probability</td><td>$P(s', r \vert s, a) = \mathbb{P} [S_{t+1} = s', R_{t+1} = r \vert S_t = s, A_t = a]$</td></tr>
 <tr><td>Discounted Return</td><td>$G_t = R_{t+1} + \gamma R_{t+2} + \dots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}$</td></tr>
 <tr><td>State-Value Function</td><td>$V_{\pi}(s) = \mathbb{E}_{\pi}[G_t \vert S_t = s]$</td></tr>
 <tr><td>Action-Value Function</td><td>$Q_{\pi}(s, a) = \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]$</td></tr>
@@ -1349,14 +1345,14 @@ $$
 <tr><td>Optimal Value Functions</td><td>$V_{*}(s) = \max_{\pi} V_{\pi}(s), \quad Q_{*}(s, a) = \max_{\pi} Q_{\pi}(s, a)$</td></tr>
 <!-- Bellman Equations -->
 <tr><td colspan="2"><strong>Bellman Equations</strong></td></tr>
-<tr><td>Bellman Expectation for $V_\pi$</td><td>$V_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a \vert s) \big( R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a V_{\pi} (s’) \big)$</td></tr>
-<tr><td>Bellman Expectation for $Q_\pi$</td><td>$Q_{\pi}(s, a) = R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a \sum_{a’ \in \mathcal{A}} \pi(a’ \vert s’) Q_{\pi} (s’, a’)$</td></tr>
-<tr><td>Bellman Optimality for $V_*$</td><td>$V_{*}(s) = \max_{a \in \mathcal{A}} \big( R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a V_{*}(s’) \big)$</td></tr>
-<tr><td>Bellman Optimality for $Q_*$</td><td>$Q_{*}(s, a) = R(s, a) + \gamma \sum_{s’ \in \mathcal{S}} P_{ss’}^a \max_{a’ \in \mathcal{A}} Q_{*}(s’, a’)$</td></tr>
+<tr><td>Bellman Expectation for $V_\pi$</td><td>$V_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a \vert s) \big( R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a V_{\pi} (s') \big)$</td></tr>
+<tr><td>Bellman Expectation for $Q_\pi$</td><td>$Q_{\pi}(s, a) = R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a \sum_{a' \in \mathcal{A}} \pi(a' \vert s') Q_{\pi} (s', a')$</td></tr>
+<tr><td>Bellman Optimality for $V_*$</td><td>$V_{*}(s) = \max_{a \in \mathcal{A}} \big( R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a V_{*}(s') \big)$</td></tr>
+<tr><td>Bellman Optimality for $Q_*$</td><td>$Q_{*}(s, a) = R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a \max_{a' \in \mathcal{A}} Q_{*}(s', a')$</td></tr>
 <!-- Dynamic Programming -->
 <tr><td colspan="2"><strong>Dynamic Programming</strong></td></tr>
-<tr><td>Policy Evaluation</td><td>$V_{t+1}(s) = \sum_a \pi(a \vert s) \sum_{s’, r} P(s’, r \vert s, a) \big(r + \gamma V_t(s’)\big)$</td></tr>
-<tr><td>Policy Improvement</td><td>$Q_\pi(s, a) = \sum_{s’, r} P(s’, r \vert s, a) \big(r + \gamma V_\pi(s’)\big)$</td></tr>
+<tr><td>Policy Evaluation</td><td>$V_{t+1}(s) = \sum_a \pi(a \vert s) \sum_{s', r} P(s', r \vert s, a) \big(r + \gamma V_t(s')\big)$</td></tr>
+<tr><td>Policy Improvement</td><td>$Q_\pi(s, a) = \sum_{s', r} P(s', r \vert s, a) \big(r + \gamma V_\pi(s')\big)$</td></tr>
 <!-- Monte-Carlo Methods -->
 <tr><td colspan="2"><strong>Monte-Carlo Methods</strong></td></tr>
 <tr><td>MC State-Value Estimate</td><td>$V(s) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s] \, G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s]}$</td></tr>
@@ -1366,7 +1362,7 @@ $$
 <tr><td>TD(0) Value Update</td><td>$V(S_t) \leftarrow V(S_t) + \alpha \big(R_{t+1} + \gamma V(S_{t+1}) - V(S_t)\big)$</td></tr>
 <tr><td>SARSA (On-Policy)</td><td>$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \big(R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)\big)$</td></tr>
 <tr><td>Q-Learning (Off-Policy)</td><td>$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \big(R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, a) - Q(S_t, A_t)\big)$</td></tr>
-<tr><td>DQN Loss</td><td>$\mathcal{L}(\theta) = \mathbb{E}_{(s, a, r, s’) \sim U(D)} \Big[ \big( r + \gamma \max_{a’} Q(s’, a’; \theta^{-}) - Q(s, a; \theta) \big)^2 \Big]$</td></tr>
+<tr><td>DQN Loss</td><td>$\mathcal{L}(\theta) = \mathbb{E}_{(s, a, r, s') \sim U(D)} \Big[ \big( r + \gamma \max_{a'} Q(s', a'; \theta^{-}) - Q(s, a; \theta) \big)^2 \Big]$</td></tr>
 <tr><td>$n$-Step Return</td><td>$G_t^{(n)} = R_{t+1} + \gamma R_{t+2} + \dots + \gamma^{n-1} R_{t+n} + \gamma^n V(S_{t+n})$</td></tr>
 <tr><td>$\lambda$-Return</td><td>$G_t^{\lambda} = (1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_t^{(n)}$</td></tr>
 <!-- Policy Gradient Methods -->
@@ -1374,8 +1370,8 @@ $$
 <tr><td>Policy Gradient Theorem</td><td>$\nabla \mathcal{J}(\theta) = \mathbb{E}_{\pi_\theta}[\nabla \ln \pi(a \vert s, \theta) \, Q_\pi(s, a)]$</td></tr>
 <tr><td>REINFORCE Update</td><td>$\theta \leftarrow \theta + \alpha \gamma^t G_t \nabla \ln \pi(A_t \vert S_t, \theta)$</td></tr>
 <tr><td>Actor-Critic Policy Update</td><td>$\theta \leftarrow \theta + \alpha_\theta \, Q(s, a; w) \, \nabla_\theta \ln \pi(a \vert s; \theta)$</td></tr>
-<tr><td>Actor-Critic TD Correction</td><td>$G_{t:t+1} = r_t + \gamma Q(s’, a’; w) - Q(s, a; w)$</td></tr>
-<tr><td>A3C Return Estimation</td><td>$R = \begin{cases} 0 & \text{if } s_t \text{ is TERMINAL} \\ V(s_t; w’) & \text{otherwise} \end{cases}$</td></tr>
+<tr><td>Actor-Critic TD Correction</td><td>$G_{t:t+1} = r_t + \gamma Q(s', a'; w) - Q(s, a; w)$</td></tr>
+<tr><td>A3C Return Estimation</td><td>$R = \begin{cases} 0 & \text{if } s_t \text{ is TERMINAL} \\ V(s_t; w') & \text{otherwise} \end{cases}$</td></tr>
 <tr><td>ES Gradient</td><td>$\nabla_\theta \mathbb{E}_{\epsilon \sim N(0, I)} F(\theta + \sigma \epsilon) = \frac{1}{\sigma} \mathbb{E}_{\epsilon \sim N(0, I)} [F(\theta + \sigma \epsilon) \, \epsilon]$</td></tr>
 <!-- Case Study -->
 <tr><td colspan="2"><strong>Case Study: AlphaGo Zero</strong></td></tr>

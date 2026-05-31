@@ -10,7 +10,7 @@ summary: 'An agentic DOM workspace where an LLM has full read/write/delete privi
 cover:
     image: "process.png"
     caption: "The Ouroboros Process (by [Google Gemini](https://gemini.google.com/))"
-tags: ["agent", "AI", "web", "self-modifying", "single-file", "HTML application"]
+tags: ["agent", "ai", "web", "self-modifying", "single-file", "html-application"]
 math: false
 ---
 

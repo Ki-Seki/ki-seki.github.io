@@ -2,7 +2,7 @@
 date: '2021-02-05T22:57:00+08:00'
 title: 'C/C++ 语言算法与数据结构学习笔记'
 summary: '给自己备考用的 C/C++ 语言算法与数据结构学习笔记。从 https://github.com/Ki-Seki/algorithm 迁移而来。'
-tags: ['C++', 'data structure', 'algorithm']
+tags: ['c++', 'data-structure', 'algorithm']
 math: true
 ---
 
