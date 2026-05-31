@@ -1,9 +1,9 @@
 ---
-date: '2026-05-09T00:00:00+00:00'
+date: '2026-05-31T22:20:53+08:00'
 title: 'Fully Annotated Guide to "A (Long) Peek into Reinforcement Learning"'
 author:
   - Shichao Song
-summary: 'This is a fully annotated guide to Lilian Weng’s post A (Long) Peek into Reinforcement Learning. It covers the key concepts, mathematical formulations, and common approaches in reinforcement learning (RL). The guide is structured to help readers understand the fundamental ideas and algorithms in RL, with detailed explanations and examples.'
+summary: 'This is a fully annotated guide to Lilian Weng’s post A (Long) Peek into Reinforcement Learning.'
 cover:
   image: "RL_illustration_new.png"
   caption: "Reinforcement Learning illustration (by [Google Gemini](https://gemini.google.com/))"
