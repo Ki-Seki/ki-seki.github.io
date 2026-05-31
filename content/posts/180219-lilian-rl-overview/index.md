@@ -1060,7 +1060,7 @@ Let’s see how it works in an action-value actor-critic algorithm.
 1. Initialize $s, \theta, w$ at random; sample $a \sim \pi(a|s; \theta)$.
 2. For $t = 1 \dots T$:
    - Sample reward $r_t \sim R(s, a)$ and next state $s’ \sim P(s’|s, a)$.
-   - Then sample the next action $a’ \sim \pi(s’, a’; \theta)$.
+   - Then sample the next action $a’ \sim \pi(a’|s’; \theta)$.
    - Update policy parameters: $\theta \leftarrow \theta + \alpha_\theta Q(s, a; w) \nabla_\theta \ln \pi(a|s; \theta)$.
    - Compute the correction for action-value at time $t$: $G_{t:t+1} = r_t + \gamma Q(s’, a’; w) - Q(s, a; w)$ and use it to update value function parameters: $w \leftarrow w + \alpha_w G_{t:t+1} \nabla_w Q(s, a; w)$.
    - Update $a \leftarrow a’$ and $s \leftarrow s’$.
