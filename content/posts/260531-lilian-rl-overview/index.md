@@ -14,7 +14,7 @@ tags:
 math: true
 ---
 
-This is a fully annotated guide to Lilian Weng's post [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). I also added an extra section, [*Key Formulas at a Glance*](#key-formulas-at-a-glance), to summarize the key formulas in the post for quick reference.
+This is a fully annotated guide to Lilian Weng's post [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). I also added an extra section, *Key Formulas at a Glance*, to summarize the key formulas in the post for quick reference.
 
 I recommend reading the [Multi-armed Bandit post](https://ki-seki.github.io/posts/260430-multi-armed-bandit/) first if you are new to RL.
 
@@ -119,8 +119,6 @@ Why is the index of reward $t+1$?
 src="dep_structure.png"
 caption="Two common types of dependency structures in MDP episodes."
 >}}
-
-
 
 {{% admonition type="quote" title="Common Terms" open=true %}}
 Terms you will encounter a lot when diving into different categories of RL algorithms:
@@ -425,7 +423,6 @@ $$
 \end{aligned}
 $$
 
-
 #### Bellman Optimality Equations
 
 {{% admonition type="quote" title="Bellman Optimality Equations" open=true %}}
@@ -717,7 +714,6 @@ $$
 \pi(a|s)=\epsilon\frac{1}{|\mathcal{A}|} + (1-\epsilon)\,\mathbf{1}[a=\arg\max_{a'}Q(s,a')]
 $$
 
-
 #### Q-Learning: Off-policy TD control
 
 {{% admonition type="quote" title="Q-Learning" open=true %}}
@@ -890,7 +886,6 @@ So:
 > **Forward view defines what TD(λ) should learn.
 > Backward view implements the same weights efficiently.**
 
-
 ### Policy Gradient
 
 {{% admonition type="quote" title="Learn the Policy Directly" open=true %}}
@@ -968,7 +963,6 @@ a \in \mathbb{R}^7
 - Stable and standard for continuous control.
 
 → The dominant approach for robotic manipulators.
-
 
 #### Policy Gradient Theorem
 
