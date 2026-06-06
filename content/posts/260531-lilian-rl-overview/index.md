@@ -448,7 +448,27 @@ $$
 Q_*(s, a) = R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a \max_{a' \in \mathcal{A}} Q_*(s', a')
 $$
 
-It connects the environment (transition probability and reward) with the optimal action-value function.
+Because it connects the environment (transition probability and reward), the optimal action-value function and the optimal action selection process.
+
+---
+
+Why is the Bellman optimality equation for Q-value the way it is? Let's derive it step by step.
+
+Firstly, if we select the optimal action with 100% probability, then the state-value function is the same as the action-value function:
+
+$$V_{*}(s) = \max_{a \in \mathcal{A}} Q_*(s, a)$$
+
+Let's recall the Q-value decomposition in [Bellman Expectation Equations](#bellman-expectation-equations):
+
+$$Q(s, a) = R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a V (s')$$
+
+So we have:
+
+$$Q_*(s, a) = R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a V_* (s')$$
+
+Then we can substitute $V_*(s')$ with $\max_{a' \in \mathcal{A}} Q_*(s', a')$:
+
+$$\boxed{Q_*(s, a) = R(s, a) + \gamma \sum_{s' \in \mathcal{S}} P_{ss'}^a \max_{a' \in \mathcal{A}} Q_*(s', a')}$$
 
 ## Common Approaches
 
