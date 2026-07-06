@@ -1585,12 +1585,17 @@ function renderProgress() {
     label.textContent = '';
     return;
   }
-  // Estimate total steps based on visible questions
-  const totalQuestions = QUESTIONS.length;
+
+  const visibleQuestions = QUESTIONS.filter(q => {
+    if (!q.dependsOn) return true;
+    return Object.entries(q.dependsOn).every(([depQ, depVal]) => state.selections[depQ] === depVal);
+  }).length;
+
   const answered = Object.keys(state.selections).length;
-  const pct = Math.min(Math.round((answered / totalQuestions) * 100), 100);
+  const denom = Math.max(visibleQuestions, 1);
+  const pct = Math.min(Math.round((answered / denom) * 100), 100);
   fill.style.width = pct + '%';
-  label.textContent = `已完成 ${answered}/${totalQuestions} 步`;
+  label.textContent = `已完成 ${answered}/${denom} 步`;
 }
 
 function renderQuestion(container, q) {
