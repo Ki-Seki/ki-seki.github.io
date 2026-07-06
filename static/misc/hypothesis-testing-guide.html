@@ -1,1831 +1,1219 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>统计学假设检验 · 选择向导</title>
-<style>
-/* ========== 设计系统 / Design Tokens ========== */
-:root {
-  --bg-page: #F0F5FA;
-  --bg-card: #FFFFFF;
-  --bg-card-alt: #F8FAFC;
-  --bg-option: #F0F4F8;
-  --bg-option-hover: #DBE9F7;
-  --bg-selected: #E0F2FE;
-  --bg-accent-light: #EFF6FF;
-  --primary: #1E3A5F;
-  --primary-light: #2563EB;
-  --teal: #0891B2;
-  --emerald: #059669;
-  --amber: #D97706;
-  --rose: #E11D48;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
-  --border: #E2E8F0;
-  --border-light: #F1F5F9;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.04);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-xs: 6px;
-  --font: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-  --font-mono: "SF Mono", "Fira Code", "Consolas", monospace;
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>统计学假设检验速查工具</title>
+  <style>
+    :root {
+      --bg: #f5faf8;
+      --panel: #ffffff;
+      --ink: #18201d;
+      --muted: #62716b;
+      --line: #dbe7e2;
+      --accent: #247f73;
+      --accent-2: #2563eb;
+      --accent-3: #b45309;
+      --soft: #e8f5f1;
+      --soft-blue: #eaf2ff;
+      --soft-warm: #fff4df;
+      --danger: #b42318;
+      --shadow: 0 18px 50px rgba(20, 42, 36, 0.08);
+      --radius: 8px;
+    }
 
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .question-card, .result-section { animation: none !important; }
-  .progress-fill, .concepts-content, .snackbar { transition: none !important; }
-}
-body {
-  font-family: var(--font);
-  background: var(--bg-page);
-  color: var(--text-primary);
-  line-height: 1.7;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+    * { box-sizing: border-box; }
 
-/* ========== 布局 ========== */
-.wrapper { max-width: 880px; margin: 0 auto; padding: 24px 20px 60px; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(36, 127, 115, 0.12), transparent 32rem),
+        linear-gradient(180deg, #f5faf8 0%, #eef6f3 100%);
+      line-height: 1.65;
+    }
 
-/* ========== 标题区 ========== */
-header {
-  text-align: center;
-  padding: 32px 0 28px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 28px;
-}
-header h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--primary);
-  letter-spacing: -0.01em;
-}
-header h1 span { color: var(--teal); }
-header p {
-  color: var(--text-secondary);
-  font-size: 15px;
-  margin-top: 8px;
-  max-width: 520px;
-  margin-left: auto;
-  margin-right: auto;
-}
+    button, input, select { font: inherit; }
 
-/* ========== 面包屑 / Breadcrumb ========== */
-.breadcrumb-wrap {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 12px 20px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  min-height: 48px;
-}
-.breadcrumb-wrap .bc-none {
-  color: var(--text-muted);
-  font-size: 13px;
-}
-.bc-step {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--text-secondary);
-}
-.bc-step .bc-link {
-  color: var(--primary-light);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: var(--radius-xs);
-  transition: var(--transition);
-  border: none;
-  background: none;
-  font: inherit;
-  font-size: 13px;
-}
-.bc-step .bc-link:hover { background: var(--bg-accent-light); color: var(--primary); }
-.bc-step .bc-current {
-  font-weight: 600;
-  color: var(--primary);
-  padding: 2px 6px;
-  background: var(--bg-accent-light);
-  border-radius: var(--radius-xs);
-}
-.bc-arrow {
-  color: var(--text-muted);
-  font-size: 12px;
-  margin: 0 2px;
-}
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
 
-/* ========== 进度条 ========== */
-.progress-wrap {
-  margin-bottom: 20px;
-}
-.progress-bar {
-  height: 4px;
-  background: var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary-light), var(--teal));
-  border-radius: 4px;
-  transition: width 0.5s ease;
-  width: 0%;
-}
-.progress-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 4px;
-  text-align: right;
-}
+    .hero {
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
 
-/* ========== 问题卡片 ========== */
-.question-card {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border);
-  padding: 32px;
-  margin-bottom: 20px;
-  animation: fadeSlideIn 0.35s ease;
-}
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.question-card h2 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 6px;
-}
-.question-card .q-desc {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 20px;
-}
-.options-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-@media (max-width: 600px) {
-  .options-grid { grid-template-columns: 1fr; }
-}
-.option-btn {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 14px 16px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-option);
-  cursor: pointer;
-  transition: var(--transition);
-  font: inherit;
-}
-.option-btn:hover {
-  border-color: var(--primary-light);
-  background: var(--bg-option-hover);
-  box-shadow: var(--shadow-sm);
-}
-.option-btn:focus-visible {
-  outline: 2px solid var(--primary-light);
-  outline-offset: 2px;
-}
-.option-btn .opt-label {
-  display: block;
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--primary);
-  margin-bottom: 3px;
-}
-.option-btn .opt-desc {
-  display: block;
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-.option-btn.selected {
-  border-color: var(--primary-light);
-  background: var(--bg-selected);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-}
+    .hero-main, .quick-note, .panel {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(219, 231, 226, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
 
-/* ========== 重置按钮 ========== */
-.reset-wrap { text-align: center; margin: 16px 0 8px; }
-.reset-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  transition: var(--transition);
-}
-.reset-btn:hover {
-  border-color: var(--rose);
-  color: var(--rose);
-  background: #FFF1F2;
-}
+    .hero-main { padding: 28px; }
+    .quick-note { padding: 22px; }
 
-/* ========== 结果区 ========== */
-.result-section {
-  animation: fadeSlideIn 0.4s ease;
-}
-.result-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.result-icon {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #DBEAFE, #CFFAFE);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
-}
-.result-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--primary);
-}
-.result-card {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border);
-  padding: 28px;
-  margin-bottom: 16px;
-}
-.result-card h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-.result-card h3 .h3-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 1px 8px;
-  border-radius: 10px;
-  background: var(--bg-accent-light);
-  color: var(--primary-light);
-  margin-left: 8px;
-  vertical-align: middle;
-}
-.result-card p, .result-card li { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
-.result-card ul { padding-left: 18px; }
-.result-card li { margin-bottom: 2px; }
-.result-card .highlight {
-  background: #FEF3C7;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-weight: 600;
-  color: #92400E;
-}
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
 
-/* 假设框 */
-.hypothesis-box {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 12px 0;
-}
-@media (max-width: 500px) {
-  .hypothesis-box { grid-template-columns: 1fr; }
-}
-.h0-box, .h1-box {
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-}
-.h0-box { background: #F8FAFC; border-left: 3px solid var(--text-muted); }
-.h1-box { background: #FFF7ED; border-left: 3px solid var(--amber); }
-.h0-box .h-label, .h1-box .h-label {
-  font-weight: 700;
-  font-size: 14px;
-  display: block;
-  margin-bottom: 4px;
-}
-.h0-box { color: var(--text-secondary); }
-.h1-box .h-label { color: var(--amber); }
-.h0-box p, .h1-box p { font-size: 14px; line-height: 1.6; }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
 
-/* 示例数据表格 */
-.example-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  margin: 12px 0;
-}
-.example-table th {
-  background: var(--bg-accent-light);
-  color: var(--primary);
-  font-weight: 600;
-  padding: 8px 12px;
-  text-align: left;
-  border: 1px solid var(--border);
-}
-.example-table td {
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  font-size: 14px;
-}
-.example-table tr:nth-child(even) td { background: var(--bg-card-alt); }
+    h2, h3 {
+      margin: 0;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
 
-/* 指标解读 */
-.indicator-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 12px 0;
-}
-@media (max-width: 500px) {
-  .indicator-grid { grid-template-columns: 1fr; }
-}
-.indicator-item {
-  background: var(--bg-card-alt);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-}
-.indicator-item .ind-name {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--primary);
-  display: block;
-  margin-bottom: 2px;
-}
-.indicator-item .ind-val {
-  font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--primary-light);
-  display: block;
-}
-.indicator-item .ind-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-  line-height: 1.5;
-}
+    h2 { font-size: 22px; }
+    h3 { font-size: 18px; }
 
-/* 结论框 */
-.conclusion-box {
-  background: linear-gradient(135deg, #ECFDF5, #F0FDF4);
-  border: 1px solid #A7F3D0;
-  border-radius: var(--radius-sm);
-  padding: 14px 18px;
-  margin: 12px 0;
-}
-.conclusion-box.conclusion-reject {
-  background: linear-gradient(135deg, #FEF2F2, #FFF1F2);
-  border-color: #FECACA;
-}
-.conclusion-box .c-label {
-  font-weight: 700;
-  font-size: 14px;
-  display: block;
-  margin-bottom: 4px;
-}
-.conclusion-box p {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-.conclusion-box .conclusion-reject-text { color: var(--rose); }
-.conclusion-box .conclusion-accept-text { color: var(--emerald); }
+    p { margin: 0; }
 
-/* ========== 常见概念 ========== */
-.concepts-section {
-  margin-top: 36px;
-}
-.concepts-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 14px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--primary);
-  transition: var(--transition);
-}
-.concepts-toggle:hover { background: var(--bg-accent-light); }
-.concepts-toggle .toggle-arrow {
-  transition: transform 0.3s ease;
-  font-size: 14px;
-}
-.concepts-toggle.open .toggle-arrow { transform: rotate(180deg); }
-.concepts-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease, opacity 0.3s ease;
-  opacity: 0;
-}
-.concepts-content.open {
-  max-height: 4000px;
-  opacity: 1;
-}
-.concepts-inner {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--radius) var(--radius);
-  padding: 20px 24px 24px;
-}
-.concept-item {
-  margin-bottom: 18px;
-}
-.concept-item:last-child { margin-bottom: 0; }
-.concept-item h4 {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 4px;
-}
-.concept-item p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
+    .lead {
+      color: var(--muted);
+      max-width: 76ch;
+      font-size: 16px;
+    }
 
-/* ========== 路径可视化 ========== */
-.path-vis {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 16px;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--border-light);
-}
-.path-vis .pv-node {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 14px;
-  background: #F1F5F9;
-  color: var(--text-secondary);
-}
-.path-vis .pv-node.pv-active {
-  background: #DBEAFE;
-  color: var(--primary);
-  font-weight: 600;
-}
-.path-vis .pv-node.pv-result {
-  background: #D1FAE5;
-  color: #065F46;
-  font-weight: 600;
-}
-.path-vis .pv-arrow {
-  color: var(--text-muted);
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-}
+    .note-list {
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
 
-/* ========== 小程序 / 重置选择确认 ========== */
-.snackbar {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: var(--primary);
-  color: white;
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 100;
-  white-space: nowrap;
-}
-.snackbar.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.96fr) minmax(360px, 1.04fr);
+      gap: 18px;
+      align-items: start;
+    }
 
-/* ========== 空状态 ========== */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-}
-.empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; display: block; }
-.empty-state p { font-size: 14px; }
+    .panel { padding: 22px; }
 
-/* ========== 页脚 ========== */
-.footer {
-  text-align: center;
-  padding: 32px 0 8px;
-  font-size: 12px;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border-light);
-  margin-top: 36px;
-}
-</style>
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .ghost-btn, .mini-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .ghost-btn {
+      padding: 9px 14px;
+      font-weight: 700;
+    }
+
+    .mini-btn {
+      padding: 6px 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .ghost-btn:hover, .mini-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .crumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 18px;
+      min-height: 35px;
+      align-items: center;
+    }
+
+    .crumb {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      padding: 7px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      max-width: 100%;
+    }
+
+    .crumb:hover { color: var(--accent); border-color: var(--accent); }
+    .crumb.current { color: #fff; background: var(--accent); border-color: var(--accent); }
+    .crumb-sep { color: #9aa9a3; }
+
+    .question-head {
+      padding: 16px;
+      background: var(--soft);
+      border: 1px solid #d5ebe4;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+    }
+
+    .question-head .hint {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 14px 15px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .option:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(36, 127, 115, 0.11);
+    }
+
+    .option-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--ink);
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .option-desc {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .result-empty {
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #c8d8d2;
+      border-radius: var(--radius);
+      background: #fbfdfc;
+      padding: 28px;
+    }
+
+    .result-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .method-name {
+      font-size: 28px;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .why {
+      padding: 14px 15px;
+      background: var(--soft-warm);
+      border: 1px solid #f7ddb0;
+      border-radius: var(--radius);
+      color: #6f4208;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      margin-top: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .info-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 13px;
+      background: #fff;
+    }
+
+    .info-box strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .info-box span, .small-muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-top: 10px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+    }
+
+    th, td {
+      padding: 10px 11px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f2f7f5;
+      color: #33423d;
+      font-weight: 800;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .concepts {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 11px 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 800;
+      color: #26332f;
+    }
+
+    details p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .method-dock {
+      margin-top: 18px;
+    }
+
+    .method-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 920px) {
+      .hero, .layout, .concepts, .grid-2 { grid-template-columns: 1fr; }
+      .shell { width: min(100% - 20px, 1180px); padding-top: 14px; }
+      .hero-main, .quick-note, .panel { padding: 18px; }
+      .method-name { font-size: 24px; }
+      table { min-width: 520px; }
+    }
+  </style>
 </head>
 <body>
-
-<div class="wrapper" id="app">
-  <header>
-    <h1>📊 假设检验 <span>· 选择向导</span></h1>
-    <p>不清楚应该用哪种统计检验？回答几个简单问题，帮你找到合适的方法。</p>
-  </header>
-
-  <!-- 面包屑 -->
-  <div class="breadcrumb-wrap" id="breadcrumb">
-    <span class="bc-none">选择路径将显示在这里</span>
-  </div>
-
-  <!-- 进度条 -->
-  <div class="progress-wrap" id="progressWrap" style="display:none">
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-label" id="progressLabel"></div>
-  </div>
-
-  <!-- 主内容区 -->
-  <div id="mainContent">
-    <div class="empty-state">
-      <span class="empty-icon">🔬</span>
-      <p>从下方第一个问题开始，一步步找到适合你的统计检验方法。</p>
-    </div>
-  </div>
-
-  <!-- 重置按钮 -->
-  <div class="reset-wrap">
-    <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetAll()">
-      ⟳ 重新开始
-    </button>
-  </div>
-
-  <!-- 常见概念 -->
-  <div class="concepts-section">
-<button class="concepts-toggle" id="conceptsToggle" onclick="toggleConcepts()" aria-expanded="false" aria-controls="conceptsContent">
-      📖 常见统计概念通俗解释
-      <span class="toggle-arrow">▾</span>
-    </button>
-    <div class="concepts-content" id="conceptsContent">
-      <div class="concepts-inner">
-
-        <div class="concept-item">
-          <h4>p 值（显著性概率）</h4>
-          <p><strong>通俗版：</strong>假设"两组没有差异"这个说法是真的，那么你看到当前这么大差异的概率有多大。如果这个概率很小（通常 &lt; 0.05），就说明"没有差异"这个假设可能不成立，你观察到的差异是真实存在的。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>显著性水平 α（阿尔法）</h4>
-          <p><strong>通俗版：</strong>你愿意冒多大的风险去犯"误判"的错误。通常设为 0.05，意思是："如果实际上没有差异，我最多接受 5% 的可能性去错误地说有差异。" α 就是判断 p 值大小的门槛。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>原假设 H₀ 与 备择假设 H₁</h4>
-          <p><strong>通俗版：</strong>H₀ 是"默认状态"——通常认为没有效果、没有差异。H₁ 是你想证明的结论——有效果、有差异。统计检验就是看数据是否提供了足够证据来推翻 H₀，支持 H₁。类似法庭上的"无罪推定"原则。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>正态性检验</h4>
-          <p><strong>通俗版：</strong>检查你的数据是否呈"钟形曲线"分布。很多参数检验（如 t 检验、ANOVA）要求数据近似正态分布。常用方法有 Shapiro-Wilk 检验（小样本）和 KS 检验。如果 p &gt; 0.05，通常认为数据满足正态性。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>方差齐性</h4>
-          <p><strong>通俗版：</strong>比较两组数据时，检查它们的波动程度是否差不多。例如：A 组分数在 70-90 之间波动，B 组在 60-95 之间波动——如果两组波动幅度差异太大，可能方差不齐。常用 Levene 检验。如果 p &gt; 0.05，通常认为方差齐。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>参数检验 vs 非参数检验</h4>
-          <p><strong>通俗版：</strong>参数检验（如 t 检验、ANOVA）就像用一把精确的尺子量东西——要求数据满足一定条件（正态分布、方差齐）。非参数检验（如 Mann-Whitney U、Wilcoxon）像用一根绳子比长短——不要求数据分布形态，但灵敏度（统计功效）稍低。数据条件满足时首选参数检验。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>效应量（Effect Size）</h4>
-          <p><strong>通俗版：</strong>p 值告诉你"有没有差异"，效应量告诉你"差异有多大"。大样本下即使很小的差异也可能 p &lt; 0.05，所以效应量很重要。常见的效应量指标有 Cohen's d（t 检验）、η²（ANOVA）、Cramer's V（卡方检验）等。通常 0.2=小效应、0.5=中效应、0.8=大效应。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>置信区间（Confidence Interval）</h4>
-          <p><strong>通俗版：</strong>给出一个范围，告诉你"真实的总体差异"大概落在哪个区间。比如 95% 置信区间为 [2.3, 7.8]，意思是：我有 95% 的把握认为真实差异在 2.3 到 7.8 之间。如果区间包含 0（或 1，取决于具体指标），通常说明差异不显著。</p>
-        </div>
-
-        <div class="concept-item">
-          <h4>独立样本 vs 配对样本</h4>
-          <p><strong>通俗版：</strong>独立样本 = 两组人不是同一批人，比如实验组 vs 对照组。配对样本 = 同一批人测了两次（前测/后测），或者一一配对的两个人（如双胞胎研究）。两种情况的检验方法不同，不能混用。</p>
-        </div>
-
+  <main class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-main">
+        <div class="eyebrow">假设检验导航</div>
+        <h1 id="page-title">统计学假设检验速查工具</h1>
+        <p class="lead">
+          按问题一步步选择你的数据情况，工具会推荐常见检验方法，并解释为什么适合、原假设是什么、示例数据怎么看、结果如何用中文报告。
+        </p>
       </div>
-    </div>
-  </div>
+      <aside class="quick-note">
+        <h2>先记住三件事</h2>
+        <ul class="note-list">
+          <li><strong>因变量</strong>：你最终想比较或预测的那个结果。</li>
+          <li><strong>独立样本</strong>：两组人不是同一批人；<strong>配对样本</strong>：同一批人前后测了两次或一一匹配。</li>
+          <li><strong>p 值</strong>：如果原假设是真的，看到当前这么大差异的概率；常用 p &lt; 0.05 作为“拒绝原假设”的参考线。</li>
+        </ul>
+      </aside>
+    </section>
 
-  <div class="footer">统计学假设检验 · 初学者指南 &mdash; 仅供参考，重要分析请咨询统计专家</div>
-</div>
+    <section class="layout">
+      <div class="panel">
+        <div class="toolbar">
+          <h2>选择路径</h2>
+          <button class="ghost-btn" id="restartBtn" type="button">重新开始</button>
+        </div>
+        <nav class="crumbs" id="breadcrumbs" aria-label="当前选择路径"></nav>
+        <div id="questionArea"></div>
+      </div>
 
-<!-- 小提示条 -->
-<div class="snackbar" id="snackbar"></div>
+      <div class="panel" id="resultPanel">
+        <div class="result-empty">
+          <div>
+            <h2>等待你的选择</h2>
+            <p>从左侧第一个问题开始。每个选项下面都有“小白解释”，选不准时选最接近的情况即可。</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<script>
-// ============================================================
-// 1. 检验方法定义
-// ============================================================
-const TESTS = {
-  // ---- t 检验相关 ----
-  one_sample_t: {
-    name: '单样本 t 检验',
-    icon: '📊',
-    scenario: '比较一组样本的均值是否与某个已知值（总体均值）有显著差异。例如：某班学生的平均身高是否与全国平均身高 170cm 有差异。',
-    hypothesis: { h0: '样本所在总体的均值等于已知值（μ = μ₀）', h1: '显著不等于已知值（μ ≠ μ₀）' },
-    dataExample: [
-      { label: '学生成绩', values: '82, 78, 85, 90, 79' },
-      { label: '总体均值 μ₀', values: '75' }
-    ],
-    indicators: [
-      { name: 't 值', value: '3.27', desc: 't 值越大，说明样本均值离总体均值越远（相对标准差而言）' },
-      { name: '自由度 df', value: '4', desc: 'n-1，用于确定 t 分布形态' },
-      { name: 'p 值', value: '0.031', desc: '如果 H₀ 为真（均值=75），抽到当前样本的概率为 3.1%' },
-      { name: '均值差', value: '82.8 - 75 = 7.8', desc: '样本均值 82.8 比总体均值 75 高出 7.8 分' },
-      { name: 'Cohen\'s d', value: '1.46', desc: '效应量巨大（&gt;0.8），说明差异不仅有统计意义，在实际中也明显' }
-    ],
-    conclusion: { reject: true, text: 't(4) = 3.27, p = 0.031 &lt; 0.05，拒绝 H₀。样本均值与总体均值存在显著差异。' },
-    chineseReport: '独立样本 t 检验结果显示：t(4) = 3.27，p = 0.031 &lt; 0.05，拒绝原假设。可以认为该班学生的平均成绩（82.8 分）与总体平均成绩（75 分）之间存在显著差异。',
-    note: '适用条件：数据近似正态分布（小样本时尤其重要）。如果严重偏离正态分布，应考虑使用 Wilcoxon 符号秩检验。'
-  },
-  independent_t: {
-    name: '独立样本 t 检验',
-    icon: '📊',
-    scenario: '比较两组独立样本的均值是否存在显著差异。例如：实验组和对照组的考试成绩是否有差异。两组受试者不是同一批人。',
-    hypothesis: { h0: '两组总体均值相等（μ₁ = μ₂）', h1: '两组总体均值不等（μ₁ ≠ μ₂）' },
-    dataExample: [
-      { label: 'A 组（新方法）', values: '23, 21, 25, 22, 24  （均值=23.0）' },
-      { label: 'B 组（旧方法）', values: '18, 20, 19, 21, 17  （均值=19.0）' }
-    ],
-    indicators: [
-      { name: 't 值', value: '4.24', desc: 't 值越大，组间差异相对组内波动越明显' },
-      { name: '自由度 df', value: '8', desc: 'n₁+n₂-2，反映总样本量' },
-      { name: 'p 值', value: '0.003', desc: '仅为 0.3%，说明两组差异非常显著' },
-      { name: '均值差', value: '23.0 - 19.0 = 4.0', desc: 'A 组比 B 组平均高出 4 分' },
-      { name: '95% CI', value: '[1.8, 6.2]', desc: '真实均值差有 95% 的把握落在 1.8~6.2 之间，不含 0，支持差异显著' }
-    ],
-    conclusion: { reject: true, text: 't(8) = 4.24, p = 0.003 &lt; 0.01，拒绝 H₀。新方法成绩显著高于旧方法。' },
-    chineseReport: '独立样本 t 检验结果显示：t(8) = 4.24，p = 0.003 &lt; 0.05，拒绝原假设。实验组的平均成绩（23.0 分）显著高于对照组（19.0 分），差异具有统计学意义。',
-    note: '适用条件：两组独立、数据近似正态、两组方差齐（可用 Levene 检验验证）。方差不齐时建议使用 Welch t 检验。'
-  },
-  welch_t: {
-    name: 'Welch t 检验',
-    icon: '📊',
-    scenario: '与独立样本 t 检验用途相同，但不需要假设两组方差相等。当两组数据的波动程度差异较大时（方差不齐），Welch t 检验更可靠。',
-    hypothesis: { h0: '两组总体均值相等（μ₁ = μ₂）', h1: '两组总体均值不等（μ₁ ≠ μ₂）' },
-    dataExample: [
-      { label: 'A 组', values: '23, 21, 25, 22, 24  （均值=23.0，方差较小）' },
-      { label: 'B 组', values: '15, 28, 12, 30, 10  （均值=19.0，方差较大）' }
-    ],
-    indicators: [
-      { name: 't 值', value: '1.96', desc: '校正自由度后的 t 值' },
-      { name: '校正自由度 df', value: '5.3', desc: 'Welch 法校正后的自由度，通常不是整数' },
-      { name: 'p 值', value: '0.104', desc: 'p &gt; 0.05，差异不显著' },
-      { name: '均值差', value: '23.0 - 19.0 = 4.0', desc: '虽然均值差是 4，但 B 组波动太大，差异不显著' },
-      { name: '95% CI', value: '[-1.2, 9.2]', desc: '包含 0，进一步说明差异不显著' }
-    ],
-    conclusion: { reject: false, text: 't(5.3) = 1.96, p = 0.104 &gt; 0.05，不能拒绝 H₀。两组均值无显著差异。' },
-    chineseReport: 'Welch t 检验结果显示：t(5.3) = 1.96，p = 0.104 &gt; 0.05，不能拒绝原假设。没有足够证据表明两组均值存在显著差异（因为 B 组数据波动很大，掩盖了均值差异）。',
-    note: '适用条件：两组独立、数据近似正态。不要求方差齐，是比独立样本 t 检验更稳健的选择（尤其是样本量不等时）。'
-  },
-  paired_t: {
-    name: '配对样本 t 检验',
-    icon: '📊',
-    scenario: '比较同一组人在两个不同条件下的均值差异。例如：同一批学生治疗前和治疗后的成绩变化。关键特征是数据成对出现（同一对象测两次）。',
-    hypothesis: { h0: '配对差值的总体均值为 0（μd = 0）', h1: '配对差值的总体均值不为 0（μd ≠ 0）' },
-    dataExample: [
-      { label: '学生编号', values: '1 / 2 / 3 / 4 / 5' },
-      { label: '治疗前', values: '68, 72, 65, 70, 66' },
-      { label: '治疗后', values: '75, 78, 70, 74, 71' },
-      { label: '差值（后-前）', values: '+7, +6, +5, +4, +5  （均值=5.4）' }
-    ],
-    indicators: [
-      { name: 't 值', value: '6.53', desc: 't 值很大，说明治疗后普遍提升' },
-      { name: '自由度 df', value: '4', desc: 'n-1 (n=5对学生)' },
-      { name: 'p 值', value: '0.003', desc: 'p = 0.3%，非常显著' },
-      { name: '平均差值', value: '5.4', desc: '治疗后平均提高了 5.4 分' },
-      { name: '95% CI', value: '[3.2, 7.6]', desc: '不包含 0，确认提升显著' }
-    ],
-    conclusion: { reject: true, text: 't(4) = 6.53, p = 0.003 &lt; 0.01，拒绝 H₀。治疗后成绩显著提升。' },
-    chineseReport: '配对样本 t 检验结果显示：t(4) = 6.53，p = 0.003 &lt; 0.05，拒绝原假设。治疗后学生的平均成绩（73.6 分）显著高于治疗前（68.2 分），平均提高了 5.4 分。',
-    note: '适用条件：数据成对、差值近似正态分布。如果差值严重偏离正态，应使用 Wilcoxon 符号秩检验。'
-  },
+    <section class="panel method-dock">
+      <h2>常见概念解释</h2>
+      <div class="concepts" id="concepts"></div>
+    </section>
 
-  // ---- ANOVA 相关 ----
-  oneway_anova: {
-    name: '单因素方差分析（One-way ANOVA）',
-    icon: '📊',
-    scenario: '比较三个及以上独立组的均值是否存在显著差异。例如：三种教学方法（A/B/C）下的学生成绩是否有差异。',
-    hypothesis: { h0: '所有组的总体均值相等（μ₁ = μ₂ = ... = μk）', h1: '至少有一组的均值与其他组不同' },
-    dataExample: [
-      { label: 'A 组（方法A）', values: '23, 21, 25  （均值=23.0）' },
-      { label: 'B 组（方法B）', values: '18, 20, 19  （均值=19.0）' },
-      { label: 'C 组（方法C）', values: '15, 17, 16  （均值=16.0）' }
-    ],
-    indicators: [
-      { name: 'F 值', value: '17.83', desc: 'F 值越大，组间差异相对组内差异越明显' },
-      { name: '组间 df', value: '2', desc: 'k-1 (3组-1)' },
-      { name: '组内 df', value: '6', desc: 'N-k (9人-3组)' },
-      { name: 'p 值', value: '0.003', desc: 'p = 0.3%，至少有一组与其他组显著不同' },
-      { name: 'η² (效应量)', value: '0.86', desc: '非常大，86% 的成绩差异可以由教学方法解释' }
-    ],
-    conclusion: { reject: true, text: 'F(2, 6) = 17.83, p = 0.003 &lt; 0.01，拒绝 H₀。不同教学方法下的成绩存在显著差异。' },
-    chineseReport: '单因素方差分析结果显示：F(2, 6) = 17.83，p = 0.003 &lt; 0.05，拒绝原假设。三种教学方法的学生成绩存在显著差异。需进一步做事后检验（Post-hoc）来确定具体哪两组之间有差异。',
-    note: '适用条件：各组独立、各组内近似正态、各组方差齐。若方差不齐，考虑 Welch ANOVA；若不满足正态，考虑 Kruskal-Wallis 检验。ANOVA 只能判断"有无差异"，要确定具体哪两组有差异需要做事后检验（如 Tukey HSD）。'
-  },
-  welch_anova: {
-    name: 'Welch 方差分析（Welch ANOVA）',
-    icon: '📊',
-    scenario: '与单因素 ANOVA 用途相同，但不要求各组方差相等。当几个组的数据波动幅度明显不同时使用。',
-    hypothesis: { h0: '所有组的总体均值相等', h1: '至少有一组的均值与其他组不同' },
-    dataExample: [
-      { label: 'A 组（波动小）', values: '22, 23, 24, 22, 23' },
-      { label: 'B 组（波动中等）', values: '18, 20, 22, 19, 21' },
-      { label: 'C 组（波动大）', values: '10, 25, 15, 30, 12' }
-    ],
-    indicators: [
-      { name: 'F 值', value: '6.21', desc: '校正后的 F 统计量' },
-      { name: '校正 df', value: '2.0, 6.8', desc: 'Welch 法校正后的自由度' },
-      { name: 'p 值', value: '0.028', desc: 'p &lt; 0.05，差异显著' }
-    ],
-    conclusion: { reject: true, text: 'F(2.0, 6.8) = 6.21, p = 0.028 &lt; 0.05，拒绝 H₀。' },
-    chineseReport: 'Welch 方差分析结果显示：F(2.0, 6.8) = 6.21，p = 0.028 &lt; 0.05，拒绝原假设。在放宽方差齐性要求后，三组之间仍存在显著差异。',
-    note: '适用条件：各组独立、各组内近似正态。不要求方差齐。是普通 ANOVA 的稳健替代。'
-  },
-  repeated_anova: {
-    name: '重复测量方差分析（Repeated Measures ANOVA）',
-    icon: '📊',
-    scenario: '对同一组人在三个或更多时间点进行重复测量，比较不同时间点的均值差异。例如：测量同一组人在治疗前、治疗1个月后、治疗3个月后的血压变化。',
-    hypothesis: { h0: '不同时间点的总体均值相等', h1: '至少有一个时间点的均值与其他不同' },
-    dataExample: [
-      { label: '患者编号', values: '1 / 2 / 3 / 4' },
-      { label: '治疗前', values: '150, 145, 160, 155' },
-      { label: '治疗1个月', values: '142, 138, 150, 148' },
-      { label: '治疗3个月', values: '135, 130, 140, 138' }
-    ],
-    indicators: [
-      { name: 'F 值', value: '34.5', desc: 'F 值很大，说明时间效应明显' },
-      { name: 'p 值', value: '&lt;0.001', desc: '非常显著' },
-      { name: 'η² (效应量)', value: '0.92', desc: '时间因素解释了绝大部分变异' }
-    ],
-    conclusion: { reject: true, text: 'F(2, 6) = 34.5, p &lt; 0.001，拒绝 H₀。不同时间点的血压存在显著差异。' },
-    chineseReport: '重复测量方差分析结果显示：F(2, 6) = 34.5，p &lt; 0.001，拒绝原假设。同一组患者在治疗前、治疗1个月、治疗3个月的血压存在显著差异，血压呈下降趋势。',
-    note: '适用条件：同一组受试者在 ≥3 个时间点测量、数据近似正态、满足球形假设（Mauchly 检验）。如果不满足球形假设，需使用 Greenhouse-Geisser 校正。若不满足正态，考虑 Friedman 检验。'
-  },
+    <section class="panel method-dock">
+      <h2>直接查看某个检验</h2>
+      <p class="small-muted">已经知道方法名称时，可以直接点开说明；路径区会显示“直接查看”。</p>
+      <div class="method-grid" id="methodGrid"></div>
+      <p class="footer-note">提示：本工具用于学习和选型。正式论文或报告中，请结合研究设计、样本量、缺失值、异常值和专业软件输出进行复核。</p>
+    </section>
+  </main>
 
-  // ---- 非参数检验 ----
-  mann_whitney: {
-    name: 'Mann-Whitney U 检验',
-    icon: '📊',
-    scenario: '比较两组独立样本的分布是否有显著差异。通常用于：数据不满足正态分布，或比较的是有序变量（如满意度等级）。可以理解为 t 检验的非参数版本。',
-    hypothesis: { h0: '两组总体分布位置相同', h1: '两组总体分布位置不同' },
-    dataExample: [
-      { label: 'A 组（新药）', values: '12, 15, 18, 20, 22  （中位数=18）' },
-      { label: 'B 组（安慰剂）', values: '8, 10, 13, 14, 16  （中位数=13）' }
-    ],
-    indicators: [
-      { name: 'U 值', value: '22.5', desc: '将所有数据混合排序后，A 组每个值比 B 组高的程度' },
-      { name: 'Z 值', value: '-2.20', desc: 'U 值标准化后的 Z 分数' },
-      { name: 'p 值', value: '0.028', desc: 'p &lt; 0.05，两组分布存在显著差异' },
-      { name: '中位数差', value: '18 - 13 = 5', desc: 'A 组比 B 组中位数高 5' }
-    ],
-    conclusion: { reject: true, text: 'U = 22.5, p = 0.028 &lt; 0.05，拒绝 H₀。两组分布存在显著差异。' },
-    chineseReport: 'Mann-Whitney U 检验结果显示：U = 22.5，p = 0.028 &lt; 0.05，拒绝原假设。新药组的效果评分（中位数 18）显著高于安慰剂组（中位数 13）。',
-    note: '适用条件：两组独立、数据至少为有序变量。不需要正态分布假设。如果是连续数据且满足正态，t 检验统计功效更高。'
-  },
-  wilcoxon_signed: {
-    name: 'Wilcoxon 符号秩检验',
-    icon: '📊',
-    scenario: '比较同一组人前后两次测量是否有显著差异。是非参数版本的配对 t 检验。例如：培训前和培训后的技能评分变化。',
-    hypothesis: { h0: '配对差值的总体中位数为 0', h1: '配对差值的总体中位数不为 0' },
-    dataExample: [
-      { label: '员工编号', values: '1 / 2 / 3 / 4' },
-      { label: '培训前', values: '3, 5, 4, 6  （评分1-10）' },
-      { label: '培训后', values: '7, 8, 6, 9' },
-      { label: '差值', values: '+4, +3, +2, +3' },
-      { label: '秩次', values: '4, 2.5, 1, 2.5' }
-    ],
-    indicators: [
-      { name: 'W 值', value: '10', desc: '正差值的秩和（所有差值方向一致时 W 最大）' },
-      { name: 'p 值', value: '0.068', desc: 'p &gt; 0.05，差异不显著（样本量太小）' },
-      { name: '中位数差', value: '2.5', desc: '前后评分中位数差' }
-    ],
-    conclusion: { reject: false, text: 'W = 10, p = 0.068 &gt; 0.05，不能拒绝 H₀（此例样本量小未达显著，实际中更大的样本可能显著）。' },
-    chineseReport: 'Wilcoxon 符号秩检验结果显示：W = 10，p = 0.068 &gt; 0.05，不能拒绝原假设。培训前后的评分差异在统计上不显著。注意：本示例只有 4 对数据，样本量太小，实际研究中通常需要更大的样本。',
-    note: '适用条件：配对数据、差值至少为有序变量。不需要正态分布假设，是配对 t 检验的非参数替代。'
-  },
-  kruskal_wallis: {
-    name: 'Kruskal-Wallis 检验',
-    icon: '📊',
-    scenario: '比较三个及以上独立组的分布是否有显著差异。是非参数版本的 ANOVA。例如：比较三种不同教学方法下学生的满意度评分（有序变量）。',
-    hypothesis: { h0: '所有组的总体分布位置相同', h1: '至少有一组与其他组的分布位置不同' },
-    dataExample: [
-      { label: 'A 组', values: '12, 15, 18' },
-      { label: 'B 组', values: '8, 10, 13' },
-      { label: 'C 组', values: '5, 7, 9' }
-    ],
-    indicators: [
-      { name: 'H 值', value: '5.96', desc: 'Kruskal-Wallis 统计量，基于秩次计算' },
-      { name: '自由度 df', value: '2', desc: 'k-1 (3组-1)' },
-      { name: 'p 值', value: '0.051', desc: 'p = 0.051 &gt; 0.05，边缘显著但未达标准' }
-    ],
-    conclusion: { reject: false, text: 'H = 5.96, p = 0.051 &gt; 0.05，不能拒绝 H₀。三组分布无显著差异（边缘显著）。' },
-    chineseReport: 'Kruskal-Wallis 检验结果显示：H = 5.96，p = 0.051 &gt; 0.05，不能拒绝原假设。三种教学方法下的满意度评分分布不存在统计显著的差异（尽管已接近显著水平）。',
-    note: '适用条件：多组独立样本、数据至少为有序变量。不需要正态分布假设。如果显著，需做事后比较（如 Dunn 检验）判断具体哪两组不同。'
-  },
-  friedman: {
-    name: 'Friedman 检验',
-    icon: '📊',
-    scenario: '对同一组人在三个及以上条件下的重复测量进行比较。是非参数版本的重复测量 ANOVA。例如：同一组消费者对三种产品的偏好评分比较。',
-    hypothesis: { h0: '各条件下的总体分布相同', h1: '至少有一个条件与其他不同' },
-    dataExample: [
-      { label: '受试者', values: '1 / 2 / 3 / 4' },
-      { label: '条件 A', values: '8, 7, 9, 6' },
-      { label: '条件 B', values: '5, 6, 4, 5' },
-      { label: '条件 C', values: '3, 4, 5, 4' }
-    ],
-    indicators: [
-      { name: 'χ² 值', value: '7.60', desc: 'Friedman 统计量，近似卡方分布' },
-      { name: '自由度 df', value: '2', desc: 'k-1' },
-      { name: 'p 值', value: '0.022', desc: 'p &lt; 0.05，显著' }
-    ],
-    conclusion: { reject: true, text: 'χ²(2) = 7.60, p = 0.022 &lt; 0.05，拒绝 H₀。不同条件下评分存在显著差异。' },
-    chineseReport: 'Friedman 检验结果显示：χ²(2) = 7.60，p = 0.022 &lt; 0.05，拒绝原假设。消费者对三种产品的偏好评分存在显著差异。',
-    note: '适用条件：同一组受试者在 ≥3 个条件下的测量、数据至少为有序变量。不需要正态分布假设。'
-  },
-  one_sample_wilcoxon: {
-    name: '单样本 Wilcoxon 符号秩检验',
-    icon: '📊',
-    scenario: '比较一组样本的中位数是否与某个已知值（总体中位数）有显著差异。是单样本 t 检验的非参数版本。',
-    hypothesis: { h0: '样本中位数等于已知值', h1: '样本中位数不等于已知值' },
-    dataExample: [
-      { label: '数据', values: '78, 82, 85, 90, 79' },
-      { label: '总体中位数', values: '80' }
-    ],
-    indicators: [
-      { name: 'W 值', value: '9', desc: '正秩次之和' },
-      { name: 'p 值', value: '0.438', desc: 'p &gt; 0.05，不显著' },
-      { name: '样本中位数', value: '82', desc: '与总体中位数 80 接近' }
-    ],
-    conclusion: { reject: false, text: 'W = 9, p = 0.438 &gt; 0.05，不能拒绝 H₀。' },
-    chineseReport: '单样本 Wilcoxon 符号秩检验结果显示：W = 9，p = 0.438 &gt; 0.05，不能拒绝原假设。没有足够证据表明样本中位数与总体中位数存在显著差异。',
-    note: '适用条件：单组数据、数据至少为有序变量。不需要正态分布假设，是单样本 t 检验的非参数替代。'
-  },
-
-  // ---- 分类数据检验 ----
-  chi_square: {
-    name: '卡方检验（独立性检验）',
-    icon: '📊',
-    scenario: '检验两个分类变量是否有关联。例如：服用不同药物（A/B）与是否治愈（治愈/未治愈）之间是否有关系。',
-    hypothesis: { h0: '两个分类变量独立（没有关联）', h1: '两个分类变量不独立（有关联）' },
-    dataExample: [
-      { label: '列联表', values: '| 药物 | 治愈 | 未治愈 | 合计 |' },
-      { label: '药物 A', values: '30  (期望 25) | 10  (期望 15) | 40' },
-      { label: '药物 B', values: '20  (期望 25) | 20  (期望 15) | 40' },
-      { label: '合计', values: '50 | 30 | 80' }
-    ],
-    indicators: [
-      { name: 'χ² 值', value: '4.29', desc: '实际观察值与期望值之间的差异大小' },
-      { name: '自由度 df', value: '1', desc: '(行数-1)×(列数-1)' },
-      { name: 'p 值', value: '0.038', desc: 'p &lt; 0.05，有显著的关联关系' },
-      { name: 'Cramer\'s V', value: '0.23', desc: '效应量中等偏低，虽有关联但强度不算大' }
-    ],
-    conclusion: { reject: true, text: 'χ²(1) = 4.29, p = 0.038 &lt; 0.05，拒绝 H₀。药物种类与治愈情况有关联。' },
-    chineseReport: '卡方检验结果显示：χ²(1) = 4.29，p = 0.038 &lt; 0.05，拒绝原假设。药物种类与治愈情况之间存在显著的关联关系。药物 A 的治愈率（75%）高于药物 B（50%）。',
-    note: '适用条件：分类变量、大样本（所有期望频数 ≥ 5）。若有单元格期望频数 &lt; 5，应使用 Fisher 精确检验。'
-  },
-  fisher_exact: {
-    name: 'Fisher 精确检验',
-    icon: '📊',
-    scenario: '与卡方检验用途相同（检验两个分类变量是否关联），但适用于小样本数据。尤其当列联表中有单元格的期望频数小于 5 时使用。',
-    hypothesis: { h0: '两个分类变量独立（没有关联）', h1: '两个分类变量不独立（有关联）' },
-    dataExample: [
-      { label: '列联表', values: '| 组别 | 有效 | 无效 |' },
-      { label: '新药', values: '3 | 1' },
-      { label: '安慰剂', values: '0 | 4' }
-    ],
-    indicators: [
-      { name: 'p 值', value: '0.143', desc: 'Fisher 直接精确计算的概率（非近似值）' },
-      { name: '优势比 OR', value: '7.0', desc: '新药组有效的概率是安慰剂组的...但因 p&gt;0.05 不显著' }
-    ],
-    conclusion: { reject: false, text: 'p = 0.143 &gt; 0.05，不能拒绝 H₀。无足够证据表明两组有效率的差异有统计意义（样本太小）。' },
-    chineseReport: 'Fisher 精确检验结果显示：p = 0.143 &gt; 0.05，不能拒绝原假设。虽然新药组有效率（75%）看似高于安慰剂组（0%），但由于样本量太小，差异不具有统计学意义。',
-    note: '适用条件：2×2 列联表、小样本（期望频数 &lt; 5）。Fisher 检验给出精确 p 值而非近似值。'
-  },
-  mcnemar: {
-    name: 'McNemar 检验',
-    icon: '📊',
-    scenario: '检验配对设计的两个分类变量是否有差异。适用于"前后对比"类型的分类数据。例如：同一批患者在治疗前后，症状"有/无"的变化。',
-    hypothesis: { h0: '前后两个时间点的分类结果一致（无变化）', h1: '前后分类结果不一致（有变化）' },
-    dataExample: [
-      { label: '配对列联表', values: '| 治疗前/后 | 后-有 | 后-无 |' },
-      { label: '前-有', values: '20 | 15（改善）' },
-      { label: '前-无', values: '5（恶化） | 30' }
-    ],
-    indicators: [
-      { name: 'χ² 值', value: '4.05', desc: 'McNemar 统计量，只看不一致的对角线' },
-      { name: 'p 值', value: '0.044', desc: 'p &lt; 0.05，显著' }
-    ],
-    conclusion: { reject: true, text: 'χ²(1) = 4.05, p = 0.044 &lt; 0.05，拒绝 H₀。治疗前后症状有显著变化。' },
-    chineseReport: 'McNemar 检验结果显示：χ²(1) = 4.05，p = 0.044 &lt; 0.05，拒绝原假设。治疗前后症状分布存在显著差异，15 名患者症状改善，仅 5 名恶化。',
-    note: '适用条件：配对二分类数据（同一个人/对象在两个时间点测量同一个二分变量）。'
-  },
-  one_sample_prop: {
-    name: '单样本比例检验（二项检验）',
-    icon: '📊',
-    scenario: '检验一个样本中的比例是否与已知总体比例有显著差异。例如：某校男女生比例是否与全国 1:1 的比例有差异。',
-    hypothesis: { h0: '总体比例等于已知值（p = p₀）', h1: '总体比例不等于已知值（p ≠ p₀）' },
-    dataExample: [
-      { label: '样本', values: '调查 100 人，其中女性 62 人' },
-      { label: '总体比例 p₀', values: '0.5（假设男女各半）' },
-      { label: '样本比例', values: '62/100 = 0.62' }
-    ],
-    indicators: [
-      { name: 'z 值', value: '2.40', desc: '样本比例与总体比例的差距（标准化）' },
-      { name: 'p 值', value: '0.016', desc: 'p &lt; 0.05，显著' },
-      { name: '比例差', value: '0.62 - 0.50 = 0.12', desc: '女性比例比假设高 12%' },
-      { name: '95% CI', value: '[0.52, 0.71]', desc: '不包含 0.5，支持差异显著' }
-    ],
-    conclusion: { reject: true, text: 'z = 2.40, p = 0.016 &lt; 0.05，拒绝 H₀。女性比例显著高于 50%。' },
-    chineseReport: '单样本比例检验结果显示：z = 2.40，p = 0.016 &lt; 0.05，拒绝原假设。该校女性比例（62%）显著高于全国男女各半的假设。',
-    note: '适用条件：二分类数据、大样本（通常 np &gt; 5 且 n(1-p) &gt; 5）。小样本时应使用精确二项检验。'
-  },
-  chi_square_gof: {
-    name: '卡方拟合优度检验',
-    icon: '📊',
-    scenario: '检验一组分类数据的分布是否与某个预期的理论分布一致。例如：某厂生产三种颜色的产品，检验生产比例是否符合 1:2:1 的预期。',
-    hypothesis: { h0: '观察频数分布与理论分布一致', h1: '观察频数分布与理论分布不一致' },
-    dataExample: [
-      { label: '颜色', values: '红色 / 蓝色 / 绿色' },
-      { label: '观察频数', values: '30 / 60 / 30' },
-      { label: '期望频数', values: '30 / 60 / 30（按 1:2:1）' }
-    ],
-    indicators: [
-      { name: 'χ² 值', value: '0.00', desc: '观察值完全等于期望值' },
-      { name: '自由度 df', value: '2', desc: 'k-1 (3类-1)' },
-      { name: 'p 值', value: '1.00', desc: '完全一致' }
-    ],
-    conclusion: { reject: false, text: 'χ²(2) = 0.00, p = 1.00，不能拒绝 H₀。数据与理论分布完全一致。' },
-    chineseReport: '卡方拟合优度检验结果显示：χ²(2) = 0.00，p = 1.00，不能拒绝原假设。观察到的颜色分布与理论预期（1:2:1）完全一致。',
-    note: '适用条件：单组分类数据、所有期望频数 ≥ 5。用于检测数据是否符合某种理论分布。'
-  },
-
-  // ---- 相关与回归 ----
-  pearson_corr: {
-    name: 'Pearson 相关分析',
-    icon: '📊',
-    scenario: '衡量两个连续变量之间的线性相关程度和方向。例如：学习时长与考试成绩之间是否存在线性关系？',
-    hypothesis: { h0: '两个变量之间无线性相关（ρ = 0）', h1: '两个变量之间有线性相关（ρ ≠ 0）' },
-    dataExample: [
-      { label: '学习时长 (X)', values: '1, 2, 3, 4, 5（小时）' },
-      { label: '考试成绩 (Y)', values: '62, 68, 65, 72, 76（分）' }
-    ],
-    indicators: [
-      { name: '相关系数 r', value: '0.93', desc: '非常强的正相关（r 接近 1），学习越久成绩越高' },
-      { name: 'r²', value: '0.86', desc: '成绩变异中 86% 可以由学习时长解释' },
-      { name: 'p 值', value: '0.022', desc: 'p &lt; 0.05，显著' },
-      { name: '95% CI for r', value: '[0.34, 0.99]', desc: '不包含 0，说明相关显著' }
-    ],
-    conclusion: { reject: true, text: 'r = 0.93, p = 0.022 &lt; 0.05，拒绝 H₀。学习时长与考试成绩呈显著正相关。' },
-    chineseReport: 'Pearson 相关分析结果显示：r = 0.93，p = 0.022 &lt; 0.05，拒绝原假设。学习时长与考试成绩之间存在显著的正相关关系（r = 0.93），属于非常强的相关性。',
-    note: '适用条件：两个连续变量、变量间呈线性关系、双变量近似正态分布（或样本量较大）。如果数据不满足正态性或存在明显异常值，应使用 Spearman 相关。'
-  },
-  spearman_corr: {
-    name: 'Spearman 秩相关分析',
-    icon: '📊',
-    scenario: '衡量两个变量之间的单调关系（不要求线性）。适用于：数据不满足正态分布、变量为有序变量、或存在异常值。可以理解为 Pearson 相关的非参数版本。',
-    hypothesis: { h0: '两个变量之间无单调相关（ρ = 0）', h1: '两个变量之间有单调相关（ρ ≠ 0）' },
-    dataExample: [
-      { label: '排名 (X)', values: '1, 2, 3, 4, 5' },
-      { label: '满意度评分 (Y)', values: '10, 8, 9, 7, 6' }
-    ],
-    indicators: [
-      { name: '秩相关系数 ρ', value: '-0.90', desc: '非常强的负相关，排名越高满意度越低' },
-      { name: 'p 值', value: '0.037', desc: 'p &lt; 0.05，显著' }
-    ],
-    conclusion: { reject: true, text: 'ρ = -0.90, p = 0.037 &lt; 0.05，拒绝 H₀。排名与满意度呈显著负相关。' },
-    chineseReport: 'Spearman 秩相关分析结果显示：ρ = -0.90，p = 0.037 &lt; 0.05，拒绝原假设。排名与满意度之间存在显著的负相关关系，排名越高（数值越大）满意度反而越低。',
-    note: '适用条件：两个变量至少为有序变量、单调关系（不要求线性）。对异常值不敏感。'
-  },
-  linear_regression: {
-    name: '线性回归分析',
-    icon: '📊',
-    scenario: '用一个或多个连续变量（自变量）来预测另一个连续变量（因变量）。例如：用学习时长预测考试成绩。',
-    hypothesis: { h0: '回归系数 β = 0（自变量不能预测因变量）', h1: '回归系数 β ≠ 0（自变量能预测因变量）' },
-    dataExample: [
-      { label: '学习时长 (X)', values: '1, 2, 3, 4, 5（小时）' },
-      { label: '考试成绩 (Y)', values: '62, 68, 65, 72, 76（分）' },
-      { label: '预测模型', values: '成绩 = 59.0 + 3.5 × 学习时长' }
-    ],
-    indicators: [
-      { name: '回归系数 β', value: '3.5', desc: '学习时长每增加 1 小时，成绩预计提高 3.5 分' },
-      { name: '截距', value: '59.0', desc: '学习时长为 0 时，预计成绩为 59 分' },
-      { name: 'p 值（系数）', value: '0.022', desc: '系数显著不等于 0' },
-      { name: 'R²', value: '0.86', desc: '模型解释了 86% 的成绩变异' },
-      { name: 'F 值', value: '18.3', desc: '模型整体显著性检验' }
-    ],
-    conclusion: { reject: true, text: 'β = 3.5, t(3) = 4.28, p = 0.022 &lt; 0.05，拒绝 H₀。学习时长能显著预测考试成绩。' },
-    chineseReport: '线性回归分析结果显示：学习时长对考试成绩有显著的正向预测作用（β = 3.5, t(3) = 4.28, p = 0.022），模型整体显著（F = 18.3, p = 0.022），R² = 0.86。学习时长每增加 1 小时，考试成绩预计提高 3.5 分。',
-    note: '适用条件：连续因变量、线性关系、残差独立且近似正态、方差齐。如果有多个自变量即多元线性回归。'
-  },
-  logistic_regression: {
-    name: 'Logistic 回归（逻辑回归）',
-    icon: '📊',
-    scenario: '用一个或多个自变量来预测一个二分类因变量（是/否、成功/失败）。例如：用年龄和体重指数预测是否患糖尿病（是/否）。',
-    hypothesis: { h0: '回归系数 β = 0（自变量不能预测分类结果）', h1: '回归系数 β ≠ 0（自变量能预测分类结果）' },
-    dataExample: [
-      { label: '年龄 (X)', values: '45, 52, 38, 60, 48' },
-      { label: '是否患病 (Y)', values: '0(否), 1(是), 0, 1, 1' }
-    ],
-    indicators: [
-      { name: 'β 系数', value: '0.12', desc: '年龄每增加 1 岁，患病 log-odds 增加 0.12' },
-      { name: '优势比 OR', value: '1.13', desc: '年龄每增加 1 岁，患病风险变为 1.13 倍（增加 13%）' },
-      { name: 'p 值', value: '0.031', desc: 'p &lt; 0.05，年龄是显著的预测变量' },
-      { name: '95% CI for OR', value: '[1.01, 1.26]', desc: '不包含 1，说明风险增加显著' }
-    ],
-    conclusion: { reject: true, text: 'β = 0.12, Wald χ² = 4.65, p = 0.031 &lt; 0.05，拒绝 H₀。年龄能显著预测患病风险。' },
-    chineseReport: 'Logistic 回归分析结果显示：年龄对患病风险有显著预测作用（β = 0.12, p = 0.031）。年龄每增加 1 岁，患病风险增加约 13%（OR = 1.13, 95% CI [1.01, 1.26]）。',
-    note: '适用条件：因变量为二分类变量、自变量可以是连续或分类变量、大样本。注意：OR 值是核心解读指标。如果因变量是多分类（如三种治疗方案），使用多项 Logistic 回归。'
-  },
-  poisson_regression: {
-    name: '泊松回归',
-    icon: '📊',
-    scenario: '用一个或多个自变量来预测一个计数变量（因变量为非负整数）。例如：用空气质量指数预测某地区一周内的哮喘发作次数。',
-    hypothesis: { h0: '回归系数 β = 0（自变量不能预测计数结果）', h1: '回归系数 β ≠ 0（自变量能预测计数结果）' },
-    dataExample: [
-      { label: 'PM2.5 指数 (X)', values: '50, 80, 120, 60, 95' },
-      { label: '哮喘发作次数 (Y)', values: '2, 5, 9, 3, 6' }
-    ],
-    indicators: [
-      { name: 'β 系数', value: '0.021', desc: 'PM2.5 每增加 1 单位，log(发作次数) 增加 0.021' },
-      { name: '发生率比 IRR', value: '1.021', desc: 'PM2.5 每增加 1 单位，发作次数变为 1.021 倍' },
-      { name: 'p 值', value: '0.003', desc: 'p &lt; 0.01，显著' }
-    ],
-    conclusion: { reject: true, text: 'β = 0.021, p = 0.003 &lt; 0.01，拒绝 H₀。PM2.5 水平能显著预测哮喘发作次数。' },
-    chineseReport: '泊松回归分析结果显示：PM2.5 指数对哮喘发作次数有显著的正向预测作用（β = 0.021, p = 0.003）。PM2.5 每增加 1 单位，发作次数增加约 2.1%（IRR = 1.021）。',
-    note: '适用条件：因变量为计数变量（非负整数）、均值和方差大致相等。如果数据过度分散（方差远大于均值），应使用负二项回归。'
-  },
-
-  // ---- 正态性 / 方差齐性检验 ----
-  shapiro_wilk: {
-    name: 'Shapiro-Wilk 正态性检验',
-    icon: '📊',
-    scenario: '检验一组数据是否来自正态分布（近似钟形曲线）。是选择参数检验还是非参数检验的重要前提步骤。',
-    hypothesis: { h0: '数据服从正态分布', h1: '数据不服从正态分布' },
-    dataExample: [
-      { label: '数据', values: '23, 21, 25, 22, 24, 18, 20, 19, 21, 17' }
-    ],
-    indicators: [
-      { name: 'W 值', value: '0.965', desc: 'Shapiro-Wilk 统计量，越接近 1 越像正态分布' },
-      { name: 'p 值', value: '0.832', desc: 'p &gt; 0.05，不能拒绝 H₀，数据可认为服从正态分布' }
-    ],
-    conclusion: { reject: false, text: 'W = 0.965, p = 0.832 &gt; 0.05，不能拒绝 H₀。数据服从正态分布。' },
-    chineseReport: 'Shapiro-Wilk 正态性检验结果显示：W = 0.965，p = 0.832 &gt; 0.05，不能拒绝原假设。没有证据表明数据偏离正态分布，可以认为数据满足正态性假设。',
-    note: '适用条件：样本量 3-5000。小样本（n &lt; 50）时最推荐的正态性检验。注意：p &gt; 0.05 表示"数据不显著偏离正态"，而非"确定是正态"。大样本时即使微小偏离也会 p &lt; 0.05，应结合图形判断。'
-  },
-  ks_test: {
-    name: 'Kolmogorov-Smirnov 检验（KS 检验）',
-    icon: '📊',
-    scenario: '有两种用途：（1）单样本 KS 检验：比较一组数据的分布是否与某个理论分布一致；（2）两样本 KS 检验：比较两组数据的分布是否相同。',
-    hypothesis: { h0: '两组数据的分布相同', h1: '两组数据的分布不同' },
-    dataExample: [
-      { label: 'A 组', values: '12, 15, 18, 20, 22' },
-      { label: 'B 组', values: '8, 10, 13, 14, 16' }
-    ],
-    indicators: [
-      { name: 'D 值', value: '0.70', desc: '两组经验分布函数的最大垂直距离，范围 0-1' },
-      { name: 'p 值', value: '0.054', desc: 'p &gt; 0.05，不显著' }
-    ],
-    conclusion: { reject: false, text: 'D = 0.70, p = 0.054 &gt; 0.05，不能拒绝 H₀。两组分布无显著差异（边缘显著）。' },
-    chineseReport: '两样本 KS 检验结果显示：D = 0.70，p = 0.054 &gt; 0.05，不能拒绝原假设。两组数据的分布没有统计显著的差异，但结果已接近显著水平。',
-    note: '适用条件：数据至少为有序变量。不要求正态分布。对分布的形状和位置差异都敏感。大样本时更可靠。'
-  },
-  levene: {
-    name: 'Levene 方差齐性检验',
-    icon: '📊',
-    scenario: '检验两个或多个组的方差是否相等（方差齐性）。是 t 检验和 ANOVA 的重要前提检验。例如：检验两组数据的波动幅度是否大致相同。',
-    hypothesis: { h0: '各组的方差相等（方差齐）', h1: '至少有一组的方差与其他组不同（方差不齐）' },
-    dataExample: [
-      { label: 'A 组', values: '23, 21, 25, 22, 24' },
-      { label: 'B 组', values: '18, 20, 19, 21, 17' }
-    ],
-    indicators: [
-      { name: 'F 值', value: '0.15', desc: 'Levene 统计量，基于各观测值离组中位数的距离' },
-      { name: 'p 值', value: '0.708', desc: 'p &gt; 0.05，不拒绝 H₀，可以认为方差齐' }
-    ],
-    conclusion: { reject: false, text: 'F(1, 8) = 0.15, p = 0.708 &gt; 0.05，不能拒绝 H₀。两组方差齐。' },
-    chineseReport: 'Levene 方差齐性检验结果显示：F(1, 8) = 0.15，p = 0.708 &gt; 0.05，不能拒绝原假设。没有证据表明两组的方差不相等，可以认为满足方差齐性假设。',
-    note: '适用条件：用于检验方差齐性。对正态分布要求不高（比早期的 Bartlett 检验更稳健）。如果 p &lt; 0.05，说明方差不齐，此时 t 检验应使用 Welch 校正，ANOVA 应使用 Welch ANOVA。'
-  }
-};
-
-// ============================================================
-// 2. 决策树 / 问题流定义
-// ============================================================
-const QUESTIONS = [
-  {
-    id: 'dv_type',
-    title: '你的因变量是什么类型？',
-    desc: '因变量 (DV) 就是你最终想比较、分析或预测的那个结果变量。先确定它的类型，才能选择正确的分析方法。',
-    options: [
-      { id: 'continuous', label: '连续变量', desc: '可以取任意数值，有单位。如：身高(cm)、体重(kg)、温度(°C)、考试成绩（分）' },
-      { id: 'categorical', label: '分类变量', desc: '分几个类别、没有顺序。如：性别（男/女）、血型（A/B/AB/O）、是否患病（是/否）' },
-      { id: 'ordinal', label: '有序变量', desc: '有顺序的分类，但间隔不一定等距。如：满意度（差/中/好）、学历（高中/本科/硕士）、评级（1星~5星）' },
-      { id: 'count', label: '计数变量', desc: '计数得到的事件次数（非负整数）。如：一周内生病次数、某区域月事故数、某时段电话呼入数' }
-    ]
-  },
-  // ---- 连续变量的分支 ----
-  {
-    id: 'goal_cont',
-    title: '你想用这个连续变量做什么？',
-    desc: '请告诉我你的研究目的——你想分析这个连续变量的什么方面？',
-    dependsOn: { dv_type: 'continuous' },
-    options: [
-      { id: 'compare_means', label: '比较均值 / 差异', desc: '想比较一个或多个组的平均值是否有差异。如：A 组和 B 组的平均分谁更高？' },
-      { id: 'correlation', label: '看相关关系', desc: '想知道两个变量之间有没有关系、是正相关还是负相关。如：身高和体重有关系吗？' },
-      { id: 'prediction', label: '做预测 / 回归', desc: '想用一个变量预测另一个变量。如：用学习时长预测考试成绩。' }
-    ]
-  },
-  {
-    id: 'num_groups_cont',
-    title: '你要比较几组数据的均值？',
-    desc: '你有几组不同的样本需要比较？',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means' },
-    options: [
-      { id: 'one', label: '一组（单样本）', desc: '只有一组样本，想把它和一个已知值比较。如：某班平均分是否等于 75 分？' },
-      { id: 'two', label: '两组', desc: '正好两组数据。如：实验组 vs 对照组、男生 vs 女生。' },
-      { id: 'multiple', label: '三组及以上', desc: '有三组或更多组数据。如：A/B/C 三种教学方法的效果比较。' }
-    ]
-  },
-  {
-    id: 'paired_cont',
-    title: '这两组样本是独立的还是配对的？',
-    desc: '两组数据之间是什么关系？',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means', num_groups_cont: 'two' },
-    options: [
-      { id: 'independent', label: '独立样本', desc: '两组人不是同一批。如：实验组（用新方法）vs 对照组（用旧方法），两组是完全不同的人。' },
-      { id: 'paired', label: '配对样本', desc: '同一批人测了两次，或用某种关系一一配对。如：治疗前 vs 治疗后、双胞胎配对。' }
-    ]
-  },
-  {
-    id: 'normality_two_ind',
-    title: '两组数据分别是否近似正态分布？方差是否大致相等？',
-    desc: '参数检验（如 t 检验）有两个重要的前提条件需要判断。如果拿不准，可以先选"是"（参数检验功效更高），或者参考 Shapiro-Wilk 检验结果。',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means', num_groups_cont: 'two', paired_cont: 'independent' },
-    options: [
-      { id: 'normal_equal', label: '近似正态 & 方差齐 ✓', desc: '两组数据都是钟形曲线（正态），且波动幅度差不多。→ 使用标准 t 检验（统计功效最高）' },
-      { id: 'normal_unequal', label: '近似正态 & 方差不齐', desc: '数据是钟形曲线，但两组波动幅度差异较大。→ 使用 Welch t 检验（校正方差不齐）' },
-      { id: 'non_normal', label: '不满足正态', desc: '数据不是钟形曲线，或样本量太小无法判断。→ 使用非参数检验（不要求正态分布）' }
-    ]
-  },
-  {
-    id: 'normality_paired',
-    title: '配对差值的分布是否近似正态？',
-    desc: '配对 t 检验要求每对数据的差值（后测 − 前测）近似服从正态分布。',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means', num_groups_cont: 'two', paired_cont: 'paired' },
-    options: [
-      { id: 'normal', label: '差值近似正态', desc: '差值的分布大致呈钟形曲线。→ 使用配对 t 检验' },
-      { id: 'non_normal', label: '不满足正态', desc: '差值分布偏离正态严重，或样本量太小。→ 使用 Wilcoxon 符号秩检验' }
-    ]
-  },
-  {
-    id: 'normality_one_cont',
-    title: '数据是否近似正态分布？',
-    desc: '单样本 t 检验要求数据近似服从正态分布。如果样本量足够大（n &gt; 30），对正态性的要求可以放宽。',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means', num_groups_cont: 'one' },
-    options: [
-      { id: 'normal', label: '近似正态', desc: '数据大致呈钟形曲线。→ 使用单样本 t 检验' },
-      { id: 'non_normal', label: '不满足正态', desc: '偏离正态严重或样本量小。→ 使用单样本 Wilcoxon 符号秩检验' }
-    ]
-  },
-  {
-    id: 'normality_multi_ind',
-    title: '各组数据是否近似正态，且方差齐？',
-    desc: 'ANOVA 要求各组内数据近似正态分布，且各组方差大致相等。',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means', num_groups_cont: 'multiple' },
-    options: [
-      { id: 'normal_equal', label: '正态 & 方差齐 ✓', desc: '各组数据都呈钟形曲线，波动幅度也差不多。→ 使用单因素 ANOVA' },
-      { id: 'normal_unequal', label: '正态 & 方差不齐', desc: '数据正态但各组波动幅度差异大。→ 使用 Welch ANOVA' },
-      { id: 'non_normal', label: '不满足正态', desc: '不呈钟形曲线或样本量太小。→ 使用 Kruskal-Wallis 检验' }
-    ]
-  },
-  {
-    id: 'repeated_or_not',
-    title: '这些多组样本是独立的还是重复测量？',
-    desc: '多组数据之间的关系是什么？',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means', num_groups_cont: 'multiple' },
-    options: [
-      { id: 'independent', label: '独立多组', desc: '每组是完全不同的人/对象。如：A/B/C 三个教学方法班的学生成绩——三个班的学生不同。' },
-      { id: 'repeated', label: '重复测量', desc: '同一组人在不同时间/条件下测了多次。如：治疗前、治疗1个月、治疗3个月测了同一批人的血压。' }
-    ]
-  },
-  {
-    id: 'normality_repeated',
-    title: '重复测量的数据是否近似正态？',
-    desc: '重复测量 ANOVA 要求数据近似正态分布。如果不满足，可使用非参数替代。',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'compare_means', num_groups_cont: 'multiple', repeated_or_not: 'repeated' },
-    options: [
-      { id: 'normal', label: '近似正态', desc: '数据呈钟形曲线。→ 使用重复测量 ANOVA' },
-      { id: 'non_normal', label: '不满足正态', desc: '偏离正态严重。→ 使用 Friedman 检验' }
-    ]
-  },
-  {
-    id: 'normality_corr_cont',
-    title: '两个变量是否都近似正态分布？',
-    desc: 'Pearson 相关要求两个变量都近似正态分布。如果不满足，可使用 Spearman 相关（不需要正态假设）。',
-    dependsOn: { dv_type: 'continuous', goal_cont: 'correlation' },
-    options: [
-      { id: 'normal', label: '都近似正态', desc: '两个变量都大致呈钟形曲线。→ 使用 Pearson 相关' },
-      { id: 'non_normal', label: '不满足正态', desc: '偏离正态、有异常值、或想分析单调关系。→ 使用 Spearman 秩相关' }
-    ]
-  },
-  // ---- 分类变量的分支 ----
-  {
-    id: 'goal_cat',
-    title: '你想用这个分类变量做什么？',
-    desc: '你的分类数据要分析什么方面？',
-    dependsOn: { dv_type: 'categorical' },
-    options: [
-      { id: 'compare_proportion', label: '比较比例', desc: '想看不同组的比例是否有差异。如：男女的治愈率是否有差异？' },
-      { id: 'association', label: '看关联关系', desc: '想知道两个分类变量是否有关联。如：吸烟（是/否）与得肺癌（是/否）是否相关？' },
-      { id: 'prediction', label: '做预测 / 回归', desc: '想用一些变量预测一个二分类结果（是/否）。如：用年龄和BMI预测是否患病。' }
-    ]
-  },
-  {
-    id: 'num_groups_cat',
-    title: '你要比较几组的比例？',
-    desc: '你有几组数据需要比较比例？',
-    dependsOn: { dv_type: 'categorical', goal_cat: 'compare_proportion' },
-    options: [
-      { id: 'one', label: '一组（单样本）', desc: '只有一组，想把它和一个已知比例比。如：调查100人，女性62%，是否显著高于 50%？' },
-      { id: 'two', label: '两组', desc: '两组数据比比例。如：男性和女性的治愈率是否有差异？' },
-      { id: 'multiple', label: '三组及以上', desc: '三组或更多组比比例。如：A、B、C 三种治疗方案的有效率是否有差异？' }
-    ]
-  },
-  {
-    id: 'paired_cat',
-    title: '这两组分类数据是独立还是配对的？',
-    desc: '两组比例数据之间是什么关系？',
-    dependsOn: { dv_type: 'categorical', goal_cat: 'compare_proportion', num_groups_cat: 'two' },
-    options: [
-      { id: 'independent', label: '独立样本', desc: '两组是不相干的人。如：男性组 vs 女性组——两组完全没有重叠。' },
-      { id: 'paired', label: '配对样本', desc: '同一批人测了两次。如：治疗前症状（有/无）vs 治疗后症状（有/无）。' }
-    ]
-  },
-  {
-    id: 'sample_size_cat',
-    title: '样本量够大吗？（所有期望频数 ≥ 5？）',
-    desc: '分类数据的检验方法选择与样本量有关。卡方检验要求每个格子"期望的个案数"不小于 5。',
-    dependsOn: { dv_type: 'categorical', goal_cat: 'compare_proportion', num_groups_cat: 'multiple' },
-    options: [
-      { id: 'large', label: '样本量大 ✓', desc: '每个格子的期望频数都 ≥ 5。→ 使用卡方检验' },
-      { id: 'small', label: '样本量小', desc: '有些格子期望频数 &lt; 5。→ 考虑增大样本，或使用 Fisher 精确检验（但多组时计算复杂）' }
-    ]
-  },
-  {
-    id: 'sample_size_cat2',
-    title: '样本量够大吗？是否有格子期望频数小于 5？',
-    desc: '判断是用卡方检验还是 Fisher 精确检验，主要看列联表中是否有期望频数小于 5 的格子。',
-    dependsOn: { dv_type: 'categorical', goal_cat: 'compare_proportion', num_groups_cat: 'two', paired_cat: 'independent' },
-    options: [
-      { id: 'large', label: '样本量大', desc: '所有格子的期望频数都 ≥ 5。→ 使用卡方检验' },
-      { id: 'small', label: '样本量小', desc: '存在期望频数 &lt; 5 的格子。→ 使用 Fisher 精确检验' }
-    ]
-  },
-  {
-    id: 'sample_size_assoc',
-    title: '样本量够大吗？（所有期望频数 ≥ 5？）',
-    desc: '卡方检验要求每个格子的期望频数 ≥ 5，否则结果不可靠。',
-    dependsOn: { dv_type: 'categorical', goal_cat: 'association' },
-    options: [
-      { id: 'large', label: '样本量大 ✓', desc: '每个格子的期望频数都 ≥ 5。→ 使用卡方检验' },
-      { id: 'small', label: '样本量小', desc: '有格子期望频数 &lt; 5。→ 使用 Fisher 精确检验' }
-    ]
-  },
-  // ---- 有序变量的分支 ----
-  {
-    id: 'goal_ord',
-    title: '你想用这个有序变量做什么？',
-    desc: '你的有序数据要分析什么？',
-    dependsOn: { dv_type: 'ordinal' },
-    options: [
-      { id: 'compare_distribution', label: '比较分布 / 差异', desc: '想比较一个或多个组的分布是否有差异。如：不同学历组（高中/本科/硕士）的满意度有差异吗？' },
-      { id: 'correlation', label: '看相关关系', desc: '想知道两个有序变量是否有关系。如：学历等级和满意度等级有关系吗？' }
-    ]
-  },
-  {
-    id: 'num_groups_ord',
-    title: '你要比较几组数据的分布？',
-    desc: '你有几组有序变量需要比较？',
-    dependsOn: { dv_type: 'ordinal', goal_ord: 'compare_distribution' },
-    options: [
-      { id: 'one', label: '一组（单样本）', desc: '只有一组有序数据。如：一组满意度评分的中位数是否等于 3（一般）？' },
-      { id: 'two', label: '两组', desc: '两组有序数据。如：男性 vs 女性的满意度评分分布是否有差异？' },
-      { id: 'multiple', label: '三组及以上', desc: '三组或更多。如：低/中/高收入人群的满意度分布是否不同？' }
-    ]
-  },
-  {
-    id: 'paired_ord',
-    title: '这两组有序数据是独立还是配对的？',
-    desc: '两组数据之间是什么关系？',
-    dependsOn: { dv_type: 'ordinal', goal_ord: 'compare_distribution', num_groups_ord: 'two' },
-    options: [
-      { id: 'independent', label: '独立样本', desc: '两组是完全不同的人。如：男性组 vs 女性组。' },
-      { id: 'paired', label: '配对样本', desc: '同一批人前后测了两次。如：满意度前测 vs 后测。' }
-    ]
-  },
-  // ---- 计数变量的分支 ----
-  {
-    id: 'goal_count',
-    title: '你想用这个计数变量做什么？',
-    desc: '你的计数数据要分析什么？',
-    dependsOn: { dv_type: 'count' },
-    options: [
-      { id: 'compare_count', label: '比较 / 预测计数', desc: '想比较不同组的计数是否有差异，或用变量预测计数结果。如：不同地区的月事故数是否有差异？' },
-      { id: 'goodness_of_fit', label: '拟合优度检验', desc: '想知道观察到的频数分布是否符合某个理论分布。如：三种颜色的产量是否符合 1:2:1？' }
-    ]
-  }
-];
-
-// ============================================================
-// 3. 终端结果映射（每种选择路径对应的检验）
-// ============================================================
-const PATH_RESULTS = {
-  // 连续 → 比较均值 → 一组 → 正态
-  'continuous|compare_means|one|normal': 'one_sample_t',
-  // 连续 → 比较均值 → 一组 → 非正态
-  'continuous|compare_means|one|non_normal': 'one_sample_wilcoxon',
-  // 连续 → 比较均值 → 两组 → 独立 → 正态&方差齐
-  'continuous|compare_means|two|independent|normal_equal': 'independent_t',
-  // 连续 → 比较均值 → 两组 → 独立 → 正态&方差不齐
-  'continuous|compare_means|two|independent|normal_unequal': 'welch_t',
-  // 连续 → 比较均值 → 两组 → 独立 → 非正态
-  'continuous|compare_means|two|independent|non_normal': 'mann_whitney',
-  // 连续 → 比较均值 → 两组 → 配对 → 正态
-  'continuous|compare_means|two|paired|normal': 'paired_t',
-  // 连续 → 比较均值 → 两组 → 配对 → 非正态
-  'continuous|compare_means|two|paired|non_normal': 'wilcoxon_signed',
-  // 连续 → 比较均值 → 多组 → 独立多组 → 正态&方差齐
-  'continuous|compare_means|multiple|independent|normal_equal': 'oneway_anova',
-  // 连续 → 比较均值 → 多组 → 独立多组 → 正态&方差不齐
-  'continuous|compare_means|multiple|independent|normal_unequal': 'welch_anova',
-  // 连续 → 比较均值 → 多组 → 独立多组 → 非正态
-  'continuous|compare_means|multiple|independent|non_normal': 'kruskal_wallis',
-  // 连续 → 比较均值 → 多组 → 重复测量 → 正态
-  'continuous|compare_means|multiple|repeated|normal': 'repeated_anova',
-  // 连续 → 比较均值 → 多组 → 重复测量 → 非正态
-  'continuous|compare_means|multiple|repeated|non_normal': 'friedman',
-  // 连续 → 相关 → 正态
-  'continuous|correlation|normal': 'pearson_corr',
-  // 连续 → 相关 → 非正态
-  'continuous|correlation|non_normal': 'spearman_corr',
-  // 连续 → 预测
-  'continuous|prediction': 'linear_regression',
-
-  // 分类 → 比较比例 → 一组
-  'categorical|compare_proportion|one': 'one_sample_prop',
-  // 分类 → 比较比例 → 两组 → 独立 → 大样本
-  'categorical|compare_proportion|two|independent|large': 'chi_square',
-  // 分类 → 比较比例 → 两组 → 独立 → 小样本
-  'categorical|compare_proportion|two|independent|small': 'fisher_exact',
-  // 分类 → 比较比例 → 两组 → 配对
-  'categorical|compare_proportion|two|paired': 'mcnemar',
-  // 分类 → 比较比例 → 多组
-  'categorical|compare_proportion|multiple|large': 'chi_square',
-  'categorical|compare_proportion|multiple|small': 'fisher_exact', // 会提示局限性
-  // 分类 → 关联 → 大样本
-  'categorical|association|large': 'chi_square',
-  // 分类 → 关联 → 小样本
-  'categorical|association|small': 'fisher_exact',
-  // 分类 → 预测
-  'categorical|prediction': 'logistic_regression',
-
-  // 有序 → 比较分布 → 一组
-  'ordinal|compare_distribution|one': 'one_sample_wilcoxon',
-  // 有序 → 比较分布 → 两组 → 独立
-  'ordinal|compare_distribution|two|independent': 'mann_whitney',
-  // 有序 → 比较分布 → 两组 → 配对
-  'ordinal|compare_distribution|two|paired': 'wilcoxon_signed',
-  // 有序 → 比较分布 → 多组
-  'ordinal|compare_distribution|multiple': 'kruskal_wallis',
-  // 有序 → 相关
-  'ordinal|correlation': 'spearman_corr',
-
-  // 计数 → 比较/预测
-  'count|compare_count': 'poisson_regression',
-  // 计数 → 拟合优度
-  'count|goodness_of_fit': 'chi_square_gof'
-};
-
-// ============================================================
-// 4. 状态管理
-// ============================================================
-const state = {
-  selections: {},   // { questionId: optionId }
-  path: [],         // [{ questionId, questionLabel, optionId, optionLabel }]
-  currentQ: null,   // current question id
-  completed: false,
-  resultKey: null
-};
-
-const questionMap = {};
-QUESTIONS.forEach(q => { questionMap[q.id] = q; });
-
-// ============================================================
-// 5. UI 渲染函数
-// ============================================================
-function render() {
-  renderBreadcrumb();
-  renderProgress();
-  const main = document.getElementById('mainContent');
-  const resetBtn = document.getElementById('resetBtn');
-
-  if (state.completed && state.resultKey) {
-    renderResult(main);
-    resetBtn.style.display = '';
-    document.getElementById('progressWrap').style.display = 'none';
-    return;
-  }
-
-  // Find next unanswered question
-  const nextQ = findNextQuestion();
-  if (!nextQ) {
-    // Shouldn't happen if completed is set, but fallback
-    main.innerHTML = '<div class="empty-state"><span class="empty-icon">✅</span><p>所有问题已回答完毕！</p></div>';
-    resetBtn.style.display = '';
-    return;
-  }
-
-  state.currentQ = nextQ.id;
-  renderQuestion(main, nextQ);
-  resetBtn.style.display = '';
-  document.getElementById('progressWrap').style.display = '';
-}
-
-function findNextQuestion() {
-  for (const q of QUESTIONS) {
-    if (state.selections[q.id] !== undefined) continue;
-    if (!q.dependsOn) return q;
-    let match = true;
-    for (const [depQ, depVal] of Object.entries(q.dependsOn)) {
-      if (state.selections[depQ] !== depVal) { match = false; break; }
-    }
-    if (match) return q;
-  }
-  return null;
-}
-
-function checkCompletion() {
-  // Build the path key
-  const keys = [];
-  for (const entry of state.path) {
-    keys.push(entry.optionId);
-  }
-  const pathKey = keys.join('|');
-  // Check exact match
-  if (PATH_RESULTS[pathKey] !== undefined) {
-    state.completed = true;
-    state.resultKey = PATH_RESULTS[pathKey];
-    return true;
-  }
-  // Also check longer paths that contain this as prefix — we need to be more careful
-  // Just check if there are no more questions AND we have a match
-  if (!findNextQuestion() && PATH_RESULTS[pathKey] !== undefined) {
-    state.completed = true;
-    state.resultKey = PATH_RESULTS[pathKey];
-    return true;
-  }
-  // Check if no more questions but no match (fallback)
-  if (!findNextQuestion() && PATH_RESULTS[pathKey] === undefined && state.path.length > 0) {
-    // Try to find closest match
-    for (const [pk, testKey] of Object.entries(PATH_RESULTS)) {
-      if (pathKey.startsWith(pk) || pk.startsWith(pathKey)) {
-        state.completed = true;
-        state.resultKey = testKey;
-        return true;
+  <script>
+    const questions = {
+      variable: {
+        title: "你最终想比较或预测的结果，是什么类型？",
+        hint: "这个结果也叫“因变量”。先别管自变量，先看你最关心的结果长什么样。",
+        options: [
+          ["连续变量", "像身高、血压、成绩、收入、反应时间；数值可以有小数。", "contGoal"],
+          ["分类变量", "像是否患病、是否通过、血型、品牌选择；结果是类别。", "catGoal"],
+          ["有序变量", "像满意度 1-5 分、疼痛等级、疾病分期；类别有高低顺序。", "ordGoal"],
+          ["计数变量", "像发作次数、事故次数、点击次数；结果是非负整数。", "countGoal"]
+        ]
+      },
+      contGoal: {
+        title: "你想对这个连续结果做什么？",
+        hint: "连续变量最常见的是比较平均水平、看两个数值是否一起变化，或者做预测。",
+        options: [
+          ["和一个标准值比较", "例如班级平均分是否不同于 80 分。", "contOneNormal"],
+          ["比较几组人的平均水平", "例如 A 药和 B 药的血压下降值是否不同。", "contGroups"],
+          ["看两个变量是否相关", "例如学习时长越长，成绩是否越高。", "corrType"],
+          ["用一个或多个变量预测它", "例如用年龄、运动量预测血压。", null, "linear_regression"],
+          ["检查正态性或方差齐性", "先判断能不能放心使用 t 检验或 ANOVA。", "assumptionGoal"],
+          ["比较整体分布形状", "不仅看平均值，还想看整条分布是否相同。", "distGoal"]
+        ]
+      },
+      contGroups: {
+        title: "要比较几组？",
+        hint: "一组是和固定标准值比；两组是 A vs B；多组是 A vs B vs C 或更多。",
+        options: [
+          ["一组", "只有一批数据，要和某个标准值或目标值比较。", "contOneNormal"],
+          ["两组", "例如男生 vs 女生，治疗组 vs 对照组。", "contPair"],
+          ["三组或更多", "例如三种教学方法、四个地区。", "contManyPair"]
+        ]
+      },
+      contOneNormal: {
+        title: "这组数据大致像钟形曲线吗？",
+        hint: "样本很小时可以画直方图或做 Shapiro-Wilk 正态性检验；不确定就先检查。",
+        options: [
+          ["是，近似正态", "数据没有明显偏斜，也没有极端离群值。", null, "one_sample_t"],
+          ["否，不太正态", "明显偏斜、等级化、离群值很多，或样本很小且形状怪。", null, "wilcoxon_signed"],
+          ["不确定，先检查", "我想先知道是否能用正态方法。", null, "shapiro_wilk"]
+        ]
+      },
+      contPair: {
+        title: "两组样本是什么关系？",
+        hint: "关键看两组观测值能不能一一对应。",
+        options: [
+          ["独立样本", "两组人不是同一批人，也没有一一匹配。", "contTwoNormal"],
+          ["配对样本", "同一批人前后测两次，或每个病例配一个相似对照。", "contPairedNormal"]
+        ]
+      },
+      contTwoNormal: {
+        title: "两组数据各自大致正态吗？",
+        hint: "t 检验比较依赖这个条件；样本量较大时通常更稳健。",
+        options: [
+          ["是，近似正态", "两组分布都没有明显偏斜。", "contTwoVariance"],
+          ["否，不太正态", "分布偏斜、离群值多，或更想比较中位数/秩。", null, "mann_whitney"],
+          ["不确定，先检查", "先做正态性检验，再决定 t 检验还是非参数检验。", null, "shapiro_wilk"]
+        ]
+      },
+      contTwoVariance: {
+        title: "两组波动程度差不多吗？",
+        hint: "这叫方差齐性。简单看就是两组标准差是否相差很大。",
+        options: [
+          ["差不多", "两组标准差接近，箱线图的散布范围也类似。", null, "independent_t"],
+          ["差很多", "一组明显更分散；这时 Welch t 检验更稳。", null, "welch_t"],
+          ["不确定，先检查", "先做 Levene 方差齐性检验。", null, "levene_test"]
+        ]
+      },
+      contPairedNormal: {
+        title: "每一对的“差值”大致正态吗？",
+        hint: "配对 t 检验看的是前后差值，而不是两次测量各自的形状。",
+        options: [
+          ["是，差值近似正态", "每个人的后测减前测，差值分布像钟形。", null, "paired_t"],
+          ["否，差值不太正态", "差值明显偏斜，或样本很小。", null, "wilcoxon_signed"],
+          ["不确定，先检查", "先对差值做 Shapiro-Wilk 正态性检验。", null, "shapiro_wilk"]
+        ]
+      },
+      contManyPair: {
+        title: "多组样本之间是什么关系？",
+        hint: "多组独立常见于不同人群；重复测量常见于同一批人测多个时间点。",
+        options: [
+          ["独立样本", "每组是不同的人或对象。", "contManyNormal"],
+          ["重复测量", "同一批人被测了三次或更多。", "contManyRepeatedNormal"]
+        ]
+      },
+      contManyNormal: {
+        title: "每组数据大致正态吗？",
+        hint: "ANOVA 常用于多组均值比较；不满足时考虑秩检验。",
+        options: [
+          ["是，近似正态", "每组分布都还算对称。", "contManyVariance"],
+          ["否，不太正态", "明显偏斜、离群值多，或更关注中位数/秩。", null, "kruskal_wallis"],
+          ["不确定，先检查", "先做正态性检验。", null, "shapiro_wilk"]
+        ]
+      },
+      contManyVariance: {
+        title: "各组方差差不多吗？",
+        hint: "如果各组标准差差异很大，普通 ANOVA 的 p 值可能不稳。",
+        options: [
+          ["差不多", "各组标准差接近。", null, "one_way_anova"],
+          ["差很多", "建议使用 Welch ANOVA，或者考虑稳健/非参数方法。", null, "welch_anova"],
+          ["不确定，先检查", "先做 Levene 方差齐性检验。", null, "levene_test"]
+        ]
+      },
+      contManyRepeatedNormal: {
+        title: "重复测量的差异大致正态吗？",
+        hint: "如果同一批人测了多个时间点，重点是这些时间点之间的变化是否适合正态方法。",
+        options: [
+          ["是，近似正态", "变化趋势平稳，没有严重偏斜。", null, "repeated_anova"],
+          ["否，不太正态", "更适合使用基于秩的 Friedman 检验。", null, "friedman"],
+          ["不确定，先检查", "先做正态性检验，并查看折线图。", null, "shapiro_wilk"]
+        ]
+      },
+      corrType: {
+        title: "两个变量的关系看起来是哪一种？",
+        hint: "Pearson 看线性关系，Spearman 看单调关系；单调就是一个变大时另一个总体也变大或变小。",
+        options: [
+          ["两个连续变量，关系近似直线", "例如身高和体重，散点图像一条斜带。", null, "pearson_corr"],
+          ["有等级变量，或关系不太直线", "例如排名、满意度，或只是总体同升同降。", null, "spearman_corr"],
+          ["不确定正态性", "先检查连续变量是否近似正态。", null, "shapiro_wilk"]
+        ]
+      },
+      assumptionGoal: {
+        title: "你想检查哪个前提？",
+        hint: "正态性看数据形状；方差齐性看不同组的波动是否接近。",
+        options: [
+          ["正态性", "判断数据或差值是否像钟形曲线。", null, "shapiro_wilk"],
+          ["方差齐性", "判断多组数据的波动程度是否差不多。", null, "levene_test"]
+        ]
+      },
+      distGoal: {
+        title: "你想比较哪种分布？",
+        hint: "KS 检验关注整条累计分布曲线，而不是只看平均值。",
+        options: [
+          ["一组数据 vs 理论分布", "例如样本是否像正态分布。", null, "ks_test"],
+          ["两组数据的整体分布", "例如两个地区的收入分布是否整体不同。", null, "ks_test"]
+        ]
+      },
+      catGoal: {
+        title: "你想对分类结果做什么？",
+        hint: "分类变量的重点通常是比例、列联表关系，或前后变化。",
+        options: [
+          ["比较比例或类别分布", "例如男女通过率是否不同，血型分布是否符合预期。", "catGroups"],
+          ["看两个分类变量是否有关", "例如性别和是否购买是否有关。", "catCell"],
+          ["同一批人的前后变化", "例如治疗前后阳性/阴性是否改变。", null, "mcnemar"],
+          ["预测一个二分类结果", "例如预测是否患病、是否违约。", null, "logistic_regression"]
+        ]
+      },
+      catGroups: {
+        title: "有几组或几个类别表？",
+        hint: "一组通常是看观察分布是否符合理论比例；两组或多组通常看比例是否不同。",
+        options: [
+          ["一组，与理论比例比较", "例如骰子六个面是否均匀。", null, "chi_square_goodness"],
+          ["两组或更多，比较比例", "例如三个班的通过率是否相同。", "catCell"]
+        ]
+      },
+      catCell: {
+        title: "列联表里每个格子的期望人数够多吗？",
+        hint: "经验上如果很多格子期望人数小于 5，Fisher 精确检验更稳。",
+        options: [
+          ["够多", "样本量不小，大多数格子的期望人数至少约 5。", null, "chi_square_independence"],
+          ["不够多", "样本很小，或某些类别人数很少。", null, "fisher_exact"],
+          ["不确定", "先看列联表的期望频数；不够时用 Fisher。", null, "fisher_exact"]
+        ]
+      },
+      ordGoal: {
+        title: "你想对有序结果做什么？",
+        hint: "有序变量有高低，但相邻等级差距不一定相等，所以常用非参数方法。",
+        options: [
+          ["比较组间高低", "例如两种治疗后疼痛等级谁更低。", "ordGroups"],
+          ["看两个等级变量是否相关", "例如满意度等级和复购意愿等级。", null, "spearman_corr"]
+        ]
+      },
+      ordGroups: {
+        title: "要比较几组，样本是否配对？",
+        hint: "有序结果通常比较秩或中位数，而不是直接比较均值。",
+        options: [
+          ["两组，独立样本", "两组人不同，例如 A 药组 vs B 药组。", null, "mann_whitney"],
+          ["两组，配对样本", "同一批人前后两次等级评分。", null, "wilcoxon_signed"],
+          ["三组或更多，独立样本", "三组不同人群的等级评分。", null, "kruskal_wallis"],
+          ["三次或更多，重复测量", "同一批人多个时间点的等级评分。", null, "friedman"]
+        ]
+      },
+      countGoal: {
+        title: "你想对计数结果做什么？",
+        hint: "计数数据常见于次数、事件数，通常还要考虑观察时间或暴露量。",
+        options: [
+          ["预测次数或发生率", "例如随访时间不同，预测事故次数。", null, "poisson_regression"],
+          ["检查类别计数是否符合预期", "例如各类投诉数量是否符合历史比例。", null, "chi_square_goodness"],
+          ["比较分类计数之间是否有关", "例如事件类型和地区是否有关。", "catCell"]
+        ]
       }
-    }
-    return false;
-  }
-  return false;
-}
+    };
 
-function renderBreadcrumb() {
-  const el = document.getElementById('breadcrumb');
-  if (state.path.length === 0) {
-    el.innerHTML = '<span class="bc-none">❓ 选择路径将显示在这里</span>';
-    return;
-  }
-  let html = '';
-  state.path.forEach((entry, idx) => {
-    if (idx > 0) html += '<span class="bc-arrow">→</span>';
-    const isCurrent = !state.completed && idx === state.path.length - 1;
-    if (isCurrent) {
-      html += `<span class="bc-step"><span class="bc-current">${escapeHtml(entry.optionLabel)}</span></span>`;
-    } else {
-      html += `<span class="bc-step"><button class="bc-link" data-qidx="${idx}">${escapeHtml(entry.optionLabel)}</button></span>`;
-    }
-  });
-  if (state.completed && state.resultKey) {
-    const test = TESTS[state.resultKey];
-    if (test) {
-      html += '<span class="bc-arrow">→</span>';
-      html += `<span class="bc-step"><span class="bc-current">${escapeHtml(test.name)}</span></span>`;
-    }
-  }
-  el.innerHTML = html;
+    const methods = {
+      one_sample_t: {
+        name: "单样本 t 检验",
+        tag: "连续变量 · 一组 · 正态",
+        why: "只有一组连续数据，并且想知道平均值是否不同于某个标准值；数据近似正态时，用它比较最直观。",
+        applies: "一组连续变量，与一个已知标准值或目标值比较。",
+        h0: "总体均值等于标准值，例如 μ = 80。",
+        h1: "总体均值不等于、大于或小于标准值，取决于研究问题。",
+        sampleColumns: ["学生", "成绩"],
+        sampleRows: [["1", "78"], ["2", "82"], ["3", "85"], ["4", "79"], ["5", "86"]],
+        metrics: [
+          ["输入数据", "5 个成绩，标准值 80", "原始观测值和你要比较的目标值。"],
+          ["计算统计量", "样本均值 = 82.0，t ≈ 1.41，df = 4", "t 值越远离 0，说明样本均值离标准值越远。"],
+          ["决定结论", "p 值、均值差的 95% 置信区间、效应量 Cohen's d", "p < 0.05 常表示均值和标准值差异有统计学意义；置信区间若不含 0，也支持拒绝 H0。"]
+        ],
+        decision: "当 p < 0.05，或均值差的置信区间不包含 0 时，通常拒绝原假设。",
+        report: "本班成绩均值为 82.0 分，单样本 t 检验显示其与 80 分的差异未达到统计学显著，t(4)=1.41，p>0.05。"
+      },
+      independent_t: {
+        name: "独立样本 t 检验",
+        tag: "连续变量 · 两组独立 · 方差齐",
+        why: "两组不是同一批人，结果是连续变量，且两组数据近似正态、波动程度接近；此时比较两组均值用独立样本 t 检验。",
+        applies: "两组独立样本的连续变量均值比较。",
+        h0: "两组总体均值相等。",
+        h1: "两组总体均值不相等，或一组大于另一组。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A 组", "8, 9, 10, 11"], ["B 组", "11, 12, 13, 14"]],
+        metrics: [
+          ["输入数据", "A 组和 B 组各 4 个连续数值", "两组必须彼此独立。"],
+          ["计算统计量", "均值差 = -3.0，t ≈ -3.29，df ≈ 6", "t 值表示均值差相对于组内波动有多大。"],
+          ["决定结论", "p 值、均值差 95% CI、Cohen's d", "p < 0.05 时认为两组均值差异不太可能只是随机波动。"]
+        ],
+        decision: "p < 0.05 时拒绝“两组均值相等”。",
+        report: "A 组均值低于 B 组，独立样本 t 检验显示两组差异有统计学意义，t(6)≈-3.29，p<0.05。"
+      },
+      welch_t: {
+        name: "Welch t 检验",
+        tag: "连续变量 · 两组独立 · 方差不齐",
+        why: "它和独立样本 t 检验目的相同，但不要求两组方差相等；当两组波动差很多时更稳。",
+        applies: "两组独立连续变量均值比较，尤其适合方差不齐或样本量不等。",
+        h0: "两组总体均值相等。",
+        h1: "两组总体均值不相等。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A 组", "8, 9, 10, 11"], ["B 组", "6, 12, 18, 24"]],
+        metrics: [
+          ["输入数据", "两组连续数值，B 组波动明显更大", "先看标准差或 Levene 检验。"],
+          ["计算统计量", "t 值、Welch 修正后的 df", "df 不是简单的 n1+n2-2，而是根据方差差异修正。"],
+          ["决定结论", "p 值、均值差 95% CI、效应量", "p < 0.05 时认为均值差异显著。"]
+        ],
+        decision: "p < 0.05 时拒绝原假设。",
+        report: "Welch t 检验显示两组均值差异未达到统计学显著，t≈-1.34，p>0.05。"
+      },
+      paired_t: {
+        name: "配对样本 t 检验",
+        tag: "连续变量 · 两次配对 · 差值正态",
+        why: "同一批人前后测量，真正要比较的是每个人的变化量；差值近似正态时用配对 t 检验。",
+        applies: "同一对象前后两次连续测量，或一一匹配的两组数据。",
+        h0: "平均差值等于 0。",
+        h1: "平均差值不等于 0，或改善/降低方向明确。",
+        sampleColumns: ["对象", "治疗前", "治疗后", "差值"],
+        sampleRows: [["1", "140", "132", "-8"], ["2", "138", "130", "-8"], ["3", "150", "144", "-6"], ["4", "142", "136", "-6"]],
+        metrics: [
+          ["输入数据", "每个对象有前后两个数值", "先算每个人的后测 - 前测。"],
+          ["计算统计量", "平均差 = -7.0，t 值、df = 配对数 - 1", "t 值衡量平均变化量相对于变化波动的大小。"],
+          ["决定结论", "p 值、平均差 95% CI、配对效应量 dz", "置信区间若完全低于 0，说明后测整体更低。"]
+        ],
+        decision: "p < 0.05 时拒绝“平均变化为 0”。",
+        report: "治疗后血压较治疗前降低，配对样本 t 检验显示平均差异有统计学意义，p<0.05。"
+      },
+      one_way_anova: {
+        name: "单因素 ANOVA",
+        tag: "连续变量 · 多组独立 · 方差齐",
+        why: "要比较三组或更多组的均值，不能反复做很多个 t 检验；ANOVA 先整体判断是否至少有一组不同。",
+        applies: "一个分组因素，三组或更多独立样本的连续变量均值比较。",
+        h0: "所有组的总体均值都相等。",
+        h1: "至少有一组总体均值不同。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A", "7, 8, 9"], ["B", "9, 10, 11"], ["C", "12, 13, 14"]],
+        metrics: [
+          ["输入数据", "三组独立连续数据", "每行是一组。"],
+          ["计算统计量", "组间均方、组内均方、F 值", "F 值越大，组间差异相对组内波动越明显。"],
+          ["决定结论", "p 值、η² 或 partial η²、事后比较", "ANOVA 显著只说明至少一组不同，还要做事后比较看哪两组不同。"]
+        ],
+        decision: "p < 0.05 时拒绝“所有组均值相等”。",
+        report: "三组成绩均值存在统计学显著差异，单因素 ANOVA：F(2,6)≈18.0，p<0.05；建议进一步进行 Tukey 事后比较。"
+      },
+      welch_anova: {
+        name: "Welch ANOVA",
+        tag: "连续变量 · 多组独立 · 方差不齐",
+        why: "当三组或更多组方差差异很大时，Welch ANOVA 比普通单因素 ANOVA 更稳健。",
+        applies: "多组独立连续变量均值比较，方差不齐或样本量不平衡。",
+        h0: "所有组总体均值相等。",
+        h1: "至少有一组总体均值不同。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A", "8, 9, 10"], ["B", "8, 12, 16"], ["C", "15, 16, 17"]],
+        metrics: [
+          ["输入数据", "三组连续数据，组内波动不同", "先通过标准差或 Levene 检验发现方差不齐。"],
+          ["计算统计量", "Welch F 值、修正 df", "自由度会被修正，不再是普通 ANOVA 的固定形式。"],
+          ["决定结论", "p 值、均值差、Games-Howell 事后比较", "显著后推荐用适合方差不齐的事后比较。"]
+        ],
+        decision: "p < 0.05 时拒绝原假设。",
+        report: "Welch ANOVA 显示各组均值存在统计学显著差异，p<0.05；后续采用 Games-Howell 比较组间差异。"
+      },
+      repeated_anova: {
+        name: "重复测量 ANOVA",
+        tag: "连续变量 · 多时间点 · 同一批对象",
+        why: "同一批对象测了三次或更多，数据之间有关联；重复测量 ANOVA 会利用这种配对结构。",
+        applies: "同一对象在三个或更多时间点/条件下的连续变量比较。",
+        h0: "所有时间点或条件的总体均值相等。",
+        h1: "至少一个时间点或条件的总体均值不同。",
+        sampleColumns: ["对象", "第 1 次", "第 2 次", "第 3 次"],
+        sampleRows: [["1", "10", "12", "14"], ["2", "9", "11", "13"], ["3", "11", "12", "15"], ["4", "8", "10", "11"]],
+        metrics: [
+          ["输入数据", "每个对象有多列测量值", "行代表对象，列代表时间点或条件。"],
+          ["计算统计量", "F 值、df、球形性检验", "若球形性不满足，常看 Greenhouse-Geisser 校正后的 p 值。"],
+          ["决定结论", "p 值、partial η²、成对比较", "显著后需要看哪些时间点之间不同。"]
+        ],
+        decision: "校正后 p < 0.05 时拒绝“各时间点均值相同”。",
+        report: "重复测量 ANOVA 显示三个时间点的均值存在显著变化，F≈22.4，p<0.05。"
+      },
+      mann_whitney: {
+        name: "Mann-Whitney U 检验",
+        tag: "非参数 · 两组独立",
+        why: "两组独立，但连续数据不太正态，或结果是有序等级；它比较两组整体秩次/位置差异。",
+        applies: "两组独立样本的连续或有序变量，尤其适合非正态数据。",
+        h0: "两组分布位置相同，随机抽一人来自 A 组高于 B 组的概率约等于反过来。",
+        h1: "两组分布位置不同。",
+        sampleColumns: ["组别", "疼痛评分"],
+        sampleRows: [["A 组", "2, 3, 3, 4"], ["B 组", "4, 5, 5, 6"]],
+        metrics: [
+          ["输入数据", "两组独立评分", "把所有值混在一起排序。"],
+          ["计算统计量", "秩和、U 值", "U 值来自两组秩次的比较。"],
+          ["决定结论", "p 值、秩双列相关或 Cliff's delta", "p < 0.05 表示两组位置差异显著；效应量说明差异大小。"]
+        ],
+        decision: "p < 0.05 时拒绝“两组分布位置相同”。",
+        report: "Mann-Whitney U 检验显示 A 组疼痛评分低于 B 组，U≈1.0，p<0.05。"
+      },
+      wilcoxon_signed: {
+        name: "Wilcoxon 符号秩检验",
+        tag: "非参数 · 配对或一组中位数",
+        why: "配对差值不正态，或一组数据要和某个中位数比较时，用它替代配对 t 检验或单样本 t 检验。",
+        applies: "配对样本的前后差异，或一组连续/有序数据与指定中位数比较。",
+        h0: "差值的中位数等于 0，或总体中位数等于指定值。",
+        h1: "差值的中位数不等于 0，或总体中位数不同于指定值。",
+        sampleColumns: ["对象", "前", "后", "差值"],
+        sampleRows: [["1", "5", "3", "-2"], ["2", "6", "4", "-2"], ["3", "7", "7", "0"], ["4", "8", "5", "-3"]],
+        metrics: [
+          ["输入数据", "配对数据及差值", "去掉差值为 0 的对象，对差值绝对值排序。"],
+          ["计算统计量", "正秩和、负秩和、W 值", "W 通常取较小的符号秩和。"],
+          ["决定结论", "p 值、匹配效应量 r", "p < 0.05 表示前后中位差异显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“中位差值为 0”。",
+        report: "Wilcoxon 符号秩检验显示治疗后评分较治疗前降低，W≈0，p<0.05。"
+      },
+      kruskal_wallis: {
+        name: "Kruskal-Wallis 检验",
+        tag: "非参数 · 多组独立",
+        why: "三组或更多独立样本不适合普通 ANOVA 时，用它比较各组秩次/位置是否不同。",
+        applies: "三组或更多独立样本的连续或有序变量，尤其适合非正态数据。",
+        h0: "各组分布位置相同。",
+        h1: "至少有一组分布位置不同。",
+        sampleColumns: ["组别", "评分"],
+        sampleRows: [["A", "2, 3, 3"], ["B", "4, 4, 5"], ["C", "6, 7, 7"]],
+        metrics: [
+          ["输入数据", "三组独立评分", "先把全部观测值统一排序。"],
+          ["计算统计量", "各组平均秩、H 值", "H 值越大，组间秩差异越明显。"],
+          ["决定结论", "p 值、ε²、Dunn 事后比较", "显著后要进一步比较哪两组不同。"]
+        ],
+        decision: "p < 0.05 时拒绝“各组位置相同”。",
+        report: "Kruskal-Wallis 检验显示三组评分分布存在差异，H≈7.2，p<0.05；建议做 Dunn 事后比较。"
+      },
+      friedman: {
+        name: "Friedman 检验",
+        tag: "非参数 · 多次重复测量",
+        why: "同一批对象测了三次或更多，但数据是等级或不正态；Friedman 是重复测量 ANOVA 的非参数替代。",
+        applies: "同一对象在三个或更多条件下的有序/非正态连续结果。",
+        h0: "各时间点或条件的分布位置相同。",
+        h1: "至少一个时间点或条件不同。",
+        sampleColumns: ["对象", "第 1 次", "第 2 次", "第 3 次"],
+        sampleRows: [["1", "5", "4", "3"], ["2", "6", "5", "4"], ["3", "4", "4", "2"], ["4", "7", "6", "5"]],
+        metrics: [
+          ["输入数据", "每个对象多次评分", "在每个对象内部给不同时间点排序。"],
+          ["计算统计量", "χ²_F 或 Q 值、df", "反映各时间点秩次是否系统不同。"],
+          ["决定结论", "p 值、Kendall's W、成对 Wilcoxon 比较", "Kendall's W 可作为效应量。"]
+        ],
+        decision: "p < 0.05 时拒绝“各时间点位置相同”。",
+        report: "Friedman 检验显示三个时间点评分存在显著差异，χ²(2)≈8.0，p<0.05。"
+      },
+      chi_square_independence: {
+        name: "卡方独立性检验",
+        tag: "分类变量 · 列联表",
+        why: "两个分类变量组成列联表，样本量足够时，用卡方检验判断它们是否有关。",
+        applies: "两个分类变量的关联分析，或多组比例比较。",
+        h0: "两个分类变量相互独立，比例没有差异。",
+        h1: "两个分类变量不独立，比例存在差异。",
+        sampleColumns: ["组别", "通过", "未通过"],
+        sampleRows: [["A 班", "18", "7"], ["B 班", "10", "15"]],
+        metrics: [
+          ["输入数据", "2×2 或更大列联表的实际人数", "每个格子是观察到的人数。"],
+          ["计算统计量", "期望人数、χ² 值、df", "χ² 衡量观察人数和期望人数差多远。"],
+          ["决定结论", "p 值、Cramer's V 或 φ", "p < 0.05 表示比例差异显著；效应量说明关联强度。"]
+        ],
+        decision: "p < 0.05 时拒绝“变量独立/比例相同”。",
+        report: "通过率与班级有关，卡方检验显示差异有统计学意义，χ²(1)≈5.13，p<0.05。"
+      },
+      chi_square_goodness: {
+        name: "卡方拟合优度检验",
+        tag: "分类计数 · 一组分布",
+        why: "只有一组类别计数，想知道观察到的分布是否符合某个理论比例。",
+        applies: "一组分类计数与预期比例比较。",
+        h0: "观察分布符合预期分布。",
+        h1: "观察分布不符合预期分布。",
+        sampleColumns: ["类别", "观察次数", "期望次数"],
+        sampleRows: [["红", "18", "15"], ["蓝", "12", "15"], ["绿", "20", "15"], ["黄", "10", "15"]],
+        metrics: [
+          ["输入数据", "每类观察次数和理论比例", "期望次数 = 总数 × 理论比例。"],
+          ["计算统计量", "χ² = Σ(观察-期望)²/期望", "观察和期望差越大，χ² 越大。"],
+          ["决定结论", "p 值、标准化残差", "显著后看残差，找出哪些类别贡献最大。"]
+        ],
+        decision: "p < 0.05 时拒绝“符合预期分布”。",
+        report: "类别分布与均匀分布存在差异，卡方拟合优度检验 χ²(3)≈4.53，p>0.05 时则不拒绝原假设。"
+      },
+      fisher_exact: {
+        name: "Fisher 精确检验",
+        tag: "分类变量 · 小样本",
+        why: "列联表样本太小或某些格子人数很少时，卡方近似可能不可靠；Fisher 直接计算精确概率。",
+        applies: "小样本 2×2 列联表，或期望频数较小的分类变量比较。",
+        h0: "两分类变量独立，优势比 OR = 1。",
+        h1: "两分类变量有关，OR 不等于 1。",
+        sampleColumns: ["组别", "有效", "无效"],
+        sampleRows: [["治疗组", "5", "1"], ["对照组", "1", "4"]],
+        metrics: [
+          ["输入数据", "2×2 实际人数", "适合总样本很小的情况。"],
+          ["计算统计量", "精确 p 值、优势比 OR", "OR > 1 表示治疗组有效的优势更高。"],
+          ["决定结论", "p 值、OR 的置信区间", "p < 0.05 或 OR 置信区间不含 1 时支持有关联。"]
+        ],
+        decision: "p < 0.05 时拒绝独立性原假设。",
+        report: "Fisher 精确检验显示治疗组有效率高于对照组，OR≈20.0，p<0.05。"
+      },
+      mcnemar: {
+        name: "McNemar 检验",
+        tag: "二分类 · 配对前后",
+        why: "同一批人前后都是二分类结果，例如阴性/阳性；它只关注发生改变的那两格。",
+        applies: "配对二分类数据的前后比例变化。",
+        h0: "从 A 变 B 的人数与从 B 变 A 的人数相同，前后比例无系统变化。",
+        h1: "两个方向改变的人数不同。",
+        sampleColumns: ["", "后：阳性", "后：阴性"],
+        sampleRows: [["前：阳性", "12", "8"], ["前：阴性", "2", "18"]],
+        metrics: [
+          ["输入数据", "配对 2×2 表", "重点是阳转阴 8 人、阴转阳 2 人。"],
+          ["计算统计量", "χ²_McNemar 或精确 p 值", "只用不一致的两个格子计算。"],
+          ["决定结论", "p 值、改变方向比例", "p < 0.05 表示前后阳性率有显著变化。"]
+        ],
+        decision: "p < 0.05 时拒绝“前后改变方向相同”。",
+        report: "McNemar 检验显示治疗前后阳性率发生显著变化，χ²≈3.6，p<0.05。"
+      },
+      pearson_corr: {
+        name: "Pearson 相关",
+        tag: "连续变量 · 线性关系",
+        why: "两个连续变量都近似正态，散点图接近直线趋势时，用 Pearson r 衡量线性相关强度。",
+        applies: "两个连续变量之间的线性相关分析。",
+        h0: "总体相关系数 ρ = 0，即没有线性相关。",
+        h1: "总体相关系数 ρ 不等于 0，或方向明确。",
+        sampleColumns: ["学生", "学习时长", "成绩"],
+        sampleRows: [["1", "1", "60"], ["2", "2", "65"], ["3", "3", "70"], ["4", "4", "78"], ["5", "5", "82"]],
+        metrics: [
+          ["输入数据", "每个对象有两个连续数值", "建议先画散点图。"],
+          ["计算统计量", "相关系数 r、t 值", "r 取 -1 到 1；越接近 ±1，线性关系越强。"],
+          ["决定结论", "p 值、r 的 95% CI", "p < 0.05 表示线性相关显著；r 的绝对值说明强弱。"]
+        ],
+        decision: "p < 0.05 时拒绝“无线性相关”。",
+        report: "学习时长与成绩呈正相关，Pearson r≈0.99，p<0.05。"
+      },
+      spearman_corr: {
+        name: "Spearman 相关",
+        tag: "等级/非正态 · 单调关系",
+        why: "变量是等级，或关系只要求同升同降而不一定是直线；Spearman 用排名来计算相关。",
+        applies: "有序变量、非正态连续变量，或单调但非线性的关系。",
+        h0: "总体 Spearman ρ = 0，即没有单调相关。",
+        h1: "总体 Spearman ρ 不等于 0。",
+        sampleColumns: ["对象", "满意度等级", "复购意愿等级"],
+        sampleRows: [["1", "1", "1"], ["2", "2", "2"], ["3", "3", "3"], ["4", "4", "5"], ["5", "5", "4"]],
+        metrics: [
+          ["输入数据", "每个对象两个等级或可排序数值", "先把数值转换成秩。"],
+          ["计算统计量", "Spearman ρ", "ρ 越接近 1 表示越同向单调，越接近 -1 表示越反向单调。"],
+          ["决定结论", "p 值、ρ 的置信区间", "p < 0.05 表示单调相关显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“无单调相关”。",
+        report: "满意度等级与复购意愿呈正向单调相关，Spearman ρ≈0.90，p<0.05。"
+      },
+      linear_regression: {
+        name: "线性回归",
+        tag: "连续因变量 · 预测",
+        why: "当结果是连续变量，并且想用一个或多个变量解释/预测它时，线性回归比单纯相关更完整。",
+        applies: "连续因变量与一个或多个自变量的关系建模。",
+        h0: "某个回归系数 β = 0，即该自变量与结果无线性关系。",
+        h1: "某个回归系数 β 不等于 0。",
+        sampleColumns: ["对象", "运动小时", "收缩压"],
+        sampleRows: [["1", "1", "142"], ["2", "2", "138"], ["3", "3", "134"], ["4", "4", "130"], ["5", "5", "126"]],
+        metrics: [
+          ["输入数据", "因变量 Y 和自变量 X", "Y 是要预测的结果，X 是解释变量。"],
+          ["计算统计量", "回归系数 β、t 值、R²", "β 表示 X 每增加 1 单位，Y 平均变化多少。"],
+          ["决定结论", "β 的 p 值、95% CI、整体 F 检验", "β 的 CI 不含 0 或 p < 0.05，说明该变量有显著预测作用。"]
+        ],
+        decision: "某个 β 的 p < 0.05 时，拒绝“该自变量无作用”。",
+        report: "线性回归显示运动小时数可显著预测收缩压，β≈-4.0，p<0.05，表示每多运动 1 小时，收缩压平均降低约 4 mmHg。"
+      },
+      logistic_regression: {
+        name: "Logistic 回归",
+        tag: "二分类因变量 · 预测概率",
+        why: "当结果只有是/否、患病/未患病这类二分类时，不能直接用线性回归；Logistic 回归预测事件发生概率。",
+        applies: "二分类因变量与一个或多个自变量的关系建模。",
+        h0: "某个回归系数 β = 0，或 OR = 1。",
+        h1: "某个回归系数 β 不等于 0，或 OR 不等于 1。",
+        sampleColumns: ["对象", "年龄", "是否患病"],
+        sampleRows: [["1", "30", "否"], ["2", "40", "否"], ["3", "50", "是"], ["4", "60", "是"], ["5", "70", "是"]],
+        metrics: [
+          ["输入数据", "二分类结果和预测变量", "结果通常编码为 0/1。"],
+          ["计算统计量", "β、标准误、Wald z、OR = exp(β)", "OR > 1 表示 X 越大，事件优势越高；OR < 1 表示越低。"],
+          ["决定结论", "p 值、OR 95% CI、AUC", "OR 的 CI 不含 1 或 p < 0.05，说明预测变量显著。"]
+        ],
+        decision: "某个 β 的 p < 0.05，或 OR 的置信区间不含 1 时，拒绝原假设。",
+        report: "Logistic 回归显示年龄与患病概率相关，OR≈1.12，p<0.05，表示年龄每增加 1 岁，患病优势约增加 12%。"
+      },
+      poisson_regression: {
+        name: "泊松回归",
+        tag: "计数因变量 · 发生率",
+        why: "结果是次数，并且可能有不同观察时间或暴露量；泊松回归用来建模事件发生率。",
+        applies: "计数结果与自变量的关系建模，例如事故次数、发作次数。",
+        h0: "某个回归系数 β = 0，或发生率比 IRR = 1。",
+        h1: "某个回归系数 β 不等于 0，或 IRR 不等于 1。",
+        sampleColumns: ["对象", "暴露月数", "事故次数", "是否培训"],
+        sampleRows: [["1", "6", "3", "否"], ["2", "6", "2", "否"], ["3", "6", "1", "是"], ["4", "6", "0", "是"]],
+        metrics: [
+          ["输入数据", "计数、暴露时间、自变量", "暴露时间不同时要加入 offset。"],
+          ["计算统计量", "β、z 值、IRR = exp(β)", "IRR < 1 表示发生率降低，IRR > 1 表示发生率升高。"],
+          ["决定结论", "p 值、IRR 95% CI、过度离散检查", "若方差远大于均值，可能需要负二项回归。"]
+        ],
+        decision: "p < 0.05 或 IRR 置信区间不含 1 时，拒绝“发生率无变化”。",
+        report: "泊松回归显示培训与事故发生率降低相关，IRR≈0.40，p<0.05。"
+      },
+      ks_test: {
+        name: "KS 检验",
+        tag: "分布差异 · 连续变量",
+        why: "它比较整条累计分布曲线，适合问“这组数据像不像某个理论分布”或“两组整体分布是否不同”。",
+        applies: "一组样本与理论分布比较，或两组连续样本的分布比较。",
+        h0: "样本来自指定分布，或两组来自同一分布。",
+        h1: "样本不来自指定分布，或两组分布不同。",
+        sampleColumns: ["样本 A", "样本 B"],
+        sampleRows: [["1.1", "1.8"], ["1.3", "2.0"], ["1.5", "2.2"], ["1.8", "2.4"], ["2.0", "2.7"]],
+        metrics: [
+          ["输入数据", "连续样本值，或样本值加理论分布", "KS 对离散数据和大量相同值不太理想。"],
+          ["计算统计量", "D 值", "D 是两条累计分布曲线之间的最大距离。"],
+          ["决定结论", "p 值", "p < 0.05 表示分布差异显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“分布相同/符合理论分布”。",
+        report: "KS 检验显示两组累计分布存在显著差异，D≈0.80，p<0.05。"
+      },
+      shapiro_wilk: {
+        name: "Shapiro-Wilk 正态性检验",
+        tag: "前提检查 · 正态性",
+        why: "在决定是否使用 t 检验、ANOVA、Pearson 相关之前，常用它检查数据或差值是否近似正态。",
+        applies: "连续变量、配对差值、模型残差的正态性检查；常用于小到中等样本。",
+        h0: "数据来自正态分布。",
+        h1: "数据不来自正态分布。",
+        sampleColumns: ["观测值"],
+        sampleRows: [["78"], ["82"], ["85"], ["79"], ["86"], ["81"]],
+        metrics: [
+          ["输入数据", "一列连续数值", "配对设计时应检查差值，而不是分别检查前后。"],
+          ["计算统计量", "W 值", "W 越接近 1，越像正态分布。"],
+          ["决定结论", "p 值、Q-Q 图", "p < 0.05 常提示偏离正态；样本很大时很小偏离也可能显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“数据正态”；p ≥ 0.05 只能说未发现明显偏离正态。",
+        report: "Shapiro-Wilk 检验未发现数据显著偏离正态，W≈0.96，p>0.05。"
+      },
+      levene_test: {
+        name: "Levene 方差齐性检验",
+        tag: "前提检查 · 方差齐性",
+        why: "比较两组或多组均值前，用它检查各组波动是否差不多；这会影响选择普通 t/ANOVA 还是 Welch 方法。",
+        applies: "两组或多组连续变量的方差齐性检查。",
+        h0: "各组总体方差相等。",
+        h1: "至少有一组总体方差不同。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A", "8, 9, 10, 11"], ["B", "7, 12, 16, 20"], ["C", "9, 10, 11, 12"]],
+        metrics: [
+          ["输入数据", "每组连续数值", "先按组整理。"],
+          ["计算统计量", "F 值", "F 值越大，说明各组波动差异越明显。"],
+          ["决定结论", "p 值", "p < 0.05 表示方差齐性可能不满足。"]
+        ],
+        decision: "p < 0.05 时拒绝“方差相等”；可考虑 Welch t 检验或 Welch ANOVA。",
+        report: "Levene 检验显示各组方差不齐，F≈6.2，p<0.05；后续建议使用 Welch 方法。"
+      }
+    };
 
-  // Add click handlers for breadcrumb links
-  el.querySelectorAll('.bc-link').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const idx = parseInt(this.dataset.qidx);
-      goBackTo(idx);
+    const concepts = [
+      ["原假设 H0", "默认先相信“没有差异、没有关系、没有变化”。检验的任务是看数据是否足够反常，从而推翻它。"],
+      ["备择假设 H1", "研究者真正关心的可能性，例如“有差异”“有关系”“治疗后降低”。"],
+      ["p 值", "如果 H0 真的成立，出现当前这么大或更大差异的概率。p 小不代表差异一定大，只代表用 H0 难解释。"],
+      ["置信区间", "给出参数可能范围。均值差的区间不含 0、OR/IRR 的区间不含 1，通常支持显著。"],
+      ["效应量", "差异或关系到底有多大。p 值受样本量影响，效应量更接近实际重要性。"],
+      ["正态性", "数据形状接近钟形曲线。t 检验和 ANOVA 对它有要求，但样本较大时通常更稳健。"],
+      ["方差齐性", "几组数据的波动程度差不多。若不满足，优先考虑 Welch t 检验或 Welch ANOVA。"],
+      ["独立 vs 配对", "独立样本是不同对象；配对样本是同一对象前后测量或一一匹配。选错会影响 p 值。"],
+      ["统计显著 vs 实际重要", "p < 0.05 说明统计证据较强，但还要看差异大小、置信区间和业务/医学意义。"]
+    ];
+
+    let path = [];
+    let currentQuestion = "variable";
+
+    const questionArea = document.getElementById("questionArea");
+    const resultPanel = document.getElementById("resultPanel");
+    const breadcrumbs = document.getElementById("breadcrumbs");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      if (!q) return;
+      questionArea.innerHTML = `
+        <div class="question-head">
+          <h2>${q.title}</h2>
+          <p class="hint">${q.hint}</p>
+        </div>
+        <div class="options">
+          ${q.options.map((opt, index) => `
+            <button class="option" type="button" data-index="${index}">
+              <span class="option-title"><span>${opt[0]}</span><span>选择</span></span>
+              <span class="option-desc">${opt[1]}</span>
+            </button>
+          `).join("")}
+        </div>
+      `;
+
+      questionArea.querySelectorAll(".option").forEach(button => {
+        button.addEventListener("click", () => {
+          const opt = q.options[Number(button.dataset.index)];
+          path.push({
+            questionId: currentQuestion,
+            label: opt[0],
+            desc: opt[1],
+            next: opt[2],
+            result: opt[3] || null
+          });
+          if (opt[3]) {
+            currentQuestion = null;
+            renderBreadcrumbs(opt[3]);
+            renderResult(opt[3]);
+            questionArea.innerHTML = `
+              <div class="question-head">
+                <h2>已推荐检验方法</h2>
+                <p class="hint">可以点击上方路径中的任一步回去重选，后续选择会自动清空。</p>
+              </div>
+            `;
+          } else {
+            currentQuestion = opt[2];
+            renderBreadcrumbs();
+            renderQuestion();
+          }
+        });
+      });
+    }
+
+    function renderBreadcrumbs(resultId) {
+      const items = path.map((item, idx) => `
+        <button class="crumb" type="button" data-step="${idx}">${item.label}</button>
+        ${idx < path.length - 1 || resultId ? '<span class="crumb-sep">→</span>' : ''}
+      `).join("");
+      const resultCrumb = resultId ? `<button class="crumb current" type="button">${methods[resultId].name}</button>` : "";
+      breadcrumbs.innerHTML = items || `<span class="small-muted">尚未选择</span>`;
+      if (resultId) breadcrumbs.innerHTML += resultCrumb;
+
+      breadcrumbs.querySelectorAll("[data-step]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.step);
+          const item = path[idx];
+          path = path.slice(0, idx);
+          currentQuestion = item.questionId;
+          renderBreadcrumbs();
+          renderQuestion();
+          renderEmptyResult();
+        });
+      });
+    }
+
+    function renderResult(id) {
+      const m = methods[id];
+      resultPanel.innerHTML = `
+        <div class="result-title">
+          <div>
+            <span class="pill">${m.tag}</span>
+            <h2 class="method-name">${m.name}</h2>
+          </div>
+        </div>
+        <div class="why"><strong>为什么推荐它：</strong>${m.why}</div>
+
+        <div class="grid-2">
+          <div class="info-box"><strong>适用场景</strong><span>${m.applies}</span></div>
+          <div class="info-box"><strong>什么时候拒绝 H0</strong><span>${m.decision}</span></div>
+        </div>
+
+        <div class="section grid-2">
+          <div class="info-box"><strong>原假设 H0</strong><span>${m.h0}</span></div>
+          <div class="info-box"><strong>备择假设 H1</strong><span>${m.h1}</span></div>
+        </div>
+
+        <div class="section">
+          <h3>示例数据</h3>
+          <p class="small-muted">表中是输入数据；后面的统计指标是由这些数据或列联表计算出来的演示结果。</p>
+          ${tableHtml(m.sampleColumns, m.sampleRows)}
+        </div>
+
+        <div class="section">
+          <h3>示例中要看哪些指标</h3>
+          ${tableHtml(["类型", "示例/统计量", "怎么解读"], m.metrics)}
+        </div>
+
+        <div class="section">
+          <h3>中文结果表述</h3>
+          <p>${m.report}</p>
+        </div>
+      `;
+    }
+
+    function renderEmptyResult() {
+      resultPanel.innerHTML = `
+        <div class="result-empty">
+          <div>
+            <h2>等待你的选择</h2>
+            <p>继续回答左侧问题，推荐结果会显示在这里。</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function tableHtml(columns, rows) {
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead><tr>${columns.map(c => `<th>${c}</th>`).join("")}</tr></thead>
+            <tbody>
+              ${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderConcepts() {
+      document.getElementById("concepts").innerHTML = concepts.map(([title, text]) => `
+        <details>
+          <summary>${title}</summary>
+          <p>${text}</p>
+        </details>
+      `).join("");
+    }
+
+    function renderMethodGrid() {
+      const grid = document.getElementById("methodGrid");
+      grid.innerHTML = Object.entries(methods).map(([id, m]) => `
+        <button class="mini-btn" type="button" data-method="${id}">${m.name}</button>
+      `).join("");
+      grid.querySelectorAll("[data-method]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.method;
+          path = [{ questionId: "variable", label: "直接查看", desc: "从方法列表打开", next: null, result: id }];
+          currentQuestion = null;
+          renderBreadcrumbs(id);
+          renderResult(id);
+          questionArea.innerHTML = `
+            <div class="question-head">
+              <h2>直接查看：${methods[id].name}</h2>
+              <p class="hint">可以点“重新开始”回到问答式选择流程。</p>
+            </div>
+          `;
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    }
+
+    restartBtn.addEventListener("click", () => {
+      path = [];
+      currentQuestion = "variable";
+      renderBreadcrumbs();
+      renderQuestion();
+      renderEmptyResult();
     });
-  });
-}
 
-function renderProgress() {
-  const fill = document.getElementById('progressFill');
-  const label = document.getElementById('progressLabel');
-  if (state.path.length === 0) {
-    fill.style.width = '0%';
-    label.textContent = '';
-    return;
-  }
-
-  const visibleQuestions = QUESTIONS.filter(q => {
-    if (!q.dependsOn) return true;
-    return Object.entries(q.dependsOn).every(([depQ, depVal]) => state.selections[depQ] === depVal);
-  }).length;
-
-  const answered = Object.keys(state.selections).length;
-  const denom = Math.max(visibleQuestions, 1);
-  const pct = Math.min(Math.round((answered / denom) * 100), 100);
-  fill.style.width = pct + '%';
-  label.textContent = `已完成 ${answered}/${denom} 步`;
-}
-
-function renderQuestion(container, q) {
-  let html = `<div class="question-card">`;
-  html += `<h2>${escapeHtml(q.title)}</h2>`;
-  html += `<p class="q-desc">${escapeHtml(q.desc)}</p>`;
-  html += `<div class="options-grid">`;
-  q.options.forEach(opt => {
-    const selected = state.selections[q.id] === opt.id ? ' selected' : '';
-    html += `<button class="option-btn${selected}" data-q="${q.id}" data-opt="${opt.id}">`;
-    html += `<span class="opt-label">${escapeHtml(opt.label)}</span>`;
-    html += `<span class="opt-desc">${escapeHtml(opt.desc)}</span>`;
-    html += `</button>`;
-  });
-  html += `</div>`;
-  // Path visualization
-  if (state.path.length > 0) {
-    html += `<div class="path-vis">`;
-    state.path.forEach((entry, idx) => {
-      if (idx > 0) html += `<span class="pv-arrow">→</span>`;
-      const cls = (idx === state.path.length - 1) ? 'pv-active' : '';
-      html += `<span class="pv-node ${cls}">${escapeHtml(entry.optionLabel)}</span>`;
-    });
-    html += `</div>`;
-  }
-  html += `</div>`;
-  container.innerHTML = html;
-
-  // Add click handlers
-  container.querySelectorAll('.option-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const qId = this.dataset.q;
-      const optId = this.dataset.opt;
-      selectOption(qId, optId);
-    });
-  });
-}
-
-function renderResult(container, testKey) {
-  const test = TESTS[state.resultKey];
-  if (!test) {
-    container.innerHTML = `<div class="empty-state"><span class="empty-icon">⚠️</span><p>无法确定推荐的检验方法。请重新选择。</p></div>`;
-    return;
-  }
-
-  const rejectEmoji = test.conclusion.reject ? '🔴' : '🟢';
-  const rejectClass = test.conclusion.reject ? 'conclusion-reject' : '';
-  const rejectTextClass = test.conclusion.reject ? 'conclusion-reject-text' : 'conclusion-accept-text';
-
-  let html = `<div class="result-section">`;
-
-  // Header
-  html += `<div class="result-header">`;
-  html += `<div class="result-icon">${test.icon}</div>`;
-  html += `<div class="result-title">🔬 推荐使用：${escapeHtml(test.name)}</div>`;
-  html += `</div>`;
-
-  // 适用场景
-  html += `<div class="result-card">`;
-  html += `<h3>📌 适用场景</h3>`;
-  html += `<p>${escapeHtml(test.scenario)}</p>`;
-  html += `</div>`;
-
-  // 假设
-  html += `<div class="result-card">`;
-  html += `<h3>🎯 假设</h3>`;
-  html += `<div class="hypothesis-box">`;
-  html += `<div class="h0-box"><span class="h-label">H₀ 原假设</span><p>${escapeHtml(test.hypothesis.h0)}</p></div>`;
-  html += `<div class="h1-box"><span class="h-label">H₁ 备择假设</span><p>${escapeHtml(test.hypothesis.h1)}</p></div>`;
-  html += `</div>`;
-  html += `</div>`;
-
-  // 示例数据
-  html += `<div class="result-card">`;
-  html += `<h3>📋 示例数据</h3>`;
-  html += `<table class="example-table">`;
-  test.dataExample.forEach(row => {
-    html += `<tr><td style="font-weight:600;white-space:nowrap;width:30%">${escapeHtml(row.label)}</td><td>${row.values}</td></tr>`;
-  });
-  html += `</table>`;
-  html += `</div>`;
-
-  // 统计指标
-  html += `<div class="result-card">`;
-  html += `<h3>📊 需要关注的统计指标</h3>`;
-  html += `<div class="indicator-grid">`;
-  test.indicators.forEach(ind => {
-    html += `<div class="indicator-item">`;
-    html += `<span class="ind-name">${escapeHtml(ind.name)}</span>`;
-    html += `<span class="ind-val">${ind.value}</span>`;
-    html += `<span class="ind-desc">${escapeHtml(ind.desc)}</span>`;
-    html += `</div>`;
-  });
-  html += `</div>`;
-  html += `</div>`;
-
-  // 结论
-  html += `<div class="result-card">`;
-  html += `<h3>⚖️ 结论</h3>`;
-  html += `<div class="conclusion-box ${rejectClass}">`;
-  html += `<span class="c-label">${rejectEmoji} ${test.conclusion.reject ? '拒绝 H₀' : '不能拒绝 H₀'}</span>`;
-  html += `<p>${test.conclusion.text}</p>`;
-  html += `</div>`;
-  html += `<div style="margin-top:12px">`;
-  html += `<h4 style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:4px">📝 结果的中文表述</h4>`;
-  html += `<p style="font-size:14px;color:var(--text-secondary);line-height:1.8">${test.chineseReport}</p>`;
-  html += `</div>`;
-  html += `</div>`;
-
-  // 注意事项
-  html += `<div class="result-card">`;
-  html += `<h3>💡 注意事项</h3>`;
-  html += `<p>${escapeHtml(test.note)}</p>`;
-  html += `</div>`;
-
-  // Path visualization
-  html += `<div class="result-card">`;
-  html += `<h3>📍 你的选择路径</h3>`;
-  html += `<div class="path-vis">`;
-  state.path.forEach((entry, idx) => {
-    if (idx > 0) html += `<span class="pv-arrow">→</span>`;
-    html += `<span class="pv-node">${escapeHtml(entry.optionLabel)}</span>`;
-  });
-  html += `<span class="pv-arrow">→</span>`;
-  html += `<span class="pv-node pv-result">${escapeHtml(test.name)}</span>`;
-  html += `</div>`;
-  html += `</div>`;
-
-  html += `</div>`;
-  container.innerHTML = html;
-}
-
-// ============================================================
-// 6. 交互逻辑
-// ============================================================
-function selectOption(qId, optId) {
-  const q = questionMap[qId];
-  if (!q) return;
-  const opt = q.options.find(o => o.id === optId);
-  if (!opt) return;
-
-  // If this question was already answered, remove later selections
-  if (state.selections[qId] !== undefined) {
-    const idx = state.path.findIndex(e => e.questionId === qId);
-    if (idx >= 0) {
-      const toRemove = state.path.slice(idx);
-      toRemove.forEach(e => { delete state.selections[e.questionId]; });
-      state.path = state.path.slice(0, idx);
-      state.completed = false;
-      state.resultKey = null;
-    }
-  }
-
-  state.selections[qId] = optId;
-  state.path.push({
-    questionId: qId,
-    questionLabel: q.title,
-    optionId: optId,
-    optionLabel: opt.label
-  });
-
-  // Check completion
-  if (checkCompletion()) {
-    // Re-render everything
-    const main = document.getElementById('mainContent');
-    renderResult(main);
-    renderBreadcrumb();
-    renderProgress();
-    document.getElementById('progressWrap').style.display = 'none';
-    return;
-  }
-
-  render();
-}
-
-function goBackTo(idx) {
-  // Remove all path entries from idx onwards (so the clicked step becomes editable)
-  const toRemove = state.path.slice(idx);
-  toRemove.forEach(e => { delete state.selections[e.questionId]; });
-  state.path = state.path.slice(0, idx);
-  state.completed = false;
-  state.resultKey = null;
-
-  render();
-}
-
-function resetAll() {
-  state.selections = {};
-  state.path = [];
-  state.currentQ = null;
-  state.completed = false;
-  state.resultKey = null;
-
-  const main = document.getElementById('mainContent');
-  const resetBtn = document.getElementById('resetBtn');
-
-  main.innerHTML = '<div class="empty-state"><span class="empty-icon">🔬</span><p>从下方第一个问题开始，一步步找到适合你的统计检验方法。</p></div>';
-  renderBreadcrumb();
-  renderProgress();
-  document.getElementById('progressWrap').style.display = 'none';
-  resetBtn.style.display = 'none';
-
-  showSnackbar('🔄 已重置，重新开始选择');
-}
-
-function toggleConcepts() {
-  const toggle = document.getElementById('conceptsToggle');
-  const content = document.getElementById('conceptsContent');
-  const isOpen = content.classList.toggle('open');
-  toggle.classList.toggle('open', isOpen);
-  toggle.setAttribute('aria-expanded', String(isOpen));
-}
-
-function showSnackbar(msg) {
-  const el = document.getElementById('snackbar');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-// ============================================================
-// 7. 初始化
-// ============================================================
-render();
-</script>
+    renderBreadcrumbs();
+    renderQuestion();
+    renderConcepts();
+    renderMethodGrid();
+  </script>
 </body>
 </html>
