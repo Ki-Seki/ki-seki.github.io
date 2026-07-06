@@ -1800,7 +1800,8 @@ function toggleConcepts() {
   const toggle = document.getElementById('conceptsToggle');
   const content = document.getElementById('conceptsContent');
   const isOpen = content.classList.toggle('open');
-  toggle.classList.toggle('open');
+  toggle.classList.toggle('open', isOpen);
+  toggle.setAttribute('aria-expanded', String(isOpen));
 }
 
 function showSnackbar(msg) {
