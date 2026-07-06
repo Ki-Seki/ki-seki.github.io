@@ -1761,10 +1761,10 @@ function selectOption(qId, optId) {
 }
 
 function goBackTo(idx) {
-  // Remove all path entries from idx+1 onwards
-  const toRemove = state.path.slice(idx + 1);
+  // Remove all path entries from idx onwards (so the clicked step becomes editable)
+  const toRemove = state.path.slice(idx);
   toRemove.forEach(e => { delete state.selections[e.questionId]; });
-  state.path = state.path.slice(0, idx + 1);
+  state.path = state.path.slice(0, idx);
   state.completed = false;
   state.resultKey = null;
 
