@@ -21,7 +21,7 @@ math: true
 
     Ph.D. in Computer Application Technology
 
-    Supervised by Prof. **Xun Liang**
+    Supervised by **[Xun Liang](https://scholar.google.com/citations?user=d0E7YlcAAAAJ)**
 
     Sep 2023 - Jun 2028
 
@@ -29,7 +29,7 @@ math: true
 
     B.Mgt. in E-commerce
 
-    Supervised by Prof. **Yong Pan** and Prof. **Xiaodong Shi**
+    Supervised by **[Yong Pan](https://baike.baidu.com/item/%E6%BD%98%E5%8B%87/13811990)** and **[Xiaodong Shi](https://skds.huel.edu.cn/info/1163/1237.htm)**
 
     GPA: 4.05/5.0, Top 2%
 
@@ -37,11 +37,19 @@ math: true
 
 ## <font color="lightgray">H2</font> Work Experience
 
+- **[Canva](https://www.lifeatcanva.com/)**
+
+    Research Intern at Canva Research
+
+    Collaborated with **[Zhejun Zhao](https://openreview.net/profile?id=~Zhejun_Zhao2)**
+
+    Jul 2026 - Present
+
 - **[Ant Group](https://www.antgroup.com/en)**
 
-    Research Intern at [AntResearch](https://www.antresearch.com/)
+    Research Intern at [Ant Research](https://www.antresearch.com/)
 
-    Collaborated with Director, **Qing Shao**
+    Collaborated with **Qing Shao**
 
     Jul 2025 - May 2026
 
@@ -49,7 +57,7 @@ math: true
 
     Software Engineer Intern
 
-    Collaborated with Dr. **Zhiyu Li**
+    Collaborated with **[Zhiyu Li](https://openreview.net/profile?id=~Zhiyu_li2)**
 
     May 2025 - Jul 2025
 
@@ -57,7 +65,7 @@ math: true
 
     Research Intern at the Large Language Model Center
 
-    Collaborated with Dr. **Zhiyu Li** and Dr. **Zehao Lin**
+    Collaborated with **[Zehao Lin](https://scholar.google.com/citations?user=ptbQQlUAAAAJ)**
 
     Sep 2023 - Apr 2025
 
@@ -187,5 +195,5 @@ Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAA
     <sup>&ast;</sup> Contributed Equally
     <sup>†</sup> Corresponding Author
     <br>
-    Last update: May 2026 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content/cv.md'>Edit this page</a>
+    Last update: July 2026 | <a href='https://github.com/Ki-Seki/ki-seki.github.io/blob/main/content/cv.md'>Edit this page</a>
 </footer>
