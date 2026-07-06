@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>统计学假设检验速查工具</title>
+  <style>
+    :root {
+      --bg: #f5faf8;
+      --panel: #ffffff;
+      --ink: #18201d;
+      --muted: #62716b;
+      --line: #dbe7e2;
+      --accent: #247f73;
+      --accent-2: #2563eb;
+      --accent-3: #b45309;
+      --soft: #e8f5f1;
+      --soft-blue: #eaf2ff;
+      --soft-warm: #fff4df;
+      --danger: #b42318;
+      --shadow: 0 18px 50px rgba(20, 42, 36, 0.08);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(36, 127, 115, 0.12), transparent 32rem),
+        linear-gradient(180deg, #f5faf8 0%, #eef6f3 100%);
+      line-height: 1.65;
+    }
+
+    button, input, select { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero-main, .quick-note, .panel {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(219, 231, 226, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main { padding: 28px; }
+    .quick-note { padding: 22px; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
+
+    h2, h3 {
+      margin: 0;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    h2 { font-size: 22px; }
+    h3 { font-size: 18px; }
+
+    p { margin: 0; }
+
+    .lead {
+      color: var(--muted);
+      max-width: 76ch;
+      font-size: 16px;
+    }
+
+    .note-list {
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.96fr) minmax(360px, 1.04fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel { padding: 22px; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .ghost-btn, .mini-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .ghost-btn {
+      padding: 9px 14px;
+      font-weight: 700;
+    }
+
+    .mini-btn {
+      padding: 6px 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .ghost-btn:hover, .mini-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .crumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 18px;
+      min-height: 35px;
+      align-items: center;
+    }
+
+    .crumb {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      padding: 7px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      max-width: 100%;
+    }
+
+    .crumb:hover { color: var(--accent); border-color: var(--accent); }
+    .crumb.current { color: #fff; background: var(--accent); border-color: var(--accent); }
+    .crumb-sep { color: #9aa9a3; }
+
+    .question-head {
+      padding: 16px;
+      background: var(--soft);
+      border: 1px solid #d5ebe4;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+    }
+
+    .question-head .hint {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 14px 15px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .option:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(36, 127, 115, 0.11);
+    }
+
+    .option-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--ink);
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .option-desc {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .result-empty {
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #c8d8d2;
+      border-radius: var(--radius);
+      background: #fbfdfc;
+      padding: 28px;
+    }
+
+    .result-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .method-name {
+      font-size: 28px;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .why {
+      padding: 14px 15px;
+      background: var(--soft-warm);
+      border: 1px solid #f7ddb0;
+      border-radius: var(--radius);
+      color: #6f4208;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      margin-top: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .info-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 13px;
+      background: #fff;
+    }
+
+    .info-box strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .info-box span, .small-muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-top: 10px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+    }
+
+    th, td {
+      padding: 10px 11px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f2f7f5;
+      color: #33423d;
+      font-weight: 800;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .concepts {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 11px 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 800;
+      color: #26332f;
+    }
+
+    details p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .method-dock {
+      margin-top: 18px;
+    }
+
+    .method-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 920px) {
+      .hero, .layout, .concepts, .grid-2 { grid-template-columns: 1fr; }
+      .shell { width: min(100% - 20px, 1180px); padding-top: 14px; }
+      .hero-main, .quick-note, .panel { padding: 18px; }
+      .method-name { font-size: 24px; }
+      table { min-width: 520px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-main">
+        <div class="eyebrow">假设检验导航</div>
+        <h1 id="page-title">统计学假设检验速查工具</h1>
+        <p class="lead">
+          按问题一步步选择你的数据情况，工具会推荐常见检验方法，并解释为什么适合、原假设是什么、示例数据怎么看、结果如何用中文报告。
+        </p>
+      </div>
+      <aside class="quick-note">
+        <h2>先记住三件事</h2>
+        <ul class="note-list">
+          <li><strong>因变量</strong>：你最终想比较或预测的那个结果。</li>
+          <li><strong>独立样本</strong>：两组人不是同一批人；<strong>配对样本</strong>：同一批人前后测了两次或一一匹配。</li>
+          <li><strong>p 值</strong>：如果原假设是真的，看到当前这么大差异的概率；常用 p &lt; 0.05 作为“拒绝原假设”的参考线。</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <div class="toolbar">
+          <h2>选择路径</h2>
+          <button class="ghost-btn" id="restartBtn" type="button">重新开始</button>
+        </div>
+        <nav class="crumbs" id="breadcrumbs" aria-label="当前选择路径"></nav>
+        <div id="questionArea"></div>
+      </div>
+
+      <div class="panel" id="resultPanel">
+        <div class="result-empty">
+          <div>
+            <h2>等待你的选择</h2>
+            <p>从左侧第一个问题开始。每个选项下面都有“小白解释”，选不准时选最接近的情况即可。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel method-dock">
+      <h2>常见概念解释</h2>
+      <div class="concepts" id="concepts"></div>
+    </section>
+
+    <section class="panel method-dock">
+      <h2>直接查看某个检验</h2>
+      <p class="small-muted">已经知道方法名称时，可以直接点开说明；路径区会显示“直接查看”。</p>
+      <div class="method-grid" id="methodGrid"></div>
+      <p class="footer-note">提示：本工具用于学习和选型。正式论文或报告中，请结合研究设计、样本量、缺失值、异常值和专业软件输出进行复核。</p>
+    </section>
+  </main>
+
+  <script>
+    const questions = {
+      variable: {
+        title: "你最终想比较或预测的结果，是什么类型？",
+        hint: "这个结果也叫“因变量”。先别管自变量，先看你最关心的结果长什么样。",
+        options: [
+          ["连续变量", "像身高、血压、成绩、收入、反应时间；数值可以有小数。", "contGoal"],
+          ["分类变量", "像是否患病、是否通过、血型、品牌选择；结果是类别。", "catGoal"],
+          ["有序变量", "像满意度 1-5 分、疼痛等级、疾病分期；类别有高低顺序。", "ordGoal"],
+          ["计数变量", "像发作次数、事故次数、点击次数；结果是非负整数。", "countGoal"]
+        ]
+      },
+      contGoal: {
+        title: "你想对这个连续结果做什么？",
+        hint: "连续变量最常见的是比较平均水平、看两个数值是否一起变化，或者做预测。",
+        options: [
+          ["和一个标准值比较", "例如班级平均分是否不同于 80 分。", "contOneNormal"],
+          ["比较几组人的平均水平", "例如 A 药和 B 药的血压下降值是否不同。", "contGroups"],
+          ["看两个变量是否相关", "例如学习时长越长，成绩是否越高。", "corrType"],
+          ["用一个或多个变量预测它", "例如用年龄、运动量预测血压。", null, "linear_regression"],
+          ["检查正态性或方差齐性", "先判断能不能放心使用 t 检验或 ANOVA。", "assumptionGoal"],
+          ["比较整体分布形状", "不仅看平均值，还想看整条分布是否相同。", "distGoal"]
+        ]
+      },
+      contGroups: {
+        title: "要比较几组？",
+        hint: "一组是和固定标准值比；两组是 A vs B；多组是 A vs B vs C 或更多。",
+        options: [
+          ["一组", "只有一批数据，要和某个标准值或目标值比较。", "contOneNormal"],
+          ["两组", "例如男生 vs 女生，治疗组 vs 对照组。", "contPair"],
+          ["三组或更多", "例如三种教学方法、四个地区。", "contManyPair"]
+        ]
+      },
+      contOneNormal: {
+        title: "这组数据大致像钟形曲线吗？",
+        hint: "样本很小时可以画直方图或做 Shapiro-Wilk 正态性检验；不确定就先检查。",
+        options: [
+          ["是，近似正态", "数据没有明显偏斜，也没有极端离群值。", null, "one_sample_t"],
+          ["否，不太正态", "明显偏斜、等级化、离群值很多，或样本很小且形状怪。", null, "wilcoxon_signed"],
+          ["不确定，先检查", "我想先知道是否能用正态方法。", null, "shapiro_wilk"]
+        ]
+      },
+      contPair: {
+        title: "两组样本是什么关系？",
+        hint: "关键看两组观测值能不能一一对应。",
+        options: [
+          ["独立样本", "两组人不是同一批人，也没有一一匹配。", "contTwoNormal"],
+          ["配对样本", "同一批人前后测两次，或每个病例配一个相似对照。", "contPairedNormal"]
+        ]
+      },
+      contTwoNormal: {
+        title: "两组数据各自大致正态吗？",
+        hint: "t 检验比较依赖这个条件；样本量较大时通常更稳健。",
+        options: [
+          ["是，近似正态", "两组分布都没有明显偏斜。", "contTwoVariance"],
+          ["否，不太正态", "分布偏斜、离群值多，或更想比较中位数/秩。", null, "mann_whitney"],
+          ["不确定，先检查", "先做正态性检验，再决定 t 检验还是非参数检验。", null, "shapiro_wilk"]
+        ]
+      },
+      contTwoVariance: {
+        title: "两组波动程度差不多吗？",
+        hint: "这叫方差齐性。简单看就是两组标准差是否相差很大。",
+        options: [
+          ["差不多", "两组标准差接近，箱线图的散布范围也类似。", null, "independent_t"],
+          ["差很多", "一组明显更分散；这时 Welch t 检验更稳。", null, "welch_t"],
+          ["不确定，先检查", "先做 Levene 方差齐性检验。", null, "levene_test"]
+        ]
+      },
+      contPairedNormal: {
+        title: "每一对的“差值”大致正态吗？",
+        hint: "配对 t 检验看的是前后差值，而不是两次测量各自的形状。",
+        options: [
+          ["是，差值近似正态", "每个人的后测减前测，差值分布像钟形。", null, "paired_t"],
+          ["否，差值不太正态", "差值明显偏斜，或样本很小。", null, "wilcoxon_signed"],
+          ["不确定，先检查", "先对差值做 Shapiro-Wilk 正态性检验。", null, "shapiro_wilk"]
+        ]
+      },
+      contManyPair: {
+        title: "多组样本之间是什么关系？",
+        hint: "多组独立常见于不同人群；重复测量常见于同一批人测多个时间点。",
+        options: [
+          ["独立样本", "每组是不同的人或对象。", "contManyNormal"],
+          ["重复测量", "同一批人被测了三次或更多。", "contManyRepeatedNormal"]
+        ]
+      },
+      contManyNormal: {
+        title: "每组数据大致正态吗？",
+        hint: "ANOVA 常用于多组均值比较；不满足时考虑秩检验。",
+        options: [
+          ["是，近似正态", "每组分布都还算对称。", "contManyVariance"],
+          ["否，不太正态", "明显偏斜、离群值多，或更关注中位数/秩。", null, "kruskal_wallis"],
+          ["不确定，先检查", "先做正态性检验。", null, "shapiro_wilk"]
+        ]
+      },
+      contManyVariance: {
+        title: "各组方差差不多吗？",
+        hint: "如果各组标准差差异很大，普通 ANOVA 的 p 值可能不稳。",
+        options: [
+          ["差不多", "各组标准差接近。", null, "one_way_anova"],
+          ["差很多", "建议使用 Welch ANOVA，或者考虑稳健/非参数方法。", null, "welch_anova"],
+          ["不确定，先检查", "先做 Levene 方差齐性检验。", null, "levene_test"]
+        ]
+      },
+      contManyRepeatedNormal: {
+        title: "重复测量的差异大致正态吗？",
+        hint: "如果同一批人测了多个时间点，重点是这些时间点之间的变化是否适合正态方法。",
+        options: [
+          ["是，近似正态", "变化趋势平稳，没有严重偏斜。", null, "repeated_anova"],
+          ["否，不太正态", "更适合使用基于秩的 Friedman 检验。", null, "friedman"],
+          ["不确定，先检查", "先做正态性检验，并查看折线图。", null, "shapiro_wilk"]
+        ]
+      },
+      corrType: {
+        title: "两个变量的关系看起来是哪一种？",
+        hint: "Pearson 看线性关系，Spearman 看单调关系；单调就是一个变大时另一个总体也变大或变小。",
+        options: [
+          ["两个连续变量，关系近似直线", "例如身高和体重，散点图像一条斜带。", null, "pearson_corr"],
+          ["有等级变量，或关系不太直线", "例如排名、满意度，或只是总体同升同降。", null, "spearman_corr"],
+          ["不确定正态性", "先检查连续变量是否近似正态。", null, "shapiro_wilk"]
+        ]
+      },
+      assumptionGoal: {
+        title: "你想检查哪个前提？",
+        hint: "正态性看数据形状；方差齐性看不同组的波动是否接近。",
+        options: [
+          ["正态性", "判断数据或差值是否像钟形曲线。", null, "shapiro_wilk"],
+          ["方差齐性", "判断多组数据的波动程度是否差不多。", null, "levene_test"]
+        ]
+      },
+      distGoal: {
+        title: "你想比较哪种分布？",
+        hint: "KS 检验关注整条累计分布曲线，而不是只看平均值。",
+        options: [
+          ["一组数据 vs 理论分布", "例如样本是否像正态分布。", null, "ks_test"],
+          ["两组数据的整体分布", "例如两个地区的收入分布是否整体不同。", null, "ks_test"]
+        ]
+      },
+      catGoal: {
+        title: "你想对分类结果做什么？",
+        hint: "分类变量的重点通常是比例、列联表关系，或前后变化。",
+        options: [
+          ["比较比例或类别分布", "例如男女通过率是否不同，血型分布是否符合预期。", "catGroups"],
+          ["看两个分类变量是否有关", "例如性别和是否购买是否有关。", "catCell"],
+          ["同一批人的前后变化", "例如治疗前后阳性/阴性是否改变。", null, "mcnemar"],
+          ["预测一个二分类结果", "例如预测是否患病、是否违约。", null, "logistic_regression"]
+        ]
+      },
+      catGroups: {
+        title: "有几组或几个类别表？",
+        hint: "一组通常是看观察分布是否符合理论比例；两组或多组通常看比例是否不同。",
+        options: [
+          ["一组，与理论比例比较", "例如骰子六个面是否均匀。", null, "chi_square_goodness"],
+          ["两组或更多，比较比例", "例如三个班的通过率是否相同。", "catCell"]
+        ]
+      },
+      catCell: {
+        title: "列联表里每个格子的期望人数够多吗？",
+        hint: "经验上如果很多格子期望人数小于 5，Fisher 精确检验更稳。",
+        options: [
+          ["够多", "样本量不小，大多数格子的期望人数至少约 5。", null, "chi_square_independence"],
+          ["不够多", "样本很小，或某些类别人数很少。", null, "fisher_exact"],
+          ["不确定", "先看列联表的期望频数；不够时用 Fisher。", null, "fisher_exact"]
+        ]
+      },
+      ordGoal: {
+        title: "你想对有序结果做什么？",
+        hint: "有序变量有高低，但相邻等级差距不一定相等，所以常用非参数方法。",
+        options: [
+          ["比较组间高低", "例如两种治疗后疼痛等级谁更低。", "ordGroups"],
+          ["看两个等级变量是否相关", "例如满意度等级和复购意愿等级。", null, "spearman_corr"]
+        ]
+      },
+      ordGroups: {
+        title: "要比较几组，样本是否配对？",
+        hint: "有序结果通常比较秩或中位数，而不是直接比较均值。",
+        options: [
+          ["两组，独立样本", "两组人不同，例如 A 药组 vs B 药组。", null, "mann_whitney"],
+          ["两组，配对样本", "同一批人前后两次等级评分。", null, "wilcoxon_signed"],
+          ["三组或更多，独立样本", "三组不同人群的等级评分。", null, "kruskal_wallis"],
+          ["三次或更多，重复测量", "同一批人多个时间点的等级评分。", null, "friedman"]
+        ]
+      },
+      countGoal: {
+        title: "你想对计数结果做什么？",
+        hint: "计数数据常见于次数、事件数，通常还要考虑观察时间或暴露量。",
+        options: [
+          ["预测次数或发生率", "例如随访时间不同，预测事故次数。", null, "poisson_regression"],
+          ["检查类别计数是否符合预期", "例如各类投诉数量是否符合历史比例。", null, "chi_square_goodness"],
+          ["比较分类计数之间是否有关", "例如事件类型和地区是否有关。", "catCell"]
+        ]
+      }
+    };
+
+    const methods = {
+      one_sample_t: {
+        name: "单样本 t 检验",
+        tag: "连续变量 · 一组 · 正态",
+        why: "只有一组连续数据，并且想知道平均值是否不同于某个标准值；数据近似正态时，用它比较最直观。",
+        applies: "一组连续变量，与一个已知标准值或目标值比较。",
+        h0: "总体均值等于标准值，例如 μ = 80。",
+        h1: "总体均值不等于、大于或小于标准值，取决于研究问题。",
+        sampleColumns: ["学生", "成绩"],
+        sampleRows: [["1", "78"], ["2", "82"], ["3", "85"], ["4", "79"], ["5", "86"]],
+        metrics: [
+          ["输入数据", "5 个成绩，标准值 80", "原始观测值和你要比较的目标值。"],
+          ["计算统计量", "样本均值 = 82.0，t ≈ 1.41，df = 4", "t 值越远离 0，说明样本均值离标准值越远。"],
+          ["决定结论", "p 值、均值差的 95% 置信区间、效应量 Cohen's d", "p < 0.05 常表示均值和标准值差异有统计学意义；置信区间若不含 0，也支持拒绝 H0。"]
+        ],
+        decision: "当 p < 0.05，或均值差的置信区间不包含 0 时，通常拒绝原假设。",
+        report: "本班成绩均值为 82.0 分，单样本 t 检验显示其与 80 分的差异未达到统计学显著，t(4)=1.41，p>0.05。"
+      },
+      independent_t: {
+        name: "独立样本 t 检验",
+        tag: "连续变量 · 两组独立 · 方差齐",
+        why: "两组不是同一批人，结果是连续变量，且两组数据近似正态、波动程度接近；此时比较两组均值用独立样本 t 检验。",
+        applies: "两组独立样本的连续变量均值比较。",
+        h0: "两组总体均值相等。",
+        h1: "两组总体均值不相等，或一组大于另一组。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A 组", "8, 9, 10, 11"], ["B 组", "11, 12, 13, 14"]],
+        metrics: [
+          ["输入数据", "A 组和 B 组各 4 个连续数值", "两组必须彼此独立。"],
+          ["计算统计量", "均值差 = -3.0，t ≈ -3.29，df ≈ 6", "t 值表示均值差相对于组内波动有多大。"],
+          ["决定结论", "p 值、均值差 95% CI、Cohen's d", "p < 0.05 时认为两组均值差异不太可能只是随机波动。"]
+        ],
+        decision: "p < 0.05 时拒绝“两组均值相等”。",
+        report: "A 组均值低于 B 组，独立样本 t 检验显示两组差异有统计学意义，t(6)≈-3.29，p<0.05。"
+      },
+      welch_t: {
+        name: "Welch t 检验",
+        tag: "连续变量 · 两组独立 · 方差不齐",
+        why: "它和独立样本 t 检验目的相同，但不要求两组方差相等；当两组波动差很多时更稳。",
+        applies: "两组独立连续变量均值比较，尤其适合方差不齐或样本量不等。",
+        h0: "两组总体均值相等。",
+        h1: "两组总体均值不相等。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A 组", "8, 9, 10, 11"], ["B 组", "6, 12, 18, 24"]],
+        metrics: [
+          ["输入数据", "两组连续数值，B 组波动明显更大", "先看标准差或 Levene 检验。"],
+          ["计算统计量", "t 值、Welch 修正后的 df", "df 不是简单的 n1+n2-2，而是根据方差差异修正。"],
+          ["决定结论", "p 值、均值差 95% CI、效应量", "p < 0.05 时认为均值差异显著。"]
+        ],
+        decision: "p < 0.05 时拒绝原假设。",
+        report: "Welch t 检验显示两组均值差异未达到统计学显著，t≈-1.34，p>0.05。"
+      },
+      paired_t: {
+        name: "配对样本 t 检验",
+        tag: "连续变量 · 两次配对 · 差值正态",
+        why: "同一批人前后测量，真正要比较的是每个人的变化量；差值近似正态时用配对 t 检验。",
+        applies: "同一对象前后两次连续测量，或一一匹配的两组数据。",
+        h0: "平均差值等于 0。",
+        h1: "平均差值不等于 0，或改善/降低方向明确。",
+        sampleColumns: ["对象", "治疗前", "治疗后", "差值"],
+        sampleRows: [["1", "140", "132", "-8"], ["2", "138", "130", "-8"], ["3", "150", "144", "-6"], ["4", "142", "136", "-6"]],
+        metrics: [
+          ["输入数据", "每个对象有前后两个数值", "先算每个人的后测 - 前测。"],
+          ["计算统计量", "平均差 = -7.0，t 值、df = 配对数 - 1", "t 值衡量平均变化量相对于变化波动的大小。"],
+          ["决定结论", "p 值、平均差 95% CI、配对效应量 dz", "置信区间若完全低于 0，说明后测整体更低。"]
+        ],
+        decision: "p < 0.05 时拒绝“平均变化为 0”。",
+        report: "治疗后血压较治疗前降低，配对样本 t 检验显示平均差异有统计学意义，p<0.05。"
+      },
+      one_way_anova: {
+        name: "单因素 ANOVA",
+        tag: "连续变量 · 多组独立 · 方差齐",
+        why: "要比较三组或更多组的均值，不能反复做很多个 t 检验；ANOVA 先整体判断是否至少有一组不同。",
+        applies: "一个分组因素，三组或更多独立样本的连续变量均值比较。",
+        h0: "所有组的总体均值都相等。",
+        h1: "至少有一组总体均值不同。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A", "7, 8, 9"], ["B", "9, 10, 11"], ["C", "12, 13, 14"]],
+        metrics: [
+          ["输入数据", "三组独立连续数据", "每行是一组。"],
+          ["计算统计量", "组间均方、组内均方、F 值", "F 值越大，组间差异相对组内波动越明显。"],
+          ["决定结论", "p 值、η² 或 partial η²、事后比较", "ANOVA 显著只说明至少一组不同，还要做事后比较看哪两组不同。"]
+        ],
+        decision: "p < 0.05 时拒绝“所有组均值相等”。",
+        report: "三组成绩均值存在统计学显著差异，单因素 ANOVA：F(2,6)≈18.0，p<0.05；建议进一步进行 Tukey 事后比较。"
+      },
+      welch_anova: {
+        name: "Welch ANOVA",
+        tag: "连续变量 · 多组独立 · 方差不齐",
+        why: "当三组或更多组方差差异很大时，Welch ANOVA 比普通单因素 ANOVA 更稳健。",
+        applies: "多组独立连续变量均值比较，方差不齐或样本量不平衡。",
+        h0: "所有组总体均值相等。",
+        h1: "至少有一组总体均值不同。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A", "8, 9, 10"], ["B", "8, 12, 16"], ["C", "15, 16, 17"]],
+        metrics: [
+          ["输入数据", "三组连续数据，组内波动不同", "先通过标准差或 Levene 检验发现方差不齐。"],
+          ["计算统计量", "Welch F 值、修正 df", "自由度会被修正，不再是普通 ANOVA 的固定形式。"],
+          ["决定结论", "p 值、均值差、Games-Howell 事后比较", "显著后推荐用适合方差不齐的事后比较。"]
+        ],
+        decision: "p < 0.05 时拒绝原假设。",
+        report: "Welch ANOVA 显示各组均值存在统计学显著差异，p<0.05；后续采用 Games-Howell 比较组间差异。"
+      },
+      repeated_anova: {
+        name: "重复测量 ANOVA",
+        tag: "连续变量 · 多时间点 · 同一批对象",
+        why: "同一批对象测了三次或更多，数据之间有关联；重复测量 ANOVA 会利用这种配对结构。",
+        applies: "同一对象在三个或更多时间点/条件下的连续变量比较。",
+        h0: "所有时间点或条件的总体均值相等。",
+        h1: "至少一个时间点或条件的总体均值不同。",
+        sampleColumns: ["对象", "第 1 次", "第 2 次", "第 3 次"],
+        sampleRows: [["1", "10", "12", "14"], ["2", "9", "11", "13"], ["3", "11", "12", "15"], ["4", "8", "10", "11"]],
+        metrics: [
+          ["输入数据", "每个对象有多列测量值", "行代表对象，列代表时间点或条件。"],
+          ["计算统计量", "F 值、df、球形性检验", "若球形性不满足，常看 Greenhouse-Geisser 校正后的 p 值。"],
+          ["决定结论", "p 值、partial η²、成对比较", "显著后需要看哪些时间点之间不同。"]
+        ],
+        decision: "校正后 p < 0.05 时拒绝“各时间点均值相同”。",
+        report: "重复测量 ANOVA 显示三个时间点的均值存在显著变化，F≈22.4，p<0.05。"
+      },
+      mann_whitney: {
+        name: "Mann-Whitney U 检验",
+        tag: "非参数 · 两组独立",
+        why: "两组独立，但连续数据不太正态，或结果是有序等级；它比较两组整体秩次/位置差异。",
+        applies: "两组独立样本的连续或有序变量，尤其适合非正态数据。",
+        h0: "两组分布位置相同，随机抽一人来自 A 组高于 B 组的概率约等于反过来。",
+        h1: "两组分布位置不同。",
+        sampleColumns: ["组别", "疼痛评分"],
+        sampleRows: [["A 组", "2, 3, 3, 4"], ["B 组", "4, 5, 5, 6"]],
+        metrics: [
+          ["输入数据", "两组独立评分", "把所有值混在一起排序。"],
+          ["计算统计量", "秩和、U 值", "U 值来自两组秩次的比较。"],
+          ["决定结论", "p 值、秩双列相关或 Cliff's delta", "p < 0.05 表示两组位置差异显著；效应量说明差异大小。"]
+        ],
+        decision: "p < 0.05 时拒绝“两组分布位置相同”。",
+        report: "Mann-Whitney U 检验显示 A 组疼痛评分低于 B 组，U≈1.0，p<0.05。"
+      },
+      wilcoxon_signed: {
+        name: "Wilcoxon 符号秩检验",
+        tag: "非参数 · 配对或一组中位数",
+        why: "配对差值不正态，或一组数据要和某个中位数比较时，用它替代配对 t 检验或单样本 t 检验。",
+        applies: "配对样本的前后差异，或一组连续/有序数据与指定中位数比较。",
+        h0: "差值的中位数等于 0，或总体中位数等于指定值。",
+        h1: "差值的中位数不等于 0，或总体中位数不同于指定值。",
+        sampleColumns: ["对象", "前", "后", "差值"],
+        sampleRows: [["1", "5", "3", "-2"], ["2", "6", "4", "-2"], ["3", "7", "7", "0"], ["4", "8", "5", "-3"]],
+        metrics: [
+          ["输入数据", "配对数据及差值", "去掉差值为 0 的对象，对差值绝对值排序。"],
+          ["计算统计量", "正秩和、负秩和、W 值", "W 通常取较小的符号秩和。"],
+          ["决定结论", "p 值、匹配效应量 r", "p < 0.05 表示前后中位差异显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“中位差值为 0”。",
+        report: "Wilcoxon 符号秩检验显示治疗后评分较治疗前降低，W≈0，p<0.05。"
+      },
+      kruskal_wallis: {
+        name: "Kruskal-Wallis 检验",
+        tag: "非参数 · 多组独立",
+        why: "三组或更多独立样本不适合普通 ANOVA 时，用它比较各组秩次/位置是否不同。",
+        applies: "三组或更多独立样本的连续或有序变量，尤其适合非正态数据。",
+        h0: "各组分布位置相同。",
+        h1: "至少有一组分布位置不同。",
+        sampleColumns: ["组别", "评分"],
+        sampleRows: [["A", "2, 3, 3"], ["B", "4, 4, 5"], ["C", "6, 7, 7"]],
+        metrics: [
+          ["输入数据", "三组独立评分", "先把全部观测值统一排序。"],
+          ["计算统计量", "各组平均秩、H 值", "H 值越大，组间秩差异越明显。"],
+          ["决定结论", "p 值、ε²、Dunn 事后比较", "显著后要进一步比较哪两组不同。"]
+        ],
+        decision: "p < 0.05 时拒绝“各组位置相同”。",
+        report: "Kruskal-Wallis 检验显示三组评分分布存在差异，H≈7.2，p<0.05；建议做 Dunn 事后比较。"
+      },
+      friedman: {
+        name: "Friedman 检验",
+        tag: "非参数 · 多次重复测量",
+        why: "同一批对象测了三次或更多，但数据是等级或不正态；Friedman 是重复测量 ANOVA 的非参数替代。",
+        applies: "同一对象在三个或更多条件下的有序/非正态连续结果。",
+        h0: "各时间点或条件的分布位置相同。",
+        h1: "至少一个时间点或条件不同。",
+        sampleColumns: ["对象", "第 1 次", "第 2 次", "第 3 次"],
+        sampleRows: [["1", "5", "4", "3"], ["2", "6", "5", "4"], ["3", "4", "4", "2"], ["4", "7", "6", "5"]],
+        metrics: [
+          ["输入数据", "每个对象多次评分", "在每个对象内部给不同时间点排序。"],
+          ["计算统计量", "χ²_F 或 Q 值、df", "反映各时间点秩次是否系统不同。"],
+          ["决定结论", "p 值、Kendall's W、成对 Wilcoxon 比较", "Kendall's W 可作为效应量。"]
+        ],
+        decision: "p < 0.05 时拒绝“各时间点位置相同”。",
+        report: "Friedman 检验显示三个时间点评分存在显著差异，χ²(2)≈8.0，p<0.05。"
+      },
+      chi_square_independence: {
+        name: "卡方独立性检验",
+        tag: "分类变量 · 列联表",
+        why: "两个分类变量组成列联表，样本量足够时，用卡方检验判断它们是否有关。",
+        applies: "两个分类变量的关联分析，或多组比例比较。",
+        h0: "两个分类变量相互独立，比例没有差异。",
+        h1: "两个分类变量不独立，比例存在差异。",
+        sampleColumns: ["组别", "通过", "未通过"],
+        sampleRows: [["A 班", "18", "7"], ["B 班", "10", "15"]],
+        metrics: [
+          ["输入数据", "2×2 或更大列联表的实际人数", "每个格子是观察到的人数。"],
+          ["计算统计量", "期望人数、χ² 值、df", "χ² 衡量观察人数和期望人数差多远。"],
+          ["决定结论", "p 值、Cramer's V 或 φ", "p < 0.05 表示比例差异显著；效应量说明关联强度。"]
+        ],
+        decision: "p < 0.05 时拒绝“变量独立/比例相同”。",
+        report: "通过率与班级有关，卡方检验显示差异有统计学意义，χ²(1)≈5.13，p<0.05。"
+      },
+      chi_square_goodness: {
+        name: "卡方拟合优度检验",
+        tag: "分类计数 · 一组分布",
+        why: "只有一组类别计数，想知道观察到的分布是否符合某个理论比例。",
+        applies: "一组分类计数与预期比例比较。",
+        h0: "观察分布符合预期分布。",
+        h1: "观察分布不符合预期分布。",
+        sampleColumns: ["类别", "观察次数", "期望次数"],
+        sampleRows: [["红", "18", "15"], ["蓝", "12", "15"], ["绿", "20", "15"], ["黄", "10", "15"]],
+        metrics: [
+          ["输入数据", "每类观察次数和理论比例", "期望次数 = 总数 × 理论比例。"],
+          ["计算统计量", "χ² = Σ(观察-期望)²/期望", "观察和期望差越大，χ² 越大。"],
+          ["决定结论", "p 值、标准化残差", "显著后看残差，找出哪些类别贡献最大。"]
+        ],
+        decision: "p < 0.05 时拒绝“符合预期分布”。",
+        report: "类别分布与均匀分布存在差异，卡方拟合优度检验 χ²(3)≈4.53，p>0.05 时则不拒绝原假设。"
+      },
+      fisher_exact: {
+        name: "Fisher 精确检验",
+        tag: "分类变量 · 小样本",
+        why: "列联表样本太小或某些格子人数很少时，卡方近似可能不可靠；Fisher 直接计算精确概率。",
+        applies: "小样本 2×2 列联表，或期望频数较小的分类变量比较。",
+        h0: "两分类变量独立，优势比 OR = 1。",
+        h1: "两分类变量有关，OR 不等于 1。",
+        sampleColumns: ["组别", "有效", "无效"],
+        sampleRows: [["治疗组", "5", "1"], ["对照组", "1", "4"]],
+        metrics: [
+          ["输入数据", "2×2 实际人数", "适合总样本很小的情况。"],
+          ["计算统计量", "精确 p 值、优势比 OR", "OR > 1 表示治疗组有效的优势更高。"],
+          ["决定结论", "p 值、OR 的置信区间", "p < 0.05 或 OR 置信区间不含 1 时支持有关联。"]
+        ],
+        decision: "p < 0.05 时拒绝独立性原假设。",
+        report: "Fisher 精确检验显示治疗组有效率高于对照组，OR≈20.0，p<0.05。"
+      },
+      mcnemar: {
+        name: "McNemar 检验",
+        tag: "二分类 · 配对前后",
+        why: "同一批人前后都是二分类结果，例如阴性/阳性；它只关注发生改变的那两格。",
+        applies: "配对二分类数据的前后比例变化。",
+        h0: "从 A 变 B 的人数与从 B 变 A 的人数相同，前后比例无系统变化。",
+        h1: "两个方向改变的人数不同。",
+        sampleColumns: ["", "后：阳性", "后：阴性"],
+        sampleRows: [["前：阳性", "12", "8"], ["前：阴性", "2", "18"]],
+        metrics: [
+          ["输入数据", "配对 2×2 表", "重点是阳转阴 8 人、阴转阳 2 人。"],
+          ["计算统计量", "χ²_McNemar 或精确 p 值", "只用不一致的两个格子计算。"],
+          ["决定结论", "p 值、改变方向比例", "p < 0.05 表示前后阳性率有显著变化。"]
+        ],
+        decision: "p < 0.05 时拒绝“前后改变方向相同”。",
+        report: "McNemar 检验显示治疗前后阳性率发生显著变化，χ²≈3.6，p<0.05。"
+      },
+      pearson_corr: {
+        name: "Pearson 相关",
+        tag: "连续变量 · 线性关系",
+        why: "两个连续变量都近似正态，散点图接近直线趋势时，用 Pearson r 衡量线性相关强度。",
+        applies: "两个连续变量之间的线性相关分析。",
+        h0: "总体相关系数 ρ = 0，即没有线性相关。",
+        h1: "总体相关系数 ρ 不等于 0，或方向明确。",
+        sampleColumns: ["学生", "学习时长", "成绩"],
+        sampleRows: [["1", "1", "60"], ["2", "2", "65"], ["3", "3", "70"], ["4", "4", "78"], ["5", "5", "82"]],
+        metrics: [
+          ["输入数据", "每个对象有两个连续数值", "建议先画散点图。"],
+          ["计算统计量", "相关系数 r、t 值", "r 取 -1 到 1；越接近 ±1，线性关系越强。"],
+          ["决定结论", "p 值、r 的 95% CI", "p < 0.05 表示线性相关显著；r 的绝对值说明强弱。"]
+        ],
+        decision: "p < 0.05 时拒绝“无线性相关”。",
+        report: "学习时长与成绩呈正相关，Pearson r≈0.99，p<0.05。"
+      },
+      spearman_corr: {
+        name: "Spearman 相关",
+        tag: "等级/非正态 · 单调关系",
+        why: "变量是等级，或关系只要求同升同降而不一定是直线；Spearman 用排名来计算相关。",
+        applies: "有序变量、非正态连续变量，或单调但非线性的关系。",
+        h0: "总体 Spearman ρ = 0，即没有单调相关。",
+        h1: "总体 Spearman ρ 不等于 0。",
+        sampleColumns: ["对象", "满意度等级", "复购意愿等级"],
+        sampleRows: [["1", "1", "1"], ["2", "2", "2"], ["3", "3", "3"], ["4", "4", "5"], ["5", "5", "4"]],
+        metrics: [
+          ["输入数据", "每个对象两个等级或可排序数值", "先把数值转换成秩。"],
+          ["计算统计量", "Spearman ρ", "ρ 越接近 1 表示越同向单调，越接近 -1 表示越反向单调。"],
+          ["决定结论", "p 值、ρ 的置信区间", "p < 0.05 表示单调相关显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“无单调相关”。",
+        report: "满意度等级与复购意愿呈正向单调相关，Spearman ρ≈0.90，p<0.05。"
+      },
+      linear_regression: {
+        name: "线性回归",
+        tag: "连续因变量 · 预测",
+        why: "当结果是连续变量，并且想用一个或多个变量解释/预测它时，线性回归比单纯相关更完整。",
+        applies: "连续因变量与一个或多个自变量的关系建模。",
+        h0: "某个回归系数 β = 0，即该自变量与结果无线性关系。",
+        h1: "某个回归系数 β 不等于 0。",
+        sampleColumns: ["对象", "运动小时", "收缩压"],
+        sampleRows: [["1", "1", "142"], ["2", "2", "138"], ["3", "3", "134"], ["4", "4", "130"], ["5", "5", "126"]],
+        metrics: [
+          ["输入数据", "因变量 Y 和自变量 X", "Y 是要预测的结果，X 是解释变量。"],
+          ["计算统计量", "回归系数 β、t 值、R²", "β 表示 X 每增加 1 单位，Y 平均变化多少。"],
+          ["决定结论", "β 的 p 值、95% CI、整体 F 检验", "β 的 CI 不含 0 或 p < 0.05，说明该变量有显著预测作用。"]
+        ],
+        decision: "某个 β 的 p < 0.05 时，拒绝“该自变量无作用”。",
+        report: "线性回归显示运动小时数可显著预测收缩压，β≈-4.0，p<0.05，表示每多运动 1 小时，收缩压平均降低约 4 mmHg。"
+      },
+      logistic_regression: {
+        name: "Logistic 回归",
+        tag: "二分类因变量 · 预测概率",
+        why: "当结果只有是/否、患病/未患病这类二分类时，不能直接用线性回归；Logistic 回归预测事件发生概率。",
+        applies: "二分类因变量与一个或多个自变量的关系建模。",
+        h0: "某个回归系数 β = 0，或 OR = 1。",
+        h1: "某个回归系数 β 不等于 0，或 OR 不等于 1。",
+        sampleColumns: ["对象", "年龄", "是否患病"],
+        sampleRows: [["1", "30", "否"], ["2", "40", "否"], ["3", "50", "是"], ["4", "60", "是"], ["5", "70", "是"]],
+        metrics: [
+          ["输入数据", "二分类结果和预测变量", "结果通常编码为 0/1。"],
+          ["计算统计量", "β、标准误、Wald z、OR = exp(β)", "OR > 1 表示 X 越大，事件优势越高；OR < 1 表示越低。"],
+          ["决定结论", "p 值、OR 95% CI、AUC", "OR 的 CI 不含 1 或 p < 0.05，说明预测变量显著。"]
+        ],
+        decision: "某个 β 的 p < 0.05，或 OR 的置信区间不含 1 时，拒绝原假设。",
+        report: "Logistic 回归显示年龄与患病概率相关，OR≈1.12，p<0.05，表示年龄每增加 1 岁，患病优势约增加 12%。"
+      },
+      poisson_regression: {
+        name: "泊松回归",
+        tag: "计数因变量 · 发生率",
+        why: "结果是次数，并且可能有不同观察时间或暴露量；泊松回归用来建模事件发生率。",
+        applies: "计数结果与自变量的关系建模，例如事故次数、发作次数。",
+        h0: "某个回归系数 β = 0，或发生率比 IRR = 1。",
+        h1: "某个回归系数 β 不等于 0，或 IRR 不等于 1。",
+        sampleColumns: ["对象", "暴露月数", "事故次数", "是否培训"],
+        sampleRows: [["1", "6", "3", "否"], ["2", "6", "2", "否"], ["3", "6", "1", "是"], ["4", "6", "0", "是"]],
+        metrics: [
+          ["输入数据", "计数、暴露时间、自变量", "暴露时间不同时要加入 offset。"],
+          ["计算统计量", "β、z 值、IRR = exp(β)", "IRR < 1 表示发生率降低，IRR > 1 表示发生率升高。"],
+          ["决定结论", "p 值、IRR 95% CI、过度离散检查", "若方差远大于均值，可能需要负二项回归。"]
+        ],
+        decision: "p < 0.05 或 IRR 置信区间不含 1 时，拒绝“发生率无变化”。",
+        report: "泊松回归显示培训与事故发生率降低相关，IRR≈0.40，p<0.05。"
+      },
+      ks_test: {
+        name: "KS 检验",
+        tag: "分布差异 · 连续变量",
+        why: "它比较整条累计分布曲线，适合问“这组数据像不像某个理论分布”或“两组整体分布是否不同”。",
+        applies: "一组样本与理论分布比较，或两组连续样本的分布比较。",
+        h0: "样本来自指定分布，或两组来自同一分布。",
+        h1: "样本不来自指定分布，或两组分布不同。",
+        sampleColumns: ["样本 A", "样本 B"],
+        sampleRows: [["1.1", "1.8"], ["1.3", "2.0"], ["1.5", "2.2"], ["1.8", "2.4"], ["2.0", "2.7"]],
+        metrics: [
+          ["输入数据", "连续样本值，或样本值加理论分布", "KS 对离散数据和大量相同值不太理想。"],
+          ["计算统计量", "D 值", "D 是两条累计分布曲线之间的最大距离。"],
+          ["决定结论", "p 值", "p < 0.05 表示分布差异显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“分布相同/符合理论分布”。",
+        report: "KS 检验显示两组累计分布存在显著差异，D≈0.80，p<0.05。"
+      },
+      shapiro_wilk: {
+        name: "Shapiro-Wilk 正态性检验",
+        tag: "前提检查 · 正态性",
+        why: "在决定是否使用 t 检验、ANOVA、Pearson 相关之前，常用它检查数据或差值是否近似正态。",
+        applies: "连续变量、配对差值、模型残差的正态性检查；常用于小到中等样本。",
+        h0: "数据来自正态分布。",
+        h1: "数据不来自正态分布。",
+        sampleColumns: ["观测值"],
+        sampleRows: [["78"], ["82"], ["85"], ["79"], ["86"], ["81"]],
+        metrics: [
+          ["输入数据", "一列连续数值", "配对设计时应检查差值，而不是分别检查前后。"],
+          ["计算统计量", "W 值", "W 越接近 1，越像正态分布。"],
+          ["决定结论", "p 值、Q-Q 图", "p < 0.05 常提示偏离正态；样本很大时很小偏离也可能显著。"]
+        ],
+        decision: "p < 0.05 时拒绝“数据正态”；p ≥ 0.05 只能说未发现明显偏离正态。",
+        report: "Shapiro-Wilk 检验未发现数据显著偏离正态，W≈0.96，p>0.05。"
+      },
+      levene_test: {
+        name: "Levene 方差齐性检验",
+        tag: "前提检查 · 方差齐性",
+        why: "比较两组或多组均值前，用它检查各组波动是否差不多；这会影响选择普通 t/ANOVA 还是 Welch 方法。",
+        applies: "两组或多组连续变量的方差齐性检查。",
+        h0: "各组总体方差相等。",
+        h1: "至少有一组总体方差不同。",
+        sampleColumns: ["组别", "观测值"],
+        sampleRows: [["A", "8, 9, 10, 11"], ["B", "7, 12, 16, 20"], ["C", "9, 10, 11, 12"]],
+        metrics: [
+          ["输入数据", "每组连续数值", "先按组整理。"],
+          ["计算统计量", "F 值", "F 值越大，说明各组波动差异越明显。"],
+          ["决定结论", "p 值", "p < 0.05 表示方差齐性可能不满足。"]
+        ],
+        decision: "p < 0.05 时拒绝“方差相等”；可考虑 Welch t 检验或 Welch ANOVA。",
+        report: "Levene 检验显示各组方差不齐，F≈6.2，p<0.05；后续建议使用 Welch 方法。"
+      }
+    };
+
+    const concepts = [
+      ["原假设 H0", "默认先相信“没有差异、没有关系、没有变化”。检验的任务是看数据是否足够反常，从而推翻它。"],
+      ["备择假设 H1", "研究者真正关心的可能性，例如“有差异”“有关系”“治疗后降低”。"],
+      ["p 值", "如果 H0 真的成立，出现当前这么大或更大差异的概率。p 小不代表差异一定大，只代表用 H0 难解释。"],
+      ["置信区间", "给出参数可能范围。均值差的区间不含 0、OR/IRR 的区间不含 1，通常支持显著。"],
+      ["效应量", "差异或关系到底有多大。p 值受样本量影响，效应量更接近实际重要性。"],
+      ["正态性", "数据形状接近钟形曲线。t 检验和 ANOVA 对它有要求，但样本较大时通常更稳健。"],
+      ["方差齐性", "几组数据的波动程度差不多。若不满足，优先考虑 Welch t 检验或 Welch ANOVA。"],
+      ["独立 vs 配对", "独立样本是不同对象；配对样本是同一对象前后测量或一一匹配。选错会影响 p 值。"],
+      ["统计显著 vs 实际重要", "p < 0.05 说明统计证据较强，但还要看差异大小、置信区间和业务/医学意义。"]
+    ];
+
+    let path = [];
+    let currentQuestion = "variable";
+
+    const questionArea = document.getElementById("questionArea");
+    const resultPanel = document.getElementById("resultPanel");
+    const breadcrumbs = document.getElementById("breadcrumbs");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      if (!q) return;
+      questionArea.innerHTML = `
+        <div class="question-head">
+          <h2>${q.title}</h2>
+          <p class="hint">${q.hint}</p>
+        </div>
+        <div class="options">
+          ${q.options.map((opt, index) => `
+            <button class="option" type="button" data-index="${index}">
+              <span class="option-title"><span>${opt[0]}</span><span>选择</span></span>
+              <span class="option-desc">${opt[1]}</span>
+            </button>
+          `).join("")}
+        </div>
+      `;
+
+      questionArea.querySelectorAll(".option").forEach(button => {
+        button.addEventListener("click", () => {
+          const opt = q.options[Number(button.dataset.index)];
+          path.push({
+            questionId: currentQuestion,
+            label: opt[0],
+            desc: opt[1],
+            next: opt[2],
+            result: opt[3] || null
+          });
+          if (opt[3]) {
+            currentQuestion = null;
+            renderBreadcrumbs(opt[3]);
+            renderResult(opt[3]);
+            questionArea.innerHTML = `
+              <div class="question-head">
+                <h2>已推荐检验方法</h2>
+                <p class="hint">可以点击上方路径中的任一步回去重选，后续选择会自动清空。</p>
+              </div>
+            `;
+          } else {
+            currentQuestion = opt[2];
+            renderBreadcrumbs();
+            renderQuestion();
+          }
+        });
+      });
+    }
+
+    function renderBreadcrumbs(resultId) {
+      const items = path.map((item, idx) => `
+        <button class="crumb" type="button" data-step="${idx}">${item.label}</button>
+        ${idx < path.length - 1 || resultId ? '<span class="crumb-sep">→</span>' : ''}
+      `).join("");
+      const resultCrumb = resultId ? `<button class="crumb current" type="button">${methods[resultId].name}</button>` : "";
+      breadcrumbs.innerHTML = items || `<span class="small-muted">尚未选择</span>`;
+      if (resultId) breadcrumbs.innerHTML += resultCrumb;
+
+      breadcrumbs.querySelectorAll("[data-step]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.step);
+          const item = path[idx];
+          path = path.slice(0, idx);
+          currentQuestion = item.questionId;
+          renderBreadcrumbs();
+          renderQuestion();
+          renderEmptyResult();
+        });
+      });
+    }
+
+    function renderResult(id) {
+      const m = methods[id];
+      resultPanel.innerHTML = `
+        <div class="result-title">
+          <div>
+            <span class="pill">${m.tag}</span>
+            <h2 class="method-name">${m.name}</h2>
+          </div>
+        </div>
+        <div class="why"><strong>为什么推荐它：</strong>${m.why}</div>
+
+        <div class="grid-2">
+          <div class="info-box"><strong>适用场景</strong><span>${m.applies}</span></div>
+          <div class="info-box"><strong>什么时候拒绝 H0</strong><span>${m.decision}</span></div>
+        </div>
+
+        <div class="section grid-2">
+          <div class="info-box"><strong>原假设 H0</strong><span>${m.h0}</span></div>
+          <div class="info-box"><strong>备择假设 H1</strong><span>${m.h1}</span></div>
+        </div>
+
+        <div class="section">
+          <h3>示例数据</h3>
+          <p class="small-muted">表中是输入数据；后面的统计指标是由这些数据或列联表计算出来的演示结果。</p>
+          ${tableHtml(m.sampleColumns, m.sampleRows)}
+        </div>
+
+        <div class="section">
+          <h3>示例中要看哪些指标</h3>
+          ${tableHtml(["类型", "示例/统计量", "怎么解读"], m.metrics)}
+        </div>
+
+        <div class="section">
+          <h3>中文结果表述</h3>
+          <p>${m.report}</p>
+        </div>
+      `;
+    }
+
+    function renderEmptyResult() {
+      resultPanel.innerHTML = `
+        <div class="result-empty">
+          <div>
+            <h2>等待你的选择</h2>
+            <p>继续回答左侧问题，推荐结果会显示在这里。</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function tableHtml(columns, rows) {
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead><tr>${columns.map(c => `<th>${c}</th>`).join("")}</tr></thead>
+            <tbody>
+              ${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderConcepts() {
+      document.getElementById("concepts").innerHTML = concepts.map(([title, text]) => `
+        <details>
+          <summary>${title}</summary>
+          <p>${text}</p>
+        </details>
+      `).join("");
+    }
+
+    function renderMethodGrid() {
+      const grid = document.getElementById("methodGrid");
+      grid.innerHTML = Object.entries(methods).map(([id, m]) => `
+        <button class="mini-btn" type="button" data-method="${id}">${m.name}</button>
+      `).join("");
+      grid.querySelectorAll("[data-method]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.method;
+          path = [{ questionId: "variable", label: "直接查看", desc: "从方法列表打开", next: null, result: id }];
+          currentQuestion = null;
+          renderBreadcrumbs(id);
+          renderResult(id);
+          questionArea.innerHTML = `
+            <div class="question-head">
+              <h2>直接查看：${methods[id].name}</h2>
+              <p class="hint">可以点“重新开始”回到问答式选择流程。</p>
+            </div>
+          `;
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    }
+
+    restartBtn.addEventListener("click", () => {
+      path = [];
+      currentQuestion = "variable";
+      renderBreadcrumbs();
+      renderQuestion();
+      renderEmptyResult();
+    });
+
+    renderBreadcrumbs();
+    renderQuestion();
+    renderConcepts();
+    renderMethodGrid();
+  </script>
+</body>
+</html>
