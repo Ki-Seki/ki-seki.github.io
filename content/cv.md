@@ -63,7 +63,7 @@ math: true
 
 - **[Institute for Advanced Algorithms Research, Shanghai](https://www.iaar.ac.cn/)**
 
-    Research Intern at the Large Language Model Center
+    Research Intern at [the Large Language Model Center](https://www.iaar.ac.cn/model)
 
     Collaborated with **[Zehao Lin](https://scholar.google.com/citations?user=ptbQQlUAAAAJ)**
 
