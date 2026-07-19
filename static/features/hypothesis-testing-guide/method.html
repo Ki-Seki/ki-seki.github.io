@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN" data-default-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f4f1e8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15201b" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="查看统计检验的背景、适用条件、完整公式、逐步计算、置信区间、效应量、边界情况和 Python 复现代码。">
+  <meta name="keywords" content="统计公式,假设检验计算,效应量,Python,hypothesis test formula,worked example">
+  <meta name="author" content="Ki-Seki">
+  <meta name="robots" content="index,follow">
+
+  <title>方法详情｜假设检验指南</title>
+  <link id="canonical-url" rel="canonical" href="https://ki-seki.github.io/features/hypothesis-testing-guide/method.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Ki-Seki">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:title" content="方法详情｜假设检验指南">
+  <meta property="og:description" content="从假设和公式到手算示例与 Python 代码，完整理解一项统计方法。">
+  <meta property="og:url" content="https://ki-seki.github.io/features/hypothesis-testing-guide/method.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="方法详情｜假设检验指南">
+  <meta name="twitter:description" content="假设检验的完整公式、逐步计算、效应量与 Python 复现。">
+
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css" integrity="sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js" integrity="sha384-AtrdNsnxl/75rvBneBVH7DtOvCxSVahR2zWqle1coBKd8DEmLoviqNeJSx64gNAs" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous"></script>
+  <script defer src="./app.js"></script>
+
+  <script type="application/ld+json" id="method-structured-data">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "统计方法详情",
+    "url": "https://ki-seki.github.io/features/hypothesis-testing-guide/method.html",
+    "description": "Bilingual formulas, worked examples, effect sizes, edge cases, and Python code for a statistical method.",
+    "isAccessibleForFree": true,
+    "inLanguage": ["zh-CN", "en"],
+    "learningResourceType": ["Worked example", "Reference"],
+    "educationalUse": ["Self study", "Reference"]
+  }
+  </script>
+</head>
+<body class="site-page" data-page="method">
+  <a class="skip-link" href="#main-content" data-i18n="skipToContent">跳到主要内容</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" id="site-brand" href="./index.html" aria-label="假设检验指南首页">
+        <span class="brand-mark" aria-hidden="true">∑</span>
+        <span class="brand-copy">
+          <strong data-i18n="brandTitle">假设检验指南</strong>
+          <span data-i18n="brandSubtitle">从研究问题到可靠结论</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="主要导航" data-i18n-aria-label="primaryNavigation">
+        <a href="./index.html" data-nav="finder" data-i18n="navFinder" aria-current="page">方法选择</a>
+        <a href="./help.html" data-nav="help" data-i18n="navHelp">帮助</a>
+      </nav>
+
+      <button class="lang-toggle" id="language-toggle" type="button" aria-label="Switch to English" title="Switch to English">
+        <span aria-hidden="true">文 / A</span>
+        <span class="lang-current">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="sr-only" id="page-status" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <main class="page-shell method-shell" id="main-content" tabindex="-1">
+    <div class="app-mount" id="app" aria-busy="true">
+      <div class="loading-state" role="status">
+        <h1 class="sr-only">统计方法详情</h1>
+        <span class="loading-mark" aria-hidden="true">∑</span>
+        <p>正在载入方法详情…</p>
+      </div>
+    </div>
+
+    <noscript>
+      <section class="noscript-note" aria-labelledby="noscript-title-method">
+        <h1 id="noscript-title-method">需要启用 JavaScript</h1>
+        <p lang="zh-CN">方法正文由当前 URL 中的方法 ID 动态载入。请启用 JavaScript 后重新载入页面。</p>
+        <p lang="en">The method is loaded dynamically from the ID in this page’s URL. Enable JavaScript and reload the page.</p>
+        <p><a href="./index.html">返回方法库 / Return to the method library</a></p>
+      </section>
+    </noscript>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p data-i18n="footerNote">统计方法帮助你量化证据，但不能替代清晰的研究设计。</p>
+      <a href="./help.html#reporting" data-i18n="footerChecklist">查看报告检查表</a>
+    </div>
+  </footer>
+</body>
+</html>
