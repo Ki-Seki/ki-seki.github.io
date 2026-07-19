@@ -163,7 +163,7 @@ Based on how we do exploration, there several ways to solve the multi-armed band
 | **Smart exploration (probabilistic)**      | **Thompson Sampling**            | Sample a parameter from each arm’s posterior; pick the arm with the highest sample   |
 
 <iframe
-  src="/misc/bandit-algorithms.html"
+  src="/misc/bandit-algo.html"
   title="Bandit algorithm interactive demo"
   width="100%"
   height="1000px"
