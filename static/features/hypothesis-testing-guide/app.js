@@ -8,51 +8,47 @@
       skipToContent: "跳到主要内容", brandTitle: "假设检验指南", brandSubtitle: "从研究问题到可靠结论",
       navFinder: "方法选择", navHelp: "帮助", primaryNavigation: "主要导航",
       footerNote: "统计方法帮助你量化证据，但不能替代清晰的研究设计。", footerChecklist: "查看报告检查表",
-      switchLanguage: "Switch to English", languageCode: "EN", guideTitle: "从问题出发，选对统计方法",
-      guideLead: "回答几个关于结果变量、研究设计和推断目标的问题，或直接搜索完整方法库。",
+      switchLanguage: "Switch to English", languageCode: "EN",
       findMethodTitle: "找到合适的统计方法", findMethodLead: "先选择查找方式：沿研究问题树判断，或按名称和条件搜索完整方法库。",
       modeLabel: "选择查找方式", guideModeTitle: "沿选择树判断", guideModeDesc: "不知道方法名称？从研究目标和数据结构沿树找到候选。",
       libraryModeTitle: "搜索方法库", libraryModeDesc: "已有名称或条件？搜索别名，或按研究设计筛选全部方法。", currentMode: "当前模式", openMethodShort: "查看公式与计算", alternativeMethod: "替代方法",
-      finder: "帮我选择", library: "浏览方法", searchLabel: "搜索方法与概念", searchPlaceholder: "输入名称、场景、公式或代码别名，例如 paired_wilcoxon",
+      searchLabel: "搜索方法与概念", searchPlaceholder: "输入名称、场景、公式或代码别名，例如 paired_wilcoxon",
       searchHint: "按 / 或 Ctrl+K 聚焦；Tab 浏览结果，Esc 清空。", noResults: "没有匹配结果。试试更通用的关键词。",
-      methods: "统计方法", concepts: "概念与效应量", yourConditions: "你的条件", startOver: "重新开始", previous: "上一步",
-      recommendation: "推荐方法", whyThis: "为什么推荐", openMethod: "查看公式与完整计算", allMethods: "全部方法",
+      methods: "统计方法", concepts: "概念与效应量",
       filterOutcome: "结果类型", filterDesign: "设计", filterGroups: "组数", filterKind: "方法类别", clearFilters: "清除筛选", clearSearch: "清空搜索",
       continuous: "连续", categorical: "分类", ordinal: "有序", count: "计数", any: "不限", independent: "独立", paired: "配对/重复",
       one: "一组", two: "两组", many: "三组以上", comparison: "比较", association: "关联/模型", diagnostic: "前提检查",
-      methodLibrary: "方法库", background: "背景与直觉", suitability: "何时使用", hypotheses: "假设", assumptions: "数据结构与前提",
-      formula: "公式与符号", example: "逐步计算", inference: "p 值与推断", effect: "置信区间与效应量", edgeCases: "特殊情况",
+      methodLibrary: "方法库", background: "背景与直觉", hypotheses: "假设", assumptions: "数据结构与前提",
+      formula: "公式与符号", example: "逐步计算", inference: "p 值与推断", effect: "效应量", edgeCases: "特殊情况",
       reporting: "报告模板", python: "Python 复现", related: "相关方法", references: "参考资料", contents: "本页目录",
       useWhen: "适用", avoidWhen: "不适用", nullHypothesis: "原假设 H₀", alternativeHypothesis: "备择假设 H₁",
-      symbols: "符号表", calculationSteps: "代入步骤", result: "结果", approximate: "近似结果", copy: "复制", copied: "已复制",
+      result: "结果", approximate: "数值已四舍五入", copy: "复制", copied: "已复制", copyFailed: "复制失败",
       backToLibrary: "返回方法库", helpTitle: "统计推断帮助中心", helpLead: "先理解研究设计与估计目标，再选择检验；不要让单个前提检验的 p 值替你做决定。",
-      glossary: "中英文术语表", checklist: "报告检查表", updated: "内容审校：2026-07-17", notFound: "没有找到这个方法",
-      notFoundText: "URL 中的方法 ID 不存在。你可以返回方法库搜索。", searchResults: "搜索结果", resultCount: "个结果"
+      updated: "内容审校：2026-07-25", notFound: "没有找到这个方法",
+      notFoundText: "URL 中的方法 ID 不存在。你可以返回方法库搜索。", resultCount: "个结果"
     },
     en: {
       skipToContent: "Skip to main content", brandTitle: "Hypothesis Testing Guide", brandSubtitle: "From research questions to reliable conclusions",
       navFinder: "Find a method", navHelp: "Help", primaryNavigation: "Primary navigation",
       footerNote: "Statistical methods quantify evidence; they do not replace a clear study design.", footerChecklist: "Open the reporting checklist",
-      switchLanguage: "切换到中文", languageCode: "中", guideTitle: "Start with the question, then choose the method",
-      guideLead: "Answer a few questions about the outcome, design, and estimand, or search the complete method library.",
+      switchLanguage: "切换到中文", languageCode: "中",
       findMethodTitle: "Find the right statistical method", findMethodLead: "Choose how to find it: follow the research-question tree or search and filter the complete method library.",
       modeLabel: "Choose how to find a method", guideModeTitle: "Follow the decision tree", guideModeDesc: "Not sure of the method? Follow the research goal and data structure to a candidate.",
       libraryModeTitle: "Search the method library", libraryModeDesc: "Know a name or condition? Search aliases or filter the full library by study design.", currentMode: "Current mode", openMethodShort: "View formulas & calculation", alternativeMethod: "Alternative method",
-      finder: "Help me choose", library: "Browse methods", searchLabel: "Search methods and concepts", searchPlaceholder: "Search a name, use case, formula, or code alias, e.g. paired_wilcoxon",
+      searchLabel: "Search methods and concepts", searchPlaceholder: "Search a name, use case, formula, or code alias, e.g. paired_wilcoxon",
       searchHint: "Press / or Ctrl+K to focus; use Tab to browse results; Esc clears.", noResults: "No matches. Try a broader term.",
-      methods: "Statistical methods", concepts: "Concepts and effect sizes", yourConditions: "Your conditions", startOver: "Start over", previous: "Back",
-      recommendation: "Recommended method", whyThis: "Why it fits", openMethod: "See formulas and full calculation", allMethods: "All methods",
+      methods: "Statistical methods", concepts: "Concepts and effect sizes",
       filterOutcome: "Outcome", filterDesign: "Design", filterGroups: "Groups", filterKind: "Method type", clearFilters: "Clear filters", clearSearch: "Clear search",
       continuous: "Continuous", categorical: "Categorical", ordinal: "Ordinal", count: "Count", any: "Any", independent: "Independent", paired: "Paired/repeated",
       one: "One", two: "Two", many: "Three or more", comparison: "Comparison", association: "Association/model", diagnostic: "Assumption check",
-      methodLibrary: "Method library", background: "Background and intuition", suitability: "When to use it", hypotheses: "Hypotheses", assumptions: "Data structure and assumptions",
-      formula: "Formula and notation", example: "Worked calculation", inference: "p-value and inference", effect: "Confidence intervals and effect size", edgeCases: "Edge cases",
+      methodLibrary: "Method library", background: "Background and intuition", hypotheses: "Hypotheses", assumptions: "Data structure and assumptions",
+      formula: "Formula and notation", example: "Worked calculation", inference: "p-value and inference", effect: "Effect size", edgeCases: "Edge cases",
       reporting: "Reporting template", python: "Python reproduction", related: "Related methods", references: "References", contents: "On this page",
       useWhen: "Use when", avoidWhen: "Avoid when", nullHypothesis: "Null hypothesis H₀", alternativeHypothesis: "Alternative hypothesis H₁",
-      symbols: "Notation", calculationSteps: "Substitution steps", result: "Result", approximate: "Approximate result", copy: "Copy", copied: "Copied",
+      result: "Result", approximate: "Values are rounded", copy: "Copy", copied: "Copied", copyFailed: "Copy failed",
       backToLibrary: "Back to library", helpTitle: "Statistical inference help center", helpLead: "Understand the design and estimand before choosing a test; do not let one assumption-test p-value decide for you.",
-      glossary: "Chinese–English glossary", checklist: "Reporting checklist", updated: "Content reviewed: 2026-07-17", notFound: "Method not found",
-      notFoundText: "The method ID in the URL does not exist. Return to the library and search.", searchResults: "Search results", resultCount: "results"
+      updated: "Content reviewed: 2026-07-25", notFound: "Method not found",
+      notFoundText: "The method ID in the URL does not exist. Return to the library and search.", resultCount: "results"
     }
   };
 
@@ -850,7 +846,7 @@
       ],
       example: { caption: bi("四个前后差值", "Four before–after differences"), columns: bi(["对象", "D"], ["Pair", "D"]), rows: [[1,-2],[2,-4],[3,-3],[4,-3]], steps: bi(["D̄=(−2−4−3−3)/4=−3。", "s_D=0.816。", "d_z=−3/0.816≈−3.67。", "若来自配对 t，t=d_z√n≈−7.35。"], ["D̄=(−2−4−3−3)/4=−3.", "s_D=0.816.", "d_z=−3/0.816≈−3.67.", "If paired t is used, t=d_z√n≈−7.35."]), result: bi("d_z 保留差值方向；它量化变化大小，不提供独立 p 值。", "d_z keeps the direction of the difference and quantifies its size; it does not produce an independent p-value.") },
       zh: { name: "Cohen's d_z（配对效应量）", short: "配对差值均值除以配对差值标准差。", background: "配对 t 检验把每一对压缩成一个差值；d_z 将平均变化用差值波动标准化。", useWhen: "报告配对 t 或重复测量的标准化变化时。", avoidWhen: "不要把 d_z 与独立组 pooled d、d_av 或 d_rm 混用；必须写清分母。", hypotheses: { h0: "效应量本身不定义 H₀；通常与配对差值检验一起报告。", h1: "同上。" }, assumptions: ["差值方向必须预先定义。", "效应量不替代研究设计、区间和原始单位。"], formulaNotes: "d_z 的绝对值越大表示变化相对差值波动越大；正负号取决于差值方向。", inference: "p 值来自配对 t/Wilcoxon/符号检验，而不是 d_z 本身。", ci: "可用非中心 t 方法或 bootstrap 为 d_z 构造区间。", effect: "d_z 本身就是效应量；同时报告原始平均差和其置信区间。", edgeCases: ["n 很小且差值高度一致时，d_z 可能极大。", "跨研究比较前确认效应量定义一致。"], report: "配对差值均值为 −3.0，配对效应量 Cohen's d_z=−3.67。", references: [OFFICIAL_REFS.scipy, OFFICIAL_REFS.nist], related: ["paired_t", "wilcoxon_signed"] },
-      en: { name: "Cohen's d_z (paired effect size)", short: "The mean paired difference divided by its sample SD.", background: "A paired t-test reduces each pair to one difference; d_z standardizes the mean change by the variability of those differences.", useWhen: "Report a standardized change alongside a paired t-test or repeated-measures comparison.", avoidWhen: "Do not mix d_z with independent-group pooled d, d_av, or d_rm; state the denominator.", hypotheses: { h0: "An effect size does not define H₀; it is reported alongside a paired-difference test.", h1: "Same.\"" }, assumptions: ["Prespecify the direction of the difference.", "An effect size does not replace design, intervals, or raw-unit interpretation."], formulaNotes: "The absolute value reflects standardized magnitude; the sign follows the difference direction.", inference: "The p-value comes from the paired t, Wilcoxon, or sign test, not from d_z itself.", ci: "Use a noncentral-t or bootstrap method for a d_z interval.", effect: "d_z is the effect size; also report the raw mean difference and CI.", edgeCases: ["With tiny n and nearly identical differences, d_z can be very large.", "Confirm the effect-size definition before comparing studies."], report: "The mean paired difference was −3.0, with Cohen's d_z=−3.67.", references: [OFFICIAL_REFS.scipy, OFFICIAL_REFS.nist], related: ["paired_t", "wilcoxon_signed"] }
+      en: { name: "Cohen's d_z (paired effect size)", short: "The mean paired difference divided by its sample SD.", background: "A paired t-test reduces each pair to one difference; d_z standardizes the mean change by the variability of those differences.", useWhen: "Report a standardized change alongside a paired t-test or repeated-measures comparison.", avoidWhen: "Do not mix d_z with independent-group pooled d, d_av, or d_rm; state the denominator.", hypotheses: { h0: "An effect size does not define H₀; it is reported alongside a paired-difference test.", h1: "Same." }, assumptions: ["Prespecify the direction of the difference.", "An effect size does not replace design, intervals, or raw-unit interpretation."], formulaNotes: "The absolute value reflects standardized magnitude; the sign follows the difference direction.", inference: "The p-value comes from the paired t, Wilcoxon, or sign test, not from d_z itself.", ci: "Use a noncentral-t or bootstrap method for a d_z interval.", effect: "d_z is the effect size; also report the raw mean difference and CI.", edgeCases: ["With tiny n and nearly identical differences, d_z can be very large.", "Confirm the effect-size definition before comparing studies."], report: "The mean paired difference was −3.0, with Cohen's d_z=−3.67.", references: [OFFICIAL_REFS.scipy, OFFICIAL_REFS.nist], related: ["paired_t", "wilcoxon_signed"] }
     }
   };
 
@@ -938,9 +934,9 @@
   const HELP_CONTENT = [
     { id: "start", title: bi("如何使用这个工具", "How to use this guide"), body: bi(["先明确结果变量、研究单位、配对关系和目标参数，再使用向导。", "若已经知道方法，直接打开方法库或搜索别名。", "页面给出教学示例；正式分析仍需回到研究设计、缺失值和数据诊断。"], ["Define the outcome, unit of analysis, pairing, and estimand before using the guide.", "If you already know the method, open the library or search an alias.", "Examples are for learning; formal analysis still requires design, missing-data, and diagnostic review."]) },
     { id: "pvalue", title: bi("p 值、置信区间和效应量", "p-values, intervals, and effect sizes"), body: bi(["p 值是在 H₀ 下得到当前或更极端统计量的概率，不是 H₀ 为真的概率。", "置信区间描述估计的精度和与哪些效应相容；不应只看是否跨过 0。", "效应量说明差异大小，必须结合原始单位和实际重要性。"], ["A p-value is the probability of a statistic at least as extreme under H₀, not the probability that H₀ is true.", "A confidence interval conveys precision and compatible effects; do not read it only as a zero-crossing rule.", "Effect sizes describe magnitude and must be interpreted with raw units and practical importance."]) },
-    { id: "design", title: bi("独立、配对与分析单位", "independent, paired, and unit of analysis"), body: bi(["同一对象前后测量或自然匹配的数据必须保留配对关系。", "配对方法要求不同配对之间独立，而不是要求同一对象的两次测量独立。", "重复使用同一对象、对话或数据集时，分析单位应与研究问题一致。"], ["Keep the pairing for before–after or genuinely matched data.", "Paired methods require independence between pairs, not independence of the two observations within a pair.", "When a unit is reused, the analysis unit must match the research question."]) },
-    { id: "assumptions", title: bi("前提、ties 和缺失值", "assumptions, ties, and missing values"), body: bi(["不要把单个正态性检验当作自动路由器；看差值/残差图形、离群点、样本量和估计目标。", "Wilcoxon 的精确零分布受零差和并列秩影响；符号检验要报告删除的 ties。", "缺失值不能默认为零；提前写出 complete-case、插补或模型处理规则。"], ["Do not use one normality-test p-value as an automatic router; inspect differences/residuals, outliers, sample size, and estimand.", "Zeros and tied ranks change Wilcoxon exact null distributions; report ties removed by the sign test.", "Missing values are not zeros; prespecify complete-case, imputation, or model-based handling."]) },
-    { id: "multiple", title: bi("多重比较和报告", "multiple comparisons and reporting"), body: bi(["同一研究反复检验会提高假阳性；考虑预先指定主要比较并控制 FWER 或 FDR。", "报告估计值、95% CI、统计量、自由度、p 值、样本量、效应量和方向。", "用“未拒绝 H₀”而不是“接受 H₀”；统计显著不等于实际重要。"], ["Repeated tests inflate false positives; prespecify primary comparisons and control FWER or FDR.", "Report the estimate, 95% CI, statistic, df, p-value, sample size, effect size, and direction.", "Say “failed to reject H₀,” not “accepted H₀”; statistical significance is not practical importance."]) },
+    { id: "design", title: bi("独立、配对与分析单位", "Independence, pairing, and the unit of analysis"), body: bi(["同一对象前后测量或自然匹配的数据必须保留配对关系。", "配对方法要求不同配对之间独立，而不是要求同一对象的两次测量独立。", "重复使用同一对象、对话或数据集时，分析单位应与研究问题一致。"], ["Keep the pairing for before–after or genuinely matched data.", "Paired methods require independence between pairs, not independence of the two observations within a pair.", "When a unit is reused, the analysis unit must match the research question."]) },
+    { id: "assumptions", title: bi("前提、ties 和缺失值", "Assumptions, ties, and missing values"), body: bi(["不要把单个正态性检验当作自动路由器；看差值/残差图形、离群点、样本量和估计目标。", "Wilcoxon 的精确零分布受零差和并列秩影响；符号检验要报告删除的 ties。", "缺失值不能默认为零；提前写出 complete-case、插补或模型处理规则。"], ["Do not use one normality-test p-value as an automatic router; inspect differences/residuals, outliers, sample size, and estimand.", "Zeros and tied ranks change Wilcoxon exact null distributions; report ties removed by the sign test.", "Missing values are not zeros; prespecify complete-case, imputation, or model-based handling."]) },
+    { id: "reporting", title: bi("多重比较和报告", "Multiple comparisons and reporting"), body: bi(["同一研究反复检验会提高假阳性；考虑预先指定主要比较并控制 FWER 或 FDR。", "报告估计值、95% CI、统计量、自由度、p 值、样本量、效应量和方向。", "用“未拒绝 H₀”而不是“接受 H₀”；统计显著不等于实际重要。"], ["Repeated tests inflate false positives; prespecify primary comparisons and control FWER or FDR.", "Report the estimate, 95% CI, statistic, df, p-value, sample size, effect size, and direction.", "Say “failed to reject H₀,” not “accepted H₀”; statistical significance is not practical importance."]) },
     { id: "glossary", title: bi("常用术语", "Common terms"), body: bi(["连续变量：可以在区间内取小数的数值结果。", "有序变量：类别有自然顺序，但间距不一定相等。", "精确检验：直接使用离散零分布，不依赖大样本近似。", "效应量：描述差异/关联幅度的指标。"], ["Continuous: numeric outcomes that can take values on an interval.", "Ordinal: ordered categories whose spacing need not be equal.", "Exact test: uses a discrete null distribution rather than a large-sample approximation.", "Effect size: a measure of the magnitude of a difference or association."]) }
   ];
 
@@ -1176,19 +1172,28 @@
   }
   function rerenderMath(root = document.getElementById("app")) {
     if (!root) return;
-    root.querySelectorAll("[data-tex]").forEach(node => {
-      const source = node.dataset.tex || node.textContent || "";
+    root.querySelectorAll("[data-tex], [data-tex-inline]").forEach(node => {
+      const inline = node.hasAttribute("data-tex-inline");
+      const source = (inline ? node.dataset.texInline : node.dataset.tex) || node.textContent || "";
       if (window.katex) {
-        try { window.katex.render(source, node, { displayMode: true, throwOnError: false, strict: "warn" }); return; } catch (_) {}
+        try { window.katex.render(source, node, { displayMode: !inline, throwOnError: false, strict: "warn" }); return; } catch (_) {}
       }
       node.textContent = source;
       node.classList.add("formula-fallback");
     });
     if (window.renderMathInElement) { try { window.renderMathInElement(root, { delimiters: [{ left: "\\[", right: "\\]", display: true }, { left: "\\(", right: "\\)", display: false }], throwOnError: false }); } catch (_) {} }
   }
-  function focusMain() { const heading = document.querySelector("#app h1, #app h2"); if (heading) { heading.setAttribute("tabindex", "-1"); heading.focus({ preventScroll: true }); } }
   function status(message) { const node = document.getElementById("page-status"); if (node) node.textContent = message; }
-  function cardLink(id, label = null) { return `<a class="method-card" href="${safeUrl("method.html", { id })}" data-method-link="${id}"><span class="method-card-title">${escapeHTML(label || localized(METHODS[id]?.zh?.name || METHODS[id]?.en?.name || id))}</span><span class="method-card-meta">${escapeHTML(localized(METHODS[id]?.category || ""))}</span></a>`; }
+  function updatePageMeta(pathWithQuery, pageName) {
+    const canonical = document.getElementById("canonical-url"); if (!canonical) return;
+    const url = new URL(pathWithQuery, canonical.href).href;
+    canonical.href = url;
+    const ogUrl = document.querySelector('meta[property="og:url"]'); if (ogUrl) ogUrl.content = url;
+    const ogTitle = document.querySelector('meta[property="og:title"]'); if (ogTitle) ogTitle.content = document.title;
+    const ld = document.getElementById("method-structured-data");
+    if (ld && pageName) { try { const data = JSON.parse(ld.textContent); data.name = pageName; data.url = url; ld.textContent = JSON.stringify(data); } catch (_) {} }
+  }
+  function cardLink(id, label = null) { const entry = METHODS[id] || CONCEPTS[id]; return `<a class="method-card" href="${safeUrl("method.html", { id })}" data-method-link="${id}"><span class="method-card-title">${escapeHTML(label || localized(entry?.[LANG]?.name || entry?.zh?.name || id))}</span><span class="method-card-meta">${escapeHTML(localized(entry?.category || ""))}</span></a>`; }
   function methodDisplay(id) { return METHODS[id] ? { id, item: METHODS[id], copy: METHODS[id][LANG] } : CONCEPTS[id] ? { id, item: CONCEPTS[id], copy: CONCEPTS[id][LANG] } : null; }
   function allEntries() { return [...Object.values(METHODS), ...CONCEPT_ENTRIES]; }
   function normalizeSearch(value) {
@@ -1234,8 +1239,7 @@
     });
     if (!normalizeSearch(query)) return candidates.map(({ item }) => item);
     const scored = candidates.map(({ item, index }) => ({ item, index, score: searchScore(item, query) })).filter(value => value.score > 0);
-    const hasExactMatch = scored.some(value => value.score >= 100);
-    return scored.filter(value => !hasExactMatch || value.score >= 100).sort((a, b) => b.score - a.score || a.index - b.index).map(({ item }) => item);
+    return scored.sort((a, b) => b.score - a.score || a.index - b.index).map(({ item }) => item);
   }
   function filtersHtml() {
     const options = (label, key, values) => `<label class="filter-field"><span>${escapeHTML(label)}</span><select data-filter="${key}"><option value="">${escapeHTML(UI_TEXT[LANG].any)}</option>${values.map(v => `<option value="${v}">${escapeHTML(UI_TEXT[LANG][v] || v)}</option>`).join("")}</select></label>`;
@@ -1306,7 +1310,7 @@
   }
   function listHtml(value) { const values = Array.isArray(value) ? value : [value]; return `<ul class="check-list">${values.map(x => `<li>${escapeHTML(x)}</li>`).join("")}</ul>`; }
   function formulaHtml(formulas) { return `<div class="formula-list">${(formulas || []).map(f => `<div class="formula-card"><h3>${escapeHTML(localized(f.label))}</h3><div class="formula" data-tex="${escapeHTML(f.tex)}">${escapeHTML(f.tex)}</div></div>`).join("")}</div>`; }
-  function symbolsHtml(symbols) { return `<div class="symbol-grid">${(symbols || []).map(s => `<div><code>${escapeHTML(s.symbol)}</code><span>${escapeHTML(localized(s.meaning))}</span></div>`).join("")}</div>`; }
+  function symbolsHtml(symbols) { return `<div class="symbol-grid">${(symbols || []).map(s => `<div><code data-tex-inline="${escapeHTML(s.symbol)}">${escapeHTML(s.symbol)}</code><span>${escapeHTML(localized(s.meaning))}</span></div>`).join("")}</div>`; }
   function renderCode(code) { return code ? `<div class="code-block"><div class="code-toolbar"><span>Python</span><button class="button tiny" type="button" data-copy-code>${escapeHTML(UI_TEXT[LANG].copy)}</button></div><pre><code>${escapeHTML(code)}</code></pre></div>` : ""; }
   function renderMethod() {
     const root = document.getElementById("app"); if (!root) return;
@@ -1314,7 +1318,8 @@
     if (!found) { document.title = LANG === "zh" ? "方法不存在｜假设检验指南" : "Method not found | Hypothesis Testing Guide"; root.innerHTML = `<section class="empty-state"><h1>${escapeHTML(UI_TEXT[LANG].notFound)}</h1><p>${escapeHTML(UI_TEXT[LANG].notFoundText)}</p><a class="button primary" href="${safeUrl("index.html", { view: "library" })}">${escapeHTML(UI_TEXT[LANG].backToLibrary)}</a></section>`; return; }
     const { item, copy } = found; const related = (item.related || []).filter(x => METHODS[x] || CONCEPTS[x]);
     document.title = LANG === "zh" ? `${copy.name}｜假设检验指南` : `${copy.name} | Hypothesis Testing Guide`;
-    root.innerHTML = `<div class="detail-layout"><aside class="toc panel"><p class="eyebrow">${escapeHTML(localized(item.category))}</p><h2>${escapeHTML(UI_TEXT[LANG].contents)}</h2><nav><a href="#background">${escapeHTML(UI_TEXT[LANG].background)}</a><a href="#formula">${escapeHTML(UI_TEXT[LANG].formula)}</a><a href="#example">${escapeHTML(UI_TEXT[LANG].example)}</a><a href="#inference">${escapeHTML(UI_TEXT[LANG].inference)}</a><a href="#python">${escapeHTML(UI_TEXT[LANG].python)}</a><a href="#reporting">${escapeHTML(UI_TEXT[LANG].reporting)}</a></nav></aside><article class="method-article"><p class="breadcrumbs"><a href="${safeUrl("index.html", { view: "library" })}">${escapeHTML(UI_TEXT[LANG].methodLibrary)}</a><span aria-hidden="true">/</span><span>${escapeHTML(localized(item.category))}</span></p><header class="method-header"><span class="pill">${escapeHTML(localized(item.category))}</span><h1>${escapeHTML(copy.name)}</h1><p class="lead">${escapeHTML(copy.short)}</p></header><section id="background" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].background)}</h2><p>${escapeHTML(copy.background)}</p><div class="two-col"><div class="info-card"><h3>${escapeHTML(UI_TEXT[LANG].useWhen)}</h3><p>${escapeHTML(copy.useWhen)}</p></div><div class="info-card"><h3>${escapeHTML(UI_TEXT[LANG].avoidWhen)}</h3><p>${escapeHTML(copy.avoidWhen)}</p></div></div></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].hypotheses)}</h2><div class="two-col"><div class="hypothesis h0"><h3>${escapeHTML(UI_TEXT[LANG].nullHypothesis)}</h3><p>${escapeHTML(copy.hypotheses.h0)}</p></div><div class="hypothesis h1"><h3>${escapeHTML(UI_TEXT[LANG].alternativeHypothesis)}</h3><p>${escapeHTML(copy.hypotheses.h1)}</p></div></div></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].assumptions)}</h2>${listHtml(copy.assumptions)}</section><section id="formula" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].formula)}</h2>${symbolsHtml(item.symbols)}${formulaHtml(item.formulas)}<p class="hint">${escapeHTML(copy.formulaNotes)}</p></section><section id="example" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].example)}</h2>${tableHtml(item.example)}<ol class="calculation-steps">${(localized(item.example?.steps) || []).map(step => `<li>${escapeHTML(step)}</li>`).join("")}</ol><div class="result-callout"><strong>${escapeHTML(UI_TEXT[LANG].result)}</strong><p>${escapeHTML(localized(item.example?.result))}</p></div></section><section id="inference" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].inference)}</h2><p>${escapeHTML(copy.inference)}</p><p>${escapeHTML(copy.ci)}</p><p>${escapeHTML(copy.effect)}</p></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].edgeCases)}</h2>${listHtml(copy.edgeCases)}</section><section id="reporting" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].reporting)}</h2><div class="report-box"><p>${escapeHTML(copy.report)}</p><button class="button tiny" type="button" data-copy-report>${escapeHTML(UI_TEXT[LANG].copy)}</button></div></section><section id="python" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].python)}</h2>${renderCode(item.python)}</section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].related)}</h2><div class="method-grid">${related.map(r => cardLink(r, localized((METHODS[r] || CONCEPTS[r])[LANG]?.name || (METHODS[r] || CONCEPTS[r]).zh?.name))).join("")}</div></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].references)}</h2><ul class="reference-list">${(item.references || []).map(r => `<li><a href="${r.url}" target="_blank" rel="noreferrer">${escapeHTML(localized(r.label))}</a></li>`).join("")}</ul></section></article></div>`;
+    updatePageMeta(`method.html?id=${encodeURIComponent(item.id || id)}`, copy.name);
+    root.innerHTML = `<div class="detail-layout"><aside class="toc panel"><p class="eyebrow">${escapeHTML(localized(item.category))}</p><h2>${escapeHTML(UI_TEXT[LANG].contents)}</h2><nav><a href="#background">${escapeHTML(UI_TEXT[LANG].background)}</a><a href="#formula">${escapeHTML(UI_TEXT[LANG].formula)}</a><a href="#example">${escapeHTML(UI_TEXT[LANG].example)}</a><a href="#inference">${escapeHTML(UI_TEXT[LANG].inference)}</a><a href="#python">${escapeHTML(UI_TEXT[LANG].python)}</a><a href="#reporting">${escapeHTML(UI_TEXT[LANG].reporting)}</a></nav></aside><article class="method-article"><p class="breadcrumbs"><a href="${safeUrl("index.html", { view: "library" })}">${escapeHTML(UI_TEXT[LANG].methodLibrary)}</a><span aria-hidden="true">/</span><span>${escapeHTML(localized(item.category))}</span></p><header class="method-header"><span class="pill">${escapeHTML(localized(item.category))}</span><h1>${escapeHTML(copy.name)}</h1><p class="lead">${escapeHTML(copy.short)}</p></header><section id="background" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].background)}</h2><p>${escapeHTML(copy.background)}</p><div class="two-col"><div class="info-card"><h3>${escapeHTML(UI_TEXT[LANG].useWhen)}</h3><p>${escapeHTML(copy.useWhen)}</p></div><div class="info-card"><h3>${escapeHTML(UI_TEXT[LANG].avoidWhen)}</h3><p>${escapeHTML(copy.avoidWhen)}</p></div></div></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].hypotheses)}</h2><div class="two-col"><div class="hypothesis h0"><h3>${escapeHTML(UI_TEXT[LANG].nullHypothesis)}</h3><p>${escapeHTML(copy.hypotheses.h0)}</p></div><div class="hypothesis h1"><h3>${escapeHTML(UI_TEXT[LANG].alternativeHypothesis)}</h3><p>${escapeHTML(copy.hypotheses.h1)}</p></div></div></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].assumptions)}</h2>${listHtml(copy.assumptions)}</section><section id="formula" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].formula)}</h2>${symbolsHtml(item.symbols)}${formulaHtml(item.formulas)}<p class="hint">${escapeHTML(copy.formulaNotes)}</p></section><section id="example" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].example)}</h2>${tableHtml(item.example)}<ol class="calculation-steps">${(localized(item.example?.steps) || []).map(step => `<li>${escapeHTML(step)}</li>`).join("")}</ol><div class="result-callout"><strong>${escapeHTML(UI_TEXT[LANG].result)}</strong>${item.example?.approximate ? `<span class="approx-tag">${escapeHTML(UI_TEXT[LANG].approximate)}</span>` : ""}<p>${escapeHTML(localized(item.example?.result))}</p></div></section><section id="inference" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].inference)}</h2><p>${escapeHTML(copy.inference)}</p><p>${escapeHTML(copy.ci)}</p><p>${escapeHTML(copy.effect)}</p></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].edgeCases)}</h2>${listHtml(copy.edgeCases)}</section><section id="reporting" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].reporting)}</h2><div class="report-box"><p>${escapeHTML(copy.report)}</p><button class="button tiny" type="button" data-copy-report>${escapeHTML(UI_TEXT[LANG].copy)}</button></div></section><section id="python" class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].python)}</h2>${renderCode(item.python)}</section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].related)}</h2><div class="method-grid">${related.map(r => cardLink(r, localized((METHODS[r] || CONCEPTS[r])[LANG]?.name || (METHODS[r] || CONCEPTS[r]).zh?.name))).join("")}</div></section><section class="content-section"><h2>${escapeHTML(UI_TEXT[LANG].references)}</h2><ul class="reference-list">${(item.references || []).map(r => `<li><a href="${r.url}" target="_blank" rel="noreferrer">${escapeHTML(localized(r.label))}</a></li>`).join("")}</ul></section></article></div>`;
     root.querySelectorAll("[data-copy-code]").forEach(btn => btn.addEventListener("click", () => copyText(item.python, btn)));
     root.querySelector("[data-copy-report]")?.addEventListener("click", () => copyText(copy.report, root.querySelector("[data-copy-report]")));
     rerenderMath();
@@ -1494,7 +1499,21 @@
     root.innerHTML = `<section class="hero-block compact"><p class="eyebrow">${escapeHTML(UI_TEXT[LANG].navHelp)}</p><h1>${escapeHTML(UI_TEXT[LANG].helpTitle)}</h1><p class="lead">${escapeHTML(UI_TEXT[LANG].helpLead)}</p></section>${renderPAlphaStory()}${renderPAlphaLab()}<div class="help-grid">${HELP_CONTENT.filter(section => section.id !== "pvalue").map(section => `<section class="help-card" id="${section.id}"><h2>${escapeHTML(localized(section.title))}</h2>${listHtml(localized(section.body))}</section>`).join("")}</div>`;
     bindPAlphaStory(root); bindPAlphaLab(root); rerenderMath(root);
   }
-  async function copyText(value, button) { try { await navigator.clipboard.writeText(value); const original = button.textContent; button.textContent = UI_TEXT[LANG].copied; setTimeout(() => { button.textContent = original; }, 1400); } catch (_) { status(UI_TEXT[LANG].copy); } }
+  async function copyText(value, button) {
+    let copied = false;
+    try { await navigator.clipboard.writeText(value); copied = true; } catch (_) {
+      const scratch = document.createElement("textarea");
+      scratch.value = value; scratch.setAttribute("readonly", ""); scratch.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+      document.body.appendChild(scratch); scratch.select();
+      try { copied = document.execCommand("copy"); } catch (_) {}
+      scratch.remove();
+    }
+    status(UI_TEXT[LANG][copied ? "copied" : "copyFailed"]);
+    if (!button) return;
+    const original = button.textContent;
+    button.textContent = UI_TEXT[LANG][copied ? "copied" : "copyFailed"];
+    setTimeout(() => { button.textContent = original; }, 1400);
+  }
   function boot() {
     syncLanguage(); document.getElementById("language-toggle")?.addEventListener("click", () => { LANG = LANG === "zh" ? "en" : "zh"; const url = new URL(location.href); url.searchParams.set("lang", LANG); history.replaceState({}, "", url); syncLanguage(); renderCurrent(); });
     document.addEventListener("keydown", event => {
@@ -1507,6 +1526,7 @@
       if (event.key === "Escape" && document.activeElement?.id === "method-search") { document.activeElement.value = ""; document.activeElement.dispatchEvent(new Event("input")); }
     });
     window.addEventListener("popstate", renderCurrent); renderCurrent();
+    if (location.hash) { const target = document.getElementById(location.hash.slice(1)); if (target) target.scrollIntoView({ behavior: "instant", block: "start" }); }
   }
   function renderCurrent() { syncLanguage(); const page = document.body.dataset.page; if (page === "method") renderMethod(); else if (page === "help") renderHelp(); else renderIndex(); const app = document.getElementById("app"); if (app) app.setAttribute("aria-busy", "false"); }
   boot();
