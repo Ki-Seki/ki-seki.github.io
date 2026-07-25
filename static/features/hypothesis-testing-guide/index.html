@@ -4,28 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f4f7f5" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#15201b" media="(prefers-color-scheme: dark)">
-  <meta name="description" content="通过交互式选择向导、双语搜索和分类方法库，找到合适的假设检验，并学习完整公式、计算步骤与 Python 复现。">
+  <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141b18" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="描述你的数据结构，实时筛选并排序假设检验方法库；配套分支建议、完整公式、逐步计算与 Python 复现。">
   <meta name="keywords" content="假设检验,统计检验,效应量,p值,置信区间,hypothesis testing,statistics,Python">
   <meta name="author" content="Ki-Seki">
   <meta name="robots" content="index,follow">
 
-  <title>假设检验指南｜方法选择</title>
+  <title>假设检验指南｜方法探索</title>
   <link id="canonical-url" rel="canonical" href="https://ki-seki.github.io/features/hypothesis-testing-guide/">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ki-Seki">
   <meta property="og:locale" content="zh_CN">
   <meta property="og:locale:alternate" content="en_US">
-  <meta property="og:title" content="假设检验指南｜选择向导与方法库">
-  <meta property="og:description" content="用清晰的决策路径选择统计方法，查看完整公式、手算示例、效应量和 Python 代码。">
+  <meta property="og:title" content="假设检验指南｜方法探索与方法库">
+  <meta property="og:description" content="描述数据结构即可实时筛选统计方法，查看完整公式、手算示例、效应量和 Python 代码。">
   <meta property="og:url" content="https://ki-seki.github.io/features/hypothesis-testing-guide/">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="假设检验指南｜选择向导与方法库">
-  <meta name="twitter:description" content="中英文假设检验选择向导、方法库与计算教程。">
+  <meta name="twitter:title" content="假设检验指南｜方法探索与方法库">
+  <meta name="twitter:description" content="中英文假设检验方法探索、分支建议与计算教程。">
 
   <link rel="stylesheet" href="./styles.css">
+  <script defer src="./data.js"></script>
   <script defer src="./app.js"></script>
 
   <script type="application/ld+json">
@@ -59,14 +60,21 @@
       </a>
 
       <nav class="site-nav" aria-label="主要导航" data-i18n-aria-label="primaryNavigation">
-        <a href="./index.html" data-nav="finder" data-i18n="navFinder" aria-current="page">方法选择</a>
+        <a href="./index.html" data-nav="explore" data-i18n="navExplore" aria-current="page">探索方法</a>
         <a href="./help.html" data-nav="help" data-i18n="navHelp">帮助</a>
       </nav>
 
-      <button class="lang-toggle" id="language-toggle" type="button" aria-label="Switch to English" title="Switch to English">
-        <span aria-hidden="true">文 / A</span>
-        <span class="lang-current">EN</span>
-      </button>
+      <div class="header-actions">
+        <button class="palette-button" id="palette-button" type="button">
+          <span class="palette-button-glyph" aria-hidden="true">⌕</span>
+          <span data-i18n="searchButton">搜索</span>
+          <kbd aria-hidden="true">⌘K</kbd>
+        </button>
+        <button class="lang-toggle" id="language-toggle" type="button" aria-label="Switch to English" title="Switch to English">
+          <span aria-hidden="true">文 / A</span>
+          <span class="lang-current">EN</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -84,8 +92,8 @@
     <noscript>
       <section class="noscript-note" aria-labelledby="noscript-title-index">
         <h1 id="noscript-title-index">需要启用 JavaScript</h1>
-        <p lang="zh-CN">此交互式指南依靠 JavaScript 提供选择向导、搜索和方法详情。请启用 JavaScript 后重新载入页面。</p>
-        <p lang="en">This interactive guide requires JavaScript for the decision guide, search, and method pages. Enable JavaScript and reload the page.</p>
+        <p lang="zh-CN">此交互式指南依靠 JavaScript 提供方法探索、搜索和方法详情。请启用 JavaScript 后重新载入页面。</p>
+        <p lang="en">This interactive guide requires JavaScript for the method explorer, search, and method pages. Enable JavaScript and reload the page.</p>
       </section>
     </noscript>
   </main>
