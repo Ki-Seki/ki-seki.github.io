@@ -145,8 +145,8 @@
 
         <!-- Iframes -->
         <main class="flex-1 min-h-0 grid grid-cols-2 gap-2 px-2 pb-1">
-            <iframe id="left-frame"  src="./index.html" title="Left model"  class="w-full h-full rounded-lg border border-gray-200 bg-white shadow-sm"></iframe>
-            <iframe id="right-frame" src="./index.html" title="Right model" class="w-full h-full rounded-lg border border-gray-200 bg-white shadow-sm"></iframe>
+            <iframe id="left-frame"  src="./index.html?persist=0" title="Left model"  class="w-full h-full rounded-lg border border-gray-200 bg-white shadow-sm"></iframe>
+            <iframe id="right-frame" src="./index.html?persist=0" title="Right model" class="w-full h-full rounded-lg border border-gray-200 bg-white shadow-sm"></iframe>
         </main>
 
         <!-- Command bar -->
@@ -298,11 +298,19 @@
             orig(...args);
         };
     }
+    function initializeFrame(frame, which) {
+        try {
+            injectConfig(frame, getConfig(which));
+            zoomFrame(frame);
+            patchConsole(frame);
+        } catch (error) {
+            console.warn(`Could not initialize ${which} frame:`, error);
+        }
+    }
     function reloadFrames() {
         resetStatusUI();
-        [[leftFrame, 'left'], [rightFrame, 'right']].forEach(([fr, which]) => {
-            fr.addEventListener('load', () => { injectConfig(fr, getConfig(which)); zoomFrame(fr); patchConsole(fr); }, {once:true});
-            fr.src = './index.html';
+        [[leftFrame, 'left'], [rightFrame, 'right']].forEach(([fr]) => {
+            fr.src = './index.html?persist=0';
         });
     }
 
@@ -484,6 +492,10 @@
     $('skip-vote').addEventListener('click',  () => castVote('skip'));
     $('left-fullscreen').addEventListener('click',  () => leftFrame.requestFullscreen?.());
     $('right-fullscreen').addEventListener('click', () => rightFrame.requestFullscreen?.());
+
+    [[leftFrame, 'left'], [rightFrame, 'right']].forEach(([frame, which]) =>
+        frame.addEventListener('load', () => initializeFrame(frame, which))
+    );
 
     document.querySelectorAll('.preset-btn').forEach(btn =>
         btn.addEventListener('click', () => { broadcastCmd.value = btn.textContent.trim(); broadcastCmd.focus(); })

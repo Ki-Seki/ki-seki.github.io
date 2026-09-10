@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ouroboros</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐍%3C/text%3E%3C/svg%3E">
+    <script>
+        // Run before external dependencies and before any saved mutation can execute.
+        (() => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('reset') !== '1') return;
+
+            try {
+                const shouldClearJournal = window.top === window || params.get('persist') !== '0';
+                if (shouldClearJournal) localStorage.removeItem('ouroboros_mutations_v1');
+                sessionStorage.removeItem('ouroboros_replay_guard_v1');
+            } catch (error) {
+                console.error('Failed to reset saved mutations:', error);
+                params.set('persist', '0');
+                window.__ouroborosResetError = true;
+            }
+
+            params.delete('reset');
+            const query = params.toString();
+            history.replaceState(null, '', location.pathname + (query ? '?' + query : '') + location.hash);
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
@@ -15,9 +36,14 @@
         <!-- Header -->
         <div class="window-header cursor-move bg-gray-800 text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
             <h2 class="font-bold text-sm tracking-wide">OUROBOROS // CORE</h2>
-            <button id="export-btn" title="Export HTML" class="text-gray-400 hover:text-white transition-colors mr-2">
-                <svg class="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <button id="reset-btn" type="button" title="Reset generated changes" aria-label="Reset generated changes" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.5 15a7 7 0 0011.9 2M18.5 9A7 7 0 006.6 7"></path></svg>
+                </button>
+                <button id="export-btn" type="button" title="Export HTML" aria-label="Export HTML" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+            </div>
         </div>
 
         <!-- Token Monitor -->
@@ -75,13 +101,14 @@ You are Ouroboros, a self-editing HTML application. Satisfy the user's request b
 ## Rules
 * State Transition: You receive the full HTML source of the current page. Analyze it, then write JavaScript that modifies the DOM to implement the requested feature.
 * Preservation: NEVER delete or modify the element with id="ouroboros-core". This contains your own API logic and the terminal. Modifying this will kill the application.
+* Persistence: Successful mutation code is saved and replayed when the page loads. Your code runs inside an async function, so await every asynchronous initialization step. Make initialization idempotent, never trigger automatic navigation or reloads, avoid irreversible side effects during initialization, and persist runtime-only user data separately when needed.
 * UI Standards:
   *  Create "Windows" as `div` elements with absolute positioning.
   *  Use Tailwind CSS classes for all styling.
   *  Ensure new windows have a higher z-index than existing ones.
   *  Implement drag-and-drop functionality for new windows using the existing `interact.js` or similar mechanism present in the global scope.
 * Efficiency:
-  *  Use `import` from `https://esm.sh/` for external libraries.
+  *  Use `await import()` from `https://esm.sh/` for external libraries.
   *  Do not inline large Base64 images or SVGs; use external URLs.
   *  Keep code concise to save token space.
 * Users:
@@ -102,11 +129,20 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
         import OpenAI from 'https://esm.sh/openai@4.28.0?bundle';
 
         // --- STATE ---
+        const MUTATION_JOURNAL_KEY = 'ouroboros_mutations_v1';
+        const MUTATION_JOURNAL_VERSION = 1;
+        const REPLAY_GUARD_KEY = 'ouroboros_replay_guard_v1';
+        const persistenceEnabled = new URLSearchParams(window.location.search).get('persist') !== '0';
+        const mutationJournal = loadMutationJournal();
+
         const state = {
             apiKey: localStorage.getItem('ouroboros_api_key') || '',
             apiBase: localStorage.getItem('ouroboros_api_base') || '',
             modelName: localStorage.getItem('ouroboros_model_name') || '',
-            isProcessing: false
+            isProcessing: false,
+            mutations: mutationJournal.entries,
+            mutationJournalError: mutationJournal.error,
+            restoreBlocked: false
         };
 
         // --- DOM REFERENCE ---
@@ -118,6 +154,7 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
             saveKeyBtn: document.getElementById('save-key-btn'),
             promptInput: document.getElementById('user-prompt'),
             executeBtn: document.getElementById('execute-btn'),
+            resetBtn: document.getElementById('reset-btn'),
             exportBtn: document.getElementById('export-btn'),
             btnText: document.getElementById('btn-text'),
             spinner: document.getElementById('spinner'),
@@ -127,7 +164,7 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
         };
 
         // --- INITIALIZATION ---
-        function init() {
+        async function init() {
             // Restore Settings
             if (state.apiKey) els.apiKeyInput.value = state.apiKey;
             if (state.apiBase) els.apiBaseInput.value = state.apiBase;
@@ -136,6 +173,7 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
             // Setup Event Listeners
             els.saveKeyBtn.addEventListener('click', saveApiSettings);
             els.executeBtn.addEventListener('click', handleExecution);
+            els.resetBtn.addEventListener('click', resetWorkspace);
             els.exportBtn.addEventListener('click', exportHtml);
             els.promptInput.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.key === 'Enter') handleExecution();
@@ -143,6 +181,22 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
 
             // Initialize Interact.js
             setupDraggable();
+
+            // Restore successful mutations from previous visits
+            const hasSavedMutations = persistenceEnabled && state.mutations.length > 0;
+            if (hasSavedMutations) setLoading(true);
+            let replayResult;
+            try {
+                replayResult = await replaySavedMutations();
+            } finally {
+                if (hasSavedMutations) setLoading(false);
+            }
+            state.restoreBlocked = Boolean(
+                window.__ouroborosResetError
+                || state.mutationJournalError
+                || replayResult.skipped
+                || replayResult.failedAt !== null
+            );
 
             // Initial Token Estimate
             updateTokenEstimate();
@@ -156,6 +210,17 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
             }).observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
 
             logMessage('system', 'Ouroboros loaded.');
+            if (window.__ouroborosResetError) {
+                logMessage('system', 'Reset could not clear browser storage, so saved changes are disabled for this visit.');
+            } else if (state.mutationJournalError) {
+                logMessage('system', 'Saved changes could not be read. Use Reset to clear them and start over.');
+            } else if (replayResult.skipped) {
+                logMessage('system', 'Saved changes were skipped to prevent a reload loop. Refresh once to retry or use Reset to start over.');
+            } else if (replayResult.failedAt !== null) {
+                logMessage('system', `Restored ${replayResult.restored}/${replayResult.total} saved changes. Replay stopped at change ${replayResult.failedAt}; use Reset to start over.`);
+            } else if (replayResult.restored > 0) {
+                logMessage('system', `Restored ${replayResult.restored} saved change${replayResult.restored === 1 ? '' : 's'}.`);
+            }
         }
 
         // --- INTERACTION ---
@@ -197,6 +262,134 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
         }
 
         // --- LOGIC ---
+        function loadMutationJournal() {
+            if (!persistenceEnabled) return { entries: [], error: null };
+
+            try {
+                const saved = localStorage.getItem(MUTATION_JOURNAL_KEY);
+                if (!saved) return { entries: [], error: null };
+
+                const journal = JSON.parse(saved);
+                if (journal?.version !== MUTATION_JOURNAL_VERSION
+                    || !Array.isArray(journal.entries)
+                    || journal.entries.some(code => typeof code !== 'string')) {
+                    throw new Error('Mutation journal has an invalid format.');
+                }
+                return { entries: journal.entries, error: null };
+            } catch (error) {
+                console.error('Failed to load saved mutations:', error);
+                return { entries: [], error };
+            }
+        }
+
+        function persistMutation(code) {
+            if (!persistenceEnabled) return true;
+            if (state.mutationJournalError || state.restoreBlocked) return false;
+
+            try {
+                const mutations = [...state.mutations, code];
+                localStorage.setItem(MUTATION_JOURNAL_KEY, JSON.stringify({
+                    version: MUTATION_JOURNAL_VERSION,
+                    entries: mutations
+                }));
+                state.mutations = mutations;
+                return true;
+            } catch (error) {
+                console.error('Failed to save mutation:', error);
+                return false;
+            }
+        }
+
+        async function runMutation(code, notifyOnError = true) {
+            try {
+                const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+                await new AsyncFunction(code).call(window);
+                return true;
+            } catch (error) {
+                console.error('Mutation Script Error:', error);
+                if (notifyOnError) alert(`Mutation script failed: ${error?.message || String(error)}`);
+                return false;
+            }
+        }
+
+        function clearReplayGuard() {
+            try {
+                sessionStorage.removeItem(REPLAY_GUARD_KEY);
+            } catch (error) {
+                console.warn('Failed to clear replay guard:', error);
+            }
+        }
+
+        function watchReplayNavigation() {
+            const navigationApi = window.navigation;
+            let programmaticNavigationStarted = false;
+            const onNavigate = event => {
+                const leavesCurrentDocument = event.navigationType === 'reload' || !event.destination.sameDocument;
+                if (!event.userInitiated && leavesCurrentDocument) programmaticNavigationStarted = true;
+            };
+            navigationApi?.addEventListener?.('navigate', onNavigate);
+
+            return failed => {
+                if (failed) {
+                    navigationApi?.removeEventListener?.('navigate', onNavigate);
+                    clearReplayGuard();
+                    return;
+                }
+
+                // location.reload() schedules navigation. Wait one task so the
+                // Navigation API can mark script-initiated reloads first.
+                setTimeout(() => {
+                    navigationApi?.removeEventListener?.('navigate', onNavigate);
+                    if (!programmaticNavigationStarted) clearReplayGuard();
+                }, 0);
+            };
+        }
+
+        async function replaySavedMutations() {
+            const result = { total: state.mutations.length, restored: 0, failedAt: null, skipped: false };
+            if (!persistenceEnabled || result.total === 0) return result;
+
+            let guardSet = false;
+            try {
+                if (sessionStorage.getItem(REPLAY_GUARD_KEY) === '1') {
+                    sessionStorage.removeItem(REPLAY_GUARD_KEY);
+                    result.skipped = true;
+                    return result;
+                }
+                sessionStorage.setItem(REPLAY_GUARD_KEY, '1');
+                guardSet = true;
+            } catch (error) {
+                console.warn('Replay guard is unavailable:', error);
+            }
+
+            const finishReplayGuard = guardSet
+                ? watchReplayNavigation()
+                : () => {};
+
+            try {
+                for (let index = 0; index < state.mutations.length; index += 1) {
+                    if (!await runMutation(state.mutations[index], false)) {
+                        result.failedAt = index + 1;
+                        break;
+                    }
+                    result.restored += 1;
+                }
+            } finally {
+                finishReplayGuard(result.failedAt !== null);
+            }
+
+            return result;
+        }
+
+        function resetWorkspace() {
+            if (!confirm('Reset all generated changes? Your API settings will be kept.')) return;
+
+            const resetUrl = new URL(window.location.href);
+            if (window.top === window) resetUrl.searchParams.delete('persist');
+            resetUrl.searchParams.set('reset', '1');
+            window.location.replace(resetUrl.href);
+        }
+
         function exportHtml() {
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html' }));
@@ -244,6 +437,10 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
 
         async function handleExecution() {
             if (state.isProcessing) return;
+            if (state.restoreBlocked) {
+                alert('Saved changes need recovery. Reload to retry, or use Reset before running another mutation.');
+                return;
+            }
             if (!state.apiKey) {
                 alert('Please enter and save your OpenAI API Key first.');
                 return;
@@ -288,9 +485,15 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
                 // 5. Extract Code & Execute
                 const codeMatch = content.match(/```(?:javascript)?\s*([\s\S]*?)\s*```/);
                 if (codeMatch?.[1]) {
-                    executeMutation(codeMatch[1]);
-                    logMessage('system', 'Mutation executed successfully.');
-                    els.promptInput.value = '';
+                    const mutationResult = await executeMutation(codeMatch[1]);
+                    if (mutationResult.executed) {
+                        logMessage('system', mutationResult.persisted
+                            ? `Mutation executed successfully${persistenceEnabled ? ' and saved' : ''}.`
+                            : 'Mutation executed, but it could not be saved. Reload or Reset before continuing.');
+                        els.promptInput.value = '';
+                    } else {
+                        logMessage('system', 'Mutation failed and was not saved. Reload or Reset before continuing.');
+                    }
                 } else {
                     logMessage('system', 'Error: No valid JavaScript block found in response.');
                     console.log('Full Response:', content);
@@ -304,23 +507,14 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
             }
         }
 
-        function executeMutation(code) {
-            try {
-                // Wrap in IIFE to avoid polluting global scope unintentionally
-                const script = document.createElement('script');
-                script.textContent = `(function() {
-                    try {
-                        ${code}
-                    } catch(e) {
-                        console.error("Mutation Script Error:", e);
-                        alert("Mutation script failed: " + e.message);
-                    }
-                })();`;
-                document.body.appendChild(script);
-                script.remove();
-            } catch (e) {
-                console.error("Injection Error:", e);
-            }
+        async function executeMutation(code) {
+            const executed = await runMutation(code);
+            const persisted = executed ? persistMutation(code) : false;
+            if (persistenceEnabled && (!executed || !persisted)) state.restoreBlocked = true;
+            return {
+                executed,
+                persisted
+            };
         }
 
         function setLoading(loading) {
@@ -332,7 +526,7 @@ Web Browsing: Use `fetch('https://r.jina.ai/' + url)` for Markdown extraction (c
         }
 
         // Start
-        init();
+        await init();
 
     </script>
 </body>
