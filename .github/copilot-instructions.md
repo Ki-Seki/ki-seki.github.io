@@ -11,7 +11,6 @@ submodule). It is deployed via GitHub Pages.
 - `content/posts/` — long-form blog posts (Hugo page bundles)
 - `content/moments/` — short reflections with `location` and `mood` front
   matter
-- `content/cv.md` — curriculum vitae page
 - `archetypes/` — Hugo content archetypes/templates
 - `assets/` — custom CSS (`assets/css/extended/`) and JS (`assets/js/`)
 - `layouts/` — Hugo layout overrides and custom partials
