@@ -14,6 +14,11 @@ tags: ["agent", "ai", "web", "self-modifying", "single-file", "html-application"
 math: false
 ---
 
+{{% admonition type="danger" title="Attention" open=true %}}
+The code has moved to {{< github "Ki-Seki/ouroboros">}}, and the corresponding live demo is available at https://ki-seki.github.io/ouroboros/.
+This page is archived and is no longer maintained.
+{{% /admonition %}}
+
 - **Version:** 1.5
 - **Links:** [View Demo](/features/ouroboros/), [OuroArena](/features/ouroboros/arena.html), [Landing Page](/features/ouroboros/landing.html), [<400 Lines of Source Code](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/ouroboros/index.html)
 - **Product Type:** Single-File, Self-Modifying HTML Application
