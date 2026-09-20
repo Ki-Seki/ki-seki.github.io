@@ -14,7 +14,7 @@ tags: ["agent", "ai", "web", "self-modifying", "single-file", "html-application"
 math: false
 ---
 
-{{% admonition type="danger" title="Attention" open=true %}}
+{{% admonition type="warning" title="Attention" open=true %}}
 The code has moved to {{< github "Ki-Seki/ouroboros">}}, and the current live demo is available at [https://ki-seki.github.io/ouroboros/](https://ki-seki.github.io/ouroboros/).
 This page is archived and is no longer maintained; the links below refer to the archived implementation.
 {{% /admonition %}}
