@@ -1,0 +1,51 @@
+{{- /* Favicon for a link to this site's host, given the link's URL path. It
+  mirrors what the browser would show for the target, using files only (no
+  network):
+  - a page of this Hugo site, or a file it serves: the site's favicon;
+  - a standalone HTML page under static/ (e.g. static/features/*): the icon it
+    declares with <link rel="icon">, or the globe if it declares none;
+  - anything else, such as another GitHub Pages project on the same host
+    (/hodoku-translation/): the globe. */ -}}
+{{- $globe := "favicons/globe.svg" | relURL -}}
+{{- $icon := $globe -}}
+{{- $file := path.Join "static" . -}}
+{{- $pagePaths := partialCached "site-page-paths.html" site -}}
+{{- $html := "" -}}
+{{- if not (or (eq $file "static") (strings.HasPrefix $file "static/")) -}}
+  {{- /* the path climbs out of static/ */ -}}
+{{- else if index $pagePaths (strings.TrimSuffix "/" . | lower) -}}
+  {{- $icon = site.Params.assets.favicon32x32 | relURL -}}
+{{- else if (try (fileExists $file)).Value -}}
+  {{- /* try: a path below a file (a/b.png/c) is an error, not just missing */ -}}
+  {{- if (os.Stat $file).IsDir -}}
+    {{- with path.Join $file "index.html" -}}
+      {{- if (try (fileExists .)).Value }}{{ $html = . }}{{ end -}}
+    {{- end -}}
+  {{- else if strings.HasSuffix $file ".html" -}}
+    {{- $html = $file -}}
+  {{- end -}}
+  {{- if not $html -}}
+    {{- /* another file this site serves */ -}}
+    {{- $icon = site.Params.assets.favicon32x32 | relURL -}}
+  {{- end -}}
+{{- end -}}
+{{- with $html -}}
+  {{- range findRE `(?i)<link\b[^>]*>` (readFile $html) -}}
+    {{- if and (eq $icon $globe) (findRE `(?i)\brel=["']?(shortcut\s+)?icon["'\s>]` .) -}}
+      {{- /* the value may hold the other quote, e.g. an inline SVG */ -}}
+      {{- with findRESubmatch `(?i)\bhref=(?:"([^"]*)"|'([^']*)')` . 1 -}}
+        {{- $href := or (index (index . 0) 1) (index (index . 0) 2) -}}
+        {{- if eq $href "data:," -}}
+          {{- /* an explicitly empty icon */ -}}
+        {{- else if or (strings.HasPrefix $href "data:") (strings.Contains $href "://") (strings.HasPrefix $href "/") -}}
+          {{- /* data:, absolute, protocol-relative (//) and root-relative (/)
+            URLs mean the same from any page */ -}}
+          {{- $icon = $href -}}
+        {{- else -}}
+          {{- $icon = path.Join (path.Dir (strings.TrimPrefix "static" $html)) $href | relURL -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $icon -}}
