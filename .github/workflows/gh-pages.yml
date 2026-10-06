@@ -7,10 +7,12 @@ on:
   pull_request:
     branches:
       - main
-# Allow one concurrent deployment
+# Deploys from main share one queue and are never cancelled midway. Pull
+# request builds only check the site, so each PR gets its own group: a new
+# push to the PR cancels its older build without touching a deployment.
 concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('pages-pr-{0}', github.event.pull_request.number) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Default to bash
 defaults:
