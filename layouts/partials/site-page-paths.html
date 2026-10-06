@@ -1,0 +1,8 @@
+{{- /* Set of this site's page paths (lower case, no trailing slash) for
+  partials/local-favicon.html. Called with partialCached, so it is built once
+  per build. */ -}}
+{{- $s := newScratch -}}
+{{- range site.AllPages -}}
+  {{- $s.SetInMap "paths" (strings.TrimSuffix "/" .RelPermalink | lower) true -}}
+{{- end -}}
+{{- return $s.Get "paths" -}}

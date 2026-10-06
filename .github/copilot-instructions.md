@@ -84,3 +84,9 @@ Markdown links get a favicon from their address automatically
 `owner/repo`, `owner/repo#12` (issue or PR), `owner/repo@b52b0c0` (commit),
 `owner/repo/path/file.py` (file). Links with their own text keep it. The
 `github` shortcode is deprecated and only kept for existing posts.
+
+Links to this site's host show what the target really shows: the site
+favicon for Hugo pages, the declared icon of a standalone page under
+`static/`, or a globe when there is none (e.g. other GitHub Pages projects
+such as `/hodoku-translation/`). For a page that sets its icon with
+JavaScript, add an entry to `params.linkFavicons` in `config.yml`.

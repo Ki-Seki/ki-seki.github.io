@@ -2,12 +2,16 @@
   the resolved link address:
   - external http(s) links: that site's favicon, downloaded at build time and
     served from this site, so visitors make no third-party requests;
-  - links to other pages or files of this site: this site's favicon;
+  - links to this site's host: what the target really shows (this site's
+    favicon, a static page's own icon, or the globe); see
+    partials/local-favicon.html;
+  - params.linkFavicons overrides any of these by URL prefix;
   - same-page anchors, mailto: and image links: no icon.
   Bare GitHub links read as a short name such as owner/repo, owner/repo#12
   or owner/repo@b52b0c0; see partials/github-short-name.html. */ -}}
 {{- $u := urls.Parse .Destination -}}
 {{- $href := $u.String -}}
+{{- $resolved := false -}}
 {{- if strings.HasPrefix $u.String "#" -}}
   {{- $href = printf "%s#%s" .PageInner.RelPermalink $u.Fragment -}}
 {{- else if and $href (not $u.IsAbs) -}}
@@ -18,6 +22,7 @@
     (resources.Get $path)
   -}}
     {{- $href = .RelPermalink -}}
+    {{- $resolved = true -}}
     {{- with $u.RawQuery -}}
       {{- $href = printf "%s?%s" $href . -}}
     {{- end -}}
@@ -30,11 +35,29 @@
 {{- $hu := urls.Parse $href -}}
 {{- $siteHosts := slice (urls.Parse site.BaseURL).Hostname | append (site.Params.siteHosts | default slice) -}}
 {{- $isLocal := or (and (not $hu.Scheme) (not $hu.Host)) (and $hu.IsAbs (in $siteHosts $hu.Hostname)) -}}
+{{- /* Icons set in params.linkFavicons win; local links match by path. */ -}}
+{{- $target := cond $isLocal $hu.Path (printf "%s%s" $hu.Host $hu.Path) -}}
+{{- $override := "" -}}
+{{- range site.Params.linkFavicons -}}
+  {{- if and (not $override) (strings.HasPrefix $target .prefix) -}}
+    {{- $override = cond (or (strings.HasPrefix .icon "data:") (strings.Contains .icon "://")) .icon (.icon | relURL) -}}
+  {{- end -}}
+{{- end -}}
 {{- $icon := "" -}}
 {{- if strings.Contains (string .Text) "<img" -}}
   {{- /* image links keep the image alone */ -}}
+{{- else if strings.HasPrefix .Destination "HAHAHUGOSHORTCODE" -}}
+  {{- /* a shortcode such as relref: the real URL is filled in after this
+    hook runs, so the target is unknown */ -}}
+{{- else if $override -}}
+  {{- $icon = $override -}}
 {{- else if and $isLocal $hu.Path (ne $hu.Path .PageInner.RelPermalink) -}}
-  {{- $icon = site.Params.assets.favicon32x32 | relURL -}}
+  {{- if $resolved -}}
+    {{- /* a page, page resource or asset of this Hugo site */ -}}
+    {{- $icon = site.Params.assets.favicon32x32 | relURL -}}
+  {{- else -}}
+    {{- $icon = partial "local-favicon.html" $hu.Path -}}
+  {{- end -}}
 {{- else if and (not $isLocal) (in (slice "http" "https") $hu.Scheme) -}}
   {{- $host := $hu.Hostname -}}
   {{- $icon = "favicons/globe.svg" | relURL -}}
@@ -52,5 +75,8 @@
     {{- $text = . -}}
   {{- end -}}
 {{- end -}}
-<a href="{{ $href }}" {{- with .Title }} title="{{ . }}" {{- end }} {{- with $icon }} class="has-favicon" style="{{ printf "--favicon: url(%s)" . | safeCSS }}" {{- end }}>{{ $text }}</a>
+{{- /* Unquoted url(): quotes in the style attribute make .Plain drop the link
+  text. Percent-encode what an unquoted url() can't hold (data: URIs too). */ -}}
+{{- $cssIcon := $icon | replaceRE `\s` "%20" | replaceRE `'` "%27" | replaceRE `"` "%22" | replaceRE `\(` "%28" | replaceRE `\)` "%29" -}}
+<a href="{{ $href }}" {{- with .Title }} title="{{ . }}" {{- end }} {{- with $cssIcon }} class="has-favicon" style="{{ printf "--favicon: url(%s)" . | safeCSS }}" {{- end }}>{{ $text }}</a>
 {{- /**/ -}}

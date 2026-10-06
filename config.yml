@@ -135,6 +135,14 @@ params:
   siteHosts:
     - ki-seki.github.io
 
+  # Icons for link targets the favicon hook can't detect, such as pages that
+  # set their icon with JavaScript. `prefix` is matched against the link's path
+  # for this site's hosts and against host + path for other sites; `icon` is a
+  # path under static/, an absolute URL, or a data: URI.
+  linkFavicons:
+    - prefix: /ouroboros/  # Ki-Seki/ouroboros, sets a Lucide icon at runtime
+      icon: favicons/ouroboros.svg
+
   assets:
     disableHLJS: true
     favicon: favicons/icons8-capybara-32.png
