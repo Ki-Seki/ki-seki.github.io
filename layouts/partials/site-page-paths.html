@@ -1,0 +1,11 @@
+{{- /* Set of the paths this Hugo site generates (lower case, no trailing
+  slash): every output of every page, so /index.xml and /index.json count as
+  well as the HTML pages. For partials/local-favicon.html; called with
+  partialCached, so it is built once per build. */ -}}
+{{- $s := newScratch -}}
+{{- range site.AllPages -}}
+  {{- range .OutputFormats -}}
+    {{- $s.SetInMap "paths" (strings.TrimSuffix "/" .RelPermalink | lower) true -}}
+  {{- end -}}
+{{- end -}}
+{{- return $s.Get "paths" -}}
