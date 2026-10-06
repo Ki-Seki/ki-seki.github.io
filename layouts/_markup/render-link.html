@@ -4,8 +4,8 @@
     served from this site, so visitors make no third-party requests;
   - links to other pages or files of this site: this site's favicon;
   - same-page anchors, mailto: and image links: no icon.
-  Bare links to a GitHub user or repo read "owner/repo", like the github
-  shortcode. */ -}}
+  Bare GitHub links read as a short name such as owner/repo, owner/repo#12
+  or owner/repo@b52b0c0; see partials/github-short-name.html. */ -}}
 {{- $u := urls.Parse .Destination -}}
 {{- $href := $u.String -}}
 {{- if strings.HasPrefix $u.String "#" -}}
@@ -47,9 +47,10 @@
   {{- end -}}
 {{- end -}}
 {{- $text := .Text -}}
-{{- $ghPath := strings.Trim $hu.Path "/" -}}
-{{- if and (in (slice "github.com" "www.github.com") $hu.Hostname) $ghPath (le (len (split $ghPath "/")) 2) (not $hu.RawQuery) (not $hu.Fragment) (in (slice "" .Destination (replaceRE "^https?://" "" .Destination)) .PlainText) -}}
-  {{- $text = $ghPath -}}
+{{- if and (in (slice "github.com" "www.github.com") $hu.Hostname) (in (slice "" .Destination (replaceRE "^https?://" "" .Destination)) .PlainText) -}}
+  {{- with partial "github-short-name.html" $hu -}}
+    {{- $text = . -}}
+  {{- end -}}
 {{- end -}}
 <a href="{{ $href }}" {{- with .Title }} title="{{ . }}" {{- end }} {{- with $icon }} class="has-favicon" style="{{ printf "--favicon: url(%s)" . | safeCSS }}" {{- end }}>{{ $text }}</a>
 {{- /**/ -}}

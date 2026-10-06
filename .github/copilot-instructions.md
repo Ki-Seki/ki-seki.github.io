@@ -79,7 +79,8 @@ shortcode accepts images, YouTube, Vimeo, and plain video URLs.
 ### Links
 
 Markdown links get a favicon from their address automatically
-(`layouts/_markup/render-link.html`). For a GitHub user or repo, write a bare
-link such as `<https://github.com/owner/repo>`; it renders as `owner/repo`
-with the GitHub icon. The `github` shortcode is deprecated and only kept for
-existing posts.
+(`layouts/_markup/render-link.html`). Bare GitHub links such as
+`<https://github.com/owner/repo>` render with the GitHub icon and a short name:
+`owner/repo`, `owner/repo#12` (issue or PR), `owner/repo@b52b0c0` (commit),
+`owner/repo/path/file.py` (file). Links with their own text keep it. The
+`github` shortcode is deprecated and only kept for existing posts.
