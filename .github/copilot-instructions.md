@@ -88,5 +88,5 @@ Markdown links get a favicon from their address automatically
 Links to this site's host show what the target really shows: the site
 favicon for Hugo pages, the declared icon of a standalone page under
 `static/`, or a globe when there is none (e.g. other GitHub Pages projects
-such as `/hodoku-translation/`). For a page that sets its icon with
-JavaScript, add an entry to `params.linkFavicons` in `config.yml`.
+such as `/hodoku-translation/`). Icons a page sets with JavaScript at
+runtime are ignored.

@@ -5,7 +5,6 @@
   - links to this site's host: what the target really shows (this site's
     favicon, a static page's own icon, or the globe); see
     partials/local-favicon.html;
-  - params.linkFavicons overrides any of these by URL prefix;
   - same-page anchors, mailto: and image links: no icon.
   Bare GitHub links read as a short name such as owner/repo, owner/repo#12
   or owner/repo@b52b0c0; see partials/github-short-name.html. */ -}}
@@ -46,22 +45,12 @@
     {{- $localPath = printf "%s/" $localPath -}}
   {{- end -}}
 {{- end -}}
-{{- /* Icons set in params.linkFavicons win; local links match by path. */ -}}
-{{- $target := cond $isLocal $localPath (printf "%s%s" $hu.Host $hu.Path) -}}
-{{- $override := "" -}}
-{{- range site.Params.linkFavicons -}}
-  {{- if and (not $override) (strings.HasPrefix $target .prefix) -}}
-    {{- $override = cond (or (strings.HasPrefix .icon "data:") (strings.Contains .icon "://")) .icon (.icon | relURL) -}}
-  {{- end -}}
-{{- end -}}
 {{- $icon := "" -}}
 {{- if strings.Contains (string .Text) "<img" -}}
   {{- /* image links keep the image alone */ -}}
 {{- else if strings.HasPrefix .Destination "HAHAHUGOSHORTCODE" -}}
   {{- /* a shortcode such as relref: the real URL is filled in after this
     hook runs, so the target is unknown */ -}}
-{{- else if $override -}}
-  {{- $icon = $override -}}
 {{- else if and $isLocal $localPath (ne $localPath .PageInner.RelPermalink) -}}
   {{- if $resolved -}}
     {{- /* a page, page resource or asset of this Hugo site */ -}}
