@@ -7,17 +7,16 @@ disableShare: true
 ShowPostNavLinks: false
 ---
 
-## AI
+## My Projects
 
-- [karpathy/autoresearch](https://github.com/karpathy/autoresearch) — cited in [my post on the post-labor AI economy](/posts/260314-ai-economics/).
-- [Learning Beyond Gradients](https://trinkle23897.github.io/learning-beyond-gradients/) — the heuristic-learning paradigm.
-- [Anthropic Economic Index](https://www.anthropic.com/economic-index) — AI usage appears strongly correlated with regional wealth levels.
+- [Ouroboros](https://ki-seki.github.io/ouroboros/) — a single-file, self-modifying HTML app where an LLM edits its own code and interface ([PRD](/posts/260322-ouroboros/)).
+- [Hawkins](https://ki-seki.github.io/hawkins/) — an interactive geospatial timeline of Stranger Things.
+- [HoDoKu Techniques](https://ki-seki.github.io/hodoku-translation/) — Sudoku solving techniques, bilingual EN/CN.
+- [Hypothesis Testing Guide](https://ki-seki.github.io/features/hypothesis-testing-guide/) — pick a hypothesis test from your data's structure, with formulas, worked steps and Python (in Chinese).
+- [The 10,000th Sunset](https://ki-seki.github.io/features/10000th-sunset/) — a gallery of sunsets from cities around the world.
+- [The Kiseki Gallery](https://song-shichao.github.io/) — a photography gallery.
 
-## Reinforcement Learning
+## Elsewhere
 
-- [A (Long) Peek into Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/) — annotated in full in [my guide](/posts/260531-lilian-rl-overview/).
-- [Markov Chain Monte Carlo Without all the Bullshit](https://jeremykun.com/2015/04/06/markov-chain-monte-carlo-without-all-the-bullshit/) — reference for stationary distributions.
-
-## Podcasts
-
-- [NYT podcast on marriage, kids and relationships](https://www.nytimes.com/2026/02/25/podcasts/marriage-kids-parenting-relationships.html) — Helena de Groot's stories are truly extraordinary ([moment](/moments/260308-a-fabulous-podcast/)).
+- [FMHY](https://fmhy.net/) — freemediaheckyeah, a huge index of free stuff on the internet.
+- [Scientific Spaces](https://spaces.ac.cn/) — Su Jianlin's blog (科学空间) on math and machine learning.
