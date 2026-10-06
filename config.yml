@@ -43,6 +43,9 @@ languages:
         - name: Moments
           url: moments/
           weight: 3
+        - name: Links
+          url: links/
+          weight: 4
         - name: Archive
           url: archives/
           weight: 5
