@@ -35,8 +35,19 @@
 {{- $hu := urls.Parse $href -}}
 {{- $siteHosts := slice (urls.Parse site.BaseURL).Hostname | append (site.Params.siteHosts | default slice) -}}
 {{- $isLocal := or (and (not $hu.Scheme) (not $hu.Host)) (and $hu.IsAbs (in $siteHosts $hu.Hostname)) -}}
+{{- /* The path a local link reaches, for picking its icon only (the href is
+  left as is): a relative path resolves against the page, as in a browser. */ -}}
+{{- $localPath := $hu.Path -}}
+{{- if and $isLocal $hu.Path (not (strings.HasPrefix $hu.Path "/")) -}}
+  {{- $base := .PageInner.RelPermalink -}}
+  {{- if not (strings.HasSuffix $base "/") }}{{ $base = path.Dir $base }}{{ end -}}
+  {{- $localPath = path.Join $base $hu.Path -}}
+  {{- if and (strings.HasSuffix $hu.Path "/") (ne $localPath "/") -}}
+    {{- $localPath = printf "%s/" $localPath -}}
+  {{- end -}}
+{{- end -}}
 {{- /* Icons set in params.linkFavicons win; local links match by path. */ -}}
-{{- $target := cond $isLocal $hu.Path (printf "%s%s" $hu.Host $hu.Path) -}}
+{{- $target := cond $isLocal $localPath (printf "%s%s" $hu.Host $hu.Path) -}}
 {{- $override := "" -}}
 {{- range site.Params.linkFavicons -}}
   {{- if and (not $override) (strings.HasPrefix $target .prefix) -}}
@@ -51,12 +62,12 @@
     hook runs, so the target is unknown */ -}}
 {{- else if $override -}}
   {{- $icon = $override -}}
-{{- else if and $isLocal $hu.Path (ne $hu.Path .PageInner.RelPermalink) -}}
+{{- else if and $isLocal $localPath (ne $localPath .PageInner.RelPermalink) -}}
   {{- if $resolved -}}
     {{- /* a page, page resource or asset of this Hugo site */ -}}
     {{- $icon = site.Params.assets.favicon32x32 | relURL -}}
   {{- else -}}
-    {{- $icon = partial "local-favicon.html" $hu.Path -}}
+    {{- $icon = partial "local-favicon.html" $localPath -}}
   {{- end -}}
 {{- else if and (not $isLocal) (in (slice "http" "https") $hu.Scheme) -}}
   {{- $host := $hu.Hostname -}}

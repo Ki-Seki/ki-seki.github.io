@@ -37,7 +37,9 @@
         {{- $href := or (index (index . 0) 1) (index (index . 0) 2) -}}
         {{- if eq $href "data:," -}}
           {{- /* an explicitly empty icon */ -}}
-        {{- else if or (strings.HasPrefix $href "data:") (strings.Contains $href "://") -}}
+        {{- else if or (strings.HasPrefix $href "data:") (strings.Contains $href "://") (strings.HasPrefix $href "/") -}}
+          {{- /* data:, absolute, protocol-relative (//) and root-relative (/)
+            URLs mean the same from any page */ -}}
           {{- $icon = $href -}}
         {{- else -}}
           {{- $icon = path.Join (path.Dir (strings.TrimPrefix "static" $html)) $href | relURL -}}
