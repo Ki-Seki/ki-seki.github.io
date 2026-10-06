@@ -13,3 +13,4 @@ ShowPostNavLinks: false
 - [The Kiseki Gallery](https://song-shichao.github.io/) — a photography gallery.
 - [FMHY](https://fmhy.net/) — freemediaheckyeah, a huge index of free stuff on the internet.
 - [Scientific Spaces](https://spaces.ac.cn/) — Su Jianlin's blog on math and machine learning.
+- [4kvm](https://www.4kvm.net/) — movies and TV series to watch online (in Chinese).
