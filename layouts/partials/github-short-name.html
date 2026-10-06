@@ -1,0 +1,35 @@
+{{- /* Short GitHub-style name for a parsed github.com URL (urls.Parse):
+  owner, owner/repo, owner/repo#12 (issue, PR, discussion),
+  owner/repo@b52b0c0 (commit), owner/repo@v1.0 (release, bare branch),
+  owner/repo/path/to/file#L10 (blob, tree), otherwise the path itself.
+  Returns "" when the URL has no path. */ -}}
+{{- $p := split (strings.Trim .Path "/") "/" -}}
+{{- $name := "" -}}
+{{- if index $p 0 -}}
+  {{- $name = delimit (first 2 $p) "/" -}}
+  {{- if gt (len $p) 2 -}}
+    {{- $kind := index $p 2 -}}
+    {{- $rest := after 3 $p -}}
+    {{- if and (in (slice "issues" "pull" "discussions") $kind) $rest -}}
+      {{- $name = printf "%s#%s" $name (index $rest 0) -}}
+    {{- else if and (eq $kind "commit") $rest -}}
+      {{- $name = printf "%s@%s" $name (substr (index $rest 0) 0 7) -}}
+    {{- else if and (in (slice "blob" "tree") $kind) $rest -}}
+      {{- with after 1 $rest -}}
+        {{- $name = printf "%s/%s" $name (delimit . "/") -}}
+      {{- else -}}
+        {{- $name = printf "%s@%s" $name (index $rest 0) -}}
+      {{- end -}}
+      {{- with $.Fragment -}}
+        {{- if findRE `^L\d+` . -}}
+          {{- $name = printf "%s#%s" $name . -}}
+        {{- end -}}
+      {{- end -}}
+    {{- else if and (eq $kind "releases") (gt (len $rest) 1) (eq (index $rest 0) "tag") -}}
+      {{- $name = printf "%s@%s" $name (index $rest 1) -}}
+    {{- else -}}
+      {{- $name = delimit $p "/" -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $name -}}

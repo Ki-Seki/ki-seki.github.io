@@ -1,18 +1,4 @@
-{{- $parts := split (.Get 0) "/" -}}
-{{- $user := index $parts 0 -}}
-{{- $repo := "" -}}
-{{- if ge (len $parts) 2 -}}
-  {{- $repo = index $parts 1 -}}
-{{- end -}}
-
-{{- $url := printf "https://github.com/%s" $user -}}
-{{- $display := $user -}}
-
-{{- if ne $repo "" -}}
-  {{- $url = printf "%s/%s" $url $repo -}}
-  {{- $display = printf "%s/%s" $user $repo -}}
-{{- end -}}
-
-<a href="{{ $url }}" target="_blank" rel="noopener">
-  <i class="fab fa-github"></i> {{ $display }}
-</a>
+{{- /* Deprecated: kept so existing posts still build. Write a plain link
+  instead, e.g. <https://github.com/owner/repo>; the link render hook adds the
+  GitHub favicon and shows "owner/repo". */ -}}
+{{- printf "<https://github.com/%s>" (.Get 0) | .Page.RenderString -}}

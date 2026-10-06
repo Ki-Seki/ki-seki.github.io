@@ -1,0 +1,52 @@
+/* Favicon before Markdown links; see layouts/_markup/render-link.html.
+   The icon sits inside the link (it is clickable and never wraps away from
+   the text), drawn as a background in the left padding, but outside the
+   underline. */
+:root {
+  /* Light rounded tile that keeps dark favicons visible on the dark theme. */
+  --favicon-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23fff' fill-opacity='.9'/%3E%3C/svg%3E");
+}
+
+a.has-favicon {
+  padding-inline-start: 1.3em;
+  background: var(--favicon) left center / 1em no-repeat;
+  /* Draw the icon on the first line only when the link wraps. */
+  box-decoration-break: slice;
+  -webkit-box-decoration-break: slice;
+}
+
+[data-theme="dark"] a.has-favicon {
+  background-image: var(--favicon), var(--favicon-tile);
+  background-position: left 0.1em center, left center;
+  background-size: 0.8em, 1em;
+}
+
+/* These rules underline the whole link box, icon included (box-shadow or
+   border-bottom), and some clone the box onto every line. Replace that
+   underline with a background line that starts after the icon. */
+.post-content a.has-favicon,
+.entry-cover a.has-favicon,
+.footer a.has-favicon,
+.moment-content .media-figure > figcaption a.has-favicon {
+  padding-bottom: 1px;
+  border-bottom: none;
+  box-shadow: none;
+  box-decoration-break: slice;
+  -webkit-box-decoration-break: slice;
+  background-image: var(--favicon), linear-gradient(var(--favicon-underline, currentColor), var(--favicon-underline, currentColor));
+  background-position: left center, 1.3em 100%;
+  background-size: 1em, calc(100% - 1.3em) 1px;
+}
+
+.entry-cover a.has-favicon {
+  --favicon-underline: var(--primary);
+}
+
+[data-theme="dark"] .post-content a.has-favicon,
+[data-theme="dark"] .entry-cover a.has-favicon,
+[data-theme="dark"] .footer a.has-favicon,
+[data-theme="dark"] .moment-content .media-figure > figcaption a.has-favicon {
+  background-image: var(--favicon), var(--favicon-tile), linear-gradient(var(--favicon-underline, currentColor), var(--favicon-underline, currentColor));
+  background-position: left 0.1em center, left center, 1.3em 100%;
+  background-size: 0.8em, 1em, calc(100% - 1.3em) 1px;
+}
