@@ -26,8 +26,8 @@
 {{- end -}}
 
 {{- $hu := urls.Parse $href -}}
-{{- $siteHost := (urls.Parse site.BaseURL).Hostname -}}
-{{- $isLocal := or (and (not $hu.Scheme) (not $hu.Host)) (and $hu.IsAbs (eq $hu.Hostname $siteHost)) -}}
+{{- $siteHosts := slice (urls.Parse site.BaseURL).Hostname | append (site.Params.siteHosts | default slice) -}}
+{{- $isLocal := or (and (not $hu.Scheme) (not $hu.Host)) (and $hu.IsAbs (in $siteHosts $hu.Hostname)) -}}
 {{- $icon := "" -}}
 {{- if strings.Contains (string .Text) "<img" -}}
   {{- /* image links keep the image alone */ -}}

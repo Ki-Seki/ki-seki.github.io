@@ -130,6 +130,11 @@ params:
 
   clarityTagId: "vglavb3ml2"  # Microsoft Clarity analytics tag ID
 
+  # Hosts that absolute links count as this site for the link favicon hook,
+  # even when baseURL is overridden (previews, `hugo server`).
+  siteHosts:
+    - ki-seki.github.io
+
   assets:
     disableHLJS: true
     favicon: favicons/icons8-capybara-32.png
