@@ -75,3 +75,11 @@ Created with `hugo new moments/<slug>/index.md`. Front matter includes
 
 Custom shortcodes available: `media`, `admonition`, `bibtex`. The `media`
 shortcode accepts images, YouTube, Vimeo, and plain video URLs.
+
+### Links
+
+Markdown links get a favicon from their address automatically
+(`layouts/_markup/render-link.html`). For a GitHub user or repo, write a bare
+link such as `<https://github.com/owner/repo>`; it renders as `owner/repo`
+with the GitHub icon. The `github` shortcode is deprecated and only kept for
+existing posts.

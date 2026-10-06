@@ -3,7 +3,9 @@
   - external http(s) links: that site's favicon, downloaded at build time and
     served from this site, so visitors make no third-party requests;
   - links to other pages or files of this site: this site's favicon;
-  - same-page anchors, mailto: and image links: no icon. */ -}}
+  - same-page anchors, mailto: and image links: no icon.
+  Bare links to a GitHub user or repo read "owner/repo", like the github
+  shortcode. */ -}}
 {{- $u := urls.Parse .Destination -}}
 {{- $href := $u.String -}}
 {{- if strings.HasPrefix $u.String "#" -}}
@@ -44,5 +46,10 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
-<a href="{{ $href }}" {{- with .Title }} title="{{ . }}" {{- end }} {{- with $icon }} class="has-favicon" style="{{ printf "--favicon: url(%s)" . | safeCSS }}" {{- end }}>{{ .Text }}</a>
+{{- $text := .Text -}}
+{{- $ghPath := strings.Trim $hu.Path "/" -}}
+{{- if and (in (slice "github.com" "www.github.com") $hu.Hostname) $ghPath (le (len (split $ghPath "/")) 2) (not $hu.RawQuery) (not $hu.Fragment) (in (slice "" .Destination (replaceRE "^https?://" "" .Destination)) .PlainText) -}}
+  {{- $text = $ghPath -}}
+{{- end -}}
+<a href="{{ $href }}" {{- with .Title }} title="{{ . }}" {{- end }} {{- with $icon }} class="has-favicon" style="{{ printf "--favicon: url(%s)" . | safeCSS }}" {{- end }}>{{ $text }}</a>
 {{- /**/ -}}
