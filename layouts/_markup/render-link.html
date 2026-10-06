@@ -1,0 +1,48 @@
+{{- /* Hugo's embedded link render hook (v0.146.0), plus a favicon chosen by
+  the resolved link address:
+  - external http(s) links: that site's favicon, downloaded at build time and
+    served from this site, so visitors make no third-party requests;
+  - links to other pages or files of this site: this site's favicon;
+  - same-page anchors, mailto: and image links: no icon. */ -}}
+{{- $u := urls.Parse .Destination -}}
+{{- $href := $u.String -}}
+{{- if strings.HasPrefix $u.String "#" -}}
+  {{- $href = printf "%s#%s" .PageInner.RelPermalink $u.Fragment -}}
+{{- else if and $href (not $u.IsAbs) -}}
+  {{- $path := strings.TrimPrefix "./" $u.Path -}}
+  {{- with or
+    ($.PageInner.GetPage $path)
+    ($.PageInner.Resources.Get $path)
+    (resources.Get $path)
+  -}}
+    {{- $href = .RelPermalink -}}
+    {{- with $u.RawQuery -}}
+      {{- $href = printf "%s?%s" $href . -}}
+    {{- end -}}
+    {{- with $u.Fragment -}}
+      {{- $href = printf "%s#%s" $href . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $hu := urls.Parse $href -}}
+{{- $siteHost := (urls.Parse site.BaseURL).Hostname -}}
+{{- $isLocal := or (and (not $hu.Scheme) (not $hu.Host)) (and $hu.IsAbs (eq $hu.Hostname $siteHost)) -}}
+{{- $icon := "" -}}
+{{- if strings.Contains (string .Text) "<img" -}}
+  {{- /* image links keep the image alone */ -}}
+{{- else if and $isLocal $hu.Path (ne $hu.Path .PageInner.RelPermalink) -}}
+  {{- $icon = site.Params.assets.favicon32x32 | relURL -}}
+{{- else if and (not $isLocal) (in (slice "http" "https") $hu.Scheme) -}}
+  {{- $host := $hu.Hostname -}}
+  {{- $icon = "favicons/globe.svg" | relURL -}}
+  {{- with try (resources.GetRemote (printf "https://www.google.com/s2/favicons?domain=%s&sz=32" $host)) -}}
+    {{- with .Err -}}
+      {{- warnidf "favicon-fetch" "Favicon for %s unavailable, using the globe icon: %s" $host . -}}
+    {{- else with .Value -}}
+      {{- $icon = (resources.Copy (printf "favicons/%s.png" $host) .).RelPermalink -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+<a href="{{ $href }}" {{- with .Title }} title="{{ . }}" {{- end }} {{- with $icon }} class="has-favicon" style="{{ printf "--favicon: url(%s)" . | safeCSS }}" {{- end }}>{{ .Text }}</a>
+{{- /**/ -}}

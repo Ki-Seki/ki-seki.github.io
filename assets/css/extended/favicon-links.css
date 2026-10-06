@@ -1,0 +1,18 @@
+/* Favicon before Markdown links; see layouts/_markup/render-link.html.
+   Drawn as a background in the left padding (not a ::before box) so a line
+   never breaks between the icon and the first word of the link. */
+a.has-favicon {
+  padding-inline-start: 1.3em;
+  background: var(--favicon) left center / 1em 1em no-repeat;
+  /* PaperMod clones link boxes per line; slice keeps the icon on line one. */
+  box-decoration-break: slice;
+  -webkit-box-decoration-break: slice;
+}
+
+/* Dark favicons (e.g. NYT, GitHub) disappear on the dark theme, so sit them
+   on a light rounded tile. */
+[data-theme="dark"] a.has-favicon {
+  background:
+    var(--favicon) left 0.1em center / 0.8em 0.8em no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23fff' fill-opacity='.9'/%3E%3C/svg%3E") left center / 1em 1em no-repeat;
+}
