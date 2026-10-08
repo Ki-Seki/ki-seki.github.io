@@ -126,10 +126,12 @@
   :root[data-tod="night"] { --wash: var(--wash-night); }
 
   *, *::before, *::after { box-sizing: border-box; }
-  html { height: 100%; }
+  /* No rubber-band overscroll: the page only moves when there is more content to see */
+  html { height: 100%; overscroll-behavior-y: none; }
   body {
     min-height: 100%;
     margin: 0;
+    overscroll-behavior-y: none;
     background-color: var(--bg);
     background-image: radial-gradient(90% 60% at 50% -10%, var(--wash), transparent 70%);
     background-attachment: fixed;
@@ -146,7 +148,8 @@
   .page {
     max-width: 780px;
     margin: 0 auto;
-    padding-inline: clamp(16px, 5vw, 32px);
+    padding-left: max(clamp(16px, 5vw, 32px), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(16px, 5vw, 32px), env(safe-area-inset-right, 0px));
     padding-block: clamp(56px, 15vh, 150px) 72px;
     display: flex;
     flex-direction: column;
@@ -254,13 +257,33 @@
   }
   .link:hover { background: var(--hover); }
   .link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .link-row:hover .link, .link-row:focus-within .link { padding-right: 36px; }
   .link-row.is-active .link { background: var(--accent-soft); }
   .link-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; }
   .link-title mark { background: var(--accent-soft); color: inherit; border-radius: 3px; box-shadow: 0 0 0 1px var(--accent-soft); }
   .row-edit { position: absolute; right: 5px; top: 50%; translate: 0 -50%; opacity: 0; }
   .link-row:hover .row-edit, .row-edit:focus-visible { opacity: 1; }
-  .link-row.is-dragging { opacity: 0.3; }
+  .link, .group-head { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+  /* Dragging: the lifted copy follows the pointer, a faded placeholder marks where it will land */
+  .link-row.is-lifted .link { transform: scale(1.06); transition: transform 0.15s ease; }
+  .group.is-lifted { transform: scale(1.01); transition: transform 0.15s ease; }
+  .is-placeholder { opacity: 0.25; }
+  .is-landing { visibility: hidden; }
+  .drag-ghost {
+    position: fixed;
+    z-index: 60;
+    margin: 0;
+    list-style: none;
+    pointer-events: none;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    transform: scale(1.04);
+  }
+  .group.drag-ghost { border-radius: 4px; box-shadow: 0 0 0 10px var(--surface), var(--shadow-lg); }
+  .drag-ghost .row-edit, .drag-ghost .group-actions, .drag-ghost .add-row { display: none; }
+  body.is-dragging, body.is-dragging * { cursor: grabbing !important; }
+  body.is-dragging .link:hover { background: transparent; }
 
   .ico {
     position: relative;
@@ -305,7 +328,11 @@
 
   /* Edit mode: every control visible, which is how touch screens reach them */
   .is-editing .row-edit, .is-editing .add-link, .is-editing .group-actions, .is-editing .new-group { opacity: 1; }
-  .is-editing .link { background: var(--hover); padding-right: 36px; }
+  .is-editing .link { background: var(--hover); }
+  /* Room for the hover pencil on wide screens */
+  @media (min-width: 561px) {
+    .link-row:hover .link, .link-row:focus-within .link, .is-editing .link { padding-right: 36px; }
+  }
   .is-editing .grid { gap: 6px; }
 
   .shelf-wrap { display: flex; flex-direction: column; gap: 18px; }
@@ -331,7 +358,6 @@
   .is-filtering .link-row.is-miss { opacity: 0.25; }
   .is-filtering .group.is-miss .group-head { opacity: 0.4; }
   .is-filtering .add-row { display: none; }
-  .group.is-dragging { opacity: 0.35; }
 
   .drop-line { position: fixed; z-index: 30; pointer-events: none; background: var(--accent); border-radius: 2px; box-shadow: 0 0 0 3px var(--accent-soft); }
 
@@ -524,9 +550,27 @@
     .corner .icon-btn { opacity: 0.75; }
     .row-edit { width: 34px; height: 34px; }
   }
+  /* Phones: bookmarks become an icon grid like a home screen, the corner buttons scroll with the page,
+     and the vertical rhythm tightens so the defaults fit on one screen */
   @media (max-width: 560px) {
-    .page { gap: 32px; padding-block: clamp(64px, 12vh, 120px) 56px; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .page { gap: 22px; padding-block: calc(44px + env(safe-area-inset-top, 0px)) 28px; }
+    .new-group { display: none; }
+    .is-editing .new-group { display: inline-flex; }
+    .corner { position: absolute; }
+    .top { gap: 10px; }
+    .clock { font-size: clamp(60px, 18vw, 76px); }
+    .shelf { gap: 20px; }
+    .group-head { height: 26px; margin-bottom: 8px; }
+    .grid { margin: 0 -4px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 4px; }
+    .link { flex-direction: column; gap: 7px; padding: 4px 2px; border-radius: 14px; text-align: center; }
+    .link:hover { background: transparent; }
+    .link-title { max-width: 100%; font-size: 12px; line-height: 1.3; }
+    .ico { width: 48px; height: 48px; border-radius: 14px; font-size: 19px; }
+    .ico img { inset: 14px; width: 20px; height: 20px; }
+    .row-edit { display: none; }
+    .add-link { flex-direction: column; gap: 7px; padding: 4px 2px; font-size: 12px; text-align: center; }
+    .add-link .plus-slot { width: 48px; height: 48px; border-radius: 14px; border: 1.5px dashed var(--line); }
+    .group.is-empty .add-link { flex-direction: row; gap: 12px; text-align: left; }
     .q-hint { display: none; }
     .set-row .input { max-width: none; }
     .dialog-actions { flex-wrap: wrap; }
@@ -766,7 +810,7 @@
       tUngrouped: g => `Ungrouped “${g}”. Its bookmarks moved to the top.`,
       undo: 'Undo',
       tUndone: 'Undone',
-      tipHint: 'Tip: tap the pencil in the top-right corner to edit bookmarks and groups. On a computer you can also drag to reorder, or paste a URL anywhere to add one.',
+      tipHint: 'Tip: drag bookmarks or group names to reorder them. On a phone, long-press to pick one up, or long-press and let go to edit it. Paste a URL anywhere to add a bookmark.',
       gotIt: 'Got it',
       sLang: 'Language',
       sTheme: 'Appearance',
@@ -855,7 +899,7 @@
       tUngrouped: g => `已取消分组「${g}」，其中的书签移到了最上方。`,
       undo: '撤销',
       tUndone: '已撤销',
-      tipHint: '提示：点右上角的铅笔即可编辑书签和分组。在电脑上还可以拖动排序，或在页面任意处粘贴网址来添加。',
+      tipHint: '提示：拖动书签或分组名即可排序。手机上长按拿起再拖动，长按后直接松手可以编辑。在页面任意处粘贴网址即可添加书签。',
       gotIt: '知道了',
       sLang: '语言',
       sTheme: '外观',
@@ -1137,7 +1181,7 @@
     const name = displayName(it);
     const nt = state.settings.newTab;
     const a = el('a', {
-      class: 'link', href: it.url, dataset: { id: it.id }, title: host && host !== name ? `${name}\n${host}` : name,
+      class: 'link', href: it.url, draggable: 'false', dataset: { id: it.id }, title: host && host !== name ? `${name}\n${host}` : name,
       target: nt ? '_blank' : null, rel: nt ? 'noopener' : null,
     }, iconEl(it.url, host, name), el('span', { class: 'link-title' }, name));
     return el('li', { class: 'link-row', dataset: { id: it.id } },
@@ -1149,7 +1193,7 @@
     const empty = !g.items.length;
     const addLabel = empty ? (isMain ? t('addFirst') : t('addOrDrop')) : t('addTile');
     return el('section', { class: 'group' + (empty ? ' is-empty' : ''), dataset: { gid: g.id }, 'aria-label': isMain ? null : g.name },
-      isMain ? null : el('header', { class: 'group-head', draggable: 'true' },
+      isMain ? null : el('header', { class: 'group-head' },
         el('h2', { class: 'group-name' }, g.name),
         el('span', { class: 'group-actions' },
           iconBtn('plus', t('addToAria', g.name), () => openLinkDialog({ gid: g.id })),
@@ -1489,7 +1533,7 @@
     openLinkDialog({ id: a.dataset.id });
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && editMode && !dialogOpen() && !isTyping(e.target)) setEditMode(false);
+    if (e.key === 'Escape' && !e.defaultPrevented && editMode && !dialogOpen() && !isTyping(e.target)) setEditMode(false);
   });
   $('#group-ungroup').addEventListener('click', () => {
     const i = state.groups.findIndex(x => x.id === editingGroup);
@@ -1667,11 +1711,247 @@
 
   $('#hint-dismiss').addEventListener('click', () => { state.settings.hintDismissed = true; save(); $('#hint').hidden = true; });
 
-  /* ---------- Drag and drop: reorder, move between groups, drop links in ---------- */
-  const line = $('#drop-line');
-  let drag = null;
-  let dropTarget = null;
+  /* ---------- Reordering: one pointer-based drag for mouse and touch ---------- */
+  // Mouse: press and move. Touch: long-press to lift, then move; lift and let go without moving to edit.
+  // The picked-up item stays in the layout as a faded placeholder that slides to where it would land,
+  // and the other tiles animate out of its way. The new order is read back from the DOM on drop.
+  const LONG_PRESS_MS = 380;
+  const MOUSE_SLOP = 6;   // px a mouse travels before a press becomes a drag
+  const TOUCH_SLOP = 10;  // px a finger may wander while waiting for the long-press; more means it's a scroll
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let press = null;       // { kind, el, pointerId, type, x, y, timer, lifted }
+  let drag = null;        // { kind, el, ghost, dx, dy, pointerId, x, y }
+  let suppressClick = false;
+  let lastPointerType = 'mouse';
 
+  function cancelPress() {
+    if (!press) return;
+    clearTimeout(press.timer);
+    press.el.classList.remove('is-lifted');
+    press = null;
+  }
+
+  shelf.addEventListener('pointerdown', e => {
+    lastPointerType = e.pointerType;
+    if (e.button !== 0 || drag || press || document.body.classList.contains('is-filtering')) return;
+    const target = e.target instanceof Element ? e.target : null;
+    if (!target || target.closest('button')) return;
+    const row = target.closest('.link-row');
+    const head = !row && target.closest('.group-head');
+    if (!row && !head) return;
+    press = {
+      kind: row ? 'link' : 'group', el: row || head.closest('.group'),
+      pointerId: e.pointerId, type: e.pointerType, x: e.clientX, y: e.clientY, timer: 0, lifted: false,
+    };
+    if (e.pointerType !== 'mouse') {
+      press.timer = setTimeout(() => {
+        if (!press) return;
+        press.lifted = true;
+        press.el.classList.add('is-lifted');
+        if (navigator.vibrate) navigator.vibrate(8);
+      }, LONG_PRESS_MS);
+    }
+  });
+
+  document.addEventListener('pointermove', e => {
+    if (drag) {
+      if (e.pointerId !== drag.pointerId) return;
+      e.preventDefault();
+      moveDrag(e.clientX, e.clientY);
+      return;
+    }
+    if (!press || e.pointerId !== press.pointerId) return;
+    const dist = Math.hypot(e.clientX - press.x, e.clientY - press.y);
+    if (press.type === 'mouse') { if (dist > MOUSE_SLOP) startDrag(e); }
+    else if (press.lifted) { if (dist > 3) startDrag(e); }
+    else if (dist > TOUCH_SLOP) cancelPress();
+  }, { passive: false });
+
+  // Once something is lifted, the finger moves it instead of scrolling the page
+  document.addEventListener('touchmove', e => { if (drag || (press && press.lifted)) e.preventDefault(); }, { passive: false });
+
+  document.addEventListener('pointerup', e => {
+    if (drag && e.pointerId === drag.pointerId) { finishDrag(true); suppressNextClick(); return; }
+    if (!press || e.pointerId !== press.pointerId) return;
+    const p = press;
+    cancelPress();
+    if (p.lifted) {
+      // Long-press and release in place: open the editor, like a context menu
+      suppressNextClick();
+      if (p.kind === 'link') openLinkDialog({ id: p.el.dataset.id });
+      else openGroupDialog(p.el.dataset.gid);
+    }
+  });
+  document.addEventListener('pointercancel', e => {
+    if (drag && e.pointerId === drag.pointerId) finishDrag(false);
+    else if (press && e.pointerId === press.pointerId) cancelPress();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && drag) { e.preventDefault(); finishDrag(false); } }, true);
+
+  function suppressNextClick() {
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 400);
+  }
+  shelf.addEventListener('click', e => {
+    if (!suppressClick) return;
+    suppressClick = false;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+  // Touch long-press would otherwise open the browser's link menu
+  shelf.addEventListener('contextmenu', e => { if (lastPointerType !== 'mouse' || drag) e.preventDefault(); });
+  // Native link dragging would steal the pointer; links can still be dragged *in* from other tabs (below)
+  shelf.addEventListener('dragstart', e => e.preventDefault());
+
+  function startDrag(e) {
+    const { el, kind, pointerId, x, y } = press;
+    clearTimeout(press.timer);
+    el.classList.remove('is-lifted');
+    press = null;
+    const r = el.getBoundingClientRect();
+    const ghost = el.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.removeAttribute('id');
+    Object.assign(ghost.style, { width: r.width + 'px', height: r.height + 'px', left: r.left + 'px', top: r.top + 'px' });
+    document.body.append(ghost);
+    el.classList.add('is-placeholder');
+    document.body.classList.add('is-dragging');
+    try { shelf.setPointerCapture(pointerId); } catch {}
+    drag = { kind, el, ghost, dx: x - r.left, dy: y - r.top, pointerId, x, y };
+    moveDrag(e.clientX, e.clientY);
+  }
+
+  function moveDrag(x, y) {
+    drag.x = x;
+    drag.y = y;
+    drag.ghost.style.left = (x - drag.dx) + 'px';
+    drag.ghost.style.top = (y - drag.dy) + 'px';
+    const under = document.elementFromPoint(x, y);
+    if (under instanceof Element) {
+      if (drag.kind === 'link') placeLink(under, x);
+      else placeGroup(under);
+    }
+    autoScroll(y);
+  }
+
+  // A tile that is still sliding into place is ignored, or it would bounce the placeholder back and forth
+  const isMoving = n => n.getAnimations().some(a => a.playState === 'running');
+
+  // Hovering a tile moves the placeholder past it; hovering empty space in another group moves it to the end
+  function placeLink(under, x) {
+    const groupNode = under.closest('.group');
+    if (!groupNode) return;
+    const grid = $('.grid', groupNode);
+    const hovered = under.closest('.link-row');
+    if (hovered && isMoving(hovered)) return;
+    let ref;
+    if (hovered && hovered !== drag.el) {
+      const sameGrid = hovered.parentNode === drag.el.parentNode;
+      const after = sameGrid
+        ? !!(drag.el.compareDocumentPosition(hovered) & Node.DOCUMENT_POSITION_FOLLOWING)
+        : x > hovered.getBoundingClientRect().left + hovered.getBoundingClientRect().width / 2;
+      ref = after ? hovered.nextElementSibling : hovered;
+    } else if (!hovered && grid !== drag.el.parentNode) {
+      ref = $('.add-row', grid);
+    } else {
+      return;
+    }
+    if (ref === drag.el || (drag.el.parentNode === grid && drag.el.nextElementSibling === ref)) return;
+    flip(() => grid.insertBefore(drag.el, ref));
+  }
+
+  function placeGroup(under) {
+    const hovered = under.closest('.group');
+    if (!hovered || hovered === drag.el || hovered.dataset.gid === MAIN || isMoving(hovered)) return;
+    const after = !!(drag.el.compareDocumentPosition(hovered) & Node.DOCUMENT_POSITION_FOLLOWING);
+    flip(() => shelf.insertBefore(drag.el, after ? hovered.nextElementSibling : hovered));
+  }
+
+  // FLIP: measure, change the DOM, then animate everything from where it was to where it is now.
+  // A tile inside a section that moved only animates its own offset, not the section's as well.
+  function flip(change) {
+    const nodes = $$('.group, .link-row', shelf).filter(n => n !== drag.el);
+    const first = new Map(nodes.map(n => [n, n.getBoundingClientRect()]));
+    change();
+    if (reduceMotion.matches) return;
+    const delta = new Map(nodes.map(n => {
+      const a = first.get(n);
+      const b = n.getBoundingClientRect();
+      return [n, [a.left - b.left, a.top - b.top]];
+    }));
+    for (const n of nodes) {
+      let [dx, dy] = delta.get(n);
+      const section = n.classList.contains('link-row') ? n.closest('.group') : null;
+      if (section && delta.has(section)) { dx -= delta.get(section)[0]; dy -= delta.get(section)[1]; }
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+      n.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 200, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+    }
+  }
+
+  // Scroll the page while dragging near the top or bottom edge
+  let scrollSpeed = 0;
+  let scrollFrame = 0;
+  function autoScroll(y) {
+    const edge = 56;
+    scrollSpeed = y < edge ? -Math.ceil((edge - y) / 4) : y > innerHeight - edge ? Math.ceil((y - innerHeight + edge) / 4) : 0;
+    if (scrollSpeed && !scrollFrame) scrollFrame = requestAnimationFrame(stepScroll);
+  }
+  function stepScroll() {
+    scrollFrame = 0;
+    if (!drag || !scrollSpeed) return;
+    window.scrollBy(0, scrollSpeed);
+    moveDrag(drag.x, drag.y);
+  }
+
+  function finishDrag(commit) {
+    const d = drag;
+    drag = null;
+    cancelAnimationFrame(scrollFrame);
+    scrollFrame = 0;
+    scrollSpeed = 0;
+    document.body.classList.remove('is-dragging');
+    try { shelf.releasePointerCapture(d.pointerId); } catch {}
+    const landing = d.el.getBoundingClientRect();
+    let changed = false;
+    if (commit && d.kind === 'link') {
+      const f = findItem(d.el.dataset.id);
+      const gid = d.el.closest('.group').dataset.gid;
+      const index = $$('.link-row', d.el.parentNode).indexOf(d.el);
+      if (f && (f.g.id !== gid || f.i !== index)) {
+        changed = true;
+        mutate(() => {
+          f.g.items.splice(f.i, 1);
+          state.groups.find(g => g.id === gid).items.splice(index, 0, f.it);
+        });
+      }
+    } else if (commit) {
+      const order = $$('.group', shelf).map(n => n.dataset.gid).filter(id => id !== MAIN);
+      if (order.join() !== namedGroups().map(g => g.id).join()) {
+        changed = true;
+        mutate(() => {
+          const byId = new Map(state.groups.map(g => [g.id, g]));
+          state.groups = [state.groups[0], ...order.map(id => byId.get(id))];
+        });
+      }
+    }
+    if (!changed) render();
+    // Settle the ghost into the landing spot, hiding the real tile until it arrives
+    const selector = d.kind === 'link' ? `.link-row[data-id="${d.el.dataset.id}"]` : `.group[data-gid="${d.el.dataset.gid}"]`;
+    const settled = shelf.querySelector(selector);
+    const to = settled ? settled.getBoundingClientRect() : landing;
+    if (reduceMotion.matches) { d.ghost.remove(); return; }
+    if (settled) settled.classList.add('is-landing');
+    const done = () => { d.ghost.remove(); if (settled) settled.classList.remove('is-landing'); };
+    setTimeout(done, 400); // in case the animation never runs, e.g. in a background tab
+    d.ghost.animate(
+      [{ left: d.ghost.style.left, top: d.ghost.style.top }, { left: to.left + 'px', top: to.top + 'px' }],
+      { duration: 160, easing: 'ease-out', fill: 'forwards' },
+    ).finished.then(done, done);
+  }
+
+  /* ---------- Links dragged in from other tabs or apps ---------- */
+  const line = $('#drop-line');
+  let dropTarget = null;
   function showLine(x, y, w, h) {
     line.hidden = false;
     line.style.left = x + 'px'; line.style.top = y + 'px';
@@ -1681,13 +1961,13 @@
   const hasUrl = dt => !!dt && Array.from(dt.types || []).some(x => x === 'text/uri-list' || x === 'text/x-moz-url');
 
   // Pick the slot nearest the pointer in a group's grid; the line sits in the gap beside that tile
-  function linkTargetAt(groupNode, x, y) {
-    const rows = $$('.link-row', groupNode).filter(r => !r.classList.contains('is-dragging'));
+  function externalTargetAt(groupNode, x, y) {
+    const rows = $$('.link-row', groupNode);
     const gid = groupNode.dataset.gid;
     if (!rows.length) {
       const r = $('.add-row', groupNode).getBoundingClientRect();
       showLine(r.left + 2, r.top + 6, 2, r.height - 12);
-      return { kind: 'link', gid, index: 0 };
+      return { gid, index: 0 };
     }
     let best = 0;
     let bestD = Infinity;
@@ -1701,17 +1981,7 @@
     const r = rows[best].getBoundingClientRect();
     const before = x < r.left + r.width / 2;
     showLine(before ? r.left - 4 : r.right + 2, r.top + 6, 2, r.height - 12);
-    return { kind: 'link', gid, index: best + (before ? 0 : 1) };
-  }
-
-  function groupTargetAt(groupNode, y) {
-    const gid = groupNode.dataset.gid;
-    if (gid === drag.gid || gid === MAIN) { hideLine(); return null; }
-    const r = groupNode.getBoundingClientRect();
-    const before = y < r.top + r.height / 2;
-    const half = (parseFloat(getComputedStyle(shelf).rowGap) || 30) / 2;
-    showLine(r.left, before ? r.top - half - 1 : r.bottom + half - 1, r.width, 2);
-    return { kind: 'group', gid, before };
+    return { gid, index: best + (before ? 0 : 1) };
   }
 
   function readDrop(dt) {
@@ -1729,95 +1999,36 @@
     return { url, title: title.slice(0, 80) };
   }
 
-  shelf.addEventListener('dragstart', e => {
-    const a = e.target instanceof Element && e.target.closest('.link');
-    const head = e.target instanceof Element && e.target.closest('.group-head');
-    if (a) {
-      drag = { kind: 'link', id: a.dataset.id };
-      e.dataTransfer.effectAllowed = 'copyMove';
-      e.dataTransfer.setData('text/uri-list', a.href);
-      e.dataTransfer.setData('text/plain', a.href);
-      requestAnimationFrame(() => a.closest('.link-row').classList.add('is-dragging'));
-    } else if (head) {
-      const g = head.closest('.group');
-      drag = { kind: 'group', gid: g.dataset.gid };
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', $('.group-name', g).textContent);
-      try { e.dataTransfer.setDragImage(head, 16, 14); } catch {}
-      requestAnimationFrame(() => g.classList.add('is-dragging'));
-    }
-  });
-
   shelf.addEventListener('dragover', e => {
     const groupNode = e.target instanceof Element && e.target.closest('.group');
-    if (!groupNode) return;
-    if (drag && drag.kind === 'link') {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      dropTarget = linkTargetAt(groupNode, e.clientX, e.clientY);
-    } else if (drag && drag.kind === 'group') {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      dropTarget = groupTargetAt(groupNode, e.clientY);
-    } else if (!drag && hasUrl(e.dataTransfer)) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-      dropTarget = linkTargetAt(groupNode, e.clientX, e.clientY);
-    }
+    if (!groupNode || !hasUrl(e.dataTransfer)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    dropTarget = externalTargetAt(groupNode, e.clientX, e.clientY);
   });
-
   shelf.addEventListener('drop', e => {
     const target = dropTarget;
     if (!target) return;
     e.preventDefault();
-    if (drag && drag.kind === 'link' && target.kind === 'link') {
-      const f = findItem(drag.id);
-      if (f) mutate(() => {
-        f.g.items.splice(f.i, 1);
-        const g = state.groups.find(x => x.id === target.gid);
-        g.items.splice(Math.min(target.index, g.items.length), 0, f.it);
-      });
-    } else if (drag && drag.kind === 'group' && target.kind === 'group') {
-      const from = state.groups.findIndex(g => g.id === drag.gid);
-      if (from > 0) mutate(() => {
-        const [moved] = state.groups.splice(from, 1);
-        let to = state.groups.findIndex(g => g.id === target.gid);
-        if (!target.before) to += 1;
-        state.groups.splice(Math.max(1, to), 0, moved);
-      });
-    } else if (!drag) {
-      const { url, title } = readDrop(e.dataTransfer);
-      if (url) mutate(() => {
-        const g = state.groups.find(x => x.id === target.gid);
-        g.items.splice(target.index, 0, { id: uid(), title, url });
-      }, t('tAdded', title || hostOf(url)));
-    }
-    endDrag();
-  });
-
-  function endDrag() {
-    drag = null;
     hideLine();
-    $$('.is-dragging').forEach(n => n.classList.remove('is-dragging'));
-  }
-  document.addEventListener('dragend', endDrag);
-
-  // Outside the bookmarks: an internal drag is cancelled, an external link opens the add dialog
+    const { url, title } = readDrop(e.dataTransfer);
+    if (url) mutate(() => {
+      const g = state.groups.find(x => x.id === target.gid);
+      g.items.splice(target.index, 0, { id: uid(), title, url });
+    }, t('tAdded', title || hostOf(url)));
+  });
+  // Dropped outside the bookmarks: open the add dialog instead
   document.addEventListener('dragover', e => {
-    const overGroup = e.target instanceof Element && e.target.closest('.group');
-    if (drag || hasUrl(e.dataTransfer)) {
-      e.preventDefault();
-      if (!overGroup) { hideLine(); e.dataTransfer.dropEffect = drag ? 'none' : 'copy'; }
-    }
+    if (!hasUrl(e.dataTransfer)) return;
+    e.preventDefault();
+    if (!(e.target instanceof Element && e.target.closest('.group'))) { hideLine(); e.dataTransfer.dropEffect = 'copy'; }
   });
   document.addEventListener('dragleave', e => { if (!e.relatedTarget) hideLine(); });
   document.addEventListener('drop', e => {
-    if (e.defaultPrevented) return;
-    if (drag) { e.preventDefault(); endDrag(); return; }
-    if (!hasUrl(e.dataTransfer)) return;
+    if (e.defaultPrevented || !hasUrl(e.dataTransfer)) return;
     e.preventDefault();
-    const { url, title } = readDrop(e.dataTransfer);
     hideLine();
+    const { url, title } = readDrop(e.dataTransfer);
     if (url) openLinkDialog({ url, title });
   });
 
