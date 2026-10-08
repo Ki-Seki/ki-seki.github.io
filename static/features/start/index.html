@@ -416,6 +416,8 @@
     background-size: 5px 5px;
     background-repeat: no-repeat;
   }
+  .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 7.5rem); gap: 12px; }
+  select.input:disabled { opacity: 0.55; cursor: not-allowed; }
   .field-error { margin: -6px 0 0; font-size: 13px; color: var(--danger); }
   .dialog-actions { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
   .dialog-actions .spacer { flex: 1; }
@@ -589,9 +591,15 @@
       <label for="f-title" data-i18n="fName">Name</label>
       <input class="input" id="f-title" type="text" maxlength="80" autocomplete="off">
     </div>
-    <div class="field">
-      <label for="f-group" data-i18n="fGroup">Group</label>
-      <select class="input" id="f-group"></select>
+    <div class="field-row">
+      <div class="field">
+        <label for="f-group" data-i18n="fGroup">Group</label>
+        <select class="input" id="f-group"></select>
+      </div>
+      <div class="field">
+        <label for="f-pos" data-i18n="fPos">Position</label>
+        <select class="input" id="f-pos"></select>
+      </div>
     </div>
     <div class="field" id="f-newgroup-field" hidden>
       <label for="f-newgroup" data-i18n="fNewGroup">New group name</label>
@@ -614,6 +622,10 @@
     <div class="field">
       <label for="g-name" data-i18n="groupName">Group name</label>
       <input class="input" id="g-name" type="text" maxlength="40" autocomplete="off">
+    </div>
+    <div class="field" id="g-pos-field">
+      <label for="g-pos" data-i18n="fPos">Position</label>
+      <select class="input" id="g-pos"></select>
     </div>
     <p class="field-error" id="g-error" hidden></p>
     <div class="dialog-actions">
@@ -720,6 +732,11 @@
       fUrl: 'URL',
       fName: 'Name',
       fGroup: 'Group',
+      fPos: 'Position',
+      posFirst: n => `${n} · first`,
+      posLast: n => `${n} · last`,
+      tMoved: (n, p) => `Moved “${n}” to position ${p}`,
+      tGroupMoved: (g, p) => `Moved group “${g}” to position ${p}`,
       fNewGroup: 'New group name',
       newGroupPh: 'e.g. Reading',
       optNone: 'None',
@@ -804,6 +821,11 @@
       fUrl: '网址',
       fName: '名称',
       fGroup: '分组',
+      fPos: '位置',
+      posFirst: n => `${n} · 最前`,
+      posLast: n => `${n} · 最后`,
+      tMoved: (n, p) => `已将「${n}」移到第 ${p} 位`,
+      tGroupMoved: (g, p) => `已将分组「${g}」移到第 ${p} 位`,
       fNewGroup: '新分组名称',
       newGroupPh: '例如：阅读',
       optNone: '不分组',
@@ -965,17 +987,23 @@
       [['Entertainment', '娱乐'], ['https://fmhy.net/', 'https://www.4kvm.net/', 'https://murdoku.com/']],
     ],
   ];
+  // Default groups carry a stable `key`, so only they get translated when the language changes.
+  // Renaming a default group drops its key and makes it the user's own.
+  const DEFAULT_KEYS = new Set(DEFAULTS.map(([k]) => k));
+  // The current layout counts as "old" only when stored before keys existed, which upgrades it to keyed groups once
+  const CURRENT_LAYOUT = DEFAULTS.map(([k, items]) => [[STR.en[k], STR.zh[k]], items.map(([, u]) => u)]);
   const isOldDefault = groups => {
     if (groups[0].items.length) return false;
     const named = groups.slice(1);
-    return OLD_LAYOUTS.some(layout => layout.length === named.length && layout.every(([names, urls], i) =>
+    if (named.some(g => g.key)) return false;
+    return [...OLD_LAYOUTS, CURRENT_LAYOUT].some(layout => layout.length === named.length && layout.every(([names, urls], i) =>
       names.includes(named[i].name) && urls.length === named[i].items.length && urls.every((u, j) => named[i].items[j].url === u)));
   };
   const V1_SAMPLE_URLS = new Set(['https://mail.google.com/', 'https://calendar.google.com/', 'https://github.com/', 'https://www.youtube.com/', 'https://claude.ai/', 'https://www.canva.com/', 'https://www.notion.so/', 'https://www.figma.com/', 'https://news.ycombinator.com/', 'https://arxiv.org/', 'https://sspai.com/', 'https://www.theverge.com/', 'https://translate.google.com/', 'https://huggingface.co/', 'https://excalidraw.com/', 'https://regex101.com/']);
 
   const sampleGroups = (L = 'en') => [
     { id: MAIN, name: '', items: [] },
-    ...DEFAULTS.map(([nameKey, items]) => ({ id: uid(), name: STR[L][nameKey], items: items.map(([title, url]) => ({ id: uid(), title, url })) })),
+    ...DEFAULTS.map(([key, items]) => ({ id: uid(), key, name: STR[L][key], items: items.map(([title, url]) => ({ id: uid(), title, url })) })),
   ];
 
   function cleanGroups(groups) {
@@ -990,9 +1018,24 @@
     for (const g of Array.isArray(groups) ? groups : []) {
       if (!g || typeof g !== 'object') continue;
       if (g.id === MAIN) { main.items.push(...cleanItems(g.items)); continue; }
-      named.push({ id: freshId(g.id), name: String(g.name || '').trim().slice(0, 40) || '—', items: cleanItems(g.items) });
+      const group = { id: freshId(g.id), name: String(g.name || '').trim().slice(0, 40) || '—', items: cleanItems(g.items) };
+      if (typeof g.key === 'string' && DEFAULT_KEYS.has(g.key)) group.key = g.key;
+      named.push(group);
     }
     return [main, ...named];
+  }
+  // Each setting is checked against its allowed values, so a bad backup or stored value can't break the page
+  const has = (obj, k) => Object.prototype.hasOwnProperty.call(obj, k);
+  function cleanSettings(raw) {
+    const r = raw && typeof raw === 'object' ? raw : {};
+    return {
+      lang: r.lang === 'zh' ? 'zh' : 'en',
+      name: typeof r.name === 'string' ? r.name.trim().slice(0, 24) : DEFAULT_SETTINGS.name,
+      engine: typeof r.engine === 'string' && has(ENGINES, r.engine) ? r.engine : DEFAULT_SETTINGS.engine,
+      theme: ['light', 'dark'].includes(r.theme) ? r.theme : 'system',
+      newTab: r.newTab === true,
+      hintDismissed: r.hintDismissed === true,
+    };
   }
   function readJson(key) {
     try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; }
@@ -1000,23 +1043,19 @@
   function load() {
     const data = readJson(STORE_KEY);
     if (data && Array.isArray(data.groups)) {
-      const settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
+      const settings = cleanSettings(data.settings);
       const groups = cleanGroups(data.groups);
-      return { groups: isOldDefault(groups) ? sampleGroups(settings.lang === 'zh' ? 'zh' : 'en') : groups, settings };
+      return { groups: isOldDefault(groups) ? sampleGroups(settings.lang) : groups, settings };
     }
     // Carry over bookmarks from the first version, unless they are only its untouched samples
     const old = readJson(OLD_KEY);
     if (old && Array.isArray(old.groups)) {
       const items = old.groups.flatMap(g => (g && Array.isArray(g.items) ? g.items : []));
       if (items.length && !items.every(it => V1_SAMPLE_URLS.has(it && it.url))) {
-        const st = old.settings || {};
-        return {
-          groups: cleanGroups(old.groups),
-          settings: { ...DEFAULT_SETTINGS, name: st.name || '', engine: st.engine || 'google', theme: st.theme || 'system', newTab: !!st.newTab, hintDismissed: true },
-        };
+        return { groups: cleanGroups(old.groups), settings: cleanSettings({ ...old.settings, lang: 'en', hintDismissed: true }) };
       }
     }
-    return { groups: sampleGroups(), settings: { ...DEFAULT_SETTINGS } };
+    return { groups: sampleGroups(), settings: cleanSettings(DEFAULT_SETTINGS) };
   }
 
   let state = load();
@@ -1072,10 +1111,13 @@
     ];
     const img = el('img', { alt: '', width: '16', height: '16', draggable: 'false', referrerpolicy: 'no-referrer', decoding: 'async' });
     let stage = 0;
+    // Out of sources: drop the image, bring back the letter tile and stop retrying this host
     const next = () => {
       stage += 1;
-      if (stage < sources.length) img.src = sources[stage];
-      else { img.remove(); if (!iconSrc.has(host)) iconSrc.set(host, ''); }
+      if (stage < sources.length) { img.src = sources[stage]; return; }
+      img.remove();
+      span.classList.remove('has-img');
+      iconSrc.set(host, '');
     };
     img.addEventListener('load', () => {
       const generic = sources.length > 1 && stage === 0 && img.naturalWidth <= 16;
@@ -1283,8 +1325,18 @@
   /* ---------- Bookmark dialog ---------- */
   const linkDialog = $('#link-dialog');
   const groupSel = $('#f-group');
+  const posSel = $('#f-pos');
   let editing = null;
 
+  // Position pickers: the keyboard- and touch-friendly way to reorder (dragging needs a mouse)
+  function fillPositions(sel, total, current) {
+    sel.replaceChildren(...Array.from({ length: total }, (_, i) => {
+      const n = i + 1;
+      const label = total < 2 ? String(n) : n === 1 ? t('posFirst', n) : n === total ? t('posLast', n) : String(n);
+      return el('option', { value: String(n) }, label);
+    }));
+    sel.value = String(Math.max(1, Math.min(current, total)));
+  }
   function fillGroupSelect(selected) {
     groupSel.replaceChildren(
       el('option', { value: MAIN }, t('optNone')),
@@ -1295,13 +1347,23 @@
   }
   function syncNewGroupField() {
     $('#f-newgroup-field').hidden = groupSel.value !== NEW_GROUP;
+    syncPositions();
+  }
+  // Offers 1..n for the chosen group; an edited bookmark keeps its place in its own group, anything else goes last
+  function syncPositions() {
+    const gid = groupSel.value;
+    posSel.disabled = gid === NEW_GROUP;
+    if (gid === NEW_GROUP) { fillPositions(posSel, 1, 1); return; }
+    const g = state.groups.find(x => x.id === gid) || state.groups[0];
+    const total = g.items.filter(x => x.id !== editing.id).length + 1;
+    fillPositions(posSel, total, editing.id && editing.fromGid === gid ? editing.fromIndex + 1 : total);
   }
   function refreshTitlePlaceholder() {
     $('#f-title').placeholder = t('namePh', hostOf(normalizeUrl($('#f-url').value)));
   }
   function openLinkDialog({ id, gid = MAIN, url = '', title = '' } = {}) {
     const found = id ? findItem(id) : null;
-    editing = found ? { id } : { gid };
+    editing = found ? { id, fromGid: found.g.id, fromIndex: found.i } : { gid };
     $('#link-dialog-title').textContent = found ? t('editBookmark') : t('addBookmark');
     $('#f-url').value = found ? found.it.url : url;
     $('#f-title').value = found ? found.it.title : title;
@@ -1336,7 +1398,10 @@
     const newName = $('#f-newgroup').value.trim();
     if (gid === NEW_GROUP && !newName) { showError($('#f-error'), t('errGroupEmpty'), $('#f-newgroup')); return; }
     const title = $('#f-title').value.trim();
+    const pos = parseInt(posSel.value, 10) || Infinity;
     const isEdit = !!editing.id;
+    const id = editing.id || uid();
+    const moved = isEdit && (gid !== editing.fromGid || pos !== editing.fromIndex + 1);
     linkDialog.close();
     mutate(() => {
       if (gid === NEW_GROUP) {
@@ -1345,16 +1410,17 @@
         else { const g = { id: uid(), name: newName, items: [] }; state.groups.push(g); gid = g.id; }
       }
       const target = state.groups.find(g => g.id === gid) || state.groups[0];
+      let item = { id, title, url };
       if (isEdit) {
-        const f = findItem(editing.id);
+        const f = findItem(id);
         if (!f) return;
-        f.it.url = url;
-        f.it.title = title;
-        if (f.g !== target) { f.g.items.splice(f.i, 1); target.items.push(f.it); }
-      } else {
-        target.items.push({ id: uid(), title, url });
+        item = Object.assign(f.it, { title, url });
+        f.g.items.splice(f.i, 1);
       }
-    }, isEdit ? null : t('tAdded', title || hostOf(url)));
+      target.items.splice(Math.min(pos - 1, target.items.length), 0, item);
+    }, !isEdit ? t('tAdded', title || hostOf(url)) : moved ? t('tMoved', title || hostOf(url), pos) : null);
+    // Keep keyboard users where they were
+    requestAnimationFrame(() => { const a = shelf.querySelector(`.link[data-id="${id}"]`); if (a && isEdit) a.focus(); });
   });
 
   $('#link-delete').addEventListener('click', () => {
@@ -1377,6 +1443,9 @@
     $('#g-name').value = g ? g.name : '';
     $('#g-name').placeholder = g ? '' : t('newGroupPh');
     $('#group-ungroup').hidden = !g;
+    const named = namedGroups();
+    $('#g-pos-field').hidden = !g || named.length < 2;
+    if (g) fillPositions($('#g-pos'), named.length, named.indexOf(g) + 1);
     $('#g-error').hidden = true;
     groupDialog.showModal();
     $('#g-name').focus();
@@ -1387,12 +1456,16 @@
     const name = $('#g-name').value.trim();
     if (!name) { showError($('#g-error'), t('errGroupEmpty'), $('#g-name')); return; }
     const gid = editingGroup;
+    const g = gid && state.groups.find(x => x.id === gid);
+    // Named groups sit at state.groups[1..n], so position p is index p
+    const from = g ? state.groups.indexOf(g) : -1;
+    const to = g && !$('#g-pos-field').hidden ? parseInt($('#g-pos').value, 10) || from : from;
     groupDialog.close();
     mutate(() => {
-      const g = gid && state.groups.find(x => x.id === gid);
-      if (g) g.name = name;
-      else state.groups.push({ id: uid(), name, items: [] });
-    }, gid ? null : t('tGroupCreated', name));
+      if (!g) { state.groups.push({ id: uid(), name, items: [] }); return; }
+      if (g.name !== name) { g.name = name; delete g.key; }
+      if (to !== from) { state.groups.splice(from, 1); state.groups.splice(to, 0, g); }
+    }, !g ? t('tGroupCreated', name) : to !== from ? t('tGroupMoved', name, to) : null);
   });
   $('#new-group').addEventListener('click', () => openGroupDialog());
 
@@ -1471,13 +1544,12 @@
   }
   $('#open-settings').addEventListener('click', openSettings);
   $('#settings-form').addEventListener('submit', e => e.preventDefault());
-  // Switching language also translates the default group names, unless they were renamed
+  // Switching language also translates the default groups (those still carrying their key)
   $$('input[name="lang"]').forEach(r => r.addEventListener('change', () => {
     const from = STR[lang()];
     const to = STR[r.value === 'zh' ? 'zh' : 'en'];
     for (const g of namedGroups()) {
-      const key = DEFAULTS.map(([k]) => k).find(k => from[k] === g.name);
-      if (key) g.name = to[key];
+      if (g.key && from[g.key] === g.name) g.name = to[g.key];
     }
     state.settings.lang = r.value;
     save();
@@ -1513,16 +1585,22 @@
     else toast(t('tUnknownFile'));
   });
 
+  // Backups this page can read: app marker -> newest schema version (v1 was exported by the first, Chinese-only page)
+  const BACKUP_APPS = { 'desk-startpage': 2, '案头': 1 };
   function importBackup(text) {
     let data;
     try { data = JSON.parse(text); } catch { toast(t('tBadBackup')); return; }
-    if (!data || !Array.isArray(data.groups)) { toast(t('tNotBackup')); return; }
+    const newest = data && typeof data === 'object' && typeof data.app === 'string' && has(BACKUP_APPS, data.app) ? BACKUP_APPS[data.app] : 0;
+    if (!newest || !Number.isInteger(data.version) || data.version < 1 || data.version > newest || !Array.isArray(data.groups)) {
+      toast(t('tNotBackup'));
+      return;
+    }
     const groups = cleanGroups(data.groups);
     const n = groups.reduce((sum, g) => sum + g.items.length, 0);
     const before = snapshot();
     state.groups = groups;
-    if (data.settings && typeof data.settings === 'object') state.settings = { ...DEFAULT_SETTINGS, ...data.settings };
-    state.settings.hintDismissed = true;
+    const incoming = data.settings && typeof data.settings === 'object' ? data.settings : {};
+    state.settings = cleanSettings({ ...state.settings, ...incoming, hintDismissed: true });
     save();
     applyAll();
     toast(t('tRestored', n), before);
