@@ -1,0 +1,1753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Desk</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%233653D3'/%3E%3Crect x='8' y='19' width='16' height='3' rx='1.5' fill='white'/%3E%3Ccircle cx='16' cy='12.5' r='3.5' fill='white'/%3E%3C/svg%3E">
+<script>
+  // Apply theme, language and time-of-day tint before first paint
+  try {
+    var s = JSON.parse(localStorage.getItem('desk.startpage.v2') || 'null');
+    var st = (s && s.settings) || {};
+    if (st.theme === 'light' || st.theme === 'dark') document.documentElement.dataset.theme = st.theme;
+    if (st.lang === 'zh') document.documentElement.lang = 'zh-CN';
+  } catch (e) {}
+  (function () {
+    var h = new Date().getHours();
+    document.documentElement.dataset.tod = h >= 5 && h < 8 ? 'dawn' : h >= 8 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night';
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Fonts load async so a blocked network never delays the page; system fonts are the fallback -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..500&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<style>
+  /* Layout: one narrow centred column, content left-aligned — clock, date, search, a flat grid of bookmarks. Settings live in the corner. */
+  :root {
+    --bg: #EDEFF2;
+    --surface: #FAFBFC;
+    --fg: #161A22;
+    --muted: #5C6473;
+    --faint: #969DAA;
+    --line: #DCE0E6;
+    --hover: rgba(22, 26, 34, 0.05);
+    --accent: #3653D3;
+    --accent-soft: rgba(54, 83, 211, 0.11);
+    --on-accent: #FFFFFF;
+    --danger: #B23C29;
+    --toast-bg: #1B1F28;
+    --toast-fg: #EEF0F4;
+    --toast-action: #A9B8FF;
+    --track: #CDD2DA;
+    --knob: #FFFFFF;
+    --ico-plate: #FFFFFF;
+    --mono-sat: 34%;
+    --mono-bg: 88%;
+    --mono-fg: 36%;
+    --shadow: 0 1px 2px rgba(18, 24, 38, 0.05), 0 6px 20px rgba(18, 24, 38, 0.05);
+    --shadow-lg: 0 2px 6px rgba(18, 24, 38, 0.06), 0 24px 60px rgba(18, 24, 38, 0.16);
+
+    --wash-dawn: #F4DCCE;
+    --wash-day: #D8E3F3;
+    --wash-dusk: #EDD4DA;
+    --wash-night: #D8D9EE;
+    --wash: var(--wash-day);
+
+    --font-display: "Fraunces", "Songti SC", "Noto Serif SC", Georgia, serif;
+    --font-body: "Geist", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1116;
+      --surface: #161920;
+      --fg: #E7E9EE;
+      --muted: #9AA2AF;
+      --faint: #656D7A;
+      --line: #252932;
+      --hover: rgba(231, 233, 238, 0.055);
+      --accent: #8EA2FF;
+      --accent-soft: rgba(142, 162, 255, 0.15);
+      --on-accent: #0F1116;
+      --danger: #FF8B74;
+      --toast-bg: #E7E9EE;
+      --toast-fg: #161A22;
+      --toast-action: #3653D3;
+      --track: #383D48;
+      --knob: #E7E9EE;
+      --ico-plate: #E4E7EC;
+      --mono-sat: 26%;
+      --mono-bg: 22%;
+      --mono-fg: 76%;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 28px 70px rgba(0, 0, 0, 0.55);
+      --wash-dawn: #261E1D;
+      --wash-day: #131C2A;
+      --wash-dusk: #241A21;
+      --wash-night: #161728;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1116;
+    --surface: #161920;
+    --fg: #E7E9EE;
+    --muted: #9AA2AF;
+    --faint: #656D7A;
+    --line: #252932;
+    --hover: rgba(231, 233, 238, 0.055);
+    --accent: #8EA2FF;
+    --accent-soft: rgba(142, 162, 255, 0.15);
+    --on-accent: #0F1116;
+    --danger: #FF8B74;
+    --toast-bg: #E7E9EE;
+    --toast-fg: #161A22;
+    --toast-action: #3653D3;
+    --track: #383D48;
+    --knob: #E7E9EE;
+    --ico-plate: #E4E7EC;
+    --mono-sat: 26%;
+    --mono-bg: 22%;
+    --mono-fg: 76%;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 28px 70px rgba(0, 0, 0, 0.55);
+    --wash-dawn: #261E1D;
+    --wash-day: #131C2A;
+    --wash-dusk: #241A21;
+    --wash-night: #161728;
+    color-scheme: dark;
+  }
+  :root[data-tod="dawn"] { --wash: var(--wash-dawn); }
+  :root[data-tod="day"] { --wash: var(--wash-day); }
+  :root[data-tod="dusk"] { --wash: var(--wash-dusk); }
+  :root[data-tod="night"] { --wash: var(--wash-night); }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    min-height: 100%;
+    margin: 0;
+    background-color: var(--bg);
+    background-image: radial-gradient(90% 60% at 50% -10%, var(--wash), transparent 70%);
+    background-attachment: fixed;
+    color: var(--fg);
+    font: 15px/1.5 var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  [hidden] { display: none !important; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  svg { display: block; }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding-inline: clamp(16px, 5vw, 32px);
+    padding-block: clamp(56px, 15vh, 150px) 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* Edit and settings buttons, out of the composition */
+  .corner {
+    position: fixed;
+    z-index: 5;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    display: flex;
+    gap: 2px;
+  }
+  .corner .icon-btn { opacity: 0.5; }
+  .corner .icon-btn:hover, .corner .icon-btn:focus-visible, .corner .icon-btn[aria-pressed="true"] { opacity: 1; }
+  .corner .icon-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+
+  /* Clock and date */
+  .top { display: grid; gap: 14px; }
+  .clock {
+    display: block;
+    margin-left: -0.045em;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(72px, 15vw, 128px);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-variation-settings: "opsz" 144;
+  }
+  .clock .colon { color: var(--faint); position: relative; top: -0.06em; margin-inline: 0.01em; }
+  .date { margin: 0; display: flex; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+  .date span + span::before { content: "·"; margin-inline: 0.6em; color: var(--faint); }
+
+  /* Search */
+  .search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 50px;
+    padding: 0 14px 0 15px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .search:focus-within {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .search-ico { flex: none; color: var(--faint); }
+  #q { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; font-size: 16px; }
+  #q::placeholder { color: var(--faint); }
+  .q-hint { flex: none; font: 12px var(--font-mono); color: var(--faint); white-space: nowrap; }
+
+  /* Bookmarks */
+  .shelf { display: flex; flex-direction: column; gap: 30px; }
+  .group { min-width: 0; }
+  .group-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    margin-bottom: 4px;
+    cursor: grab;
+    transition: opacity 0.15s ease;
+  }
+  .group-head:active { cursor: grabbing; }
+  .group-name {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .group-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s ease; }
+  .group:hover .group-actions, .group:focus-within .group-actions { opacity: 1; }
+
+  .grid {
+    list-style: none;
+    margin: 0 -10px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 2px 6px;
+  }
+  .link-row { position: relative; min-width: 0; transition: opacity 0.15s ease; }
+  .link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: 9px;
+    color: var(--fg);
+    text-decoration: none;
+    transition: background-color 0.12s ease;
+  }
+  .link:hover { background: var(--hover); }
+  .link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .link-row:hover .link, .link-row:focus-within .link { padding-right: 36px; }
+  .link-row.is-active .link { background: var(--accent-soft); }
+  .link-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; }
+  .link-title mark { background: var(--accent-soft); color: inherit; border-radius: 3px; box-shadow: 0 0 0 1px var(--accent-soft); }
+  .row-edit { position: absolute; right: 5px; top: 50%; translate: 0 -50%; opacity: 0; }
+  .link-row:hover .row-edit, .row-edit:focus-visible { opacity: 1; }
+  .link-row.is-dragging { opacity: 0.3; }
+
+  .ico {
+    position: relative;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 5px;
+    font: 600 10.5px/1 var(--font-body);
+    background: hsl(var(--h) var(--mono-sat) var(--mono-bg));
+    color: hsl(var(--h) var(--mono-sat) var(--mono-fg));
+  }
+  .ico img { position: absolute; inset: 2px; width: 16px; height: 16px; opacity: 0; transition: opacity 0.2s ease; }
+  .ico.has-img { background: var(--ico-plate); color: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+  .ico.has-img img { opacity: 1; }
+
+  /* The add tile takes space only when it is shown: in an empty group, or in edit mode */
+  .add-row { min-width: 0; display: none; }
+  .group.is-empty .add-row, .is-editing .add-row { display: block; }
+  .add-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--faint);
+    font-size: 14px;
+    text-align: left;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.12s ease, color 0.12s ease;
+  }
+  .add-link .plus-slot { width: 20px; display: grid; place-items: center; flex: none; }
+  .group:hover .add-link, .add-link:focus-visible, .group.is-empty .add-link { opacity: 1; }
+  .group.is-empty .add-row { grid-column: 1 / -1; }
+  .add-link:hover { background: var(--hover); color: var(--fg); }
+  .add-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* Edit mode: every control visible, which is how touch screens reach them */
+  .is-editing .row-edit, .is-editing .add-link, .is-editing .group-actions, .is-editing .new-group { opacity: 1; }
+  .is-editing .link { background: var(--hover); padding-right: 36px; }
+  .is-editing .grid { gap: 6px; }
+
+  .shelf-wrap { display: flex; flex-direction: column; gap: 18px; }
+  .new-group {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: -8px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--faint);
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.12s ease, color 0.12s ease;
+  }
+  .shelf-wrap:hover .new-group, .new-group:focus-visible { opacity: 1; }
+  .new-group:hover { background: var(--hover); color: var(--fg); }
+  .new-group:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .is-filtering .link-row.is-miss { opacity: 0.25; }
+  .is-filtering .group.is-miss .group-head { opacity: 0.4; }
+  .is-filtering .add-row { display: none; }
+  .group.is-dragging { opacity: 0.35; }
+
+  .drop-line { position: fixed; z-index: 30; pointer-events: none; background: var(--accent); border-radius: 2px; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  .hint { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: -14px 0 0; font-size: 12.5px; color: var(--faint); }
+  .hint button { border: 0; padding: 0; background: none; color: var(--muted); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+  .hint button:hover { color: var(--fg); text-decoration-color: currentColor; }
+
+  /* Buttons */
+  .icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    transition: background-color 0.12s ease, color 0.12s ease, opacity 0.15s ease;
+  }
+  .icon-btn:hover { background: var(--hover); color: var(--fg); }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .icon-btn.lg { width: 38px; height: 38px; border-radius: 10px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.12s ease, filter 0.12s ease;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn.primary { background: var(--accent); border-color: transparent; color: var(--on-accent); }
+  .btn.primary:hover { filter: brightness(1.07); }
+  .btn.ghost { background: transparent; border-color: transparent; }
+  .btn.ghost:hover { background: var(--hover); }
+  .btn.danger { color: var(--danger); }
+
+  /* Dialogs */
+  dialog {
+    width: min(420px, calc(100vw - 32px));
+    max-height: calc(100dvh - 48px);
+    padding: 0;
+    border: 0;
+    border-radius: 18px;
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: var(--shadow-lg);
+  }
+  dialog[open] { animation: rise 0.18s ease-out; }
+  dialog::backdrop { background: rgba(10, 12, 18, 0.3); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
+  .dialog-body { display: grid; gap: 16px; padding: 22px 24px 20px; }
+  .dialog-title { margin: 0 0 2px; font-size: 17px; font-weight: 600; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 12.5px; color: var(--muted); }
+  .input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    font-size: 16px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input::placeholder { color: var(--faint); }
+  .input:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  select.input {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 34px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--faint) 50%), linear-gradient(-45deg, transparent 50%, var(--faint) 50%);
+    background-position: right 17px center, right 12px center;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+  .field-error { margin: -6px 0 0; font-size: 13px; color: var(--danger); }
+  .dialog-actions { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .dialog-actions .spacer { flex: 1; }
+  .btn.danger.ghost { margin-left: -10px; }
+
+  /* Settings */
+  #settings-dialog { width: min(480px, calc(100vw - 32px)); }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px 10px 24px; }
+  .sheet-head .dialog-title { margin: 0; }
+  .set-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding: 13px 24px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .set-row .input { flex: 1 1 170px; max-width: 220px; }
+  .seg { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 11px; background: var(--bg); }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label { padding: 5px 11px; border-radius: 8px; font-size: 13px; color: var(--muted); cursor: pointer; transition: background-color 0.12s ease, color 0.12s ease; }
+  .seg label:hover { color: var(--fg); }
+  .seg input:checked + label { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+  .seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .switch {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 24px;
+    margin: 0;
+    border-radius: 999px;
+    background: var(--track);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--knob);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+    transition: translate 0.15s ease, background-color 0.15s ease;
+  }
+  .switch:checked { background: var(--accent); }
+  .switch:checked::after { translate: 16px 0; background: var(--on-accent); }
+  .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .set-block { display: grid; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid var(--line); }
+  .set-title { margin: 0; font-size: 14px; }
+  .set-note { margin: 0; font-size: 13px; color: var(--muted); max-width: 52ch; }
+  .set-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+  .keys { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+  .keys li { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .keys .k { display: flex; gap: 4px; flex: none; }
+  kbd {
+    display: inline-block;
+    min-width: 22px;
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: var(--bg);
+    color: var(--muted);
+    font: 11.5px/1.5 var(--font-mono);
+    text-align: center;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    z-index: 40;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    translate: -50% 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: calc(100vw - 32px);
+    padding: 9px 10px 9px 16px;
+    border-radius: 12px;
+    background: var(--toast-bg);
+    color: var(--toast-fg);
+    box-shadow: var(--shadow-lg);
+    font-size: 14px;
+    animation: toast-in 0.2s ease-out;
+  }
+  .toast-msg { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .toast button { flex: none; border: 0; border-radius: 8px; padding: 4px 10px; background: transparent; color: var(--toast-action); font-weight: 600; }
+  .toast button:hover { background: rgba(127, 127, 127, 0.16); }
+  @keyframes toast-in { from { opacity: 0; translate: -50% 8px; } }
+
+  /* Touch screens: no hover, so controls appear only in edit mode; bigger tap targets */
+  @media (hover: none) {
+    .shelf-wrap:hover .new-group, .group:hover .add-link, .group:hover .group-actions { opacity: 0; }
+    .is-editing .shelf-wrap .new-group, .is-editing .group .add-link, .is-editing .group .group-actions, .group.is-empty .add-link { opacity: 1; }
+    .link, .add-link { padding-block: 11px; }
+    .corner .icon-btn { opacity: 0.75; }
+    .row-edit { width: 34px; height: 34px; }
+  }
+  @media (max-width: 560px) {
+    .page { gap: 32px; padding-block: clamp(64px, 12vh, 120px) 56px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .q-hint { display: none; }
+    .set-row .input { max-width: none; }
+    .dialog-actions { flex-wrap: wrap; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="corner">
+  <button class="icon-btn lg" id="toggle-edit" type="button" aria-pressed="false" aria-label="Edit bookmarks" title="Edit bookmarks">
+    <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.2 3.3l2.5 2.5L6 12.5H3.5V10z"/></svg>
+  </button>
+  <button class="icon-btn lg" id="open-settings" type="button" data-i18n-aria="settings" aria-label="Settings" title="Settings">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5h7M14 5h1M3 13h1M8 13h7"/><circle cx="12" cy="5" r="2"/><circle cx="6" cy="13" r="2"/></svg>
+  </button>
+</div>
+
+<div class="page">
+  <header class="top">
+    <time class="clock" id="clock">00<span class="colon">:</span>00</time>
+    <p class="date" id="date"></p>
+  </header>
+
+  <form class="search" id="search-form" role="search" autocomplete="off">
+    <svg class="search-ico" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.25"/><path d="M12 12l3.5 3.5"/></svg>
+    <input id="q" type="text" placeholder="Search Google or type a URL" data-i18n-aria="searchAria" aria-label="Search or type a URL" spellcheck="false" enterkeyhint="search">
+    <span class="q-hint" id="q-hint" aria-hidden="true"></span>
+  </form>
+
+  <div class="shelf-wrap">
+    <main class="shelf" id="shelf"></main>
+    <button class="new-group" id="new-group" type="button">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>
+      <span data-i18n="newGroup">New group</span>
+    </button>
+  </div>
+
+  <p class="hint" id="hint" hidden>
+    <span data-i18n="tipHint">Tip: use the pencil in the top-right corner to edit bookmarks.</span>
+    <button id="hint-dismiss" type="button" data-i18n="gotIt">Got it</button>
+  </p>
+</div>
+
+<div class="drop-line" id="drop-line" hidden></div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <span class="toast-msg" id="toast-msg"></span>
+  <button type="button" id="toast-undo" data-i18n="undo">Undo</button>
+</div>
+
+<!-- Bookmark -->
+<dialog id="link-dialog" aria-labelledby="link-dialog-title">
+  <form class="dialog-body" id="link-form" novalidate>
+    <h2 class="dialog-title" id="link-dialog-title">Add bookmark</h2>
+    <div class="field">
+      <label for="f-url" data-i18n="fUrl">URL</label>
+      <input class="input" id="f-url" type="text" inputmode="url" placeholder="github.com" spellcheck="false" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="f-title" data-i18n="fName">Name</label>
+      <input class="input" id="f-title" type="text" maxlength="80" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="f-group" data-i18n="fGroup">Group</label>
+      <select class="input" id="f-group"></select>
+    </div>
+    <div class="field" id="f-newgroup-field" hidden>
+      <label for="f-newgroup" data-i18n="fNewGroup">New group name</label>
+      <input class="input" id="f-newgroup" type="text" maxlength="40" data-i18n-ph="newGroupPh" autocomplete="off">
+    </div>
+    <p class="field-error" id="f-error" hidden></p>
+    <div class="dialog-actions">
+      <button class="btn ghost danger" id="link-delete" type="button" data-i18n="del">Delete</button>
+      <span class="spacer"></span>
+      <button class="btn ghost" type="button" data-close data-i18n="cancel">Cancel</button>
+      <button class="btn primary" type="submit" data-i18n="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Group -->
+<dialog id="group-dialog" aria-labelledby="group-dialog-title">
+  <form class="dialog-body" id="group-form" novalidate>
+    <h2 class="dialog-title" id="group-dialog-title">Edit group</h2>
+    <div class="field">
+      <label for="g-name" data-i18n="groupName">Group name</label>
+      <input class="input" id="g-name" type="text" maxlength="40" autocomplete="off">
+    </div>
+    <p class="field-error" id="g-error" hidden></p>
+    <div class="dialog-actions">
+      <button class="btn ghost danger" id="group-ungroup" type="button" data-i18n="ungroup">Ungroup</button>
+      <span class="spacer"></span>
+      <button class="btn ghost" type="button" data-close data-i18n="cancel">Cancel</button>
+      <button class="btn primary" type="submit" data-i18n="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Settings -->
+<dialog id="settings-dialog" aria-labelledby="settings-title">
+  <form id="settings-form" novalidate>
+    <div class="sheet-head">
+      <h2 class="dialog-title" id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="icon-btn" type="button" data-close data-i18n-aria="close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+      </button>
+    </div>
+    <div class="set-row">
+      <span id="lang-label" data-i18n="sLang">Language</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lang-label">
+        <input type="radio" name="lang" id="s-lang-en" value="en"><label for="s-lang-en" lang="en">English</label>
+        <input type="radio" name="lang" id="s-lang-zh" value="zh"><label for="s-lang-zh" lang="zh-CN">中文</label>
+      </div>
+    </div>
+    <div class="set-row">
+      <span id="theme-label" data-i18n="sTheme">Appearance</span>
+      <div class="seg" role="radiogroup" aria-labelledby="theme-label">
+        <input type="radio" name="theme" id="s-theme-system" value="system"><label for="s-theme-system" data-i18n="themeSystem">System</label>
+        <input type="radio" name="theme" id="s-theme-light" value="light"><label for="s-theme-light" data-i18n="themeLight">Light</label>
+        <input type="radio" name="theme" id="s-theme-dark" value="dark"><label for="s-theme-dark" data-i18n="themeDark">Dark</label>
+      </div>
+    </div>
+    <div class="set-row">
+      <label for="s-name" data-i18n="sName">Your name</label>
+      <input class="input" id="s-name" type="text" maxlength="24" data-i18n-ph="sNamePh" autocomplete="off">
+    </div>
+    <div class="set-row">
+      <label for="s-engine" data-i18n="sEngine">Search engine</label>
+      <select class="input" id="s-engine"></select>
+    </div>
+    <div class="set-row">
+      <label for="s-newtab" data-i18n="sNewTab">Open links in a new tab</label>
+      <input class="switch" id="s-newtab" type="checkbox">
+    </div>
+    <div class="set-block">
+      <p class="set-title" data-i18n="sKeys">Shortcuts</p>
+      <ul class="keys" id="keys"></ul>
+    </div>
+    <div class="set-block">
+      <p class="set-title" data-i18n="sData">Data</p>
+      <p class="set-note" data-i18n="sDataNote"></p>
+      <div class="set-actions">
+        <button class="btn" id="export-btn" type="button" data-i18n="sExport">Export backup</button>
+        <button class="btn" id="import-btn" type="button" data-i18n="sImport">Import…</button>
+        <button class="btn ghost danger" id="reset-btn" type="button" data-i18n="sReset">Restore defaults</button>
+      </div>
+      <input id="import-file" type="file" accept=".json,.html,.htm,application/json,text/html" hidden>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+
+  const STORE_KEY = 'desk.startpage.v2';
+  const OLD_KEY = 'antou.startpage.v1';
+  const MAIN = 'main';
+  const NEW_GROUP = '__new';
+  const ENGINES = {
+    google: { en: 'Google', zh: 'Google', url: 'https://www.google.com/search?q=' },
+    bing: { en: 'Bing', zh: '必应', url: 'https://www.bing.com/search?q=' },
+    baidu: { en: 'Baidu', zh: '百度', url: 'https://www.baidu.com/s?wd=' },
+    ddg: { en: 'DuckDuckGo', zh: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
+  };
+  const DEFAULT_SETTINGS = { lang: 'en', name: '', engine: 'google', theme: 'system', newTab: false, hintDismissed: false };
+  const COMMON_TLDS = new Set('com net org io ai dev app cn co me so sh xyz gg tv uk jp kr de fr info edu gov site tech top design cc ly to fm im link page cloud us ca au hk tw sg news blog wiki run'.split(' '));
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  const MOD = isMac ? '⌘' : 'Ctrl ';
+  const s = n => (n === 1 ? '' : 's');
+
+  /* ---------- Strings ---------- */
+  const STR = {
+    en: {
+      title: 'Desk',
+      greet: h => (h >= 5 && h < 12 ? 'Good morning' : h >= 12 && h < 18 ? 'Good afternoon' : 'Good evening'),
+      greetName: (g, n) => `${g}, ${n}`,
+      searchPh: e => `Search ${e} or type a URL`,
+      searchAria: 'Search or type a URL',
+      hintOpen: '↵ open',
+      hintGo: '↵ go',
+      hintSearch: '↵ search',
+      hintPick: n => `↓ ${n} match${n === 1 ? '' : 'es'}`,
+      settings: 'Settings',
+      close: 'Close',
+      addBookmark: 'Add bookmark',
+      editBookmark: 'Edit bookmark',
+      addTile: 'Add',
+      addFirst: 'Add a bookmark, or paste a URL anywhere',
+      addOrDrop: 'Add, or drop a link here',
+      fUrl: 'URL',
+      fName: 'Name',
+      fGroup: 'Group',
+      fNewGroup: 'New group name',
+      newGroupPh: 'e.g. Reading',
+      optNone: 'None',
+      optNew: 'New group…',
+      namePh: host => (host ? `Defaults to ${host}` : 'Defaults to the domain'),
+      del: 'Delete',
+      cancel: 'Cancel',
+      save: 'Save',
+      errUrlEmpty: 'Enter a URL.',
+      errUrlBad: 'That URL doesn’t look right. Try github.com or https://example.com.',
+      errGroupEmpty: 'Enter a group name.',
+      editGroup: 'Edit group',
+      newGroup: 'New group',
+      groupName: 'Group name',
+      ungroup: 'Ungroup',
+      editMode: 'Edit bookmarks',
+      doneEditing: 'Done editing',
+      groupPersonal: 'Personal',
+      groupLearning: 'Learning',
+      groupFun: 'Entertainment',
+      tGroupCreated: g => `Created group “${g}”`,
+      editAria: n => `Edit “${n}”`,
+      addToAria: g => `Add a bookmark to “${g}”`,
+      editGroupAria: g => `Edit group “${g}”`,
+      tAdded: n => `Added “${n}”`,
+      tDeleted: n => `Deleted “${n}”`,
+      tUngrouped: g => `Ungrouped “${g}”. Its bookmarks moved to the top.`,
+      undo: 'Undo',
+      tUndone: 'Undone',
+      tipHint: 'Tip: tap the pencil in the top-right corner to edit bookmarks and groups. On a computer you can also drag to reorder, or paste a URL anywhere to add one.',
+      gotIt: 'Got it',
+      sLang: 'Language',
+      sTheme: 'Appearance',
+      themeSystem: 'System',
+      themeLight: 'Light',
+      themeDark: 'Dark',
+      sName: 'Your name',
+      sNamePh: 'Shown in the greeting',
+      sEngine: 'Search engine',
+      sNewTab: 'Open links in a new tab',
+      sKeys: 'Shortcuts',
+      keys: [
+        [[], 'Start typing anywhere to search'],
+        [['/'], 'Focus the search box'],
+        [['↑', '↓'], 'Pick a matching bookmark'],
+        [[MOD + '↵'], 'Open in a new tab'],
+        [[MOD + 'V'], 'Paste a URL on the page to add it'],
+      ],
+      sData: 'Data',
+      sDataNote: 'Bookmarks are saved in this browser only. Export a backup before you switch browsers or clear site data.',
+      sExport: 'Export backup',
+      sImport: 'Import…',
+      sReset: 'Restore defaults',
+      tExported: n => `Exported ${n} bookmark${s(n)}`,
+      tImported: n => `Imported ${n} bookmark${s(n)}`,
+      tRestored: n => `Restored backup with ${n} bookmark${s(n)}`,
+      tUnknownFile: 'Couldn’t read that file. Choose a .json backup from this page, or a bookmarks .html file exported from your browser.',
+      tBadBackup: 'That backup file is damaged and can’t be read.',
+      tNotBackup: 'That JSON file isn’t a backup from this page.',
+      tNothingNew: 'No new bookmarks in that file. Links you already have are skipped.',
+      tStorage: 'This browser is blocking local storage, so changes won’t survive a reload. Export a backup from Settings.',
+      tReset: 'Restored the default bookmarks',
+      importedFolder: 'Imported',
+    },
+    zh: {
+      title: '案头',
+      greet: h => (h < 5 ? '夜深了' : h < 11 ? '早上好' : h < 13 ? '中午好' : h < 18 ? '下午好' : '晚上好'),
+      greetName: (g, n) => `${g}，${n}`,
+      searchPh: e => `用 ${e} 搜索，或输入网址`,
+      searchAria: '搜索或输入网址',
+      hintOpen: '↵ 打开',
+      hintGo: '↵ 前往',
+      hintSearch: '↵ 搜索',
+      hintPick: n => `↓ ${n} 个书签`,
+      settings: '设置',
+      close: '关闭',
+      addBookmark: '添加书签',
+      editBookmark: '编辑书签',
+      addTile: '添加',
+      addFirst: '添加书签，或在页面任意处粘贴网址',
+      addOrDrop: '添加，或把链接拖到这里',
+      fUrl: '网址',
+      fName: '名称',
+      fGroup: '分组',
+      fNewGroup: '新分组名称',
+      newGroupPh: '例如：阅读',
+      optNone: '不分组',
+      optNew: '新建分组…',
+      namePh: host => (host ? `留空则显示 ${host}` : '留空则显示域名'),
+      del: '删除',
+      cancel: '取消',
+      save: '保存',
+      errUrlEmpty: '请填写网址。',
+      errUrlBad: '这个网址无法识别，请检查拼写，例如 github.com 或 https://example.com。',
+      errGroupEmpty: '请填写分组名称。',
+      editGroup: '编辑分组',
+      newGroup: '新建分组',
+      groupName: '分组名称',
+      ungroup: '取消分组',
+      editMode: '编辑书签',
+      doneEditing: '完成编辑',
+      groupPersonal: '个人',
+      groupLearning: '学习',
+      groupFun: '娱乐',
+      tGroupCreated: g => `已新建分组「${g}」`,
+      editAria: n => `编辑「${n}」`,
+      addToAria: g => `添加书签到「${g}」`,
+      editGroupAria: g => `编辑分组「${g}」`,
+      tAdded: n => `已添加「${n}」`,
+      tDeleted: n => `已删除「${n}」`,
+      tUngrouped: g => `已取消分组「${g}」，其中的书签移到了最上方。`,
+      undo: '撤销',
+      tUndone: '已撤销',
+      tipHint: '提示：点右上角的铅笔即可编辑书签和分组。在电脑上还可以拖动排序，或在页面任意处粘贴网址来添加。',
+      gotIt: '知道了',
+      sLang: '语言',
+      sTheme: '外观',
+      themeSystem: '跟随系统',
+      themeLight: '浅色',
+      themeDark: '深色',
+      sName: '称呼',
+      sNamePh: '用于问候语，可留空',
+      sEngine: '搜索引擎',
+      sNewTab: '在新标签页打开链接',
+      sKeys: '快捷键',
+      keys: [
+        [[], '在页面任意处直接打字即可搜索'],
+        [['/'], '聚焦搜索框'],
+        [['↑', '↓'], '选择匹配的书签'],
+        [[MOD + '↵'], '在新标签页打开'],
+        [[MOD + 'V'], '在页面上粘贴网址即可添加'],
+      ],
+      sData: '数据',
+      sDataNote: '书签只保存在当前浏览器里。换浏览器或清除网站数据之前，记得先导出一份备份。',
+      sExport: '导出备份',
+      sImport: '导入…',
+      sReset: '恢复默认书签',
+      tExported: n => `已导出 ${n} 个书签`,
+      tImported: n => `已导入 ${n} 个书签`,
+      tRestored: n => `已恢复备份，共 ${n} 个书签`,
+      tUnknownFile: '无法识别这个文件。请选择本页导出的 .json 备份，或浏览器导出的书签 .html 文件。',
+      tBadBackup: '备份文件已损坏，无法读取。',
+      tNotBackup: '这个 JSON 文件不是本页导出的备份。',
+      tNothingNew: '文件里没有新书签，已存在的网址会自动跳过。',
+      tStorage: '浏览器不允许本地存储，刷新后改动会丢失。请在设置里导出备份。',
+      tReset: '已恢复默认书签',
+      importedFolder: '导入的书签',
+    },
+  };
+
+  const $ = (sel, r = document) => r.querySelector(sel);
+  const $$ = (sel, r = document) => Array.from(r.querySelectorAll(sel));
+  const uid = () => Math.random().toString(36).slice(2, 10);
+
+  function el(tag, attrs = {}, ...children) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') n.className = v;
+      else if (k === 'dataset') Object.assign(n.dataset, v);
+      else if (k === 'style') n.style.cssText = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? '' : v);
+    }
+    n.append(...children.flat().filter(c => c != null && c !== false));
+    return n;
+  }
+
+  const ICONS = {
+    plus: '<path d="M8 3.5v9M3.5 8h9"/>',
+    pencil: '<path d="M10.2 3.3l2.5 2.5L6 12.5H3.5V10z"/>',
+  };
+  function icon(name, size = 14) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+    return tpl.content.firstElementChild;
+  }
+  function iconBtn(name, label, onclick, cls = '') {
+    return el('button', { class: `icon-btn ${cls}`.trim(), type: 'button', 'aria-label': label, title: label, onclick }, icon(name));
+  }
+
+  /* ---------- URL helpers ---------- */
+  function normalizeUrl(raw) {
+    let v = String(raw || '').trim();
+    if (!v) return '';
+    if (!/^(https?|ftp|file):\/\//i.test(v)) {
+      v = (/^(localhost|127\.|10\.|192\.168\.|\[::1\])/i.test(v) ? 'http://' : 'https://') + v.replace(/^\/+/, '');
+    }
+    try {
+      const u = new URL(v);
+      if (!/^(https?|ftp|file):$/.test(u.protocol)) return '';
+      if (/^https?:$/.test(u.protocol) && !u.hostname) return '';
+      return u.href;
+    } catch { return ''; }
+  }
+  function looksLikeUrl(text) {
+    const v = text.trim();
+    if (!v || /\s/.test(v)) return false;
+    if (/^(https?|ftp|file):\/\//i.test(v)) return true;
+    if (/^(localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/.*)?$/i.test(v)) return true;
+    const m = v.match(/^(?:www\.)?((?:[a-z\d-]+\.)+([a-z]{2,24}))(:\d+)?([/?#].*)?$/i);
+    if (!m) return false;
+    return /^www\./i.test(v) || !!m[4] || COMMON_TLDS.has(m[2].toLowerCase());
+  }
+  function hostOf(url) {
+    try { return new URL(url).host.replace(/^www\./, ''); } catch { return ''; }
+  }
+  function hue(str) {
+    let h = 7;
+    for (const c of str) h = (h * 31 + c.codePointAt(0)) >>> 0;
+    return h % 360;
+  }
+
+  /* ---------- Data ---------- */
+  // groups[0] is always the unnamed top-level list (hidden while empty); the rest are named groups.
+  const DEFAULTS = [
+    ['groupPersonal', [
+      ['The Kiseki Log', 'https://ki-seki.github.io/'],
+      ['The Kiseki Gallery', 'https://song-shichao.github.io/'],
+      ['Ouroboros', 'https://ki-seki.github.io/ouroboros/'],
+    ]],
+    ['groupLearning', [
+      ['Hypothesis Testing Guide', 'https://ki-seki.github.io/features/hypothesis-testing-guide/?lang=en'],
+      ['HoDoKu Techniques', 'https://ki-seki.github.io/hodoku-translation/'],
+      ['科学空间', 'https://spaces.ac.cn/'],
+    ]],
+    ['groupFun', [
+      ['FMHY', 'https://fmhy.net/'],
+      ['4K影视', 'https://www.4kvm.net/'],
+      ['Murdoku', 'https://murdoku.com/'],
+    ]],
+  ];
+  // Earlier default layouts: [allowed group names, URLs in order]. A browser still holding one of them
+  // exactly as shipped (nothing added, removed, renamed or reordered) is upgraded to the current defaults.
+  const OLD_LAYOUTS = [
+    [
+      [['My sites', '我的站点'], ['https://ki-seki.github.io/ouroboros/', 'https://ki-seki.github.io/hodoku-translation/', 'https://ki-seki.github.io/features/hypothesis-testing-guide/', 'https://song-shichao.github.io/']],
+      [['Around the web', '常去'], ['https://fmhy.net/', 'https://spaces.ac.cn/', 'https://www.4kvm.net/', 'https://murdoku.com/']],
+    ],
+    [
+      [['Personal', '个人'], ['https://song-shichao.github.io/', 'https://ki-seki.github.io/ouroboros/']],
+      [['Learning', '学习'], ['https://ki-seki.github.io/features/hypothesis-testing-guide/?lang=en', 'https://ki-seki.github.io/hodoku-translation/', 'https://spaces.ac.cn/']],
+      [['Entertainment', '娱乐'], ['https://fmhy.net/', 'https://www.4kvm.net/', 'https://murdoku.com/']],
+    ],
+  ];
+  const isOldDefault = groups => {
+    if (groups[0].items.length) return false;
+    const named = groups.slice(1);
+    return OLD_LAYOUTS.some(layout => layout.length === named.length && layout.every(([names, urls], i) =>
+      names.includes(named[i].name) && urls.length === named[i].items.length && urls.every((u, j) => named[i].items[j].url === u)));
+  };
+  const V1_SAMPLE_URLS = new Set(['https://mail.google.com/', 'https://calendar.google.com/', 'https://github.com/', 'https://www.youtube.com/', 'https://claude.ai/', 'https://www.canva.com/', 'https://www.notion.so/', 'https://www.figma.com/', 'https://news.ycombinator.com/', 'https://arxiv.org/', 'https://sspai.com/', 'https://www.theverge.com/', 'https://translate.google.com/', 'https://huggingface.co/', 'https://excalidraw.com/', 'https://regex101.com/']);
+
+  const sampleGroups = (L = 'en') => [
+    { id: MAIN, name: '', items: [] },
+    ...DEFAULTS.map(([nameKey, items]) => ({ id: uid(), name: STR[L][nameKey], items: items.map(([title, url]) => ({ id: uid(), title, url })) })),
+  ];
+
+  function cleanGroups(groups) {
+    const seen = new Set([MAIN]);
+    const freshId = id => { id = String(id || ''); if (!id || seen.has(id)) id = uid(); seen.add(id); return id; };
+    const cleanItems = arr => (Array.isArray(arr) ? arr : [])
+      .filter(it => it && typeof it === 'object')
+      .map(it => ({ id: freshId(it.id), title: String(it.title || '').trim().slice(0, 80), url: normalizeUrl(it.url) }))
+      .filter(it => it.url);
+    const main = { id: MAIN, name: '', items: [] };
+    const named = [];
+    for (const g of Array.isArray(groups) ? groups : []) {
+      if (!g || typeof g !== 'object') continue;
+      if (g.id === MAIN) { main.items.push(...cleanItems(g.items)); continue; }
+      named.push({ id: freshId(g.id), name: String(g.name || '').trim().slice(0, 40) || '—', items: cleanItems(g.items) });
+    }
+    return [main, ...named];
+  }
+  function readJson(key) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; }
+  }
+  function load() {
+    const data = readJson(STORE_KEY);
+    if (data && Array.isArray(data.groups)) {
+      const settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
+      const groups = cleanGroups(data.groups);
+      return { groups: isOldDefault(groups) ? sampleGroups(settings.lang === 'zh' ? 'zh' : 'en') : groups, settings };
+    }
+    // Carry over bookmarks from the first version, unless they are only its untouched samples
+    const old = readJson(OLD_KEY);
+    if (old && Array.isArray(old.groups)) {
+      const items = old.groups.flatMap(g => (g && Array.isArray(g.items) ? g.items : []));
+      if (items.length && !items.every(it => V1_SAMPLE_URLS.has(it && it.url))) {
+        const st = old.settings || {};
+        return {
+          groups: cleanGroups(old.groups),
+          settings: { ...DEFAULT_SETTINGS, name: st.name || '', engine: st.engine || 'google', theme: st.theme || 'system', newTab: !!st.newTab, hintDismissed: true },
+        };
+      }
+    }
+    return { groups: sampleGroups(), settings: { ...DEFAULT_SETTINGS } };
+  }
+
+  let state = load();
+  const lang = () => (state.settings.lang === 'zh' ? 'zh' : 'en');
+  function t(key, ...args) {
+    const v = STR[lang()][key] ?? STR.en[key];
+    return typeof v === 'function' ? v(...args) : v;
+  }
+  const engine = () => ENGINES[state.settings.engine] || ENGINES.google;
+
+  let storageWarned = false;
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    catch { if (!storageWarned) { storageWarned = true; toast(t('tStorage')); } }
+  }
+  const snapshot = () => JSON.stringify(state);
+  function restore(snap) {
+    state = JSON.parse(snap);
+    save();
+    applyAll();
+  }
+  function mutate(fn, message) {
+    const before = snapshot();
+    state.settings.hintDismissed = true;
+    fn();
+    save();
+    render();
+    if (message) toast(message, before);
+  }
+  function findItem(id) {
+    for (const g of state.groups) {
+      const i = g.items.findIndex(x => x.id === id);
+      if (i >= 0) return { g, i, it: g.items[i] };
+    }
+    return null;
+  }
+  const displayName = it => it.title || hostOf(it.url);
+  const namedGroups = () => state.groups.filter(g => g.id !== MAIN);
+
+  /* ---------- Render ---------- */
+  const shelf = $('#shelf');
+  let itemIndex = new Map();
+
+  // Google's icon service answers unknown sites with a generic 16px globe, so a 16px answer
+  // falls through to the site's own /favicon.ico, and then to the letter tile.
+  const iconSrc = new Map(); // host -> working URL, or '' when none was found
+  function iconEl(url, host, name) {
+    const span = el('span', { class: 'ico', style: `--h:${hue(host || name)}`, 'aria-hidden': 'true' }, [...(name || host || '?')][0].toUpperCase());
+    if (!host || !/^https?:/.test(url) || iconSrc.get(host) === '') return span;
+    const sources = iconSrc.has(host) ? [iconSrc.get(host)] : [
+      `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`,
+      `${new URL(url).origin}/favicon.ico`,
+    ];
+    const img = el('img', { alt: '', width: '16', height: '16', draggable: 'false', referrerpolicy: 'no-referrer', decoding: 'async' });
+    let stage = 0;
+    const next = () => {
+      stage += 1;
+      if (stage < sources.length) img.src = sources[stage];
+      else { img.remove(); if (!iconSrc.has(host)) iconSrc.set(host, ''); }
+    };
+    img.addEventListener('load', () => {
+      const generic = sources.length > 1 && stage === 0 && img.naturalWidth <= 16;
+      if (!img.naturalWidth || generic) { next(); return; }
+      span.classList.add('has-img');
+      iconSrc.set(host, sources[stage]);
+    });
+    img.addEventListener('error', next);
+    if (iconSrc.has(host)) span.classList.add('has-img');
+    img.src = sources[0];
+    span.append(img);
+    return span;
+  }
+
+  function linkRow(it) {
+    const host = hostOf(it.url);
+    const name = displayName(it);
+    const nt = state.settings.newTab;
+    const a = el('a', {
+      class: 'link', href: it.url, dataset: { id: it.id }, title: host && host !== name ? `${name}\n${host}` : name,
+      target: nt ? '_blank' : null, rel: nt ? 'noopener' : null,
+    }, iconEl(it.url, host, name), el('span', { class: 'link-title' }, name));
+    return el('li', { class: 'link-row', dataset: { id: it.id } },
+      a, iconBtn('pencil', t('editAria', name), () => openLinkDialog({ id: it.id }), 'row-edit'));
+  }
+
+  function groupEl(g) {
+    const isMain = g.id === MAIN;
+    const empty = !g.items.length;
+    const addLabel = empty ? (isMain ? t('addFirst') : t('addOrDrop')) : t('addTile');
+    return el('section', { class: 'group' + (empty ? ' is-empty' : ''), dataset: { gid: g.id }, 'aria-label': isMain ? null : g.name },
+      isMain ? null : el('header', { class: 'group-head', draggable: 'true' },
+        el('h2', { class: 'group-name' }, g.name),
+        el('span', { class: 'group-actions' },
+          iconBtn('plus', t('addToAria', g.name), () => openLinkDialog({ gid: g.id })),
+          iconBtn('pencil', t('editGroupAria', g.name), () => openGroupDialog(g.id)))),
+      el('ul', { class: 'grid' },
+        g.items.map(linkRow),
+        el('li', { class: 'add-row' },
+          el('button', { class: 'add-link', type: 'button', title: t('addBookmark'), onclick: () => openLinkDialog({ gid: g.id }) },
+            el('span', { class: 'plus-slot' }, icon('plus', 13)), addLabel))));
+  }
+
+  function render() {
+    itemIndex = new Map();
+    state.groups.forEach(g => g.items.forEach(it => itemIndex.set(it.id, it)));
+    // Hide an empty top-level list once named groups exist; it reappears when needed
+    const visible = state.groups.filter(g => g.id !== MAIN || g.items.length || state.groups.length === 1);
+    shelf.replaceChildren(...visible.map(groupEl));
+    $('#hint').hidden = !!state.settings.hintDismissed;
+    applyFilter();
+  }
+
+  /* ---------- Clock and date ---------- */
+  const pad = n => String(n).padStart(2, '0');
+  const CN_NUM = '一二三四五六七八九十';
+  function lunarDay(n) {
+    if (n <= 10) return '初' + CN_NUM[n - 1];
+    if (n < 20) return '十' + CN_NUM[n - 11];
+    if (n === 20) return '二十';
+    if (n < 30) return '廿' + CN_NUM[n - 21];
+    return '三十';
+  }
+  let lunarFmt = null;
+  try { lunarFmt = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { month: 'long', day: 'numeric' }); } catch {}
+  function lunar(d) {
+    if (!lunarFmt) return '';
+    try {
+      const parts = lunarFmt.formatToParts(d);
+      const month = (parts.find(p => p.type === 'month') || {}).value || '';
+      const day = parseInt((parts.find(p => p.type === 'day') || {}).value, 10);
+      if (!month || !day || !/月$/.test(month) || /\d/.test(month)) return '';
+      return '农历' + month + lunarDay(day);
+    } catch { return ''; }
+  }
+
+  let lastMinute = -1;
+  function tick() {
+    const d = new Date();
+    const key = d.getHours() * 60 + d.getMinutes();
+    if (key === lastMinute) return;
+    lastMinute = key;
+    const clock = $('#clock');
+    clock.innerHTML = `${pad(d.getHours())}<span class="colon">:</span>${pad(d.getMinutes())}`;
+    clock.setAttribute('datetime', `${pad(d.getHours())}:${pad(d.getMinutes())}`);
+
+    const name = (state.settings.name || '').trim();
+    const greet = t('greet', d.getHours());
+    const parts = [name ? t('greetName', greet, name) : greet];
+    if (lang() === 'zh') {
+      parts.push(`${d.getMonth() + 1}月${d.getDate()}日 星期${'日一二三四五六'[d.getDay()]}`, lunar(d));
+    } else {
+      parts.push(d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+    }
+    $('#date').replaceChildren(...parts.filter(Boolean).map(p => el('span', {}, p)));
+    document.documentElement.dataset.tod = d.getHours() >= 5 && d.getHours() < 8 ? 'dawn' : d.getHours() >= 8 && d.getHours() < 17 ? 'day' : d.getHours() >= 17 && d.getHours() < 20 ? 'dusk' : 'night';
+  }
+
+  /* ---------- Search and filter ---------- */
+  const q = $('#q');
+  let matches = [];
+  let active = -1;
+
+  function setTitle(span, name, term) {
+    const i = term ? name.toLowerCase().indexOf(term) : -1;
+    if (i < 0) { span.textContent = name; return; }
+    span.replaceChildren(name.slice(0, i), el('mark', {}, name.slice(i, i + term.length)), name.slice(i + term.length));
+  }
+
+  function applyFilter() {
+    const term = q.value.trim().toLowerCase();
+    document.body.classList.toggle('is-filtering', !!term);
+    matches = [];
+    for (const g of $$('.group', shelf)) {
+      let hits = 0;
+      for (const row of $$('.link-row', g)) {
+        const it = itemIndex.get(row.dataset.id);
+        if (!it) continue;
+        const name = displayName(it);
+        const hit = !term || name.toLowerCase().includes(term) || hostOf(it.url).includes(term);
+        row.classList.toggle('is-miss', !hit);
+        setTitle($('.link-title', row), name, hit ? term : '');
+        if (hit) { matches.push(row); hits++; }
+      }
+      g.classList.toggle('is-miss', !!term && !hits);
+    }
+    active = -1;
+    paintActive();
+  }
+
+  function paintActive() {
+    $$('.link-row.is-active', shelf).forEach(r => r.classList.remove('is-active'));
+    const row = matches[active];
+    if (row) { row.classList.add('is-active'); row.scrollIntoView({ block: 'nearest' }); }
+    const text = q.value.trim();
+    const hint = [];
+    if (row) hint.push(t('hintOpen'));
+    else if (text) {
+      if (matches.length) hint.push(t('hintPick', matches.length));
+      hint.push(looksLikeUrl(text) ? t('hintGo') : t('hintSearch'));
+    }
+    $('#q-hint').textContent = hint.join('   ');
+  }
+
+  function openUrl(url, newTab) {
+    if (newTab) window.open(url, '_blank', 'noopener');
+    else location.href = url;
+  }
+  function activate(e) {
+    const newTab = e.metaKey || e.ctrlKey || state.settings.newTab;
+    const row = matches[active];
+    if (row) { openUrl($('a', row).href, newTab); return; }
+    const text = q.value.trim();
+    if (!text) return;
+    openUrl(looksLikeUrl(text) ? normalizeUrl(text) : engine().url + encodeURIComponent(text), newTab);
+  }
+
+  q.addEventListener('input', applyFilter);
+  q.addEventListener('keydown', e => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') { e.preventDefault(); activate(e); }
+    else if (e.key === 'ArrowDown') { if (!matches.length) return; e.preventDefault(); active = Math.min(active + 1, matches.length - 1); paintActive(); }
+    else if (e.key === 'ArrowUp') { if (!matches.length) return; e.preventDefault(); active = Math.max(active - 1, -1); paintActive(); }
+    else if (e.key === 'Escape') {
+      e.preventDefault();
+      if (active >= 0) { active = -1; paintActive(); }
+      else if (q.value) { q.value = ''; applyFilter(); }
+      else q.blur();
+    }
+  });
+  q.addEventListener('blur', () => { if (active >= 0) { active = -1; paintActive(); } });
+  $('#search-form').addEventListener('submit', e => { e.preventDefault(); activate(e); });
+
+  /* ---------- Global keys and paste ---------- */
+  const isTyping = n => n instanceof Element && n.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]') !== null;
+  const dialogOpen = () => !!document.querySelector('dialog[open]');
+  function focusSearch(selectAll) {
+    q.focus();
+    const n = q.value.length;
+    if (selectAll) q.select(); else q.setSelectionRange(n, n);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (dialogOpen() || isTyping(e.target)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) {
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); focusSearch(true); }
+      return;
+    }
+    if (e.key === '/') { e.preventDefault(); focusSearch(true); return; }
+    if (e.key === 'ArrowDown' && document.activeElement === document.body && matches.length) {
+      e.preventDefault(); focusSearch(); active = 0; paintActive(); return;
+    }
+    if (e.key.length === 1 && e.key !== ' ') focusSearch(false);
+  });
+
+  document.addEventListener('paste', e => {
+    if (dialogOpen() || isTyping(e.target)) return;
+    const text = ((e.clipboardData && e.clipboardData.getData('text')) || '').trim();
+    if (!text) return;
+    e.preventDefault();
+    if (looksLikeUrl(text)) openLinkDialog({ url: normalizeUrl(text) });
+    else { focusSearch(); q.value = text; applyFilter(); }
+  });
+
+  /* ---------- Bookmark dialog ---------- */
+  const linkDialog = $('#link-dialog');
+  const groupSel = $('#f-group');
+  let editing = null;
+
+  function fillGroupSelect(selected) {
+    groupSel.replaceChildren(
+      el('option', { value: MAIN }, t('optNone')),
+      ...namedGroups().map(g => el('option', { value: g.id }, g.name)),
+      el('option', { value: NEW_GROUP }, t('optNew')));
+    groupSel.value = state.groups.some(g => g.id === selected) ? selected : MAIN;
+    syncNewGroupField();
+  }
+  function syncNewGroupField() {
+    $('#f-newgroup-field').hidden = groupSel.value !== NEW_GROUP;
+  }
+  function refreshTitlePlaceholder() {
+    $('#f-title').placeholder = t('namePh', hostOf(normalizeUrl($('#f-url').value)));
+  }
+  function openLinkDialog({ id, gid = MAIN, url = '', title = '' } = {}) {
+    const found = id ? findItem(id) : null;
+    editing = found ? { id } : { gid };
+    $('#link-dialog-title').textContent = found ? t('editBookmark') : t('addBookmark');
+    $('#f-url').value = found ? found.it.url : url;
+    $('#f-title').value = found ? found.it.title : title;
+    $('#f-newgroup').value = '';
+    fillGroupSelect(found ? found.g.id : gid);
+    $('#link-delete').hidden = !found;
+    $('#f-error').hidden = true;
+    refreshTitlePlaceholder();
+    linkDialog.showModal();
+    const target = found || url ? $('#f-title') : $('#f-url');
+    target.focus();
+    target.select();
+  }
+  function showError(node, msg, focusEl) {
+    node.textContent = msg;
+    node.hidden = false;
+    focusEl.focus();
+  }
+  $('#f-url').addEventListener('input', () => { $('#f-error').hidden = true; refreshTitlePlaceholder(); });
+  groupSel.addEventListener('change', () => {
+    syncNewGroupField();
+    $('#f-error').hidden = true;
+    if (groupSel.value === NEW_GROUP) $('#f-newgroup').focus();
+  });
+
+  $('#link-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const rawUrl = $('#f-url').value.trim();
+    const url = normalizeUrl(rawUrl);
+    if (!url) { showError($('#f-error'), rawUrl ? t('errUrlBad') : t('errUrlEmpty'), $('#f-url')); return; }
+    let gid = groupSel.value;
+    const newName = $('#f-newgroup').value.trim();
+    if (gid === NEW_GROUP && !newName) { showError($('#f-error'), t('errGroupEmpty'), $('#f-newgroup')); return; }
+    const title = $('#f-title').value.trim();
+    const isEdit = !!editing.id;
+    linkDialog.close();
+    mutate(() => {
+      if (gid === NEW_GROUP) {
+        const same = namedGroups().find(g => g.name === newName);
+        if (same) gid = same.id;
+        else { const g = { id: uid(), name: newName, items: [] }; state.groups.push(g); gid = g.id; }
+      }
+      const target = state.groups.find(g => g.id === gid) || state.groups[0];
+      if (isEdit) {
+        const f = findItem(editing.id);
+        if (!f) return;
+        f.it.url = url;
+        f.it.title = title;
+        if (f.g !== target) { f.g.items.splice(f.i, 1); target.items.push(f.it); }
+      } else {
+        target.items.push({ id: uid(), title, url });
+      }
+    }, isEdit ? null : t('tAdded', title || hostOf(url)));
+  });
+
+  $('#link-delete').addEventListener('click', () => {
+    const f = editing && editing.id ? findItem(editing.id) : null;
+    linkDialog.close();
+    if (!f) return;
+    mutate(() => f.g.items.splice(f.i, 1), t('tDeleted', displayName(f.it)));
+  });
+
+  /* ---------- Group dialog ---------- */
+  const groupDialog = $('#group-dialog');
+  let editingGroup = null;
+
+  // Called with a group id to rename or ungroup it, or with nothing to create a new group
+  function openGroupDialog(gid) {
+    const g = gid ? state.groups.find(x => x.id === gid && x.id !== MAIN) : null;
+    if (gid && !g) return;
+    editingGroup = g ? g.id : null;
+    $('#group-dialog-title').textContent = g ? t('editGroup') : t('newGroup');
+    $('#g-name').value = g ? g.name : '';
+    $('#g-name').placeholder = g ? '' : t('newGroupPh');
+    $('#group-ungroup').hidden = !g;
+    $('#g-error').hidden = true;
+    groupDialog.showModal();
+    $('#g-name').focus();
+    $('#g-name').select();
+  }
+  $('#group-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('#g-name').value.trim();
+    if (!name) { showError($('#g-error'), t('errGroupEmpty'), $('#g-name')); return; }
+    const gid = editingGroup;
+    groupDialog.close();
+    mutate(() => {
+      const g = gid && state.groups.find(x => x.id === gid);
+      if (g) g.name = name;
+      else state.groups.push({ id: uid(), name, items: [] });
+    }, gid ? null : t('tGroupCreated', name));
+  });
+  $('#new-group').addEventListener('click', () => openGroupDialog());
+
+  /* ---------- Edit mode: shows every control, and a tap on a bookmark opens its editor ---------- */
+  let editMode = false;
+  function setEditMode(on) {
+    editMode = on;
+    document.body.classList.toggle('is-editing', on);
+    const btn = $('#toggle-edit');
+    btn.setAttribute('aria-pressed', String(on));
+    const label = on ? t('doneEditing') : t('editMode');
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  }
+  $('#toggle-edit').addEventListener('click', () => setEditMode(!editMode));
+  shelf.addEventListener('click', e => {
+    if (!editMode) return;
+    const a = e.target instanceof Element && e.target.closest('.link');
+    if (!a) return;
+    e.preventDefault();
+    openLinkDialog({ id: a.dataset.id });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && editMode && !dialogOpen() && !isTyping(e.target)) setEditMode(false);
+  });
+  $('#group-ungroup').addEventListener('click', () => {
+    const i = state.groups.findIndex(x => x.id === editingGroup);
+    groupDialog.close();
+    if (i <= 0) return;
+    const g = state.groups[i];
+    mutate(() => {
+      state.groups[0].items.push(...g.items);
+      state.groups.splice(i, 1);
+    }, t('tUngrouped', g.name));
+  });
+
+  /* ---------- Settings ---------- */
+  const settingsDialog = $('#settings-dialog');
+
+  function fillEngineOptions() {
+    const sel = $('#s-engine');
+    sel.replaceChildren(...Object.entries(ENGINES).map(([k, v]) => el('option', { value: k }, v[lang()])));
+    sel.value = ENGINES[state.settings.engine] ? state.settings.engine : 'google';
+  }
+  function renderKeys() {
+    $('#keys').replaceChildren(...t('keys').map(([ks, desc]) =>
+      el('li', {}, el('span', {}, desc), el('span', { class: 'k' }, ks.map(k => el('kbd', {}, k))))));
+  }
+  function applyAll() {
+    const th = state.settings.theme;
+    if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th;
+    else delete document.documentElement.dataset.theme;
+
+    document.documentElement.lang = lang() === 'zh' ? 'zh-CN' : 'en';
+    document.title = t('title');
+    $$('[data-i18n]').forEach(n => { n.textContent = t(n.dataset.i18n); });
+    $$('[data-i18n-ph]').forEach(n => { n.placeholder = t(n.dataset.i18nPh); });
+    $$('[data-i18n-aria]').forEach(n => { const v = t(n.dataset.i18nAria); n.setAttribute('aria-label', v); n.title = v; });
+    q.placeholder = t('searchPh', engine()[lang()]);
+    fillEngineOptions();
+    renderKeys();
+    setEditMode(editMode);
+    lastMinute = -1;
+    tick();
+    render();
+  }
+
+  function openSettings() {
+    $(`#s-lang-${lang()}`).checked = true;
+    const th = ['light', 'dark'].includes(state.settings.theme) ? state.settings.theme : 'system';
+    $(`#s-theme-${th}`).checked = true;
+    $('#s-name').value = state.settings.name || '';
+    fillEngineOptions();
+    $('#s-newtab').checked = !!state.settings.newTab;
+    settingsDialog.showModal();
+  }
+  $('#open-settings').addEventListener('click', openSettings);
+  $('#settings-form').addEventListener('submit', e => e.preventDefault());
+  // Switching language also translates the default group names, unless they were renamed
+  $$('input[name="lang"]').forEach(r => r.addEventListener('change', () => {
+    const from = STR[lang()];
+    const to = STR[r.value === 'zh' ? 'zh' : 'en'];
+    for (const g of namedGroups()) {
+      const key = DEFAULTS.map(([k]) => k).find(k => from[k] === g.name);
+      if (key) g.name = to[key];
+    }
+    state.settings.lang = r.value;
+    save();
+    applyAll();
+  }));
+  $$('input[name="theme"]').forEach(r => r.addEventListener('change', () => { state.settings.theme = r.value; save(); applyAll(); }));
+  $('#s-name').addEventListener('input', e => { state.settings.name = e.target.value.trim(); save(); lastMinute = -1; tick(); });
+  $('#s-engine').addEventListener('change', e => { state.settings.engine = e.target.value; save(); q.placeholder = t('searchPh', engine()[lang()]); });
+  $('#s-newtab').addEventListener('change', e => { state.settings.newTab = e.target.checked; save(); render(); });
+
+  $('#export-btn').addEventListener('click', () => {
+    const d = new Date();
+    const data = { app: 'desk-startpage', version: 2, exportedAt: d.toISOString(), groups: state.groups, settings: state.settings };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = el('a', { href: URL.createObjectURL(blob), download: `desk-bookmarks-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.json` });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    toast(t('tExported', state.groups.reduce((n, g) => n + g.items.length, 0)));
+  });
+
+  $('#import-btn').addEventListener('click', () => $('#import-file').click());
+  $('#import-file').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    let text = '';
+    try { text = await file.text(); } catch {}
+    settingsDialog.close();
+    if (/^\s*\{/.test(text)) importBackup(text);
+    else if (/<a\s[^>]*href/i.test(text)) importBookmarksHtml(text);
+    else toast(t('tUnknownFile'));
+  });
+
+  function importBackup(text) {
+    let data;
+    try { data = JSON.parse(text); } catch { toast(t('tBadBackup')); return; }
+    if (!data || !Array.isArray(data.groups)) { toast(t('tNotBackup')); return; }
+    const groups = cleanGroups(data.groups);
+    const n = groups.reduce((sum, g) => sum + g.items.length, 0);
+    const before = snapshot();
+    state.groups = groups;
+    if (data.settings && typeof data.settings === 'object') state.settings = { ...DEFAULT_SETTINGS, ...data.settings };
+    state.settings.hintDismissed = true;
+    save();
+    applyAll();
+    toast(t('tRestored', n), before);
+  }
+
+  // Browser export (Netscape format): the toolbar folder goes to the top level, other folders become groups
+  function importBookmarksHtml(text) {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    const buckets = new Map();
+    const existing = new Set(state.groups.flatMap(g => g.items.map(it => it.url)));
+    for (const a of doc.querySelectorAll('a[href]')) {
+      const url = normalizeUrl(a.getAttribute('href'));
+      if (!url || !/^https?:/.test(url) || existing.has(url)) continue;
+      existing.add(url);
+      const dl = a.closest('dl');
+      const h = dl && dl.previousElementSibling;
+      const isFolder = h && h.tagName === 'H3';
+      const toTop = !isFolder || h.hasAttribute('personal_toolbar_folder');
+      const key = toTop ? MAIN : dl;
+      if (!buckets.has(key)) buckets.set(key, { name: toTop ? '' : (h.textContent.trim() || t('importedFolder')).slice(0, 40), items: [] });
+      buckets.get(key).items.push({ id: uid(), title: a.textContent.trim().slice(0, 80), url });
+    }
+    const n = [...buckets.values()].reduce((sum, b) => sum + b.items.length, 0);
+    if (!n) { toast(t('tNothingNew')); return; }
+    mutate(() => {
+      for (const [key, b] of buckets) {
+        if (key === MAIN) { state.groups[0].items.push(...b.items); continue; }
+        const same = namedGroups().find(g => g.name === b.name);
+        if (same) same.items.push(...b.items);
+        else state.groups.push({ id: uid(), name: b.name, items: b.items });
+      }
+    }, t('tImported', n));
+  }
+
+  $('#reset-btn').addEventListener('click', () => {
+    settingsDialog.close();
+    mutate(() => { state.groups = sampleGroups(lang()); }, t('tReset'));
+    state.settings.hintDismissed = false;
+    save();
+    $('#hint').hidden = false;
+  });
+
+  $$('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+  $$('dialog').forEach(d => {
+    let downOnBackdrop = false;
+    d.addEventListener('mousedown', e => { downOnBackdrop = e.target === d; });
+    d.addEventListener('click', e => { if (downOnBackdrop && e.target === d) d.close(); downOnBackdrop = false; });
+  });
+
+  /* ---------- Toast ---------- */
+  let toastTimer = 0;
+  function toast(message, undoSnap) {
+    const box = $('#toast');
+    $('#toast-msg').textContent = message;
+    const undo = $('#toast-undo');
+    undo.hidden = !undoSnap;
+    undo.onclick = () => { box.hidden = true; restore(undoSnap); toast(t('tUndone')); };
+    box.hidden = true;
+    void box.offsetWidth;
+    box.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { box.hidden = true; }, undoSnap ? 6000 : 2800);
+  }
+
+  $('#hint-dismiss').addEventListener('click', () => { state.settings.hintDismissed = true; save(); $('#hint').hidden = true; });
+
+  /* ---------- Drag and drop: reorder, move between groups, drop links in ---------- */
+  const line = $('#drop-line');
+  let drag = null;
+  let dropTarget = null;
+
+  function showLine(x, y, w, h) {
+    line.hidden = false;
+    line.style.left = x + 'px'; line.style.top = y + 'px';
+    line.style.width = w + 'px'; line.style.height = h + 'px';
+  }
+  function hideLine() { line.hidden = true; dropTarget = null; }
+  const hasUrl = dt => !!dt && Array.from(dt.types || []).some(x => x === 'text/uri-list' || x === 'text/x-moz-url');
+
+  // Pick the slot nearest the pointer in a group's grid; the line sits in the gap beside that tile
+  function linkTargetAt(groupNode, x, y) {
+    const rows = $$('.link-row', groupNode).filter(r => !r.classList.contains('is-dragging'));
+    const gid = groupNode.dataset.gid;
+    if (!rows.length) {
+      const r = $('.add-row', groupNode).getBoundingClientRect();
+      showLine(r.left + 2, r.top + 6, 2, r.height - 12);
+      return { kind: 'link', gid, index: 0 };
+    }
+    let best = 0;
+    let bestD = Infinity;
+    rows.forEach((row, i) => {
+      const r = row.getBoundingClientRect();
+      const dx = x < r.left ? r.left - x : x > r.right ? x - r.right : 0;
+      const dy = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0;
+      const dist = dx + dy * 3;
+      if (dist < bestD) { bestD = dist; best = i; }
+    });
+    const r = rows[best].getBoundingClientRect();
+    const before = x < r.left + r.width / 2;
+    showLine(before ? r.left - 4 : r.right + 2, r.top + 6, 2, r.height - 12);
+    return { kind: 'link', gid, index: best + (before ? 0 : 1) };
+  }
+
+  function groupTargetAt(groupNode, y) {
+    const gid = groupNode.dataset.gid;
+    if (gid === drag.gid || gid === MAIN) { hideLine(); return null; }
+    const r = groupNode.getBoundingClientRect();
+    const before = y < r.top + r.height / 2;
+    const half = (parseFloat(getComputedStyle(shelf).rowGap) || 30) / 2;
+    showLine(r.left, before ? r.top - half - 1 : r.bottom + half - 1, r.width, 2);
+    return { kind: 'group', gid, before };
+  }
+
+  function readDrop(dt) {
+    const list = (dt.getData('text/uri-list') || '').split(/\r?\n/).find(l => l && !l.startsWith('#'));
+    const moz = (dt.getData('text/x-moz-url') || '').split(/\r?\n/);
+    const url = normalizeUrl(list || moz[0] || dt.getData('text/plain'));
+    let title = '';
+    const html = dt.getData('text/html');
+    if (html) {
+      const a = new DOMParser().parseFromString(html, 'text/html').querySelector('a');
+      if (a) title = a.textContent.trim();
+    }
+    if (!title && moz[1]) title = moz[1].trim();
+    if (title === url || looksLikeUrl(title)) title = '';
+    return { url, title: title.slice(0, 80) };
+  }
+
+  shelf.addEventListener('dragstart', e => {
+    const a = e.target instanceof Element && e.target.closest('.link');
+    const head = e.target instanceof Element && e.target.closest('.group-head');
+    if (a) {
+      drag = { kind: 'link', id: a.dataset.id };
+      e.dataTransfer.effectAllowed = 'copyMove';
+      e.dataTransfer.setData('text/uri-list', a.href);
+      e.dataTransfer.setData('text/plain', a.href);
+      requestAnimationFrame(() => a.closest('.link-row').classList.add('is-dragging'));
+    } else if (head) {
+      const g = head.closest('.group');
+      drag = { kind: 'group', gid: g.dataset.gid };
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', $('.group-name', g).textContent);
+      try { e.dataTransfer.setDragImage(head, 16, 14); } catch {}
+      requestAnimationFrame(() => g.classList.add('is-dragging'));
+    }
+  });
+
+  shelf.addEventListener('dragover', e => {
+    const groupNode = e.target instanceof Element && e.target.closest('.group');
+    if (!groupNode) return;
+    if (drag && drag.kind === 'link') {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      dropTarget = linkTargetAt(groupNode, e.clientX, e.clientY);
+    } else if (drag && drag.kind === 'group') {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      dropTarget = groupTargetAt(groupNode, e.clientY);
+    } else if (!drag && hasUrl(e.dataTransfer)) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      dropTarget = linkTargetAt(groupNode, e.clientX, e.clientY);
+    }
+  });
+
+  shelf.addEventListener('drop', e => {
+    const target = dropTarget;
+    if (!target) return;
+    e.preventDefault();
+    if (drag && drag.kind === 'link' && target.kind === 'link') {
+      const f = findItem(drag.id);
+      if (f) mutate(() => {
+        f.g.items.splice(f.i, 1);
+        const g = state.groups.find(x => x.id === target.gid);
+        g.items.splice(Math.min(target.index, g.items.length), 0, f.it);
+      });
+    } else if (drag && drag.kind === 'group' && target.kind === 'group') {
+      const from = state.groups.findIndex(g => g.id === drag.gid);
+      if (from > 0) mutate(() => {
+        const [moved] = state.groups.splice(from, 1);
+        let to = state.groups.findIndex(g => g.id === target.gid);
+        if (!target.before) to += 1;
+        state.groups.splice(Math.max(1, to), 0, moved);
+      });
+    } else if (!drag) {
+      const { url, title } = readDrop(e.dataTransfer);
+      if (url) mutate(() => {
+        const g = state.groups.find(x => x.id === target.gid);
+        g.items.splice(target.index, 0, { id: uid(), title, url });
+      }, t('tAdded', title || hostOf(url)));
+    }
+    endDrag();
+  });
+
+  function endDrag() {
+    drag = null;
+    hideLine();
+    $$('.is-dragging').forEach(n => n.classList.remove('is-dragging'));
+  }
+  document.addEventListener('dragend', endDrag);
+
+  // Outside the bookmarks: an internal drag is cancelled, an external link opens the add dialog
+  document.addEventListener('dragover', e => {
+    const overGroup = e.target instanceof Element && e.target.closest('.group');
+    if (drag || hasUrl(e.dataTransfer)) {
+      e.preventDefault();
+      if (!overGroup) { hideLine(); e.dataTransfer.dropEffect = drag ? 'none' : 'copy'; }
+    }
+  });
+  document.addEventListener('dragleave', e => { if (!e.relatedTarget) hideLine(); });
+  document.addEventListener('drop', e => {
+    if (e.defaultPrevented) return;
+    if (drag) { e.preventDefault(); endDrag(); return; }
+    if (!hasUrl(e.dataTransfer)) return;
+    e.preventDefault();
+    const { url, title } = readDrop(e.dataTransfer);
+    hideLine();
+    if (url) openLinkDialog({ url, title });
+  });
+
+  /* ---------- Start ---------- */
+  applyAll();
+  setInterval(tick, 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { lastMinute = -1; tick(); } });
+})();
+</script>
+</body>
+</html>
