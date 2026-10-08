@@ -71,7 +71,7 @@ math: true
 
 ## <font color="lightgray">H2</font> Selected Researches
 
-Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAAAAJ) for complete list of publications.
+Refer to my [Google Scholar](https://scholar.google.com/citations?user=6t4_yXMAAAAJ) for a complete list of publications.
 
 ### <font color="lightgray">H3</font> Structured Generation
 
