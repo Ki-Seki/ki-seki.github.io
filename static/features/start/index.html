@@ -2,21 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#EEF0F3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1014" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Desk">
 <title>Desk</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232F6BF2'/%3E%3Crect x='8' y='19' width='16' height='3' rx='1.5' fill='white'/%3E%3Ccircle cx='16' cy='12.5' r='3.5' fill='white'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2315171C'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
 <script>
-  // Apply theme, language and the time-of-day colours before first paint
+  // Theme, language, time of day and photo mode are applied before first paint
   try {
     var s = JSON.parse(localStorage.getItem('desk.startpage.v2') || 'null');
     var st = (s && s.settings) || {};
     if (st.theme === 'light' || st.theme === 'dark') document.documentElement.dataset.theme = st.theme;
     if (st.lang === 'zh') document.documentElement.lang = 'zh-CN';
+    if (st.background === 'bing' || st.background === 'photo') document.documentElement.dataset.surface = 'photo';
   } catch (e) {}
   (function () {
     var h = new Date().getHours();
@@ -24,98 +26,156 @@
   })();
 </script>
 <style>
-  /* Layout: an immersive wallpaper with one centred column on top: the clock, a glass search pill, then the
-     bookmark groups as tabs over pages of app-style icon tiles. Phones swipe between groups like home screens. */
+  /* Layout: one quiet column, optically centred — a thin clock, a search field, then bookmark icons.
+     Groups are a line of words above the icons; on phones the icons swipe sideways between groups. */
   :root {
-    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-    /* Over the wallpaper: the same in both themes, the photo sets the mood */
-    --on-photo: #FFFFFF;
-    --on-photo-soft: rgba(255, 255, 255, 0.84);
-    --photo-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 14px rgba(0, 0, 0, 0.2);
-    --glass: rgba(255, 255, 255, 0.2);
-    --glass-hover: rgba(255, 255, 255, 0.28);
-    --glass-edge: rgba(255, 255, 255, 0.26);
-    --glass-deep: rgba(16, 18, 24, 0.24);
-    --tile: rgba(255, 255, 255, 0.94);
-    --tile-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 8px 22px rgba(0, 0, 0, 0.16);
-    --tile-shadow-up: 0 2px 6px rgba(0, 0, 0, 0.12), 0 16px 34px rgba(0, 0, 0, 0.26);
-    --photo-dim: 1;
+    /* The page: ink on the background */
+    --bg: #EEF0F3;
+    --pg: #15171C;
+    --pg-2: rgba(21, 23, 28, 0.58);
+    --pg-3: rgba(21, 23, 28, 0.36);
+    --pg-line: rgba(21, 23, 28, 0.12);
+    --pg-field: rgba(255, 255, 255, 0.56);
+    --pg-field-hover: rgba(255, 255, 255, 0.8);
+    --pg-hover: rgba(21, 23, 28, 0.05);
+    --pg-shadow: none;
+    --pg-icon-shadow: 0 0 0 transparent;
+    --tile: #FFFFFF;
+    --tile-img: #FFFFFF;
+    --tile-edge: rgba(21, 23, 28, 0.05);
+    --tile-shadow: 0 1px 2px rgba(20, 26, 44, 0.05), 0 6px 16px rgba(20, 26, 44, 0.07);
+    --tile-shadow-up: 0 2px 4px rgba(20, 26, 44, 0.06), 0 14px 30px rgba(20, 26, 44, 0.13);
+    --mono-s: 42%;
+    --mono-bg: 94%;
+    --mono-fg: 40%;
+    --grain: 0.035;
 
-    /* Panels, menus and dialogs */
-    --surface: rgba(255, 255, 255, 0.94);
-    --surface-solid: #FFFFFF;
-    --field: #F1F2F5;
-    --fg: #16181D;
-    --muted: #5F6672;
-    --faint: #9399A4;
-    --line: rgba(22, 24, 29, 0.09);
-    --hover: rgba(22, 24, 29, 0.055);
-    --accent: #2F6BF2;
-    --accent-soft: rgba(47, 107, 242, 0.12);
+    /* The interface: menus, panels and sheets */
+    --ui: #FFFFFF;
+    --ui-sheet: #F2F3F5;
+    --ui-ink: #15171C;
+    --ui-ink-2: rgba(21, 23, 28, 0.6);
+    --ui-ink-3: rgba(21, 23, 28, 0.36);
+    --ui-line: rgba(21, 23, 28, 0.08);
+    --ui-hover: rgba(21, 23, 28, 0.055);
+    --seg-on: #FFFFFF;
+    --accent: #2F6BF0;
     --on-accent: #FFFFFF;
-    --danger: #D23B2A;
-    --track: #D3D7DE;
+    --danger: #E0362C;
+    --track: #DADDE3;
     --knob: #FFFFFF;
-    --pop-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 20px 50px rgba(0, 0, 0, 0.22);
-    --scrim: rgba(8, 10, 14, 0.36);
+    --pop-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 14px 44px rgba(20, 26, 44, 0.16);
+    --scrim: rgba(18, 20, 26, 0.16);
+    --backdrop: rgba(18, 20, 26, 0.3);
 
-    /* The fallback wallpaper: a gradient that follows the time of day */
-    --g1: #67B7F0;
-    --g2: #3F7FD9;
-    --g3: #4FB9B8;
+    /* The background light: a soft sun that follows the time of day, with sky and lilac around it */
+    --sun-l: #F3E3C9;
+    --sun-d: #1E2A3E;
+    --f1: var(--sun-l);
+    --f2: #D6E2F7;
+    --f3: #E6DDF4;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --tile: rgba(238, 240, 244, 0.9);
-      --photo-dim: 0.82;
-      --surface: rgba(32, 34, 40, 0.94);
-      --surface-solid: #202228;
-      --field: #2B2E35;
-      --fg: #ECEEF2;
-      --muted: #A4AAB5;
-      --faint: #737A86;
-      --line: rgba(255, 255, 255, 0.09);
-      --hover: rgba(255, 255, 255, 0.07);
-      --accent: #7AA4FF;
-      --accent-soft: rgba(122, 164, 255, 0.16);
-      --on-accent: #0E1116;
-      --danger: #FF7B6B;
-      --track: #3B3F48;
-      --knob: #ECEEF2;
-      --pop-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 24px 60px rgba(0, 0, 0, 0.5);
-      --scrim: rgba(0, 0, 0, 0.5);
+      --bg: #0E1014;
+      --pg: #F1F2F4;
+      --pg-2: rgba(241, 242, 244, 0.6);
+      --pg-3: rgba(241, 242, 244, 0.34);
+      --pg-line: rgba(255, 255, 255, 0.14);
+      --pg-field: rgba(255, 255, 255, 0.06);
+      --pg-field-hover: rgba(255, 255, 255, 0.09);
+      --pg-hover: rgba(255, 255, 255, 0.06);
+      --tile: #1C1F26;
+      --tile-img: #ECEEF1;
+      --tile-edge: rgba(255, 255, 255, 0.06);
+      --tile-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 18px rgba(0, 0, 0, 0.28);
+      --tile-shadow-up: 0 2px 4px rgba(0, 0, 0, 0.4), 0 14px 32px rgba(0, 0, 0, 0.42);
+      --mono-s: 24%;
+      --mono-bg: 21%;
+      --mono-fg: 76%;
+      --grain: 0.05;
+      --ui: #1C1F25;
+      --ui-sheet: #131519;
+      --ui-ink: #F1F2F4;
+      --ui-ink-2: rgba(241, 242, 244, 0.62);
+      --ui-ink-3: rgba(241, 242, 244, 0.36);
+      --ui-line: rgba(255, 255, 255, 0.08);
+      --ui-hover: rgba(255, 255, 255, 0.07);
+      --seg-on: #3A3E47;
+      --accent: #6E9BFF;
+      --on-accent: #0E1014;
+      --danger: #FF6A5C;
+      --track: #3A3E47;
+      --knob: #F1F2F4;
+      --pop-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 18px 54px rgba(0, 0, 0, 0.55);
+      --scrim: rgba(0, 0, 0, 0.34);
+      --backdrop: rgba(0, 0, 0, 0.5);
+      --f1: var(--sun-d);
+      --f2: #142644;
+      --f3: #2A2140;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --tile: rgba(238, 240, 244, 0.9);
-    --photo-dim: 0.82;
-    --surface: rgba(32, 34, 40, 0.94);
-    --surface-solid: #202228;
-    --field: #2B2E35;
-    --fg: #ECEEF2;
-    --muted: #A4AAB5;
-    --faint: #737A86;
-    --line: rgba(255, 255, 255, 0.09);
-    --hover: rgba(255, 255, 255, 0.07);
-    --accent: #7AA4FF;
-    --accent-soft: rgba(122, 164, 255, 0.16);
-    --on-accent: #0E1116;
-    --danger: #FF7B6B;
-    --track: #3B3F48;
-    --knob: #ECEEF2;
-    --pop-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 24px 60px rgba(0, 0, 0, 0.5);
-    --scrim: rgba(0, 0, 0, 0.5);
+    --bg: #0E1014;
+    --pg: #F1F2F4;
+    --pg-2: rgba(241, 242, 244, 0.6);
+    --pg-3: rgba(241, 242, 244, 0.34);
+    --pg-line: rgba(255, 255, 255, 0.14);
+    --pg-field: rgba(255, 255, 255, 0.06);
+    --pg-field-hover: rgba(255, 255, 255, 0.09);
+    --pg-hover: rgba(255, 255, 255, 0.06);
+    --tile: #1C1F26;
+    --tile-img: #ECEEF1;
+    --tile-edge: rgba(255, 255, 255, 0.06);
+    --tile-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 18px rgba(0, 0, 0, 0.28);
+    --tile-shadow-up: 0 2px 4px rgba(0, 0, 0, 0.4), 0 14px 32px rgba(0, 0, 0, 0.42);
+    --mono-s: 24%;
+    --mono-bg: 21%;
+    --mono-fg: 76%;
+    --grain: 0.05;
+    --ui: #1C1F25;
+    --ui-sheet: #131519;
+    --ui-ink: #F1F2F4;
+    --ui-ink-2: rgba(241, 242, 244, 0.62);
+    --ui-ink-3: rgba(241, 242, 244, 0.36);
+    --ui-line: rgba(255, 255, 255, 0.08);
+    --ui-hover: rgba(255, 255, 255, 0.07);
+    --seg-on: #3A3E47;
+    --accent: #6E9BFF;
+    --on-accent: #0E1014;
+    --danger: #FF6A5C;
+    --track: #3A3E47;
+    --knob: #F1F2F4;
+    --pop-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 18px 54px rgba(0, 0, 0, 0.55);
+    --scrim: rgba(0, 0, 0, 0.34);
+    --backdrop: rgba(0, 0, 0, 0.5);
+    --f1: var(--sun-d);
+    --f2: #142644;
+    --f3: #2A2140;
     color-scheme: dark;
   }
-  :root[data-tod="dawn"] { --g1: #F7B08A; --g2: #8F79CC; --g3: #E58FA9; }
-  :root[data-tod="day"] { --g1: #67B7F0; --g2: #3F7FD9; --g3: #4FB9B8; }
-  :root[data-tod="dusk"] { --g1: #F2965F; --g2: #6E4796; --g3: #D05E7E; }
-  :root[data-tod="night"] { --g1: #3A4C90; --g2: #121937; --g3: #2E2158; }
+  :root[data-tod="dawn"] { --sun-l: #F7D4C1; --sun-d: #3A272E; }
+  :root[data-tod="day"] { --sun-l: #F3E3C9; --sun-d: #1E2A3E; }
+  :root[data-tod="dusk"] { --sun-l: #F2CDD4; --sun-d: #36202F; }
+  :root[data-tod="night"] { --sun-l: #DCD7EF; --sun-d: #211D3B; }
+  /* On a photo the page ink turns white; menus and sheets keep the theme */
+  :root[data-surface="photo"] {
+    --pg: #FFFFFF;
+    --pg-2: rgba(255, 255, 255, 0.88);
+    --pg-3: rgba(255, 255, 255, 0.64);
+    --pg-line: rgba(255, 255, 255, 0.34);
+    --pg-field: rgba(255, 255, 255, 0.18);
+    --pg-field-hover: rgba(255, 255, 255, 0.26);
+    --pg-hover: rgba(255, 255, 255, 0.14);
+    --pg-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 12px rgba(0, 0, 0, 0.25);
+    --pg-icon-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  }
 
   *, *::before, *::after { box-sizing: border-box; }
   /* No rubber-band overscroll: the page only moves when there is more to see */
@@ -124,8 +184,8 @@
     min-height: 100%;
     margin: 0;
     overscroll-behavior: none;
-    background-color: var(--g2);
-    color: var(--on-photo);
+    background-color: var(--bg);
+    color: var(--pg);
     font: 15px/1.45 var(--font);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -134,53 +194,45 @@
   [hidden] { display: none !important; }
   button, input, select { font: inherit; color: inherit; }
   button { cursor: pointer; }
-  svg { display: block; }
+  svg { display: block; flex: none; }
   img { -webkit-user-drag: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  /* —— Wallpaper —— */
+  /* —— Background —— */
   .bg {
     position: fixed;
     inset: 0;
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
-    background:
-      radial-gradient(120% 80% at 12% 8%, var(--g1), transparent 62%),
-      radial-gradient(110% 80% at 92% 96%, var(--g3), transparent 60%),
-      var(--g2);
-    filter: brightness(var(--photo-dim));
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(60% 55% at 16% 12%, var(--f1), transparent 72%),
+      radial-gradient(55% 50% at 88% 18%, var(--f2), transparent 74%),
+      radial-gradient(64% 56% at 60% 100%, var(--f3), transparent 74%);
   }
-  .bg-img {
-    position: absolute;
-    inset: -4%;
-    z-index: 0;
-    background: center / cover no-repeat;
-    opacity: 0;
-    transition: opacity 0.8s ease, filter 0.4s ease, transform 0.4s ease;
-  }
-  .bg.has-photo .bg-img { opacity: 1; }
-  .bg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  /* Darker top and bottom edges keep white text readable on any photo */
+  /* A fine grain keeps the gradient from banding and gives it a paper-like finish */
   .bg::after {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 2;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.08) 34%, rgba(0, 0, 0, 0.08) 62%, rgba(0, 0, 0, 0.32) 100%);
+    opacity: var(--grain);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  .is-searching .bg-img { filter: blur(22px) saturate(1.1); transform: scale(1.06); }
-  .is-searching .bg::before { opacity: 1; }
+  :root[data-surface="photo"] .bg { background-image: none; background-color: #22252B; }
+  :root[data-surface="photo"] .bg::after { display: none; }
+  .bg-photo { position: absolute; inset: 0; background: center / cover no-repeat; opacity: 0; transition: opacity 0.9s ease; }
+  .bg-photo.is-shown { opacity: 1; }
+  .bg-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1) 38%, rgba(0, 0, 0, 0.12) 64%, rgba(0, 0, 0, 0.34));
+  }
+  .safe-probe { position: fixed; top: 0; left: 0; padding-top: env(safe-area-inset-top, 0px); visibility: hidden; pointer-events: none; }
 
-  /* —— Page column —— */
-  .app {
+  /* —— The column —— */
+  .stage {
     position: relative;
     z-index: 1;
     min-height: 100vh;
@@ -188,12 +240,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     padding:
-      calc(env(safe-area-inset-top, 0px) + clamp(64px, 17vh, 170px))
-      max(16px, env(safe-area-inset-right, 0px))
-      calc(env(safe-area-inset-bottom, 0px) + 20px)
-      max(16px, env(safe-area-inset-left, 0px));
+      calc(env(safe-area-inset-top, 0px) + 64px)
+      max(20px, env(safe-area-inset-right, 0px))
+      calc(env(safe-area-inset-bottom, 0px) + 12vh)
+      max(20px, env(safe-area-inset-left, 0px));
   }
+  .hero, .search-wrap, .launcher { animation: rise-in 0.6s var(--ease) backwards; }
+  .search-wrap { animation-delay: 0.04s; }
+  .launcher { animation-delay: 0.08s; }
+  @keyframes rise-in { from { opacity: 0; transform: translateY(6px); } }
 
   .corner {
     position: absolute;
@@ -208,217 +265,185 @@
     border: 0;
     border-radius: 50%;
     background: transparent;
-    color: var(--on-photo);
-    opacity: 0.8;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
-    transition: opacity 0.15s ease, background-color 0.15s ease;
+    color: var(--pg-3);
+    filter: drop-shadow(var(--pg-icon-shadow));
+    transition: color 0.2s ease, background-color 0.2s ease, opacity 0.25s ease;
   }
-  .corner:hover { opacity: 1; background: var(--glass); }
-  .corner:focus-visible { opacity: 1; outline: 2px solid #FFFFFF; outline-offset: 2px; }
+  .corner:hover { color: var(--pg); background: var(--pg-hover); }
   .is-searching .corner { opacity: 0; pointer-events: none; }
 
   /* —— Clock —— */
   .hero {
     display: grid;
     justify-items: center;
-    gap: 8px;
-    margin-bottom: 26px;
+    gap: 10px;
+    margin-bottom: 44px;
     text-align: center;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.4s var(--ease);
   }
   .clock {
     display: block;
-    font: 500 clamp(64px, 9.5vw, 108px)/1 var(--font-display);
-    letter-spacing: -0.015em;
+    margin-right: -0.04em;
+    font: 200 clamp(88px, 10.5vw, 136px)/0.95 var(--font-display);
+    letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 2px 30px rgba(0, 0, 0, 0.2);
+    color: var(--pg);
+    text-shadow: var(--pg-shadow);
   }
   .date {
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
-    color: var(--on-photo);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 18px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.01em;
+    color: var(--pg-2);
+    text-shadow: var(--pg-shadow);
   }
-  .date span + span::before { content: "·"; margin-inline: 0.55em; opacity: 0.75; }
+  .date span + span::before { content: "·"; margin: 0 0.5em; opacity: 0.6; }
 
   /* —— Search —— */
-  .search-wrap { position: relative; z-index: 4; width: min(580px, 100%); }
+  .search-wrap { position: relative; z-index: 4; width: min(520px, 100%); transition: transform 0.4s var(--ease); }
+  .is-searching .search-wrap { transform: translateY(var(--lift, 0px)); }
   .search {
-    position: relative;
     display: flex;
     align-items: center;
-    height: 50px;
-    padding: 0 5px;
-    border: 1px solid var(--glass-edge);
-    border-radius: 999px;
-    background: var(--glass);
-    -webkit-backdrop-filter: blur(22px) saturate(1.5);
-    backdrop-filter: blur(22px) saturate(1.5);
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
-    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    height: 46px;
+    padding: 0 6px;
+    border-radius: 23px;
+    background: var(--pg-field);
+    box-shadow: inset 0 0 0 1px var(--pg-line);
+    transition: background-color 0.2s ease, box-shadow 0.25s ease;
   }
-  .search:hover { background: var(--glass-hover); }
+  :root[data-surface="photo"] .search { -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); }
+  .search:hover { background: var(--pg-field-hover); }
   #q {
     flex: 1;
     min-width: 0;
     height: 100%;
-    padding: 0 10px;
+    padding: 0 8px;
     border: 0;
     outline: 0;
     background: transparent;
-    color: var(--on-photo);
+    color: var(--pg);
     font-size: 16px;
     text-align: center;
     text-overflow: ellipsis;
     -webkit-appearance: none;
     appearance: none;
   }
-  #q::placeholder { color: var(--on-photo-soft); opacity: 1; }
+  #q::placeholder { color: var(--pg-3); opacity: 1; }
   #q::-webkit-search-cancel-button, #q::-webkit-search-decoration { -webkit-appearance: none; }
   .search-btn {
     flex: none;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     display: grid;
     place-items: center;
     padding: 0;
     border: 0;
     border-radius: 50%;
     background: transparent;
-    color: var(--faint);
+    color: var(--ui-ink-3);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease, background-color 0.15s ease;
   }
-  .search-btn:hover { background: var(--hover); }
-  .search-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .is-searching .search { background: var(--surface-solid); border-color: transparent; box-shadow: var(--pop-shadow); }
-  .is-searching #q { color: var(--fg); text-align: left; }
-  .is-searching #q::placeholder { color: var(--faint); }
+  .search-btn:hover { background: var(--ui-hover); }
+  .is-searching .search { background: var(--ui); box-shadow: var(--pop-shadow); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .is-searching #q { color: var(--ui-ink); text-align: left; }
+  .is-searching #q::placeholder { color: var(--ui-ink-3); }
   .is-searching .search-btn { opacity: 1; pointer-events: auto; }
+  .search.is-empty #clear-btn { visibility: hidden; }
 
-  .engine-ico { position: relative; flex: none; width: 22px; height: 22px; display: grid; place-items: center; }
+  .engine-ico { position: relative; width: 20px; height: 20px; display: grid; place-items: center; }
   .engine-ico > * { grid-area: 1 / 1; }
-  .engine-letter { font: 700 15px/1 var(--font-display); color: var(--engine, var(--accent)); }
-  .engine-ico img { width: 20px; height: 20px; border-radius: 4px; opacity: 0; }
+  .engine-letter { font: 700 14px/1 var(--font-display); color: var(--engine, var(--accent)); }
+  .engine-ico img { width: 18px; height: 18px; border-radius: 4px; opacity: 0; }
   .engine-ico.has-img img { opacity: 1; }
   .engine-ico.has-img .engine-letter { visibility: hidden; }
 
-  /* Suggestions: typed text, matching bookmarks, then the engine's own suggestions */
   .suggest {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
-    max-height: min(62vh, 460px);
+    max-height: min(60vh, 440px);
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 6px;
-    border-radius: 22px;
-    background: var(--surface);
-    color: var(--fg);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    backdrop-filter: blur(24px) saturate(1.4);
+    border-radius: 18px;
+    background: var(--ui);
+    color: var(--ui-ink);
     box-shadow: var(--pop-shadow);
-    animation: drop-in 0.18s ease-out;
+    animation: fade-down 0.18s var(--ease);
   }
-  @keyframes drop-in { from { opacity: 0; transform: translateY(-4px); } }
-  .opt {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 46px;
-    padding: 6px 8px 6px 10px;
-    border-radius: 15px;
-    cursor: pointer;
-  }
-  .opt.is-active { background: var(--hover); }
-  .opt-ico { flex: none; width: 28px; height: 28px; display: grid; place-items: center; color: var(--faint); }
+  @keyframes fade-down { from { opacity: 0; transform: translateY(-4px); } }
+  .opt { display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 8px 0 10px; border-radius: 12px; cursor: pointer; }
+  .opt.is-active { background: var(--ui-hover); }
+  .opt-ico { flex: none; width: 26px; height: 26px; display: grid; place-items: center; color: var(--ui-ink-3); }
   .opt-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
   .opt-text b { font-weight: 600; }
-  .opt-aside { flex: none; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--faint); }
-  .opt-fill {
-    flex: none;
-    width: 34px;
-    height: 34px;
-    display: grid;
-    place-items: center;
-    margin: -4px -2px;
-    padding: 0;
-    border: 0;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--faint);
-  }
-  .opt-fill:hover { background: var(--hover); color: var(--fg); }
+  .opt-aside { flex: none; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--ui-ink-3); }
+  .opt-fill { flex: none; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--ui-ink-3); }
+  .opt-fill:hover { background: var(--ui-hover); color: var(--ui-ink); }
 
-  /* —— Bookmarks: group tabs over swipeable pages —— */
+  /* —— Bookmarks —— */
   .launcher {
-    width: min(760px, 100%);
-    margin-top: clamp(30px, 7vh, 64px);
+    width: 100%;
+    max-width: 680px;
+    margin-top: clamp(40px, 7vh, 72px);
     -webkit-user-select: none;
     user-select: none;
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s;
+    transition: opacity 0.25s ease, transform 0.35s var(--ease), visibility 0s;
   }
   .is-searching .launcher {
     opacity: 0;
-    transform: translateY(12px) scale(0.985);
+    transform: translateY(10px);
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s;
+    transition: opacity 0.18s ease, transform 0.3s var(--ease), visibility 0s 0.18s;
   }
   .tabs {
+    position: relative;
     display: flex;
-    gap: 2px;
+    gap: 28px;
     width: fit-content;
     max-width: 100%;
-    margin: 0 auto 18px;
-    padding: 4px;
+    margin: 0 auto 26px;
+    padding: 0 2px 10px;
     overflow-x: auto;
     scrollbar-width: none;
-    border-radius: 999px;
-    background: var(--glass-deep);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);
-    backdrop-filter: blur(18px) saturate(1.4);
   }
   .tabs::-webkit-scrollbar { display: none; }
   .tab {
     flex: none;
-    height: 32px;
-    padding: 0 15px;
+    padding: 4px 0;
     border: 0;
-    border-radius: 999px;
     background: transparent;
-    color: var(--on-photo-soft);
+    color: var(--pg-3);
     font-size: 13.5px;
     font-weight: 500;
+    letter-spacing: 0.01em;
     white-space: nowrap;
+    text-shadow: var(--pg-shadow);
     touch-action: manipulation;
     -webkit-touch-callout: none;
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    transition: color 0.25s ease;
   }
-  .tab:hover { color: var(--on-photo); }
-  .tab[aria-selected="true"] { background: rgba(255, 255, 255, 0.94); color: #15171C; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14); }
-  .tab:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 1px; }
-  .tab-add { width: 32px; padding: 0; display: grid; place-items: center; }
+  .tab:hover, .tab.is-drop { color: var(--pg-2); }
+  .tab[aria-selected="true"] { color: var(--pg); }
+  .tab-ink {
+    position: absolute;
+    left: 0;
+    bottom: 2px;
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--pg);
+    transform: translateX(var(--ink-x, 0px));
+    transition: transform 0.38s var(--ease);
+  }
+  .tabs.is-scrubbing .tab-ink { transition: none; }
 
-  /* A frosted dock holds the tiles; it is as wide as the biggest group needs, so a few tiles don't float in an empty bar */
-  .dock {
-    width: calc(var(--cols, 4) * 92px + (var(--cols, 4) - 1) * 6px + 30px); /* columns, gaps, padding and border */
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 14px 14px 2px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 28px;
-    background: rgba(255, 255, 255, 0.1);
-    -webkit-backdrop-filter: blur(26px) saturate(1.5);
-    backdrop-filter: blur(26px) saturate(1.5);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-  }
   .pages {
     display: flex;
     align-items: flex-start;
@@ -427,32 +452,32 @@
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     overscroll-behavior-x: contain;
-    transition: height 0.25s ease;
+    transition: height 0.3s var(--ease);
   }
   .pages::-webkit-scrollbar { display: none; }
   .page { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
   .grid {
     list-style: none;
-    margin: 0;
-    padding: 6px 0 14px;
+    margin: 0 auto;
+    padding: 4px 0 10px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, 92px);
+    grid-template-columns: repeat(auto-fit, 88px); /* empty columns collapse, so a short row stays centred */
     justify-content: center;
-    gap: 22px 6px;
+    gap: 26px 4px;
   }
-
-  .tile { position: relative; min-width: 0; }
+  .tile { min-width: 0; }
   .tile-link {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     width: 100%;
-    padding: 4px 2px;
+    padding: 2px;
     border: 0;
-    border-radius: 18px;
+    border-radius: 16px;
     background: transparent;
-    color: var(--on-photo);
+    color: var(--pg-2);
+    font: inherit;
     text-decoration: none;
     cursor: pointer;
     touch-action: manipulation;
@@ -460,116 +485,105 @@
     -webkit-user-select: none;
     user-select: none;
     -webkit-user-drag: none;
+    transition: color 0.2s ease;
   }
-  .tile-link:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
   .tile-icon {
     position: relative;
     flex: none;
-    width: 62px;
-    height: 62px;
+    width: 54px;
+    height: 54px;
     display: grid;
     place-items: center;
     overflow: hidden;
-    border-radius: 18px;
+    border-radius: 15px;
     background: var(--tile);
-    box-shadow: var(--tile-shadow);
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+    box-shadow: var(--tile-shadow), inset 0 0 0 1px var(--tile-edge);
+    transition: transform 0.28s var(--ease), box-shadow 0.28s ease;
   }
   .tile-icon > * { grid-area: 1 / 1; }
-  .tile-letter { font: 600 25px/1 var(--font-display); color: hsl(var(--h) 52% 45%); }
-  .tile-icon img { width: 32px; height: 32px; opacity: 0; transition: opacity 0.2s ease; }
-  .tile-icon img.is-small { width: 22px; height: 22px; }
+  .tile-icon img { width: 28px; height: 28px; border-radius: 6px; opacity: 0; transition: opacity 0.25s ease; }
+  .tile-icon img.is-small { width: 20px; height: 20px; border-radius: 4px; }
+  .tile-icon.has-img { background: var(--tile-img); }
   .tile-icon.has-img img { opacity: 1; }
-  .tile-icon.has-img .tile-letter { visibility: hidden; }
+  .tile-icon.has-img .mono { opacity: 0; }
+  .mono {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: hsl(var(--h) var(--mono-s) var(--mono-bg));
+    color: hsl(var(--h) var(--mono-s) var(--mono-fg));
+    font: 600 17px/1 var(--font-display);
+    letter-spacing: 0.02em;
+    transition: opacity 0.25s ease;
+  }
   .tile-name {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 12.5px;
+    font-size: 12px;
     line-height: 1.3;
-    text-shadow: var(--photo-shadow);
+    text-shadow: var(--pg-shadow);
   }
   @media (hover: hover) {
-    .tile-link:hover .tile-icon { transform: translateY(-3px); box-shadow: var(--tile-shadow-up); }
+    .tile-link:hover { color: var(--pg); }
+    .tile-link:hover .tile-icon { transform: translateY(-2px); box-shadow: var(--tile-shadow-up), inset 0 0 0 1px var(--tile-edge); }
   }
-  .tile-link:active .tile-icon { transform: scale(0.94); }
-  .tile-add .tile-icon {
-    background: var(--glass);
-    box-shadow: inset 0 0 0 1px var(--glass-edge);
-    color: var(--on-photo);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-  }
-  .tile-add .tile-name { color: var(--on-photo-soft); }
+  .tile-link:active .tile-icon { transform: scale(0.94); transition-duration: 0.12s; }
+  .tile-link:focus-visible { outline: 0; }
+  .tile-link:focus-visible .tile-icon { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+  .tile-add .tile-icon { background: transparent; box-shadow: inset 0 0 0 1px var(--pg-line); color: var(--pg-3); }
+  :root[data-surface="photo"] .tile-add .tile-icon { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.08); }
+  @media (hover: hover) { .tile-add .tile-link:hover .tile-icon { box-shadow: inset 0 0 0 1px var(--pg-3); color: var(--pg-2); } }
+  .tile-icon.mini { width: 26px; height: 26px; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--ui-line); }
+  .tile-icon.mini .mono { font-size: 10.5px; }
+  .tile-icon.mini img { width: 16px; height: 16px; border-radius: 3px; }
 
-  /* Small tiles inside the suggestions list */
-  .tile-icon.mini { width: 28px; height: 28px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); }
-  .tile-icon.mini .tile-letter { font-size: 13px; }
-  .tile-icon.mini img { width: 18px; height: 18px; }
-  .tile-icon.mini img.is-small { width: 16px; height: 16px; }
-
-  /* Dragging: the lifted copy follows the pointer, a faded placeholder shows where it will land */
-  .tile.is-lifted .tile-icon { transform: scale(1.1); box-shadow: var(--tile-shadow-up); }
-  .tab.is-lifted { transform: scale(1.06); }
-  .is-placeholder { opacity: 0.3; }
+  /* Lifting and dragging */
+  .tile.is-lifted .tile-icon { transform: scale(1.08); box-shadow: var(--tile-shadow-up), inset 0 0 0 1px var(--tile-edge); }
+  .is-placeholder { opacity: 0.25; }
   .is-landing { visibility: hidden; }
   .drag-ghost { position: fixed; z-index: 70; margin: 0; list-style: none; pointer-events: none; }
-  .tile.drag-ghost .tile-icon { transform: scale(1.12); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18), 0 22px 44px rgba(0, 0, 0, 0.32); }
-  .tab.drag-ghost { background: rgba(255, 255, 255, 0.96); color: #15171C; box-shadow: var(--pop-shadow); transform: scale(1.06); }
+  .tile.drag-ghost .tile-icon { transform: scale(1.1); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16), 0 24px 48px rgba(0, 0, 0, 0.22), inset 0 0 0 1px var(--tile-edge); }
+  .tile.drag-ghost .tile-name { opacity: 0; }
+  .tab.drag-ghost { color: var(--pg); }
   body.is-dragging, body.is-dragging * { cursor: grabbing !important; }
-  body.is-dragging .tile-link:hover .tile-icon { transform: none; box-shadow: var(--tile-shadow); }
+  body.is-dragging .tile-link:hover .tile-icon { transform: none; box-shadow: var(--tile-shadow), inset 0 0 0 1px var(--tile-edge); }
 
-  .hint {
-    margin: auto 0 0;
-    padding-top: 32px;
-    max-width: 50ch;
-    text-align: center;
-    font-size: 12.5px;
-    color: var(--on-photo-soft);
-    text-shadow: var(--photo-shadow);
-    transition: opacity 0.2s ease;
-  }
-  .hint button {
-    margin-left: 0.5em;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--on-photo);
-    font-size: inherit;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: rgba(255, 255, 255, 0.5);
-  }
-  .is-searching .hint { opacity: 0; visibility: hidden; }
-
-  /* —— Menu: a popover at the pointer on computers, an action sheet on phones —— */
+  /* —— Menu: at the pointer on computers, beside the pressed icon on touch —— */
   .menu-layer { position: fixed; inset: 0; z-index: 50; }
+  .menu-layer.has-scrim { background: var(--scrim); animation: fade-in 0.2s ease; }
+  .menu-layer.is-closing { animation: fade-out 0.14s ease forwards; }
+  .menu-preview .tile { position: fixed; margin: 0; list-style: none; pointer-events: none; animation: preview-in 0.24s var(--ease); }
+  .menu-preview .tile-icon { transform: scale(1.08); box-shadow: var(--tile-shadow-up), inset 0 0 0 1px var(--tile-edge); transition: none; }
+  .menu-preview .tab { position: fixed; margin: 0; pointer-events: none; color: var(--pg); }
+  .is-previewed { visibility: hidden; }
+  @keyframes preview-in { from { transform: scale(0.94); } }
   .menu {
     position: fixed;
-    min-width: 200px;
-    max-width: calc(100vw - 16px);
-    color: var(--fg);
-    animation: pop-in 0.14s ease-out;
-  }
-  @keyframes pop-in { from { opacity: 0; transform: scale(0.97); } }
-  .menu-card {
+    min-width: 196px;
+    max-width: calc(100vw - 24px);
     padding: 5px;
     border-radius: 14px;
-    background: var(--surface);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    backdrop-filter: blur(24px) saturate(1.4);
+    background: var(--ui);
+    color: var(--ui-ink);
     box-shadow: var(--pop-shadow);
+    transform-origin: var(--origin, top left);
+    animation: menu-in 0.18s var(--ease);
   }
-  .menu-head { display: none; }
-  .menu-items { display: grid; }
+  .is-closing .menu { animation: menu-out 0.14s ease forwards; }
+  @keyframes menu-in { from { opacity: 0; transform: scale(0.94); } }
+  @keyframes menu-out { to { opacity: 0; transform: scale(0.96); } }
+  @keyframes fade-in { from { opacity: 0; } }
+  @keyframes fade-out { to { opacity: 0; } }
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 11px;
+    gap: 10px;
     width: 100%;
-    min-height: 36px;
-    padding: 0 12px 0 10px;
+    min-height: 34px;
+    padding: 0 10px;
     border: 0;
     border-radius: 9px;
     background: transparent;
@@ -577,268 +591,173 @@
     font-size: 14px;
     text-align: left;
   }
-  .menu-item > svg, .menu-item > .engine-ico { flex: none; color: var(--muted); }
-  .menu-item:hover, .menu-item:focus-visible { background: var(--hover); outline: 0; }
+  .menu-item > svg, .menu-item > .engine-ico { color: var(--ui-ink-2); }
+  .menu-item:hover, .menu-item:focus-visible { background: var(--ui-hover); outline: 0; }
   .menu-item.is-danger, .menu-item.is-danger > svg { color: var(--danger); }
   .menu-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .menu-check { margin-left: auto; color: var(--accent) !important; }
-  .menu-cancel { display: none; }
-
-  .menu-layer.is-sheet { background: var(--scrim); animation: fade-in 0.2s ease-out; }
-  .menu-layer.is-sheet .menu {
-    left: 10px;
-    right: 10px;
-    top: auto;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
-    min-width: 0;
-    max-width: none;
-    display: grid;
-    gap: 8px;
-    animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  .menu-sep { height: 1px; margin: 4px 8px; background: var(--ui-line); }
+  @media (hover: none) {
+    .menu { min-width: 224px; padding: 6px; border-radius: 16px; }
+    .menu-item { min-height: 46px; padding: 0 14px; font-size: 16px; border-radius: 11px; }
   }
-  .is-sheet .menu-card { padding: 0; overflow: hidden; border-radius: 16px; }
-  .is-sheet .menu-head {
-    display: grid;
-    gap: 2px;
-    padding: 13px 16px 12px;
-    text-align: center;
-    border-bottom: 1px solid var(--line);
-  }
-  .is-sheet .menu-head strong { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .is-sheet .menu-head span { font-size: 12.5px; color: var(--faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .is-sheet .menu-item { justify-content: center; min-height: 54px; padding: 0 16px; border-radius: 0; font-size: 17px; }
-  .is-sheet .menu-item + .menu-item { border-top: 1px solid var(--line); }
-  .is-sheet .menu-item > svg { display: none; }
-  .is-sheet .menu-item > .engine-ico { display: grid; }
-  .is-sheet .menu-label { flex: none; }
-  .is-sheet .menu-check { display: block !important; margin-left: 0; }
-  .is-sheet .menu-cancel {
-    display: block;
-    min-height: 54px;
-    border: 0;
-    border-radius: 16px;
-    background: var(--surface-solid);
-    color: var(--accent);
-    font-size: 17px;
-    font-weight: 600;
-    box-shadow: var(--pop-shadow);
-  }
-  @keyframes sheet-up { from { transform: translateY(110%); } }
-  @keyframes fade-in { from { opacity: 0; } }
 
   /* —— Toast —— */
   .toast {
     position: fixed;
-    z-index: 80;
+    z-index: 45; /* under an open menu's dimmed layer */
     left: 50%;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
     translate: -50% 0;
     display: flex;
     align-items: center;
     gap: 12px;
+    width: max-content;
     max-width: calc(100vw - 32px);
-    padding: 9px 10px 9px 18px;
-    border-radius: 999px;
-    background: rgba(22, 24, 30, 0.86);
-    color: #FFFFFF;
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    padding: 10px 10px 10px 18px;
+    border-radius: 14px;
+    background: rgba(26, 28, 34, 0.92);
+    color: #F4F5F7;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.24);
     font-size: 14px;
-    animation: toast-in 0.2s ease-out;
+    animation: toast-in 0.3s var(--ease);
   }
-  .toast-msg { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .toast button { flex: none; border: 0; border-radius: 999px; padding: 4px 12px; background: transparent; color: #8FB4FF; font-weight: 600; }
-  .toast button:hover { background: rgba(255, 255, 255, 0.12); }
-  @keyframes toast-in { from { opacity: 0; translate: -50% 8px; } }
+  .toast.is-leaving { animation: toast-out 0.2s ease forwards; }
+  .toast-msg { min-width: 0; }
+  .toast button { flex: none; border: 0; border-radius: 9px; padding: 4px 10px; background: transparent; color: #9DBBFF; font-weight: 600; }
+  .toast button:hover { background: rgba(255, 255, 255, 0.1); }
+  @keyframes toast-in { from { opacity: 0; translate: -50% 10px; } }
+  @keyframes toast-out { to { opacity: 0; translate: -50% 6px; } }
 
-  /* —— Dialogs: centred on computers, sheets from the bottom on phones —— */
-  dialog {
-    width: min(420px, calc(100vw - 32px));
-    max-height: calc(100dvh - 48px);
+  /* —— Sheets —— */
+  dialog.sheet {
+    width: min(440px, calc(100vw - 32px));
+    max-height: min(720px, calc(100dvh - 48px));
     padding: 0;
     border: 0;
-    border-radius: 22px;
-    background: var(--surface-solid);
-    color: var(--fg);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--ui-sheet);
+    color: var(--ui-ink);
     box-shadow: var(--pop-shadow);
   }
-  dialog[open] { animation: rise 0.2s ease-out; }
-  dialog:focus { outline: none; }
-  dialog::backdrop { background: rgba(8, 10, 14, 0.4); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
-  @keyframes rise { from { opacity: 0; transform: translateY(8px) scale(0.985); } }
-  .dialog-body { display: grid; gap: 16px; padding: 22px 24px 20px; }
-  .dialog-title { margin: 0 0 2px; font-size: 18px; font-weight: 600; }
-  .field { display: grid; gap: 6px; }
-  .field label { font-size: 12.5px; color: var(--muted); }
-  .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 7.5rem); gap: 12px; }
-  .input {
-    width: 100%;
-    height: 42px;
-    padding: 0 13px;
-    border: 1px solid transparent;
-    border-radius: 12px;
-    background: var(--field);
-    color: var(--fg);
-    font-size: 16px;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .input::placeholder { color: var(--faint); }
-  .input:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  select.input {
+  dialog.sheet[open] { display: flex; flex-direction: column; animation: sheet-pop 0.24s var(--ease); }
+  dialog.sheet::backdrop { background: var(--backdrop); animation: fade-in 0.22s ease; }
+  dialog.sheet:focus { outline: none; }
+  @keyframes sheet-pop { from { opacity: 0; transform: translateY(10px) scale(0.98); } }
+  .sheet > form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .sheet-bar { flex: none; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 54px; padding: 0 8px; }
+  .sheet-title { margin: 0; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; font-weight: 600; text-align: center; }
+  .bar-btn { justify-self: start; height: 36px; padding: 0 10px; border: 0; border-radius: 9px; background: transparent; color: var(--accent); font-size: 15px; }
+  .bar-btn.is-end { justify-self: end; }
+  .bar-btn.is-strong { font-weight: 600; }
+  .bar-btn:hover { background: var(--ui-hover); }
+  .sheet-body { flex: 1; min-height: 0; display: grid; align-content: start; gap: 22px; overflow-y: auto; overscroll-behavior: contain; padding: 4px 16px 22px; }
+  .group { display: grid; overflow: hidden; border-radius: 12px; background: var(--ui); }
+  .row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; font-size: 15px; }
+  .row + .row::before { content: ""; position: absolute; top: 0; left: 14px; right: 0; height: 1px; background: var(--ui-line); }
+  .row-label { flex: none; min-width: 64px; color: var(--ui-ink); }
+  .row-input { flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--ui-ink); font-size: 16px; }
+  .row-input::placeholder { color: var(--ui-ink-3); }
+  .row-select {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    padding: 0 18px 0 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ui-ink-2);
+    font-size: 15px;
+    text-align: right;
+    text-align-last: right;
     appearance: none;
     -webkit-appearance: none;
-    padding-right: 34px;
-    background-image: linear-gradient(45deg, transparent 50%, var(--faint) 50%), linear-gradient(-45deg, transparent 50%, var(--faint) 50%);
-    background-position: right 17px center, right 12px center;
+    background-image: linear-gradient(45deg, transparent 50%, var(--ui-ink-3) 50%), linear-gradient(-45deg, transparent 50%, var(--ui-ink-3) 50%);
+    background-position: right 5px center, right 0 center;
     background-size: 5px 5px;
     background-repeat: no-repeat;
+    cursor: pointer;
   }
-  select.input:disabled { opacity: 0.55; cursor: not-allowed; }
-  .field-error { margin: -6px 0 0; font-size: 13px; color: var(--danger); }
-  .dialog-actions { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-  .dialog-actions .spacer { flex: 1; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 38px;
-    padding: 0 16px;
-    border: 0;
-    border-radius: 12px;
-    background: var(--field);
-    color: var(--fg);
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background-color 0.12s ease, filter 0.12s ease;
-  }
-  .btn:hover { filter: brightness(0.97); }
-  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .btn.primary { background: var(--accent); color: var(--on-accent); }
-  .btn.primary:hover { filter: brightness(1.07); }
-  .btn.ghost { background: transparent; }
-  .btn.ghost:hover { background: var(--hover); filter: none; }
-  .btn.danger { color: var(--danger); }
-  .btn.danger.ghost { margin-left: -10px; }
-  .icon-btn {
-    display: inline-grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: var(--field);
-    color: var(--muted);
-  }
-  .icon-btn:hover { color: var(--fg); }
-  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-  /* Settings */
-  #settings-dialog { width: min(480px, calc(100vw - 32px)); }
-  .sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px 10px 24px; }
-  .sheet-head .dialog-title { margin: 0; }
-  .set-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px 16px;
-    padding: 13px 24px;
-    border-top: 1px solid var(--line);
-    font-size: 14px;
-  }
-  .set-row .input { flex: 1 1 170px; max-width: 220px; }
-  .set-sub { display: grid; justify-items: start; gap: 8px; padding: 0 24px 14px; margin-top: -4px; }
-  .set-sub .btn { height: 34px; }
-  .wall-credit { font-size: 12.5px; color: var(--muted); text-decoration: none; }
-  .wall-credit[href]:hover { color: var(--fg); text-decoration: underline; }
-  .seg { display: inline-flex; padding: 3px; border-radius: 11px; background: var(--field); }
+  .row-select:disabled { opacity: 0.5; cursor: default; }
+  .row-select:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 8px; }
+  .row-btn { width: 100%; border: 0; background: transparent; color: var(--accent); text-align: left; transition: background-color 0.12s ease; }
+  .row-btn.is-danger { color: var(--danger); }
+  .row-btn:hover { background: var(--ui-hover); }
+  .row-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .group-note { margin: -14px 14px 0; font-size: 12.5px; line-height: 1.45; color: var(--ui-ink-3); }
+  .group-note a { color: inherit; }
+  .group-note button { padding: 0; border: 0; background: none; color: var(--accent); font-size: inherit; }
+  .sheet-error { margin: -12px 14px 0; font-size: 13px; color: var(--danger); }
+  .seg { display: inline-flex; flex: none; margin-left: auto; padding: 2px; border-radius: 9px; background: var(--ui-hover); }
   .seg input { position: absolute; opacity: 0; pointer-events: none; }
-  .seg label { padding: 5px 11px; border-radius: 8px; font-size: 13px; color: var(--muted); cursor: pointer; transition: background-color 0.12s ease, color 0.12s ease; }
-  .seg label:hover { color: var(--fg); }
-  .seg input:checked + label { background: var(--surface-solid); color: var(--fg); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+  .seg label { padding: 4px 10px; border-radius: 7px; color: var(--ui-ink-2); font-size: 13px; white-space: nowrap; cursor: pointer; transition: background-color 0.15s ease, color 0.15s ease; }
+  .seg input:checked + label { background: var(--seg-on); color: var(--ui-ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
   .seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
   .switch {
     appearance: none;
     -webkit-appearance: none;
     position: relative;
     flex: none;
-    width: 44px;
-    height: 26px;
-    margin: 0;
+    width: 46px;
+    height: 28px;
+    margin: 0 0 0 auto;
     border-radius: 999px;
     background: var(--track);
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: background-color 0.2s ease;
   }
   .switch::after {
     content: "";
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 20px;
-    height: 20px;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: var(--knob);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
-    transition: translate 0.15s ease, background-color 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: translate 0.25s var(--ease);
   }
-  .switch:checked { background: var(--accent); }
-  .switch:checked::after { translate: 18px 0; background: var(--on-accent); }
-  .switch:disabled { opacity: 0.5; cursor: not-allowed; }
-  .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .set-block { display: grid; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid var(--line); }
-  .set-title { margin: 0; font-size: 14px; }
-  .set-note { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 52ch; }
-  .set-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
-  .keys { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
-  .keys li { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .keys .k { display: flex; gap: 4px; flex: none; }
-  kbd {
-    display: inline-block;
-    min-width: 22px;
-    padding: 1px 6px;
-    border: 1px solid var(--line);
-    border-bottom-width: 2px;
-    border-radius: 5px;
-    background: var(--field);
-    color: var(--muted);
-    font: 11.5px/1.5 var(--font-mono);
-    text-align: center;
-  }
+  .switch:checked { background: #34C759; }
+  .switch:checked::after { translate: 18px 0; }
+  .switch:disabled { opacity: 0.45; cursor: default; }
 
   /* —— Phones —— */
   @media (max-width: 560px) {
-    .app { padding-top: calc(env(safe-area-inset-top, 0px) + clamp(56px, 11vh, 110px)); }
-    .hero { margin-bottom: 22px; max-height: 220px; transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.3s ease, margin 0.3s ease; }
-    /* While searching, the clock folds away so the search box sits near the top, above the keyboard */
-    .is-searching .hero { max-height: 0; margin-bottom: 0; overflow: hidden; opacity: 0; transform: translateY(-10px); }
-    .clock { font-size: clamp(62px, 19vw, 84px); }
-    .launcher { margin-top: 30px; }
-    .dock { width: 100%; padding: 14px 6px 0; border-radius: 26px; }
-    .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px 4px; }
+    .stage { padding-top: calc(env(safe-area-inset-top, 0px) + 48px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10vh); }
+    .clock { font-size: clamp(76px, 23vw, 100px); }
+    .hero { margin-bottom: 34px; }
+    .search { height: 48px; border-radius: 24px; }
+    .launcher { margin-top: 44px; }
+    .tabs { gap: 24px; margin-bottom: 22px; }
+    .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 0; }
     .tile-icon { width: 58px; height: 58px; border-radius: 16px; }
-    .tile-letter { font-size: 23px; }
     .tile-icon img { width: 30px; height: 30px; }
-    .suggest { max-height: 56vh; }
-    .opt { min-height: 50px; }
+    /* While searching, the clock steps aside and the field rises to the top, clear of the keyboard */
+    .is-searching .hero { opacity: 0; transform: translateY(-18px); pointer-events: none; }
+    .suggest { border-radius: 16px; }
+    .opt { min-height: 48px; }
 
-    dialog {
+    dialog.sheet {
       width: 100%;
       max-width: 100%;
-      max-height: 90vh;
+      max-height: calc(100dvh - 24px);
       margin: auto 0 0;
-      border-radius: 22px 22px 0 0;
+      border-radius: 16px 16px 0 0;
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
-    dialog::before { content: ""; display: block; width: 36px; height: 5px; margin: 8px auto -4px; border-radius: 3px; background: var(--line); }
-    dialog[open] { animation: sheet-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
-    #settings-dialog { width: 100%; }
-    .set-row .input { max-width: none; }
-    .dialog-actions { flex-wrap: wrap; }
+    dialog.sheet[open] { animation: sheet-up 0.34s var(--ease); }
+    dialog.sheet::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: var(--ui-line); }
+    .sheet-bar { height: 58px; padding-top: 6px; touch-action: none; }
+  }
+  @keyframes sheet-up { from { transform: translateY(100%); } }
+  /* Phones on their side: a shorter clock and tighter spacing */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .stage { padding-top: calc(env(safe-area-inset-top, 0px) + 28px); padding-bottom: 28px; }
+    .clock { font-size: 64px; }
+    .hero { margin-bottom: 22px; }
+    .launcher { margin-top: 28px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -846,38 +765,37 @@
 </style>
 </head>
 <body>
-<div class="bg" id="bg" aria-hidden="true"><div class="bg-img" id="bg-img"></div></div>
+<div class="bg" aria-hidden="true"><div class="bg-photo" id="bg-photo"></div></div>
+<div class="safe-probe" id="safe-probe" aria-hidden="true"></div>
 
 <button class="corner" id="open-settings" type="button" data-i18n-aria="settings" aria-label="Settings" title="Settings">
-  <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 5h7M14 5h1M3 13h1M8 13h7"/><circle cx="12" cy="5" r="2"/><circle cx="6" cy="13" r="2"/></svg>
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.5h6M13 5.5h2M3 12.5h2M9 12.5h6"/><circle cx="11" cy="5.5" r="2"/><circle cx="7" cy="12.5" r="2"/></svg>
 </button>
 
-<div class="app" id="app">
+<main class="stage" id="stage">
   <header class="hero">
     <time class="clock" id="clock">00:00</time>
     <p class="date" id="date"></p>
   </header>
 
   <div class="search-wrap" id="search-wrap">
-    <form class="search" id="search-form" role="search" autocomplete="off">
+    <form class="search is-empty" id="search-form" role="search" autocomplete="off">
       <button class="search-btn" id="engine-btn" type="button" aria-haspopup="menu"></button>
       <input id="q" type="search" placeholder="Search" aria-label="Search or type a URL" role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
-      <button class="search-btn" id="go-btn" type="submit" aria-label="Search">
-        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.4 10.4L13.6 13.6"/></svg>
+      <button class="search-btn" id="clear-btn" type="button" data-i18n-aria="clear" aria-label="Clear">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.7 5.7l4.6 4.6M10.3 5.7l-4.6 4.6" stroke="var(--ui)" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </form>
     <div class="suggest" id="suggest" role="listbox" hidden></div>
   </div>
 
   <section class="launcher" id="launcher" aria-label="Bookmarks">
-    <div class="tabs" id="tabs" role="tablist"></div>
-    <div class="dock" id="dock"><div class="pages" id="pages"></div></div>
+    <div class="tabs" id="tabs" role="tablist"><span class="tab-ink" id="tab-ink" aria-hidden="true"></span></div>
+    <div class="pages" id="pages"></div>
   </section>
+</main>
 
-  <p class="hint" id="hint" hidden><span id="hint-text"></span><button id="hint-dismiss" type="button" data-i18n="gotIt">Got it</button></p>
-</div>
-
-<div class="menu-layer" id="menu-layer" hidden><div class="menu" id="menu" role="menu"></div></div>
+<div class="menu-layer" id="menu-layer" hidden><div class="menu-preview" id="menu-preview"></div><div class="menu" id="menu" role="menu"></div></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden>
   <span class="toast-msg" id="toast-msg"></span>
@@ -885,125 +803,105 @@
 </div>
 
 <!-- Bookmark -->
-<dialog id="link-dialog" aria-labelledby="link-dialog-title" tabindex="-1">
-  <form class="dialog-body" id="link-form" novalidate>
-    <h2 class="dialog-title" id="link-dialog-title">Add bookmark</h2>
-    <div class="field">
-      <label for="f-url" data-i18n="fUrl">URL</label>
-      <input class="input" id="f-url" type="text" inputmode="url" placeholder="github.com" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off">
-    </div>
-    <div class="field">
-      <label for="f-title" data-i18n="fName">Name</label>
-      <input class="input" id="f-title" type="text" maxlength="80" autocomplete="off">
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label for="f-group" data-i18n="fGroup">Group</label>
-        <select class="input" id="f-group"></select>
+<dialog class="sheet" id="link-dialog" aria-labelledby="link-title" tabindex="-1">
+  <form id="link-form" novalidate>
+    <header class="sheet-bar">
+      <button class="bar-btn" type="button" data-close data-i18n="cancel">Cancel</button>
+      <h2 class="sheet-title" id="link-title">Add Bookmark</h2>
+      <button class="bar-btn is-end is-strong" type="submit" data-i18n="save">Save</button>
+    </header>
+    <div class="sheet-body">
+      <div class="group">
+        <label class="row"><span class="row-label" data-i18n="fUrl">URL</span><input class="row-input" id="f-url" type="text" inputmode="url" placeholder="example.com" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></label>
+        <label class="row"><span class="row-label" data-i18n="fName">Name</span><input class="row-input" id="f-title" type="text" maxlength="80" autocomplete="off"></label>
       </div>
-      <div class="field">
-        <label for="f-pos" data-i18n="fPos">Position</label>
-        <select class="input" id="f-pos"></select>
+      <div class="group">
+        <label class="row"><span class="row-label" data-i18n="fGroup">Group</span><select class="row-select" id="f-group"></select></label>
+        <label class="row" id="f-newgroup-row" hidden><span class="row-label" data-i18n="fNewGroup">New group</span><input class="row-input" id="f-newgroup" type="text" maxlength="40" data-i18n-ph="newGroupPh" autocomplete="off"></label>
+        <label class="row"><span class="row-label" data-i18n="fPos">Position</span><select class="row-select" id="f-pos"></select></label>
       </div>
-    </div>
-    <div class="field" id="f-newgroup-field" hidden>
-      <label for="f-newgroup" data-i18n="fNewGroup">New group name</label>
-      <input class="input" id="f-newgroup" type="text" maxlength="40" data-i18n-ph="newGroupPh" autocomplete="off">
-    </div>
-    <p class="field-error" id="f-error" hidden></p>
-    <div class="dialog-actions">
-      <button class="btn ghost danger" id="link-delete" type="button" data-i18n="del">Delete</button>
-      <span class="spacer"></span>
-      <button class="btn ghost" type="button" data-close data-i18n="cancel">Cancel</button>
-      <button class="btn primary" type="submit" data-i18n="save">Save</button>
+      <p class="sheet-error" id="f-error" hidden></p>
+      <div class="group" id="link-delete-group">
+        <button class="row row-btn is-danger" id="link-delete" type="button" data-i18n="deleteBookmark">Delete Bookmark</button>
+      </div>
     </div>
   </form>
 </dialog>
 
 <!-- Group -->
-<dialog id="group-dialog" aria-labelledby="group-dialog-title" tabindex="-1">
-  <form class="dialog-body" id="group-form" novalidate>
-    <h2 class="dialog-title" id="group-dialog-title">Edit group</h2>
-    <div class="field">
-      <label for="g-name" data-i18n="groupName">Group name</label>
-      <input class="input" id="g-name" type="text" maxlength="40" autocomplete="off">
-    </div>
-    <div class="field" id="g-pos-field">
-      <label for="g-pos" data-i18n="fPos">Position</label>
-      <select class="input" id="g-pos"></select>
-    </div>
-    <p class="field-error" id="g-error" hidden></p>
-    <div class="dialog-actions">
-      <button class="btn ghost danger" id="group-ungroup" type="button" data-i18n="ungroup">Ungroup</button>
-      <span class="spacer"></span>
-      <button class="btn ghost" type="button" data-close data-i18n="cancel">Cancel</button>
-      <button class="btn primary" type="submit" data-i18n="save">Save</button>
+<dialog class="sheet" id="group-dialog" aria-labelledby="group-title" tabindex="-1">
+  <form id="group-form" novalidate>
+    <header class="sheet-bar">
+      <button class="bar-btn" type="button" data-close data-i18n="cancel">Cancel</button>
+      <h2 class="sheet-title" id="group-title">Edit Group</h2>
+      <button class="bar-btn is-end is-strong" type="submit" data-i18n="save">Save</button>
+    </header>
+    <div class="sheet-body">
+      <div class="group">
+        <label class="row"><span class="row-label" data-i18n="groupName">Name</span><input class="row-input" id="g-name" type="text" maxlength="40" autocomplete="off"></label>
+        <label class="row" id="g-pos-row"><span class="row-label" data-i18n="fPos">Position</span><select class="row-select" id="g-pos"></select></label>
+      </div>
+      <p class="sheet-error" id="g-error" hidden></p>
+      <div class="group" id="g-ungroup-group">
+        <button class="row row-btn is-danger" id="group-ungroup" type="button" data-i18n="ungroup">Ungroup</button>
+      </div>
+      <p class="group-note" id="g-ungroup-note" data-i18n="ungroupNote"></p>
     </div>
   </form>
 </dialog>
 
 <!-- Settings -->
-<dialog id="settings-dialog" aria-labelledby="settings-title">
+<dialog class="sheet" id="settings-dialog" aria-labelledby="settings-title" tabindex="-1">
   <form id="settings-form" novalidate>
-    <div class="sheet-head">
-      <h2 class="dialog-title" id="settings-title" data-i18n="settings">Settings</h2>
-      <button class="icon-btn" type="button" data-close data-i18n-aria="close" aria-label="Close">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>
-      </button>
-    </div>
-    <div class="set-row">
-      <span id="lang-label" data-i18n="sLang">Language</span>
-      <div class="seg" role="radiogroup" aria-labelledby="lang-label">
-        <input type="radio" name="lang" id="s-lang-en" value="en"><label for="s-lang-en" lang="en">English</label>
-        <input type="radio" name="lang" id="s-lang-zh" value="zh"><label for="s-lang-zh" lang="zh-CN">中文</label>
+    <header class="sheet-bar">
+      <span></span>
+      <h2 class="sheet-title" id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="bar-btn is-end is-strong" type="button" data-close data-i18n="done">Done</button>
+    </header>
+    <div class="sheet-body">
+      <div class="group">
+        <div class="row">
+          <span class="row-label" id="lang-label" data-i18n="sLang">Language</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lang-label">
+            <input type="radio" name="lang" id="s-lang-en" value="en"><label for="s-lang-en" lang="en">English</label>
+            <input type="radio" name="lang" id="s-lang-zh" value="zh"><label for="s-lang-zh" lang="zh-CN">中文</label>
+          </div>
+        </div>
+        <div class="row">
+          <span class="row-label" id="theme-label" data-i18n="sTheme">Appearance</span>
+          <div class="seg" role="radiogroup" aria-labelledby="theme-label">
+            <input type="radio" name="theme" id="s-theme-system" value="system"><label for="s-theme-system" data-i18n="themeSystem">System</label>
+            <input type="radio" name="theme" id="s-theme-light" value="light"><label for="s-theme-light" data-i18n="themeLight">Light</label>
+            <input type="radio" name="theme" id="s-theme-dark" value="dark"><label for="s-theme-dark" data-i18n="themeDark">Dark</label>
+          </div>
+        </div>
+        <div class="row">
+          <span class="row-label" id="bg-label" data-i18n="sBackground">Background</span>
+          <div class="seg" role="radiogroup" aria-labelledby="bg-label">
+            <input type="radio" name="bg" id="s-bg-default" value="default"><label for="s-bg-default" data-i18n="bgDefault">Default</label>
+            <input type="radio" name="bg" id="s-bg-bing" value="bing"><label for="s-bg-bing" data-i18n="bgBing">Bing</label>
+            <input type="radio" name="bg" id="s-bg-photo" value="photo"><label for="s-bg-photo" data-i18n="bgPhoto">Photo</label>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="set-row">
-      <span id="theme-label" data-i18n="sTheme">Appearance</span>
-      <div class="seg" role="radiogroup" aria-labelledby="theme-label">
-        <input type="radio" name="theme" id="s-theme-system" value="system"><label for="s-theme-system" data-i18n="themeSystem">System</label>
-        <input type="radio" name="theme" id="s-theme-light" value="light"><label for="s-theme-light" data-i18n="themeLight">Light</label>
-        <input type="radio" name="theme" id="s-theme-dark" value="dark"><label for="s-theme-dark" data-i18n="themeDark">Dark</label>
+      <p class="group-note" id="bg-note" hidden>
+        <a id="bg-credit" target="_blank" rel="noopener"></a>
+        <button id="bg-choose" type="button" data-i18n="bgChoose">Choose Photo…</button>
+      </p>
+      <input id="bg-file" type="file" accept="image/*" hidden>
+      <div class="group">
+        <label class="row"><span class="row-label" data-i18n="sEngine">Search Engine</span><select class="row-select" id="s-engine"></select></label>
+        <label class="row"><span class="row-label" data-i18n="sSuggest">Suggestions</span><input class="switch" id="s-suggest" type="checkbox"></label>
+        <label class="row"><span class="row-label" data-i18n="sNewTab">Open in New Tab</span><input class="switch" id="s-newtab" type="checkbox"></label>
       </div>
-    </div>
-    <div class="set-row">
-      <span id="wall-label" data-i18n="sWallpaper">Wallpaper</span>
-      <div class="seg" role="radiogroup" aria-labelledby="wall-label">
-        <input type="radio" name="wall" id="s-wall-bing" value="bing"><label for="s-wall-bing" data-i18n="wallBing">Bing daily</label>
-        <input type="radio" name="wall" id="s-wall-gradient" value="gradient"><label for="s-wall-gradient" data-i18n="wallGradient">Gradient</label>
-        <input type="radio" name="wall" id="s-wall-custom" value="custom"><label for="s-wall-custom" data-i18n="wallCustom">My photo</label>
+      <p class="group-note" id="suggest-note"></p>
+      <div class="group">
+        <button class="row row-btn" id="export-btn" type="button" data-i18n="sExport">Export Backup</button>
+        <button class="row row-btn" id="import-btn" type="button" data-i18n="sImport">Import…</button>
+        <button class="row row-btn is-danger" id="reset-btn" type="button" data-i18n="sReset">Restore Default Bookmarks</button>
       </div>
-    </div>
-    <div class="set-sub">
-      <a class="wall-credit" id="wall-credit" target="_blank" rel="noopener" hidden></a>
-      <button class="btn" id="wall-choose" type="button" data-i18n="wallChoose" hidden>Choose photo…</button>
-      <input id="wall-file" type="file" accept="image/*" hidden>
-    </div>
-    <div class="set-row">
-      <label for="s-engine" data-i18n="sEngine">Search engine</label>
-      <select class="input" id="s-engine"></select>
-    </div>
-    <div class="set-row">
-      <label for="s-suggest" data-i18n="sSuggest">Search suggestions</label>
-      <input class="switch" id="s-suggest" type="checkbox">
-    </div>
-    <div class="set-sub"><p class="set-note" id="suggest-note"></p></div>
-    <div class="set-row">
-      <label for="s-newtab" data-i18n="sNewTab">Open links in a new tab</label>
-      <input class="switch" id="s-newtab" type="checkbox">
-    </div>
-    <div class="set-block">
-      <p class="set-title" data-i18n="sKeys">Shortcuts</p>
-      <ul class="keys" id="keys"></ul>
-    </div>
-    <div class="set-block">
-      <p class="set-title" data-i18n="sData">Data</p>
-      <p class="set-note" data-i18n="sDataNote"></p>
-      <div class="set-actions">
-        <button class="btn" id="export-btn" type="button" data-i18n="sExport">Export backup</button>
-        <button class="btn" id="import-btn" type="button" data-i18n="sImport">Import…</button>
-        <button class="btn ghost danger" id="reset-btn" type="button" data-i18n="sReset">Restore defaults</button>
-      </div>
+      <p class="group-note" data-i18n="sDataNote"></p>
+      <p class="group-note" id="keys-note"></p>
       <input id="import-file" type="file" accept=".json,.html,.htm,application/json,text/html" hidden>
     </div>
   </form>
@@ -1015,9 +913,10 @@
 
   const STORE_KEY = 'desk.startpage.v2';
   const OLD_KEY = 'antou.startpage.v1';
-  const VIEW_KEY = 'desk.startpage.view';    // the group last shown, per browser
-  const BING_KEY = 'desk.startpage.bing';    // today's Bing photo, cached for the day
-  const PHOTO_KEY = 'desk.startpage.photo';  // the viewer's own wallpaper, as a data URL
+  const VIEW_KEY = 'desk.startpage.view';      // the group last shown, per browser
+  const BING_KEY = 'desk.startpage.bing';      // today's Bing photo, cached for the day
+  const PHOTO_KEY = 'desk.startpage.photo';    // the viewer's own background, as a data URL
+  const ICON_KEY = 'desk.startpage.icons.v2';  // which icon worked per site
   const MAIN = 'main';
   const NEW_GROUP = '__new';
   // Suggestions use JSONP because no engine allows cross-site requests; DuckDuckGo offers neither
@@ -1036,72 +935,71 @@
     },
     ddg: { en: 'DuckDuckGo', zh: 'DuckDuckGo', color: '#DE5833', url: 'https://duckduckgo.com/?q=', icon: 'https://duckduckgo.com/favicon.ico', suggest: null },
   };
-  const DEFAULT_SETTINGS = { lang: 'en', engine: 'google', theme: 'system', wallpaper: 'bing', suggest: true, newTab: false, hintDismissed: false };
   const COMMON_TLDS = new Set('com net org io ai dev app cn co me so sh xyz gg tv uk jp kr de fr info edu gov site tech top design cc ly to fm im link page cloud us ca au hk tw sg news blog wiki run'.split(' '));
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-  const MOD = isMac ? '⌘' : 'Ctrl ';
+  const MOD = isMac ? '⌘' : 'Ctrl+';
   const s = n => (n === 1 ? '' : 's');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const touchOnly = matchMedia('(hover: none)');
-  const sheetQuery = matchMedia('(max-width: 560px), (hover: none)');
+  const phoneQuery = matchMedia('(max-width: 560px)');
 
   /* ---------- Strings ---------- */
   const STR = {
     en: {
       title: 'Desk',
       searchIdle: 'Search',
-      searchPh: e => `Search ${e} or type a URL`,
+      searchPh: e => `Search with ${e}, or type a URL`,
       searchAria: 'Search or type a URL',
-      searchGo: 'Search',
+      clear: 'Clear',
       engineAria: e => `Search engine: ${e}`,
       goTo: h => `Go to ${h}`,
       searchWith: e => `${e} Search`,
       useSuggestion: x => `Use “${x}”`,
       settings: 'Settings',
-      close: 'Close',
-      launcherLabel: 'Bookmarks',
-      tabsLabel: 'Bookmark groups',
+      done: 'Done',
+      cancel: 'Cancel',
+      save: 'Save',
+      bookmarksLabel: 'Bookmarks',
+      groupsLabel: 'Bookmark groups',
       unsorted: 'Unsorted',
-      bookmarksTab: 'Bookmarks',
-      newGroup: 'New group',
-      addTile: 'Add',
-      addToAria: g => `Add a bookmark to “${g}”`,
-      addBookmark: 'Add bookmark',
-      editBookmark: 'Edit bookmark',
+      addTo: g => `Add a bookmark to ${g}`,
+      addBookmark: 'Add Bookmark',
+      editBookmark: 'Edit Bookmark',
       fUrl: 'URL',
       fName: 'Name',
       fGroup: 'Group',
       fPos: 'Position',
-      posFirst: n => `${n} · first`,
-      posLast: n => `${n} · last`,
-      fNewGroup: 'New group name',
-      newGroupPh: 'e.g. Reading',
+      fNewGroup: 'New group',
+      newGroupPh: 'Name',
       optNone: 'None',
-      optNew: 'New group…',
-      namePh: host => (host ? `Defaults to ${host}` : 'Defaults to the domain'),
-      del: 'Delete',
-      cancel: 'Cancel',
-      save: 'Save',
+      optNew: 'New Group…',
+      posFirst: n => `${n} · First`,
+      posLast: n => `${n} · Last`,
+      namePh: host => host || 'Optional',
+      deleteBookmark: 'Delete Bookmark',
       errUrlEmpty: 'Enter a URL.',
       errUrlBad: 'That URL doesn’t look right. Try github.com or https://example.com.',
       errGroupEmpty: 'Enter a group name.',
-      editGroup: 'Edit group',
-      groupName: 'Group name',
+      editGroup: 'Edit Group',
+      newGroup: 'New Group',
+      groupName: 'Name',
       ungroup: 'Ungroup',
-      menuOpenNew: 'Open in new tab',
+      ungroupNote: 'Ungrouping keeps the bookmarks and moves them to Unsorted.',
+      menuOpenNew: 'Open in New Tab',
       menuEdit: 'Edit',
       menuDelete: 'Delete',
+      menuEditGroup: 'Edit Group',
+      menuNewGroup: 'New Group',
       tAdded: n => `Added “${n}”`,
       tDeleted: n => `Deleted “${n}”`,
-      tUngrouped: g => `Ungrouped “${g}”. Its bookmarks moved to Unsorted.`,
+      tUngrouped: g => `Ungrouped “${g}”`,
       tMoved: (n, p) => `Moved “${n}” to position ${p}`,
-      tGroupMoved: (g, p) => `Moved group “${g}” to position ${p}`,
-      tGroupCreated: g => `Created group “${g}”`,
+      tGroupMoved: (g, p) => `Moved “${g}” to position ${p}`,
+      tGroupCreated: g => `Created “${g}”`,
       undo: 'Undo',
       tUndone: 'Undone',
-      tipHint: 'Tip: right-click a bookmark to edit it, drag to reorder, or paste a URL anywhere to add one.',
-      tipTouch: 'Tip: long-press a bookmark to edit it, or long-press and drag to move it. Swipe to switch groups.',
-      gotIt: 'Got it',
+      tipPointer: 'Right-click a bookmark to edit it, or drag it to reorder.',
+      tipTouch: 'Press and hold a bookmark to edit or move it.',
       groupPersonal: 'Personal',
       groupLearning: 'Learning',
       groupFun: 'Entertainment',
@@ -1110,36 +1008,27 @@
       themeSystem: 'System',
       themeLight: 'Light',
       themeDark: 'Dark',
-      sWallpaper: 'Wallpaper',
-      wallBing: 'Bing daily',
-      wallGradient: 'Gradient',
-      wallCustom: 'My photo',
-      wallChoose: 'Choose photo…',
+      sBackground: 'Background',
+      bgDefault: 'Default',
+      bgBing: 'Bing Daily',
+      bgPhoto: 'My Photo',
+      bgChoose: 'Choose Photo…',
       tWallTooBig: 'That photo is too large to keep in this browser. Try a smaller one.',
       tWallBad: 'Couldn’t open that image.',
-      tWallSaved: 'Wallpaper updated',
-      sEngine: 'Search engine',
-      sSuggest: 'Search suggestions',
-      sSuggestNote: e => `Shows suggestions as you type. What you type is sent to ${e}.`,
+      tWallSaved: 'Background updated',
+      sEngine: 'Search Engine',
+      sSuggest: 'Suggestions',
+      sSuggestNote: e => `Suggestions appear as you type. What you type is sent to ${e}.`,
       sSuggestNone: e => `${e} doesn’t offer suggestions to other sites.`,
-      sNewTab: 'Open links in a new tab',
-      sKeys: 'Shortcuts',
-      keys: [
-        [[], 'Start typing anywhere to search'],
-        [['/'], 'Focus the search box'],
-        [['↑', '↓'], 'Choose a suggestion'],
-        [[MOD + '↵'], 'Open in a new tab'],
-        [[MOD + 'V'], 'Paste a URL on the page to add it'],
-        [['Esc'], 'Close search'],
-      ],
-      sData: 'Data',
+      sNewTab: 'Open in New Tab',
+      sExport: 'Export Backup',
+      sImport: 'Import Backup or Browser Bookmarks',
+      sReset: 'Restore Default Bookmarks',
       sDataNote: 'Bookmarks are saved in this browser only. Export a backup before you switch browsers or clear site data.',
-      sExport: 'Export backup',
-      sImport: 'Import…',
-      sReset: 'Restore defaults',
+      keysNote: `Start typing anywhere to search · / focuses the search · ${MOD}V on the page adds a copied link`,
       tExported: n => `Exported ${n} bookmark${s(n)}`,
       tImported: n => `Imported ${n} bookmark${s(n)}`,
-      tRestored: n => `Restored backup with ${n} bookmark${s(n)}`,
+      tRestored: n => `Restored ${n} bookmark${s(n)} from the backup`,
       tUnknownFile: 'Couldn’t read that file. Choose a .json backup from this page, or a bookmarks .html file exported from your browser.',
       tBadBackup: 'That backup file is damaged and can’t be read.',
       tNotBackup: 'That JSON file isn’t a backup from this page.',
@@ -1153,56 +1042,56 @@
       searchIdle: '搜索',
       searchPh: e => `用 ${e} 搜索，或输入网址`,
       searchAria: '搜索或输入网址',
-      searchGo: '搜索',
+      clear: '清除',
       engineAria: e => `搜索引擎：${e}`,
       goTo: h => `前往 ${h}`,
       searchWith: e => `${e} 搜索`,
       useSuggestion: x => `填入「${x}」`,
       settings: '设置',
-      close: '关闭',
-      launcherLabel: '书签',
-      tabsLabel: '书签分组',
+      done: '完成',
+      cancel: '取消',
+      save: '保存',
+      bookmarksLabel: '书签',
+      groupsLabel: '书签分组',
       unsorted: '未分组',
-      bookmarksTab: '书签',
-      newGroup: '新建分组',
-      addTile: '添加',
-      addToAria: g => `添加书签到「${g}」`,
+      addTo: g => `添加书签到「${g}」`,
       addBookmark: '添加书签',
       editBookmark: '编辑书签',
       fUrl: '网址',
       fName: '名称',
       fGroup: '分组',
       fPos: '位置',
-      posFirst: n => `${n} · 最前`,
-      posLast: n => `${n} · 最后`,
-      fNewGroup: '新分组名称',
-      newGroupPh: '例如：阅读',
+      fNewGroup: '新分组',
+      newGroupPh: '名称',
       optNone: '不分组',
       optNew: '新建分组…',
-      namePh: host => (host ? `留空则显示 ${host}` : '留空则显示域名'),
-      del: '删除',
-      cancel: '取消',
-      save: '保存',
+      posFirst: n => `${n} · 最前`,
+      posLast: n => `${n} · 最后`,
+      namePh: host => host || '可选',
+      deleteBookmark: '删除书签',
       errUrlEmpty: '请填写网址。',
       errUrlBad: '这个网址无法识别，请检查拼写，例如 github.com 或 https://example.com。',
       errGroupEmpty: '请填写分组名称。',
       editGroup: '编辑分组',
-      groupName: '分组名称',
+      newGroup: '新建分组',
+      groupName: '名称',
       ungroup: '取消分组',
+      ungroupNote: '取消分组会保留其中的书签，并把它们移到「未分组」。',
       menuOpenNew: '在新标签页打开',
       menuEdit: '编辑',
       menuDelete: '删除',
+      menuEditGroup: '编辑分组',
+      menuNewGroup: '新建分组',
       tAdded: n => `已添加「${n}」`,
       tDeleted: n => `已删除「${n}」`,
-      tUngrouped: g => `已取消分组「${g}」，其中的书签移到了「未分组」。`,
+      tUngrouped: g => `已取消分组「${g}」`,
       tMoved: (n, p) => `已将「${n}」移到第 ${p} 位`,
-      tGroupMoved: (g, p) => `已将分组「${g}」移到第 ${p} 位`,
-      tGroupCreated: g => `已新建分组「${g}」`,
+      tGroupMoved: (g, p) => `已将「${g}」移到第 ${p} 位`,
+      tGroupCreated: g => `已新建「${g}」`,
       undo: '撤销',
       tUndone: '已撤销',
-      tipHint: '提示：右键书签可以编辑，拖动可以排序，在页面任意处粘贴网址即可添加。',
-      tipTouch: '提示：长按书签可以编辑，长按后拖动可以移动，左右滑动切换分组。',
-      gotIt: '知道了',
+      tipPointer: '右键书签可以编辑，拖动可以排序。',
+      tipTouch: '长按书签可以编辑或移动。',
       groupPersonal: '个人',
       groupLearning: '学习',
       groupFun: '娱乐',
@@ -1211,36 +1100,27 @@
       themeSystem: '跟随系统',
       themeLight: '浅色',
       themeDark: '深色',
-      sWallpaper: '壁纸',
-      wallBing: '必应每日',
-      wallGradient: '渐变',
-      wallCustom: '自定义图片',
-      wallChoose: '选择图片…',
+      sBackground: '背景',
+      bgDefault: '默认',
+      bgBing: '必应每日',
+      bgPhoto: '自定义',
+      bgChoose: '选择图片…',
       tWallTooBig: '图片太大，浏览器存不下，请换一张小一点的。',
       tWallBad: '无法打开这张图片。',
-      tWallSaved: '壁纸已更新',
+      tWallSaved: '背景已更新',
       sEngine: '搜索引擎',
       sSuggest: '搜索建议',
       sSuggestNote: e => `输入时显示搜索建议，输入内容会发送给 ${e}。`,
       sSuggestNone: e => `${e} 不向其他网站提供搜索建议。`,
-      sNewTab: '在新标签页打开链接',
-      sKeys: '快捷键',
-      keys: [
-        [[], '在页面任意处直接打字即可搜索'],
-        [['/'], '聚焦搜索框'],
-        [['↑', '↓'], '选择搜索建议'],
-        [[MOD + '↵'], '在新标签页打开'],
-        [[MOD + 'V'], '在页面上粘贴网址即可添加'],
-        [['Esc'], '退出搜索'],
-      ],
-      sData: '数据',
-      sDataNote: '书签只保存在当前浏览器里。换浏览器或清除网站数据之前，记得先导出一份备份。',
+      sNewTab: '在新标签页打开',
       sExport: '导出备份',
-      sImport: '导入…',
+      sImport: '导入备份或浏览器书签',
       sReset: '恢复默认书签',
+      sDataNote: '书签只保存在当前浏览器里。换浏览器或清除网站数据之前，记得先导出一份备份。',
+      keysNote: `在页面任意处打字即可搜索 · 按 / 聚焦搜索框 · 在页面上按 ${MOD}V 粘贴网址即可添加`,
       tExported: n => `已导出 ${n} 个书签`,
       tImported: n => `已导入 ${n} 个书签`,
-      tRestored: n => `已恢复备份，共 ${n} 个书签`,
+      tRestored: n => `已从备份恢复 ${n} 个书签`,
       tUnknownFile: '无法识别这个文件。请选择本页导出的 .json 备份，或浏览器导出的书签 .html 文件。',
       tBadBackup: '备份文件已损坏，无法读取。',
       tNotBackup: '这个 JSON 文件不是本页导出的备份。',
@@ -1279,8 +1159,9 @@
     globe: '<circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.4 3.4 2.4 5.5S9.6 11.9 8 13.5M8 2.5C6.4 4.1 5.6 5.9 5.6 8s.8 3.9 2.4 5.5"/>',
     check: '<path d="M3.5 8.5l3 3 6-7"/>',
     fill: '<path d="M11.5 11.5L4.5 4.5M4.5 10V4.5H10"/>',
+    folder: '<path d="M2.5 5V12.5h11V6H8L6.5 4.5h-4z"/>',
   };
-  function icon(name, size = 14, cls) {
+  function icon(name, size = 16, cls) {
     const tpl = document.createElement('template');
     tpl.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"${cls ? ` class="${cls}"` : ''}>${ICONS[name]}</svg>`;
     return tpl.content.firstElementChild;
@@ -1312,10 +1193,10 @@
   function hostOf(url) {
     try { return new URL(url).host.replace(/^www\./, ''); } catch { return ''; }
   }
-  function hue(str) {
+  function hash(str) {
     let h = 7;
     for (const c of str) h = (h * 31 + c.codePointAt(0)) >>> 0;
-    return h % 360;
+    return h;
   }
 
   /* ---------- Data ---------- */
@@ -1394,12 +1275,12 @@
     const r = raw && typeof raw === 'object' ? raw : {};
     return {
       lang: r.lang === 'zh' ? 'zh' : 'en',
-      engine: typeof r.engine === 'string' && has(ENGINES, r.engine) ? r.engine : DEFAULT_SETTINGS.engine,
+      engine: typeof r.engine === 'string' && has(ENGINES, r.engine) ? r.engine : 'google',
       theme: ['light', 'dark'].includes(r.theme) ? r.theme : 'system',
-      wallpaper: ['bing', 'gradient', 'custom'].includes(r.wallpaper) ? r.wallpaper : DEFAULT_SETTINGS.wallpaper,
+      background: ['default', 'bing', 'photo'].includes(r.background) ? r.background : 'default',
       suggest: r.suggest !== false,
       newTab: r.newTab === true,
-      hintDismissed: r.hintDismissed === true,
+      tipShown: r.tipShown === true || r.hintDismissed === true,
     };
   }
   function readJson(key) {
@@ -1423,10 +1304,10 @@
     if (old && Array.isArray(old.groups)) {
       const items = old.groups.flatMap(g => (g && Array.isArray(g.items) ? g.items : []));
       if (items.length && !items.every(it => V1_SAMPLE_URLS.has(it && it.url))) {
-        return { groups: cleanGroups(old.groups), settings: cleanSettings({ ...old.settings, lang: 'en', hintDismissed: true }) };
+        return { groups: cleanGroups(old.groups), settings: cleanSettings({ ...old.settings, lang: 'en', tipShown: true }) };
       }
     }
-    return { groups: sampleGroups(), settings: cleanSettings(DEFAULT_SETTINGS) };
+    return { groups: sampleGroups(), settings: cleanSettings({}) };
   }
 
   let state = load();
@@ -1448,11 +1329,10 @@
     state = JSON.parse(snap);
     save();
     applyAll();
-    applyWallpaper();
+    applyBackground();
   }
   function mutate(fn, message) {
     const before = snapshot();
-    state.settings.hintDismissed = true;
     fn();
     save();
     render();
@@ -1468,13 +1348,48 @@
   const displayName = it => it.title || hostOf(it.url);
   const namedGroups = () => state.groups.filter(g => g.id !== MAIN);
 
-  /* ---------- Icons for bookmarks and engines ---------- */
-  // Google's icon service answers unknown sites with a generic 16px globe, so a 16px answer falls
-  // through to the site's own /favicon.ico, and then to a coloured letter.
-  // Results are remembered per site: a working icon for good, "none" for a week before trying again.
-  const ICON_KEY = 'desk.startpage.icons';
+  /* ---------- Icons ---------- */
+  // A site without an icon gets a monogram in one of a few muted hues. Monograms avoid each other:
+  // initials first, then the first two letters, and neighbours in a group never share a hue.
+  const MONO_HUES = [214, 168, 32, 344, 262, 192, 138, 12];
+  const CJK = /[⺀-鿿가-힯぀-ヿ]/;
+  function monoCandidates(name) {
+    const clean = String(name || '').trim().replace(/^(the|a|an)\s+/i, '') || '?';
+    const chars = [...clean];
+    if (CJK.test(chars[0])) return [chars[0], chars.slice(0, 2).join('')];
+    const words = clean.split(/[\s\-_.·:|/]+/).filter(Boolean);
+    const w0 = [...(words[0] || clean)];
+    const firstTwo = w0.length > 1 ? w0[0].toUpperCase() + w0[1].toLowerCase() : '';
+    const out = words.length > 1 ? [(w0[0] + [...words[1]][0]).toUpperCase(), firstTwo] : [w0[0].toUpperCase(), firstTwo];
+    return out.filter(Boolean);
+  }
+  let monoFor = new Map(); // bookmark id -> { text, hue }
+  function assignMonograms() {
+    monoFor = new Map();
+    const usedText = new Set();
+    for (const g of state.groups) {
+      const usedHue = new Set();
+      for (const it of g.items) {
+        const name = displayName(it);
+        const cands = monoCandidates(name);
+        const text = cands.find(c => !usedText.has(c)) || cands[0];
+        usedText.add(text);
+        let hi = hash(name + it.url) % MONO_HUES.length;
+        for (let k = 0; k < MONO_HUES.length && usedHue.has(hi); k++) hi = (hi + 3) % MONO_HUES.length;
+        usedHue.add(hi);
+        monoFor.set(it.id, { text, hue: MONO_HUES[hi] });
+      }
+    }
+  }
+  // Project pages share their host's icon (or have none), so they get a monogram of their own
+  const PROJECT_HOSTS = /\.(github|gitlab)\.io$|\.pages\.dev$|\.netlify\.app$|\.vercel\.app$/i;
+  const isProjectPage = u => PROJECT_HOSTS.test(u.hostname) && u.pathname.replace(/\/+$/, '') !== '';
+
+  // Icons come from DuckDuckGo, then Google, then the site's own /favicon.ico. DuckDuckGo answers a
+  // missing icon with a 48px placeholder and Google with a 16px globe, so those sizes fall through.
+  // A working icon is remembered for good, "none" for a week before trying again.
   const ICON_RETRY_MS = 7 * 864e5;
-  const iconCache = new Map(); // host -> { src, small } once one works, or { none, at } when none does
+  const iconCache = new Map(); // hostname -> { src, small } or { none, at }
   for (const [h, v] of Object.entries(readJson(ICON_KEY) || {})) {
     if (v && typeof v.src === 'string' && /^https:\/\//.test(v.src)) iconCache.set(h, { src: v.src, small: v.small === true });
     else if (v && v.none && Date.now() - v.at < ICON_RETRY_MS) iconCache.set(h, { none: true, at: v.at });
@@ -1485,37 +1400,42 @@
     clearTimeout(iconSaveTimer);
     iconSaveTimer = setTimeout(() => writeText(ICON_KEY, JSON.stringify(Object.fromEntries(iconCache))), 600);
   }
-  function iconEl(url, host, name, cls = 'tile-icon') {
-    const span = el('span', { class: cls, style: `--h:${hue(host || name)}`, 'aria-hidden': 'true' },
-      el('span', { class: 'tile-letter' }, [...(name || host || '?')][0].toUpperCase()));
+  function iconEl(url, name, cls = 'tile-icon', id) {
+    let u = null;
+    try { u = new URL(url); } catch {}
+    const label = name || (u && u.hostname) || '?';
+    const mono = monoFor.get(id) || { text: monoCandidates(label)[0], hue: MONO_HUES[hash(label + url) % MONO_HUES.length] };
+    const span = el('span', { class: cls, style: `--h:${mono.hue}`, 'aria-hidden': 'true' }, el('span', { class: 'mono' }, mono.text));
+    if (!u || !/^https?:$/.test(u.protocol) || isProjectPage(u)) return span;
+    const host = u.hostname;
     let cached = iconCache.get(host);
     if (cached && cached.none) return span;
-    if (!host || !/^https?:/.test(url)) return span;
-    const sources = cached ? [cached.src] : [
-      `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`,
-      `${new URL(url).origin}/favicon.ico`,
+    const sources = cached ? [{ src: cached.src, ok: () => true }] : [
+      { src: `https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`, ok: w => w !== 48 },
+      { src: `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`, ok: w => w > 16 },
+      { src: `${u.origin}/favicon.ico`, ok: w => w > 0 },
     ];
     const img = el('img', { alt: '', draggable: 'false', referrerpolicy: 'no-referrer', decoding: 'async' });
     let stage = 0;
-    // Out of sources: drop the image, keep the letter and stop retrying this host
+    // Out of sources: drop the image, keep the monogram and stop retrying this site for a while
     const next = () => {
       stage += 1;
-      if (stage < sources.length) { img.src = sources[stage]; return; }
+      if (stage < sources.length) { img.src = sources[stage].src; return; }
       img.remove();
       span.classList.remove('has-img');
       rememberIcon(host, { none: true, at: Date.now() });
     };
     img.addEventListener('load', () => {
-      const generic = sources.length > 1 && stage === 0 && img.naturalWidth <= 16;
-      if (!img.naturalWidth || generic) { next(); return; }
-      const small = img.naturalWidth < 32;
+      const w = img.naturalWidth;
+      if (!w || !sources[stage].ok(w)) { next(); return; }
+      const small = w < 32;
       img.classList.toggle('is-small', small);
       span.classList.add('has-img');
-      if (!cached || cached.src !== sources[stage]) { cached = { src: sources[stage], small }; rememberIcon(host, cached); }
+      if (!cached || cached.src !== sources[stage].src) { cached = { src: sources[stage].src, small }; rememberIcon(host, cached); }
     });
     img.addEventListener('error', next);
     if (cached) { span.classList.add('has-img'); img.classList.toggle('is-small', cached.small); }
-    img.src = sources[0];
+    img.src = sources[0].src;
     span.append(img);
     return span;
   }
@@ -1530,32 +1450,33 @@
     return span;
   }
 
-  /* ---------- Bookmarks: group tabs over swipeable pages of tiles ---------- */
+  /* ---------- Bookmarks: a line of group names over swipeable pages of icons ---------- */
   const launcher = $('#launcher');
   const tabsEl = $('#tabs');
+  const tabInk = $('#tab-ink');
   const pagesEl = $('#pages');
   let itemIndex = new Map();
   let activeGid = readText(VIEW_KEY);
-  let snapLock = 0; // page scroll events are ignored until then, while a scroll we started is running
+  let snapLock = 0; // page scroll events don't change the group until then, while a scroll we started runs
 
   const visibleGroups = () => state.groups.filter(g => g.id !== MAIN || g.items.length || state.groups.length === 1);
-  const groupLabel = g => (g.id !== MAIN ? g.name : state.groups.length === 1 ? t('bookmarksTab') : t('unsorted'));
+  const groupLabel = g => (g.id !== MAIN ? g.name : state.groups.length === 1 ? t('bookmarksLabel') : t('unsorted'));
 
   function tileEl(it) {
-    const host = hostOf(it.url);
     const name = displayName(it);
+    const host = hostOf(it.url);
     const nt = state.settings.newTab;
     return el('li', { class: 'tile', dataset: { id: it.id } },
       el('a', {
         class: 'tile-link', href: it.url, draggable: 'false', title: host && host !== name ? `${name}\n${host}` : name,
         target: nt ? '_blank' : null, rel: nt ? 'noopener' : null,
-      }, iconEl(it.url, host, name), el('span', { class: 'tile-name' }, name)));
+      }, iconEl(it.url, name, 'tile-icon', it.id), el('span', { class: 'tile-name' }, name)));
   }
   function addTileEl(g) {
     return el('li', { class: 'tile tile-add' },
-      el('button', { class: 'tile-link', type: 'button', 'aria-label': t('addToAria', groupLabel(g)), onclick: () => openLinkDialog({ gid: g.id }) },
-        el('span', { class: 'tile-icon' }, icon('plus', 24)),
-        el('span', { class: 'tile-name' }, t('addTile'))));
+      el('button', { class: 'tile-link', type: 'button', 'aria-label': t('addTo', groupLabel(g)), title: t('addBookmark'), onclick: () => openLinkSheet({ gid: g.id }) },
+        el('span', { class: 'tile-icon' }, icon('plus', 20)),
+        el('span', { class: 'tile-name' }, ' ')));
   }
   function tabEl(g) {
     const on = g.id === activeGid;
@@ -1572,15 +1493,12 @@
   function render() {
     itemIndex = new Map();
     state.groups.forEach(g => g.items.forEach(it => itemIndex.set(it.id, it)));
+    assignMonograms();
     const groups = visibleGroups();
     if (!groups.some(g => g.id === activeGid)) activeGid = groups[0].id;
-    tabsEl.replaceChildren(...groups.map(tabEl),
-      el('button', { class: 'tab tab-add', type: 'button', 'aria-label': t('newGroup'), title: t('newGroup'), onclick: () => openGroupDialog() }, icon('plus', 15)));
+    tabsEl.replaceChildren(...groups.map(tabEl), tabInk);
+    tabsEl.hidden = groups.length < 2;
     pagesEl.replaceChildren(...groups.map(pageEl));
-    // Columns for the widest group, counting its "Add" tile, between 4 and 7
-    $('#dock').style.setProperty('--cols', String(Math.min(7, Math.max(4, ...groups.map(g => g.items.length + 1)))));
-    $('#hint').hidden = !!state.settings.hintDismissed;
-    $('#hint-text').textContent = touchOnly.matches ? t('tipTouch') : t('tipHint');
     showGroup(activeGid, { instant: true });
     if (searching) updatePanel();
   }
@@ -1591,41 +1509,59 @@
     if (i < 0) return;
     activeGid = gid;
     writeText(VIEW_KEY, gid);
-    for (const tab of $$('.tab[data-gid]', tabsEl)) {
+    for (const tab of $$('.tab', tabsEl)) {
       const on = tab.dataset.gid === gid;
       tab.setAttribute('aria-selected', String(on));
       tab.tabIndex = on ? 0 : -1;
-      if (on && !instant && tabsEl.scrollWidth > tabsEl.clientWidth) tab.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
     }
     if (!fromScroll) {
       const smooth = !instant && !reduceMotion.matches;
-      snapLock = Date.now() + (smooth ? 500 : 60);
+      snapLock = Date.now() + (smooth ? 520 : 60);
+      if (!smooth) inkTo(i, true);
       pagesEl.scrollTo({ left: i * pagesEl.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
     }
     syncPagesHeight();
   }
-  // The pages strip takes the height of the page on show, so a short group doesn't leave a gap below
+  // The little bar under the group names follows the pages as they move, so a swipe drags it along
+  function inkTo(pos, instant) {
+    const tabs = $$('.tab', tabsEl);
+    if (!tabs.length || tabsEl.hidden) return;
+    const i = Math.max(0, Math.min(tabs.length - 1, Math.floor(pos)));
+    const j = Math.min(tabs.length - 1, i + 1);
+    const f = Math.max(0, Math.min(1, pos - i));
+    const mid = n => n.offsetLeft + n.offsetWidth / 2;
+    const x = mid(tabs[i]) + (mid(tabs[j]) - mid(tabs[i])) * f - tabInk.offsetWidth / 2;
+    if (instant) tabsEl.classList.add('is-scrubbing');
+    tabsEl.style.setProperty('--ink-x', `${x}px`);
+    if (instant) { void tabInk.offsetWidth; tabsEl.classList.remove('is-scrubbing'); }
+  }
+  // The strip of pages takes the height of the page on show, so a short group leaves no gap below
   function syncPagesHeight() {
     const page = $$('.page', pagesEl).find(p => p.dataset.gid === activeGid);
     if (page) pagesEl.style.height = page.offsetHeight + 'px';
   }
-  let scrollFramePending = false;
+  let scrollFrame = 0;
+  let scrubTimer = 0;
   pagesEl.addEventListener('scroll', () => {
-    if (scrollFramePending) return;
-    scrollFramePending = true;
-    requestAnimationFrame(() => {
-      scrollFramePending = false;
+    if (scrollFrame) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0;
+      const pos = pagesEl.scrollLeft / (pagesEl.clientWidth || 1);
+      tabsEl.classList.add('is-scrubbing');
+      inkTo(pos);
+      clearTimeout(scrubTimer);
+      scrubTimer = setTimeout(() => tabsEl.classList.remove('is-scrubbing'), 120);
       if (Date.now() < snapLock) return;
-      const page = $$('.page', pagesEl)[Math.round(pagesEl.scrollLeft / (pagesEl.clientWidth || 1))];
+      const page = $$('.page', pagesEl)[Math.round(pos)];
       if (page && page.dataset.gid !== activeGid) showGroup(page.dataset.gid, { fromScroll: true });
     });
   }, { passive: true });
   tabsEl.addEventListener('click', e => {
-    const tab = e.target instanceof Element && e.target.closest('.tab[data-gid]');
+    const tab = e.target instanceof Element && e.target.closest('.tab');
     if (tab) showGroup(tab.dataset.gid);
   });
   tabsEl.addEventListener('keydown', e => {
-    const tabs = $$('.tab[data-gid]', tabsEl);
+    const tabs = $$('.tab', tabsEl);
     const i = tabs.indexOf(document.activeElement);
     if (i < 0) return;
     const j = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length
@@ -1675,30 +1611,33 @@
     $('#date').replaceChildren(...parts.filter(Boolean).map(p => el('span', {}, p)));
     const h = d.getHours();
     document.documentElement.dataset.tod = h >= 5 && h < 8 ? 'dawn' : h >= 8 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night';
-    // A new day brings a new Bing photo
     const day = localDay(d);
-    if (lastDay && day !== lastDay && state.settings.wallpaper === 'bing') applyWallpaper();
+    if (lastDay && day !== lastDay && state.settings.background === 'bing') applyBackground();
     lastDay = day;
   }
 
-  /* ---------- Wallpaper ---------- */
-  const bgEl = $('#bg');
-  const bgImg = $('#bg-img');
-  let wallToken = 0;
+  /* ---------- Background ---------- */
+  const bgPhoto = $('#bg-photo');
+  let photoToken = 0;
   let bingNow = null;
+  function setSurface(photo) {
+    if (photo) document.documentElement.dataset.surface = 'photo';
+    else delete document.documentElement.dataset.surface;
+  }
   function showPhoto(url) {
-    const token = ++wallToken;
-    if (!url) { bgEl.classList.remove('has-photo'); bgImg.style.backgroundImage = ''; return; }
-    // Decode first, then fade in over the gradient, so a slow network never shows a half-drawn photo
+    const token = ++photoToken;
+    if (!url) { bgPhoto.classList.remove('is-shown'); bgPhoto.style.backgroundImage = ''; setSurface(false); return; }
+    setSurface(true);
+    // Decode first, then fade in, so a slow network never shows a half-drawn photo
     const im = new Image();
     im.decoding = 'async';
     im.referrerPolicy = 'no-referrer';
     im.onload = () => {
-      if (token !== wallToken) return;
-      bgImg.style.backgroundImage = `url("${url}")`;
-      bgEl.classList.add('has-photo');
+      if (token !== photoToken) return;
+      bgPhoto.style.backgroundImage = `url("${url}")`;
+      bgPhoto.classList.add('is-shown');
     };
-    im.onerror = () => { if (token === wallToken) bgEl.classList.remove('has-photo'); };
+    im.onerror = () => { if (token === photoToken) { bgPhoto.classList.remove('is-shown'); setSurface(false); } };
     im.src = url;
   }
   const isPortrait = () => innerHeight > innerWidth * 1.1;
@@ -1706,7 +1645,8 @@
     if (isPortrait()) return '1080x1920';
     return Math.max(screen.width, screen.height) * (devicePixelRatio || 1) > 2400 ? 'UHD' : '1920x1080';
   }
-  // Bing's own API blocks cross-site requests, so today's photo comes via bing.biturl.top; the image itself loads from Bing
+  // Bing's own API blocks cross-site requests, so today's photo is looked up via bing.biturl.top;
+  // the image itself loads straight from Bing
   async function bingInfo() {
     const mkt = lang() === 'zh' ? 'zh-CN' : 'en-US';
     const day = localDay();
@@ -1724,29 +1664,21 @@
       return cached && cached.id ? cached : null; // yesterday's photo beats none
     }
   }
-  async function applyWallpaper() {
-    const mode = state.settings.wallpaper;
+  async function applyBackground() {
+    const mode = state.settings.background;
     bingNow = null;
-    syncWallCredit();
-    if (mode === 'custom') { showPhoto(readText(PHOTO_KEY)); return; }
-    if (mode !== 'bing') { showPhoto(null); return; }
+    syncBgNote();
+    if (mode === 'photo') { showPhoto(readText(PHOTO_KEY)); return; }
+    if (mode !== 'bing') { showPhoto(''); return; }
+    setSurface(true);
     const info = await bingInfo();
-    if (state.settings.wallpaper !== 'bing') return;
-    if (!info) { showPhoto(null); return; }
+    if (state.settings.background !== 'bing') return;
+    if (!info) { showPhoto(''); return; }
     bingNow = info;
-    syncWallCredit();
+    syncBgNote();
     showPhoto(`https://cn.bing.com/th?id=${encodeURIComponent(info.id)}_${bingSize()}.jpg`);
   }
-  function syncWallCredit() {
-    const a = $('#wall-credit');
-    a.hidden = !(bingNow && bingNow.title && state.settings.wallpaper === 'bing');
-    if (a.hidden) return;
-    a.textContent = bingNow.title;
-    const link = normalizeUrl(bingNow.link);
-    if (link && /(^|\.)bing\.com$/i.test(new URL(link).hostname)) a.href = link;
-    else a.removeAttribute('href');
-  }
-  // Keep a downscaled copy of the viewer's photo; local storage is small, so try smaller sizes until one fits
+  // Keep a downscaled copy of the viewer's photo; local storage is small, so smaller sizes are tried until one fits
   async function useOwnPhoto(file) {
     let objectUrl = '';
     try {
@@ -1762,10 +1694,10 @@
         const canvas = el('canvas', { width: String(Math.round(img.naturalWidth * scale)), height: String(Math.round(img.naturalHeight * scale)) });
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         if (writeText(PHOTO_KEY, canvas.toDataURL('image/jpeg', quality))) {
-          state.settings.wallpaper = 'custom';
+          state.settings.background = 'photo';
           save();
           syncSettingsForm();
-          applyWallpaper();
+          applyBackground();
           toast(t('tWallSaved'));
           return;
         }
@@ -1780,28 +1712,37 @@
 
   /* ---------- Search ---------- */
   const q = $('#q');
+  const searchForm = $('#search-form');
   const searchWrap = $('#search-wrap');
   const panel = $('#suggest');
   const engineBtn = $('#engine-btn');
+  const stage = $('#stage');
   let searching = false;
   let options = [];
   let activeOpt = 0;
   let sugState = { q: '', list: [] };
   let sugTimer = 0;
   let sugSeq = 0;
-  let panelPress = false;
+  let wrapPress = false;
 
+  const safeTop = () => parseFloat(getComputedStyle($('#safe-probe')).paddingTop) || 0;
+  const isLifted = () => searching && phoneQuery.matches && !!stage.style.getPropertyValue('--lift');
   function setSearching(on) {
     if (searching === on) return;
+    // On phones the field rises to the top so the keyboard never covers it or the suggestions
+    if (on && phoneQuery.matches) {
+      const top = searchWrap.getBoundingClientRect().top;
+      stage.style.setProperty('--lift', `${Math.round(safeTop() + 14 - top)}px`);
+    } else stage.style.removeProperty('--lift');
     searching = on;
     document.body.classList.toggle('is-searching', on);
     q.placeholder = on ? t('searchPh', engineName()) : t('searchIdle');
     if (on) { activeOpt = 0; requestSuggestions(); }
     updatePanel();
   }
-  // Searching ends once focus has left the search box and nothing in it is being used
+  // Searching ends once focus has left the search and nothing in it is being pressed
   function maybeEndSearch() {
-    if (!searching || panelPress || menuOpen() || dialogOpen()) return;
+    if (!searching || wrapPress || menuOpen() || sheetOpen()) return;
     const a = document.activeElement;
     if (a && (a === q || searchWrap.contains(a))) return;
     setSearching(false);
@@ -1814,9 +1755,27 @@
   searchWrap.addEventListener('focusin', () => setSearching(true));
   searchWrap.addEventListener('focusout', () => setTimeout(maybeEndSearch, 150));
   q.addEventListener('input', () => { activeOpt = 0; updatePanel(); requestSuggestions(); });
+  $('#clear-btn').addEventListener('click', () => {
+    q.value = '';
+    activeOpt = 0;
+    updatePanel();
+    q.focus();
+  });
+
+  // The panel never runs under the keyboard: it ends just above the visible area
+  function sizePanel() {
+    if (panel.hidden) return;
+    const vv = window.visualViewport;
+    const bottom = vv ? vv.offsetTop + vv.height : innerHeight;
+    const fieldTop = isLifted() ? safeTop() + 14 : searchWrap.getBoundingClientRect().top;
+    const panelTop = fieldTop + searchForm.offsetHeight + 8;
+    panel.style.maxHeight = `${Math.max(140, Math.min(440, bottom - panelTop - 12))}px`;
+  }
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', sizePanel);
 
   function updatePanel() {
     const text = q.value.trim();
+    searchForm.classList.toggle('is-empty', !q.value);
     const show = searching && !!text;
     panel.hidden = !show;
     q.setAttribute('aria-expanded', String(show));
@@ -1832,13 +1791,14 @@
       .filter(it => displayName(it).toLowerCase().includes(lower) || hostOf(it.url).includes(lower))
       .slice(0, 4)
       .forEach(it => options.push({ kind: 'bookmark', it }));
-    // While new suggestions load, keep showing the old ones that still fit what is typed
+    // While new suggestions load, the old ones that still fit what is typed stay
     const list = sugState.q === text ? sugState.list : sugState.list.filter(x => x.toLowerCase().startsWith(lower));
     list.filter(x => x.toLowerCase() !== lower).slice(0, 6).forEach(x => options.push({ kind: 'sug', text: x }));
     activeOpt = Math.max(0, Math.min(activeOpt, options.length - 1));
     panel.setAttribute('aria-label', t('searchAria'));
     panel.replaceChildren(...options.map((o, i) => optionEl(o, i, lower)));
     paintActiveOpt();
+    sizePanel();
   }
   function highlight(text, lower) {
     if (!text.toLowerCase().startsWith(lower) || text.length === lower.length) return text;
@@ -1849,17 +1809,16 @@
     let main;
     let aside = null;
     let fill = null;
-    if (o.kind === 'go') { ico = icon('globe', 18); main = t('goTo', o.text); }
+    if (o.kind === 'go') { ico = icon('globe', 17); main = t('goTo', o.text); }
     else if (o.kind === 'search') { ico = engineIcon(engineKey()); main = o.text; aside = t('searchWith', engineName()); }
     else if (o.kind === 'bookmark') {
-      const host = hostOf(o.it.url);
-      ico = iconEl(o.it.url, host, displayName(o.it), 'tile-icon mini');
+      ico = iconEl(o.it.url, displayName(o.it), 'tile-icon mini', o.it.id);
       main = displayName(o.it);
-      aside = host;
+      aside = hostOf(o.it.url);
     } else {
-      ico = icon('search', 16);
+      ico = icon('search', 15);
       main = highlight(o.text, lower);
-      fill = el('button', { class: 'opt-fill', type: 'button', tabindex: '-1', 'aria-label': t('useSuggestion', o.text), title: t('useSuggestion', o.text), dataset: { fill: o.text } }, icon('fill', 16));
+      fill = el('button', { class: 'opt-fill', type: 'button', tabindex: '-1', 'aria-label': t('useSuggestion', o.text), title: t('useSuggestion', o.text), dataset: { fill: o.text } }, icon('fill', 15));
     }
     return el('div', { class: 'opt', role: 'option', id: `opt-${i}`, 'aria-selected': 'false', dataset: { i: String(i) } },
       el('span', { class: 'opt-ico' }, ico), el('span', { class: 'opt-text' }, main), aside ? el('span', { class: 'opt-aside' }, aside) : null, fill);
@@ -1903,26 +1862,24 @@
       else q.blur();
     }
   });
-  $('#search-form').addEventListener('submit', e => {
+  searchForm.addEventListener('submit', e => {
     e.preventDefault();
     const text = q.value.trim();
-    if (!text) { q.focus(); return; }
-    activateOpt(options[activeOpt] || { kind: 'search', text }, e);
+    if (text) activateOpt(options[activeOpt] || { kind: 'search', text }, e);
   });
 
-  // Pressing a button or suggestion must not end the search before the click lands; a mouse press
-  // also keeps the focus in the box
+  // Pressing a button or a suggestion must not end the search before the tap lands; a mouse press keeps the focus too
   searchWrap.addEventListener('pointerdown', e => {
     if (e.target === q) return;
-    panelPress = true;
+    wrapPress = true;
     if (e.pointerType === 'mouse') e.preventDefault();
   });
-  const releasePanel = () => {
-    if (!panelPress) return;
-    setTimeout(() => { panelPress = false; maybeEndSearch(); }, 250);
+  const releaseWrap = () => {
+    if (!wrapPress) return;
+    setTimeout(() => { wrapPress = false; maybeEndSearch(); }, 250);
   };
-  document.addEventListener('pointerup', releasePanel, true);
-  document.addEventListener('pointercancel', releasePanel, true);
+  document.addEventListener('pointerup', releaseWrap, true);
+  document.addEventListener('pointercancel', releaseWrap, true);
   panel.addEventListener('pointermove', e => {
     if (e.pointerType !== 'mouse') return;
     const row = e.target instanceof Element && e.target.closest('.opt');
@@ -1997,7 +1954,6 @@
   engineBtn.addEventListener('click', () => {
     const r = engineBtn.getBoundingClientRect();
     openMenu({
-      title: t('sEngine'),
       returnFocus: q,
       items: Object.keys(ENGINES).map(k => ({
         label: ENGINES[k][lang()], iconNode: engineIcon(k), checked: k === engineKey(),
@@ -2011,53 +1967,92 @@
           requestSuggestions();
         },
       })),
-    }, { x: r.left, y: r.bottom + 8 });
+    }, { at: { x: r.left - 4, y: r.bottom + 8 } });
   });
 
-  /* ---------- Menu: a popover on computers, an action sheet on phones ---------- */
+  /* ---------- Menu ---------- */
+  // Computers: a small menu at the pointer. Touch: the pressed icon lifts above a dimmed page with the
+  // menu beside it, like a phone's home screen; moving the finger instead picks the icon up to drag it.
   const menuLayer = $('#menu-layer');
   const menuEl = $('#menu');
+  const menuPreview = $('#menu-preview');
   let menuReturn = null;
-  const menuOpen = () => !menuLayer.hidden;
-  const dialogOpen = () => !!document.querySelector('dialog[open]');
+  let menuAnchor = null;
+  let menuCloseTimer = 0;
+  let menuGuard = false; // true while the finger that opened a touch menu is still down
+  const menuOpen = () => !menuLayer.hidden && !menuLayer.classList.contains('is-closing');
+  const sheetOpen = () => !!document.querySelector('dialog[open]');
 
-  function openMenu(spec, at) {
+  function openMenu(spec, { at = null, anchor = null } = {}) {
+    clearTimeout(menuCloseTimer);
+    menuLayer.classList.remove('is-closing');
     menuReturn = spec.returnFocus || document.activeElement;
-    const sheet = sheetQuery.matches || !at;
-    menuLayer.classList.toggle('is-sheet', sheet);
-    const items = spec.items.map(it => el('button', {
+    menuGuard = !!anchor;
+    const items = spec.items.map(it => it === 'sep' ? el('div', { class: 'menu-sep', role: 'separator' }) : el('button', {
       class: 'menu-item' + (it.danger ? ' is-danger' : ''), type: 'button',
       role: it.checked != null ? 'menuitemradio' : 'menuitem', 'aria-checked': it.checked != null ? String(it.checked) : null,
       onclick: () => { closeMenu(); it.run(); },
-    }, it.iconNode || icon(it.icon, 17), el('span', { class: 'menu-label' }, it.label), it.checked ? icon('check', 16, 'menu-check') : null));
+    }, it.iconNode || icon(it.icon, 16), el('span', { class: 'menu-label' }, it.label), it.checked ? icon('check', 15, 'menu-check') : null));
     menuEl.setAttribute('aria-label', spec.title || '');
-    menuEl.replaceChildren(
-      el('div', { class: 'menu-card' },
-        spec.title ? el('div', { class: 'menu-head' }, el('strong', {}, spec.title), spec.subtitle ? el('span', {}, spec.subtitle) : null) : null,
-        el('div', { class: 'menu-items' }, items)),
-      el('button', { class: 'menu-cancel', type: 'button', onclick: () => closeMenu() }, t('cancel')));
-    menuLayer.hidden = false;
-    if (sheet) {
-      menuEl.style.left = '';
-      menuEl.style.top = '';
-    } else {
-      const w = menuEl.offsetWidth;
-      const h = menuEl.offsetHeight;
-      menuEl.style.left = Math.max(8, Math.min(at.x, innerWidth - w - 8)) + 'px';
-      menuEl.style.top = (at.y + h + 8 > innerHeight ? Math.max(8, at.y - h - 4) : at.y) + 'px';
+    menuEl.replaceChildren(...items);
+    menuPreview.replaceChildren();
+    if (menuAnchor) menuAnchor.classList.remove('is-previewed');
+    menuAnchor = anchor;
+    menuLayer.classList.toggle('has-scrim', !!anchor);
+    if (anchor) {
+      // The pressed item rises above the dimmed page: a copy sits in its place while the original hides
+      const r = anchor.getBoundingClientRect();
+      const copy = anchor.cloneNode(true);
+      copy.classList.remove('is-lifted', 'is-placeholder');
+      copy.removeAttribute('id');
+      Object.assign(copy.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+      menuPreview.append(copy);
+      anchor.classList.add('is-previewed');
     }
-    (menuEl.querySelector('[aria-checked="true"]') || items[0]).focus({ preventScroll: true });
+    menuLayer.hidden = false;
+    const w = menuEl.offsetWidth;
+    const h = menuEl.offsetHeight;
+    let x;
+    let y;
+    let origin;
+    if (anchor) {
+      const r = anchor.getBoundingClientRect();
+      x = r.left + r.width / 2 - w / 2;
+      if (r.bottom + 10 + h + 12 <= innerHeight) { y = r.bottom + 10; origin = 'top center'; }
+      else { y = Math.max(12, r.top - 10 - h); origin = 'bottom center'; }
+    } else {
+      x = at.x;
+      y = at.y + h + 8 > innerHeight ? Math.max(8, at.y - h - 4) : at.y;
+      origin = y < at.y ? 'bottom left' : 'top left';
+    }
+    menuEl.style.left = `${Math.max(12, Math.min(x, innerWidth - w - 12))}px`;
+    menuEl.style.top = `${y}px`;
+    menuEl.style.setProperty('--origin', origin);
+    if (!touchOnly.matches) (menuEl.querySelector('[aria-checked="true"]') || menuEl.querySelector('.menu-item')).focus({ preventScroll: true });
   }
-  function closeMenu() {
+  function closeMenu(instant) {
+    menuGuard = false;
     if (menuLayer.hidden) return;
-    menuLayer.hidden = true;
+    const finish = () => {
+      menuLayer.hidden = true;
+      menuLayer.classList.remove('is-closing');
+      menuPreview.replaceChildren();
+      if (menuAnchor) { menuAnchor.classList.remove('is-previewed'); menuAnchor = null; }
+    };
+    if (menuLayer.classList.contains('is-closing')) {
+      if (instant) { clearTimeout(menuCloseTimer); finish(); }
+      return;
+    }
     const back = menuReturn;
     menuReturn = null;
-    if (back && back.isConnected && typeof back.focus === 'function') back.focus({ preventScroll: true });
+    if (instant || reduceMotion.matches) finish();
+    else { menuLayer.classList.add('is-closing'); menuCloseTimer = setTimeout(finish, 140); }
+    if (back && back.isConnected && typeof back.focus === 'function' && !touchOnly.matches) back.focus({ preventScroll: true });
     setTimeout(maybeEndSearch, 0);
   }
-  menuLayer.addEventListener('click', e => { if (e.target === menuLayer) closeMenu(); });
-  menuLayer.addEventListener('contextmenu', e => { e.preventDefault(); closeMenu(); });
+  // A tap outside closes the menu, but not the lift-off of the finger that opened it
+  menuLayer.addEventListener('click', e => { if (!menuGuard && !menuEl.contains(e.target)) closeMenu(); });
+  menuLayer.addEventListener('contextmenu', e => { e.preventDefault(); if (!menuGuard) closeMenu(); });
   function menuKeys(e) {
     const items = $$('.menu-item', menuEl);
     const i = items.indexOf(document.activeElement);
@@ -2066,45 +2061,55 @@
     else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
   }
 
-  function openTileMenu(id, at) {
+  function openTileMenu(id, place) {
     const it = itemIndex.get(id);
     if (!it) return;
     openMenu({
       title: displayName(it),
-      subtitle: hostOf(it.url),
       returnFocus: launcher.querySelector(`.tile[data-id="${id}"] .tile-link`),
       items: [
         { icon: 'external', label: t('menuOpenNew'), run: () => window.open(it.url, '_blank', 'noopener') },
-        { icon: 'pencil', label: t('menuEdit'), run: () => openLinkDialog({ id }) },
+        { icon: 'pencil', label: t('menuEdit'), run: () => openLinkSheet({ id }) },
+        'sep',
         { icon: 'trash', label: t('menuDelete'), danger: true, run: () => deleteItem(id) },
       ],
-    }, at);
+    }, place);
+  }
+  function openTabMenu(gid, place) {
+    const g = state.groups.find(x => x.id === gid);
+    if (!g) return;
+    openMenu({
+      title: groupLabel(g),
+      returnFocus: tabsEl.querySelector(`.tab[data-gid="${gid}"]`),
+      items: [
+        gid !== MAIN ? { icon: 'pencil', label: t('menuEditGroup'), run: () => openGroupSheet(gid) } : null,
+        { icon: 'folder', label: t('menuNewGroup'), run: () => openGroupSheet() },
+      ].filter(Boolean),
+    }, place);
   }
   function deleteItem(id) {
     const f = findItem(id);
     if (f) mutate(() => f.g.items.splice(f.i, 1), t('tDeleted', displayName(f.it)));
   }
-  // Right-click (or the keyboard's menu key) on a tile opens its menu; on a group tab, the group editor.
-  // A touch long-press is handled when the finger lifts, so it can still turn into a drag.
+  // Right-click, or the keyboard's menu key, opens the menu; a touch long-press is handled by the drag code
   launcher.addEventListener('contextmenu', e => {
     const target = e.target instanceof Element ? e.target : null;
     const tile = target && target.closest('.tile[data-id]');
-    const tab = !tile && target && target.closest('.tab[data-gid]');
+    const tab = !tile && target && target.closest('.tab');
     if (!tile && !tab) return;
     e.preventDefault();
     if (press || drag) return;
     const r = (tile || tab).getBoundingClientRect();
-    const fromKeyboard = !e.clientX && !e.clientY;
-    const at = fromKeyboard ? { x: r.left, y: r.bottom + 6 } : { x: e.clientX, y: e.clientY };
-    if (tile) openTileMenu(tile.dataset.id, at);
-    else if (tab.dataset.gid !== MAIN) openGroupDialog(tab.dataset.gid);
+    const at = !e.clientX && !e.clientY ? { x: r.left, y: r.bottom + 6 } : { x: e.clientX, y: e.clientY };
+    if (tile) openTileMenu(tile.dataset.id, { at });
+    else openTabMenu(tab.dataset.gid, { at });
   });
 
   /* ---------- Keyboard, paste and dropped links ---------- */
   const isTyping = n => n instanceof Element && n.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]') !== null;
   document.addEventListener('keydown', e => {
     if (menuOpen()) { menuKeys(e); return; }
-    if (dialogOpen() || isTyping(e.target) || drag) return;
+    if (sheetOpen() || isTyping(e.target) || drag) return;
     if (e.metaKey || e.ctrlKey || e.altKey) {
       if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); focusSearch(true); }
       return;
@@ -2113,11 +2118,11 @@
     if (e.key.length === 1 && e.key !== ' ') focusSearch(false);
   });
   document.addEventListener('paste', e => {
-    if (dialogOpen() || menuOpen() || isTyping(e.target)) return;
+    if (sheetOpen() || menuOpen() || isTyping(e.target)) return;
     const text = ((e.clipboardData && e.clipboardData.getData('text')) || '').trim();
     if (!text) return;
     e.preventDefault();
-    if (looksLikeUrl(text)) openLinkDialog({ url: normalizeUrl(text) });
+    if (looksLikeUrl(text)) openLinkSheet({ url: normalizeUrl(text) });
     else { q.value = text; focusSearch(false); updatePanel(); requestSuggestions(); }
   });
   const hasUrl = dt => !!dt && Array.from(dt.types || []).some(x => x === 'text/uri-list' || x === 'text/x-moz-url');
@@ -2135,17 +2140,72 @@
     if (title === url || looksLikeUrl(title)) title = '';
     return { url, title: title.slice(0, 80) };
   }
-  // A link dragged in from another tab or app opens the add dialog for the group on show
+  // A link dragged in from another tab or app opens the add sheet for the group on show
   document.addEventListener('dragover', e => { if (hasUrl(e.dataTransfer)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
   document.addEventListener('drop', e => {
     if (!hasUrl(e.dataTransfer)) return;
     e.preventDefault();
     const { url, title } = readDrop(e.dataTransfer);
-    if (url) openLinkDialog({ url, title });
+    if (url) openLinkSheet({ url, title });
   });
 
-  /* ---------- Bookmark dialog ---------- */
-  const linkDialog = $('#link-dialog');
+  /* ---------- Sheets ---------- */
+  // Centred on computers, from the bottom on phones. They animate out as well as in, close on Escape or a
+  // tap outside, and on phones follow the finger down from the top bar to be swiped away.
+  function closeSheet(d, after) {
+    if (!d.open || d.dataset.closing) return;
+    d.dataset.closing = '1';
+    const done = () => {
+      delete d.dataset.closing;
+      d.style.transform = '';
+      d.close();
+      if (after) after();
+    };
+    if (reduceMotion.matches) { done(); return; }
+    const phone = phoneQuery.matches;
+    const from = d.style.transform || (phone ? 'translateY(0)' : 'none');
+    const frames = phone
+      ? [{ transform: from }, { transform: 'translateY(100%)' }]
+      : [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(6px) scale(0.98)' }];
+    d.animate(frames, { duration: phone ? 260 : 150, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }).finished.then(done, done);
+    try { d.animate([{ opacity: 1 }, { opacity: 0 }], { duration: phone ? 260 : 150, fill: 'forwards', pseudoElement: '::backdrop' }); } catch {}
+  }
+  for (const d of $$('dialog.sheet')) {
+    d.addEventListener('cancel', e => { e.preventDefault(); closeSheet(d); });
+    let downOnBackdrop = false;
+    d.addEventListener('pointerdown', e => { downOnBackdrop = e.target === d; });
+    d.addEventListener('click', e => { if (downOnBackdrop && e.target === d) closeSheet(d); downOnBackdrop = false; });
+    $$('[data-close]', d).forEach(b => b.addEventListener('click', () => closeSheet(d)));
+    const bar = $('.sheet-bar', d);
+    let pull = null;
+    bar.addEventListener('pointerdown', e => {
+      if (!phoneQuery.matches || e.target.closest('button')) return;
+      pull = { id: e.pointerId, y: e.clientY, dy: 0, lastY: e.clientY, lastT: performance.now(), v: 0 };
+      bar.setPointerCapture(e.pointerId);
+    });
+    bar.addEventListener('pointermove', e => {
+      if (!pull || e.pointerId !== pull.id) return;
+      const now = performance.now();
+      pull.v = (e.clientY - pull.lastY) / Math.max(1, now - pull.lastT);
+      pull.lastY = e.clientY;
+      pull.lastT = now;
+      pull.dy = Math.max(0, e.clientY - pull.y);
+      d.style.transform = `translateY(${pull.dy}px)`;
+    });
+    const endPull = e => {
+      if (!pull || e.pointerId !== pull.id) return;
+      const { dy, v } = pull;
+      pull = null;
+      if (dy > 120 || (v > 0.45 && dy > 24)) { closeSheet(d); return; }
+      if (dy > 0 && !reduceMotion.matches) d.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }], { duration: 260, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+      d.style.transform = '';
+    };
+    bar.addEventListener('pointerup', endPull);
+    bar.addEventListener('pointercancel', endPull);
+  }
+
+  /* ---------- Bookmark sheet ---------- */
+  const linkSheet = $('#link-dialog');
   const groupSel = $('#f-group');
   const posSel = $('#f-pos');
   let editing = null;
@@ -2168,7 +2228,7 @@
     syncNewGroupField();
   }
   function syncNewGroupField() {
-    $('#f-newgroup-field').hidden = groupSel.value !== NEW_GROUP;
+    $('#f-newgroup-row').hidden = groupSel.value !== NEW_GROUP;
     syncPositions();
   }
   // Offers 1..n for the chosen group; an edited bookmark keeps its place in its own group, anything else goes last
@@ -2183,21 +2243,21 @@
   function refreshTitlePlaceholder() {
     $('#f-title').placeholder = t('namePh', hostOf(normalizeUrl($('#f-url').value)));
   }
-  function openLinkDialog({ id, gid = activeGid || MAIN, url = '', title = '' } = {}) {
+  function openLinkSheet({ id, gid = activeGid || MAIN, url = '', title = '' } = {}) {
     const found = id ? findItem(id) : null;
     editing = found ? { id, fromGid: found.g.id, fromIndex: found.i } : { gid };
-    $('#link-dialog-title').textContent = found ? t('editBookmark') : t('addBookmark');
+    $('#link-title').textContent = found ? t('editBookmark') : t('addBookmark');
     $('#f-url').value = found ? found.it.url : url;
     $('#f-title').value = found ? found.it.title : title;
     $('#f-newgroup').value = '';
     fillGroupSelect(found ? found.g.id : gid);
-    $('#link-delete').hidden = !found;
+    $('#link-delete-group').hidden = !found;
     $('#f-error').hidden = true;
     refreshTitlePlaceholder();
-    linkDialog.showModal();
+    linkSheet.showModal();
     // On phones a focused field pops the keyboard over the sheet before it is even seen, so an edit starts
     // with the sheet itself focused; only a blank "add" goes straight to the URL field
-    if (touchOnly.matches && (found || url)) linkDialog.focus();
+    if (touchOnly.matches && (found || url)) linkSheet.focus();
     else {
       const target = found || url ? $('#f-title') : $('#f-url');
       target.focus();
@@ -2215,7 +2275,6 @@
     $('#f-error').hidden = true;
     if (groupSel.value === NEW_GROUP) $('#f-newgroup').focus();
   });
-
   $('#link-form').addEventListener('submit', e => {
     e.preventDefault();
     const rawUrl = $('#f-url').value.trim();
@@ -2229,7 +2288,7 @@
     const isEdit = !!editing.id;
     const id = editing.id || uid();
     const moved = isEdit && (gid !== editing.fromGid || pos !== editing.fromIndex + 1);
-    linkDialog.close();
+    closeSheet(linkSheet);
     mutate(() => {
       if (gid === NEW_GROUP) {
         const same = namedGroups().find(g => g.name === newName);
@@ -2247,41 +2306,33 @@
       target.items.splice(Math.min(pos - 1, target.items.length), 0, item);
       activeGid = target.id;
     }, !isEdit ? t('tAdded', title || hostOf(url)) : moved ? t('tMoved', title || hostOf(url), pos) : null);
-    // Keep keyboard users where they were
-    requestAnimationFrame(() => {
-      const a = launcher.querySelector(`.tile[data-id="${id}"] .tile-link`);
-      if (a && isEdit && !touchOnly.matches) a.focus({ preventScroll: true });
-    });
   });
   $('#link-delete').addEventListener('click', () => {
     const id = editing && editing.id;
-    linkDialog.close();
-    if (id) deleteItem(id);
+    closeSheet(linkSheet, () => { if (id) deleteItem(id); });
   });
 
-  /* ---------- Group dialog ---------- */
-  const groupDialog = $('#group-dialog');
+  /* ---------- Group sheet ---------- */
+  const groupSheet = $('#group-dialog');
   let editingGroup = null;
 
   // Called with a group id to rename, move or ungroup it, or with nothing to create a new group
-  function openGroupDialog(gid) {
+  function openGroupSheet(gid) {
     const g = gid ? state.groups.find(x => x.id === gid && x.id !== MAIN) : null;
     if (gid && !g) return;
     editingGroup = g ? g.id : null;
-    $('#group-dialog-title').textContent = g ? t('editGroup') : t('newGroup');
+    $('#group-title').textContent = g ? t('editGroup') : t('newGroup');
     $('#g-name').value = g ? g.name : '';
-    $('#g-name').placeholder = g ? '' : t('newGroupPh');
-    $('#group-ungroup').hidden = !g;
+    $('#g-name').placeholder = t('newGroupPh');
     const named = namedGroups();
-    $('#g-pos-field').hidden = !g || named.length < 2;
+    $('#g-pos-row').hidden = !g || named.length < 2;
     if (g) fillPositions($('#g-pos'), named.length, named.indexOf(g) + 1);
+    $('#g-ungroup-group').hidden = !g;
+    $('#g-ungroup-note').hidden = !g;
     $('#g-error').hidden = true;
-    groupDialog.showModal();
-    if (touchOnly.matches && g) groupDialog.focus();
-    else {
-      $('#g-name').focus();
-      $('#g-name').select();
-    }
+    groupSheet.showModal();
+    if (touchOnly.matches && g) groupSheet.focus();
+    else { $('#g-name').focus(); $('#g-name').select(); }
   }
   $('#group-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -2291,8 +2342,8 @@
     const g = gid && state.groups.find(x => x.id === gid);
     // Named groups sit at state.groups[1..n], so position p is index p
     const from = g ? state.groups.indexOf(g) : -1;
-    const to = g && !$('#g-pos-field').hidden ? parseInt($('#g-pos').value, 10) || from : from;
-    groupDialog.close();
+    const to = g && !$('#g-pos-row').hidden ? parseInt($('#g-pos').value, 10) || from : from;
+    closeSheet(groupSheet);
     const newId = uid();
     mutate(() => {
       if (!g) { state.groups.push({ id: newId, name, items: [] }); activeGid = newId; return; }
@@ -2301,41 +2352,54 @@
     }, !g ? t('tGroupCreated', name) : to !== from ? t('tGroupMoved', name, to) : null);
   });
   $('#group-ungroup').addEventListener('click', () => {
-    const i = state.groups.findIndex(x => x.id === editingGroup);
-    groupDialog.close();
-    if (i <= 0) return;
-    const g = state.groups[i];
-    mutate(() => {
-      state.groups[0].items.push(...g.items);
-      state.groups.splice(i, 1);
-      if (state.groups[0].items.length) activeGid = MAIN;
-    }, t('tUngrouped', g.name));
+    const gid = editingGroup;
+    closeSheet(groupSheet, () => {
+      const i = state.groups.findIndex(x => x.id === gid);
+      if (i <= 0) return;
+      const g = state.groups[i];
+      mutate(() => {
+        state.groups[0].items.push(...g.items);
+        state.groups.splice(i, 1);
+        if (state.groups[0].items.length) activeGid = MAIN;
+      }, t('tUngrouped', g.name));
+    });
   });
 
   /* ---------- Settings ---------- */
-  const settingsDialog = $('#settings-dialog');
+  const settingsSheet = $('#settings-dialog');
 
   function fillEngineOptions() {
     const sel = $('#s-engine');
     sel.replaceChildren(...Object.entries(ENGINES).map(([k, v]) => el('option', { value: k }, v[lang()])));
     sel.value = engineKey();
   }
-  function renderKeys() {
-    $('#keys').replaceChildren(...t('keys').map(([ks, desc]) =>
-      el('li', {}, el('span', {}, desc), el('span', { class: 'k' }, ks.map(k => el('kbd', {}, k))))));
+  function syncBgNote() {
+    const mode = state.settings.background;
+    const credit = $('#bg-credit');
+    const showCredit = mode === 'bing' && !!(bingNow && bingNow.title);
+    credit.hidden = !showCredit;
+    if (showCredit) {
+      credit.textContent = bingNow.title;
+      const link = normalizeUrl(bingNow.link);
+      if (link && /(^|\.)bing\.com$/i.test(new URL(link).hostname)) credit.href = link;
+      else credit.removeAttribute('href');
+    }
+    $('#bg-choose').hidden = mode !== 'photo';
+    $('#bg-note').hidden = !showCredit && mode !== 'photo';
   }
   function syncSettingsForm() {
     $(`#s-lang-${lang()}`).checked = true;
     $(`#s-theme-${state.settings.theme}`).checked = true;
-    $(`#s-wall-${state.settings.wallpaper}`).checked = true;
-    $('#wall-choose').hidden = state.settings.wallpaper !== 'custom';
-    syncWallCredit();
+    $(`#s-bg-${state.settings.background}`).checked = true;
+    syncBgNote();
     fillEngineOptions();
     const source = engine().suggest;
     $('#s-suggest').checked = !!(state.settings.suggest && source);
     $('#s-suggest').disabled = !source;
     $('#suggest-note').textContent = source ? t('sSuggestNote', engineName()) : t('sSuggestNone', engineName());
     $('#s-newtab').checked = state.settings.newTab;
+    $('#keys-note').textContent = t('keysNote');
+    $('#keys-note').hidden = touchOnly.matches;
   }
   function applyAll() {
     const th = state.settings.theme;
@@ -2347,18 +2411,16 @@
     $$('[data-i18n-ph]').forEach(n => { n.placeholder = t(n.dataset.i18nPh); });
     $$('[data-i18n-aria]').forEach(n => { const v = t(n.dataset.i18nAria); n.setAttribute('aria-label', v); n.title = v; });
     q.setAttribute('aria-label', t('searchAria'));
-    $('#go-btn').setAttribute('aria-label', t('searchGo'));
-    launcher.setAttribute('aria-label', t('launcherLabel'));
-    tabsEl.setAttribute('aria-label', t('tabsLabel'));
+    launcher.setAttribute('aria-label', t('bookmarksLabel'));
+    tabsEl.setAttribute('aria-label', t('groupsLabel'));
     updateEngineUI();
-    renderKeys();
     syncSettingsForm();
     lastMinute = -1;
     tick();
     render();
   }
 
-  $('#open-settings').addEventListener('click', () => { syncSettingsForm(); settingsDialog.showModal(); });
+  $('#open-settings').addEventListener('click', () => { syncSettingsForm(); settingsSheet.showModal(); settingsSheet.focus(); });
   $('#settings-form').addEventListener('submit', e => e.preventDefault());
   // Switching language also translates the default groups (those still carrying their key) and Bing's caption
   $$('input[name="lang"]').forEach(r => r.addEventListener('change', () => {
@@ -2370,23 +2432,23 @@
     state.settings.lang = r.value === 'zh' ? 'zh' : 'en';
     save();
     applyAll();
-    if (state.settings.wallpaper === 'bing') applyWallpaper();
+    if (state.settings.background === 'bing') applyBackground();
   }));
   $$('input[name="theme"]').forEach(r => r.addEventListener('change', () => { state.settings.theme = r.value; save(); applyAll(); }));
-  $$('input[name="wall"]').forEach(r => r.addEventListener('change', () => {
-    // "My photo" without a photo yet asks for one first, and keeps the current wallpaper until it arrives
-    if (r.value === 'custom' && !readText(PHOTO_KEY)) {
-      $('#wall-file').click();
+  $$('input[name="bg"]').forEach(r => r.addEventListener('change', () => {
+    // "My Photo" without a photo yet asks for one first and keeps the current background until it arrives
+    if (r.value === 'photo' && !readText(PHOTO_KEY)) {
+      $('#bg-file').click();
       syncSettingsForm();
       return;
     }
-    state.settings.wallpaper = r.value;
+    state.settings.background = r.value;
     save();
     syncSettingsForm();
-    applyWallpaper();
+    applyBackground();
   }));
-  $('#wall-choose').addEventListener('click', () => $('#wall-file').click());
-  $('#wall-file').addEventListener('change', e => {
+  $('#bg-choose').addEventListener('click', () => $('#bg-file').click());
+  $('#bg-file').addEventListener('change', e => {
     const file = e.target.files && e.target.files[0];
     e.target.value = '';
     if (file) useOwnPhoto(file);
@@ -2412,7 +2474,6 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     toast(t('tExported', state.groups.reduce((n, g) => n + g.items.length, 0)));
   });
-
   $('#import-btn').addEventListener('click', () => $('#import-file').click());
   $('#import-file').addEventListener('change', async e => {
     const file = e.target.files && e.target.files[0];
@@ -2420,7 +2481,7 @@
     if (!file) return;
     let text = '';
     try { text = await file.text(); } catch {}
-    settingsDialog.close();
+    closeSheet(settingsSheet);
     if (/^\s*\{/.test(text)) importBackup(text);
     else if (/<a\s[^>]*href/i.test(text)) importBookmarksHtml(text);
     else toast(t('tUnknownFile'));
@@ -2441,13 +2502,12 @@
     const before = snapshot();
     state.groups = groups;
     const incoming = data.settings && typeof data.settings === 'object' ? data.settings : {};
-    state.settings = cleanSettings({ ...state.settings, ...incoming, hintDismissed: true });
+    state.settings = cleanSettings({ ...state.settings, ...incoming, tipShown: true });
     save();
     applyAll();
-    applyWallpaper();
+    applyBackground();
     toast(t('tRestored', n), before);
   }
-
   // Browser export (Netscape format): the toolbar folder goes to Unsorted, other folders become groups
   function importBookmarksHtml(text) {
     const doc = new DOMParser().parseFromString(text, 'text/html');
@@ -2476,43 +2536,38 @@
       }
     }, t('tImported', n));
   }
-
   $('#reset-btn').addEventListener('click', () => {
-    settingsDialog.close();
-    mutate(() => { state.groups = sampleGroups(lang()); }, t('tReset'));
-    state.settings.hintDismissed = false;
-    save();
-    render();
-  });
-
-  $$('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
-  $$('dialog').forEach(d => {
-    let downOnBackdrop = false;
-    d.addEventListener('pointerdown', e => { downOnBackdrop = e.target === d; });
-    d.addEventListener('click', e => { if (downOnBackdrop && e.target === d) d.close(); downOnBackdrop = false; });
+    closeSheet(settingsSheet, () => mutate(() => { state.groups = sampleGroups(lang()); }, t('tReset')));
   });
 
   /* ---------- Toast ---------- */
+  const toastBox = $('#toast');
   let toastTimer = 0;
-  function toast(message, undoSnap) {
-    const box = $('#toast');
+  function toast(message, undoSnap, ms) {
     $('#toast-msg').textContent = message;
     const undo = $('#toast-undo');
     undo.hidden = !undoSnap;
-    undo.onclick = () => { box.hidden = true; restore(undoSnap); toast(t('tUndone')); };
-    box.hidden = true;
-    void box.offsetWidth;
-    box.hidden = false;
+    undo.onclick = () => { hideToast(true); restore(undoSnap); toast(t('tUndone')); };
+    toastBox.classList.remove('is-leaving');
+    toastBox.hidden = true;
+    void toastBox.offsetWidth;
+    toastBox.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { box.hidden = true; }, undoSnap ? 6000 : 2800);
+    toastTimer = setTimeout(() => hideToast(), ms || (undoSnap ? 6000 : 2800));
   }
-  $('#hint-dismiss').addEventListener('click', () => { state.settings.hintDismissed = true; save(); $('#hint').hidden = true; });
+  function hideToast(instant) {
+    clearTimeout(toastTimer);
+    if (toastBox.hidden) return;
+    if (instant || reduceMotion.matches) { toastBox.hidden = true; return; }
+    toastBox.classList.add('is-leaving');
+    toastTimer = setTimeout(() => { toastBox.hidden = true; toastBox.classList.remove('is-leaving'); }, 200);
+  }
 
   /* ---------- Reordering: one pointer-based drag for mouse and touch ---------- */
-  // Mouse: press and move. Touch: long-press to lift, then move; lift and let go without moving for the menu.
-  // Bookmarks reorder within a page, or move to another group by dragging onto its tab; tabs reorder groups.
+  // Mouse: press and move. Touch: hold to lift the icon and open its menu, then move to pick it up.
+  // Icons reorder within a page or move to another group over its name; group names reorder groups.
   // The picked-up item stays in place as a faded placeholder that slides to where it would land, the rest
-  // animate out of its way, and the new order is read back from the DOM on drop.
+  // animate out of its way, and the new order is read back from the page on drop.
   const LONG_PRESS_MS = 380;
   const MOUSE_SLOP = 6;   // px a mouse travels before a press becomes a drag
   const TOUCH_SLOP = 10;  // px a finger may wander while waiting for the long-press; more means it's a swipe or scroll
@@ -2530,8 +2585,8 @@
     if (e.button !== 0 || drag || press || searching || menuOpen()) return;
     const target = e.target instanceof Element ? e.target : null;
     const tile = target && target.closest('.tile[data-id]');
-    const tab = !tile && target && target.closest('.tab[data-gid]');
-    if (!tile && !(tab && tab.dataset.gid !== MAIN)) return;
+    const tab = !tile && target && target.closest('.tab');
+    if (!tile && !tab) return;
     press = {
       kind: tile ? 'link' : 'group', el: tile || tab,
       pointerId: e.pointerId, type: e.pointerType, x: e.clientX, y: e.clientY, timer: 0, lifted: false,
@@ -2542,6 +2597,8 @@
         press.lifted = true;
         press.el.classList.add('is-lifted');
         if (navigator.vibrate) navigator.vibrate(8);
+        if (press.kind === 'link') openTileMenu(press.el.dataset.id, { anchor: press.el });
+        else openTabMenu(press.el.dataset.gid, { anchor: press.el });
       }, LONG_PRESS_MS);
     }
   });
@@ -2554,8 +2611,10 @@
     }
     if (!press || e.pointerId !== press.pointerId) return;
     const dist = Math.hypot(e.clientX - press.x, e.clientY - press.y);
-    if (press.type === 'mouse') { if (dist > MOUSE_SLOP) startDrag(e); }
-    else if (press.lifted) { if (dist > 3) startDrag(e); }
+    // The main group can't move; holding its name only opens its menu
+    const movable = press.kind === 'link' || press.el.dataset.gid !== MAIN;
+    if (press.type === 'mouse') { if (dist > MOUSE_SLOP && movable) startDrag(e); }
+    else if (press.lifted) { if (dist > 6 && movable) { closeMenu(true); startDrag(e); } }
     else if (dist > TOUCH_SLOP) cancelPress();
   }, { passive: false });
   // Once something is lifted, the finger moves it instead of scrolling or swiping the page
@@ -2563,17 +2622,17 @@
   document.addEventListener('pointerup', e => {
     if (drag && e.pointerId === drag.pointerId) { finishDrag(true); suppressNextClick(); return; }
     if (!press || e.pointerId !== press.pointerId) return;
-    const p = press;
+    const lifted = press.lifted;
     cancelPress();
-    if (!p.lifted) return;
-    // Long-press and release in place: the menu, like a phone's home screen
-    suppressNextClick();
-    if (p.kind === 'link') openTileMenu(p.el.dataset.id, null);
-    else openGroupDialog(p.el.dataset.gid);
+    // Held and released in place: the menu stays open, and the lift-off mustn't also open the link or close it
+    if (lifted) {
+      suppressNextClick();
+      setTimeout(() => { menuGuard = false; }, 80);
+    }
   });
   document.addEventListener('pointercancel', e => {
     if (drag && e.pointerId === drag.pointerId) finishDrag(false);
-    else if (press && e.pointerId === press.pointerId) cancelPress();
+    else if (press && e.pointerId === press.pointerId) { cancelPress(); menuGuard = false; }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && drag) { e.preventDefault(); e.stopPropagation(); finishDrag(false); } }, true);
   function suppressNextClick() {
@@ -2618,14 +2677,16 @@
     }
     autoScroll(y);
   }
-  // A tile still sliding into place is ignored, or it would bounce the placeholder back and forth
+  // An item still sliding into place is ignored, or it would bounce the placeholder back and forth
   const isMoving = n => n.getAnimations().some(a => a.playState === 'running');
   const pageOf = gid => $$('.page', pagesEl).find(p => p.dataset.gid === gid);
 
   function placeLink(under) {
-    // Over another group's tab: move to the end of that group and show it
-    const tab = under.closest('.tab[data-gid]');
+    // Over another group's name: move to the end of that group and show it
+    const tab = under.closest('.tab');
+    $$('.tab.is-drop', tabsEl).forEach(n => { if (n !== tab) n.classList.remove('is-drop'); });
     if (tab) {
+      tab.classList.add('is-drop');
       const page = pageOf(tab.dataset.gid);
       if (page && drag.el.closest('.page') !== page) {
         const grid = $('.grid', page);
@@ -2647,12 +2708,13 @@
     flip(() => grid.insertBefore(drag.el, ref));
   }
   function placeGroup(under) {
-    const hovered = under.closest('.tab[data-gid]');
+    const hovered = under.closest('.tab');
     if (!hovered || hovered === drag.el || hovered.dataset.gid === MAIN || isMoving(hovered)) return;
     const after = !!(drag.el.compareDocumentPosition(hovered) & Node.DOCUMENT_POSITION_FOLLOWING);
     flip(() => tabsEl.insertBefore(drag.el, after ? hovered.nextElementSibling : hovered));
+    inkTo($$('.tab', tabsEl).indexOf(drag.el), true);
   }
-  // FLIP: measure, change the DOM, then animate everything from where it was to where it is now
+  // FLIP: measure, change the page, then animate everything from where it was to where it is now
   function flip(change) {
     const nodes = $$('.tile, .tab', launcher).filter(n => n !== drag.el);
     const first = new Map(nodes.map(n => [n, n.getBoundingClientRect()]));
@@ -2665,30 +2727,31 @@
       const dx = a.left - b.left;
       const dy = a.top - b.top;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
-      n.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+      n.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 240, easing: 'cubic-bezier(.2, .8, .2, 1)' });
     }
   }
   // Scroll the page while dragging near the top or bottom edge
-  let scrollSpeed = 0;
-  let scrollFrame = 0;
+  let edgeSpeed = 0;
+  let edgeFrame = 0;
   function autoScroll(y) {
     const edge = 56;
-    scrollSpeed = y < edge ? -Math.ceil((edge - y) / 4) : y > innerHeight - edge ? Math.ceil((y - innerHeight + edge) / 4) : 0;
-    if (scrollSpeed && !scrollFrame) scrollFrame = requestAnimationFrame(stepScroll);
+    edgeSpeed = y < edge ? -Math.ceil((edge - y) / 4) : y > innerHeight - edge ? Math.ceil((y - innerHeight + edge) / 4) : 0;
+    if (edgeSpeed && !edgeFrame) edgeFrame = requestAnimationFrame(stepEdgeScroll);
   }
-  function stepScroll() {
-    scrollFrame = 0;
-    if (!drag || !scrollSpeed) return;
-    window.scrollBy(0, scrollSpeed);
+  function stepEdgeScroll() {
+    edgeFrame = 0;
+    if (!drag || !edgeSpeed) return;
+    window.scrollBy(0, edgeSpeed);
     moveDrag(drag.x, drag.y);
   }
   function finishDrag(commit) {
     const d = drag;
     drag = null;
-    cancelAnimationFrame(scrollFrame);
-    scrollFrame = 0;
-    scrollSpeed = 0;
+    cancelAnimationFrame(edgeFrame);
+    edgeFrame = 0;
+    edgeSpeed = 0;
     document.body.classList.remove('is-dragging');
+    $$('.tab.is-drop', tabsEl).forEach(n => n.classList.remove('is-drop'));
     try { launcher.releasePointerCapture(d.pointerId); } catch {}
     const landing = d.el.getBoundingClientRect();
     let changed = false;
@@ -2706,7 +2769,7 @@
         });
       }
     } else if (commit) {
-      const order = $$('.tab[data-gid]', tabsEl).map(n => n.dataset.gid).filter(id => id !== MAIN);
+      const order = $$('.tab', tabsEl).map(n => n.dataset.gid).filter(id => id !== MAIN);
       if (order.join() !== namedGroups().map(g => g.id).join()) {
         changed = true;
         mutate(() => {
@@ -2723,31 +2786,40 @@
     if (reduceMotion.matches) { d.ghost.remove(); return; }
     if (settled) settled.classList.add('is-landing');
     const done = () => { d.ghost.remove(); if (settled) settled.classList.remove('is-landing'); };
-    setTimeout(done, 400); // in case the animation never runs, e.g. in a background tab
+    setTimeout(done, 420); // in case the animation never runs, e.g. in a background tab
     d.ghost.animate(
       [{ left: d.ghost.style.left, top: d.ghost.style.top }, { left: to.left + 'px', top: to.top + 'px' }],
-      { duration: 170, easing: 'ease-out', fill: 'forwards' },
+      { duration: 200, easing: 'cubic-bezier(.2, .8, .2, 1)', fill: 'forwards' },
     ).finished.then(done, done);
   }
 
   /* ---------- Start ---------- */
   applyAll();
-  applyWallpaper();
+  applyBackground();
   setInterval(tick, 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { lastMinute = -1; tick(); } });
+  // A one-time tip on the first visit, instead of words on the page for good
+  if (!state.settings.tipShown) {
+    setTimeout(() => {
+      state.settings.tipShown = true;
+      save();
+      toast(touchOnly.matches ? t('tipTouch') : t('tipPointer'), null, 6000);
+    }, 1400);
+  }
   let resizeTimer = 0;
   let lastPortrait = isPortrait();
   addEventListener('resize', () => {
-    closeMenu();
+    closeMenu(true);
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       const i = $$('.page', pagesEl).findIndex(p => p.dataset.gid === activeGid);
       snapLock = Date.now() + 120;
-      if (i >= 0) pagesEl.scrollTo({ left: i * pagesEl.clientWidth, behavior: 'auto' });
+      if (i >= 0) { pagesEl.scrollTo({ left: i * pagesEl.clientWidth, behavior: 'auto' }); inkTo(i, true); }
       syncPagesHeight();
+      sizePanel();
       if (isPortrait() !== lastPortrait) {
         lastPortrait = isPortrait();
-        if (state.settings.wallpaper === 'bing') applyWallpaper();
+        if (state.settings.background === 'bing') applyBackground();
       }
     }, 120);
   });
