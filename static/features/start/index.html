@@ -57,13 +57,11 @@ input { caret-color: var(--ink); }
 .page { width: min(760px, 100% - 96px); margin: 0 auto; padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 
 /* running head */
-.head { display: flex; justify-content: space-between; align-items: center; padding-top: max(24px, env(safe-area-inset-top)); font-size: 13px; line-height: 20px; letter-spacing: .01em; }
+.head { display: flex; justify-content: flex-end; align-items: center; padding-top: max(24px, env(safe-area-inset-top)); font-size: 13px; line-height: 20px; letter-spacing: .01em; }
 :lang(zh) .head { letter-spacing: .02em; }
 body.editing .head { position: sticky; top: 0; z-index: 5; background: var(--bg); }
-.lead { display: flex; align-items: center; min-width: 0; }
 .ctrls { display: flex; gap: 8px; margin-right: -8px; }
 .word { display: inline-flex; align-items: center; height: 40px; padding: 0 8px; font-size: 13px; line-height: 20px; color: var(--text-3); white-space: nowrap; transition: color 120ms var(--ease); }
-#settingsBtn { margin-left: -8px; color: var(--text-2); }
 body.editing #editBtn { color: var(--ink); font-weight: 600; }
 .edit-only { display: none; }
 body.editing .edit-only { display: inline-flex; animation: fade-in 120ms var(--ease); }
@@ -85,15 +83,33 @@ body.editing .rest-only { display: none; }
 :lang(zh) #q { letter-spacing: 0; }
 @media (max-resolution: 1.49dppx) { #q { font-weight: 400; } }
 .clear { position: absolute; right: 0; top: 8px; width: 40px; justify-content: flex-end; padding: 0; }
+/* the engine word inside the placeholder is the switch */
+.ph {
+  display: flex; align-items: center; position: absolute; left: 0; top: 0; right: 0; height: 56px;
+  font-size: 28px; line-height: 36px; font-weight: 300; letter-spacing: -.015em; color: var(--text-3);
+  white-space: pre; overflow: hidden; pointer-events: none;
+}
+:lang(zh) .ph { letter-spacing: 0; }
+@media (max-resolution: 1.49dppx) { .ph { font-weight: 400; } }
+.search.has-q .ph { display: none; }
+.ph-eng, .eng-pick { cursor: pointer; text-decoration: underline dotted 1px; text-decoration-color: var(--rule-strong); transition: color 120ms var(--ease); }
+.ph-eng { pointer-events: auto; font: inherit; letter-spacing: inherit; color: inherit; padding: 8px 0; text-underline-offset: 7px; }
+.eng-pick { text-underline-offset: 4px; }
+.tabhint { margin-left: 12px; font-size: 13px; color: var(--text-3); white-space: nowrap; }
+@media (pointer: coarse) { .tabhint { display: none; } }
 
 /* index / suggestions slot */
 .slot { position: relative; margin-top: 64px; }
-.caption {
-  position: absolute; top: -40px; left: 0; margin: 0; font-size: 13px; line-height: 20px; color: var(--text-3);
+.bm-head {
+  position: absolute; top: -48px; left: 0; right: 0;
   opacity: 0; visibility: hidden; transition: opacity 160ms var(--ease), visibility 0s 160ms;
 }
-body.editing .caption { opacity: 1; visibility: visible; transition-delay: 0s; }
-.slot.searching .caption { display: none; }
+body.editing .bm-head { opacity: 1; visibility: visible; transition-delay: 0s; }
+.slot.searching .bm-head { display: none; }
+/* edit mode sections: Bookmarks, Search engines, Settings */
+.sec-head { display: flex; align-items: baseline; gap: 16px; min-width: 0; }
+.sec-title { margin: 0; font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: -.01em; color: var(--ink); white-space: nowrap; }
+.sec-head .hint { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 20px; color: var(--text-3); }
 .index {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
   column-gap: 40px; row-gap: 56px; align-items: start; transition: opacity 120ms var(--ease);
@@ -106,14 +122,17 @@ body.editing .caption { opacity: 1; visibility: visible; transition-delay: 0s; }
 
 .group { min-width: 0; }
 .group.empty, .group-new { display: none; }
-body.editing .group.empty, body.editing .group-new { display: block; }
+body.editing .group.empty { display: block; }
+/* '+ New group' closes the bookmarks the way '+ Add' closes a list */
+body.editing .group-new { display: block; grid-column: 1 / -1; margin-top: -24px; }
+.add-btn.new-btn { width: auto; }
 .group.span-2 { grid-column: span 2; }
 .group.span-3 { grid-column: span 3; }
 .group.span-2 ul { column-count: 2; column-gap: 40px; }
 .group.span-3 ul { column-count: 3; column-gap: 40px; }
 .group.span-2 li, .group.span-3 li { break-inside: avoid; }
 .label { margin: 0 0 12px; font: inherit; }
-.label-btn, .new-btn {
+.label-btn {
   display: block; max-width: 100%; padding: 12px 0; margin: -12px 0; cursor: default;
   font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -121,9 +140,8 @@ body.editing .group.empty, body.editing .group-new { display: block; }
   transition: text-decoration-color 160ms var(--ease), color 120ms var(--ease);
   -webkit-touch-callout: none; user-select: none; -webkit-user-select: none;
 }
-:lang(zh) .label-btn, :lang(zh) .new-btn { font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: none; }
+:lang(zh) .label-btn { font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: none; }
 body.editing .label-btn { cursor: pointer; text-decoration-color: currentColor; }
-.new-btn { cursor: pointer; }
 .group ul { list-style: none; margin: 0; padding: 0; }
 .row { position: relative; }
 .link, .add-btn {
@@ -140,10 +158,11 @@ body.editing .link { box-shadow: inset 0 -1px 0 var(--rule); -webkit-user-drag: 
 .row.add { display: none; }
 body.editing .row.add { display: block; animation: fade-in 160ms var(--ease); }
 .add-btn { color: var(--text-3); transition: color 120ms var(--ease); }
-.row.src .link, .group.src { opacity: .3; }
-@media (pointer: fine) { body.editing .link, body.editing .label-btn { cursor: grab; } }
+.row.src .link, .group.src, .erow.src .eng-btn { opacity: .3; }
+@media (pointer: fine) { body.editing .link, body.editing .label-btn, .eng-btn { cursor: grab; } }
 @media (hover: hover) {
-  .word:hover, .add-btn:hover, .new-btn:hover, .btn:hover, .opt-btn:hover { color: var(--ink); }
+  .word:hover, .add-btn:hover, .btn:hover, .opt-btn:hover, .ph-eng:hover, .eng-pick:hover { color: var(--ink); }
+  .eng-btn:hover .n { text-decoration: underline 1px; text-underline-offset: 4px; }
   .link:hover { text-decoration-color: var(--ink); }
   body.editing .link:hover { text-decoration-color: transparent; }
 }
@@ -209,6 +228,23 @@ select.input option { background: var(--bg); color: var(--ink); }
 .btn.danger { color: var(--danger); }
 .btn.primary { background: var(--ink); color: var(--bg); font-weight: 600; padding: 0 20px; margin-left: 0; }
 
+/* edit mode: search engines and settings laid flat under the bookmarks */
+.prefs { display: none; }
+body.editing .prefs { display: block; animation: fade-in 160ms var(--ease); }
+.sec { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--rule); }
+.sec .sec-head { margin-bottom: 16px; }
+.sec-body { max-width: 520px; }
+.engines { list-style: none; margin: 0; padding: 0; }
+.eng-btn {
+  display: flex; align-items: baseline; gap: 12px; width: 100%; padding: 5px 0; font-size: 15px; line-height: 22px;
+  color: var(--ink); white-space: nowrap; box-shadow: inset 0 -1px 0 var(--rule);
+}
+.eng-btn .n { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.eng-btn .h { flex-shrink: 1000; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 13px; color: var(--text-3); }
+.eng-btn .def { margin-left: auto; padding-left: 12px; font-size: 13px; color: var(--text-2); }
+.eng-note { display: block; margin-top: 6px; }
+#eDefRow { cursor: pointer; }
+.opt-btn:disabled { cursor: default; }
 /* settings: a ruled table */
 .set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px; padding: 6px 0; border-top: 1px solid var(--rule); }
 .set-row.stack { display: block; padding-top: 14px; }
@@ -237,7 +273,7 @@ select.input option { background: var(--bg); color: var(--ink); }
 
 @media (pointer: coarse) {
   .word, .btn { height: 44px; }
-  .link, .add-btn { padding: 9px 0; } /* 40px rows on touch tablets; phones get 44px below */
+  .link, .add-btn, .eng-btn { padding: 9px 0; } /* 40px rows on touch tablets; phones get 44px below */
   .ghost { padding-block: 8px; }
 }
 
@@ -248,13 +284,17 @@ select.input option { background: var(--bg); color: var(--ink); }
   .word { height: 44px; }
   .search { margin-top: clamp(32px, 10vh, 80px); }
   #q { height: 52px; font-size: 22px; line-height: 30px; }
+  .ph { height: 52px; font-size: 22px; line-height: 30px; }
   .clear { top: 6px; }
-  .slot { margin-top: 40px; }
-  .caption { top: -30px; }
+  .slot { margin-top: 52px; }
+  .bm-head { top: -40px; }
+  .sec-title { font-size: 18px; line-height: 24px; }
   .index { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; row-gap: 40px; }
   .group.span-2 ul { column-gap: 24px; }
   .label { margin-bottom: 8px; }
-  .link, .add-btn { font-size: 16px; line-height: 24px; padding: 10px 0; }
+  .link, .add-btn, .eng-btn { font-size: 16px; line-height: 24px; padding: 10px 0; }
+  .sec { margin-top: 56px; padding-top: 20px; }
+  body.editing .group-new { margin-top: -16px; }
   .ghost { font-size: 16px; line-height: 24px; padding: 9px 8px; }
   .opt { height: 44px; }
   .btn { height: 44px; }
@@ -274,8 +314,8 @@ select.input option { background: var(--bg); color: var(--ink); }
 @media (max-width: 339px) { .index { grid-template-columns: minmax(0, 1fr); } }
 @media (max-height: 500px) and (orientation: landscape) {
   .search { margin-top: 24px; }
-  .slot { margin-top: 32px; }
-  .caption { top: -26px; }
+  .slot { margin-top: 44px; }
+  .bm-head { top: -38px; }
 }
 
 @media (forced-colors: active) {
@@ -294,9 +334,6 @@ select.input option { background: var(--bg); color: var(--ink); }
 <body>
 <div class="page">
   <header class="head">
-    <div class="lead">
-      <button type="button" class="word edit-only" id="settingsBtn" data-i18n="settings"></button>
-    </div>
     <nav class="ctrls">
       <button type="button" class="word" id="editBtn"></button>
       <button type="button" class="word rest-only" id="langBtn"></button>
@@ -305,13 +342,33 @@ select.input option { background: var(--bg); color: var(--ink); }
   <form class="search" id="searchForm" role="search" autocomplete="off">
     <input id="q" type="search" role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list"
       enterkeyhint="go" spellcheck="false" autocapitalize="off" autocorrect="off" data-i18n-label="searchLabel">
+    <div class="ph"><span class="ph-a"></span><button type="button" class="ph-eng" id="phEng"></button><span class="ph-b"></span></div>
     <button type="button" class="word clear" id="clearBtn" data-i18n="clear" hidden></button>
   </form>
   <main class="slot" id="slot">
-    <p class="caption" id="caption"></p>
+    <div class="sec-head bm-head"><h2 class="sec-title" data-i18n="bookmarks"></h2><span class="hint js-hint"></span></div>
     <div class="index" id="index" data-i18n-label="bookmarks" role="region"></div>
     <div class="suggest" id="suggest" role="listbox" data-i18n-label="suggestions" hidden></div>
   </main>
+  <div class="prefs" id="prefs">
+  <section class="sec" aria-labelledby="enginesCap">
+    <div class="sec-head"><h2 class="sec-title" id="enginesCap" data-i18n="engines"></h2><span class="hint js-hint"></span></div>
+    <ul class="engines sec-body" id="engines" aria-labelledby="enginesCap"></ul>
+  </section>
+  <section class="sec" aria-labelledby="settingsCap">
+    <div class="sec-head"><h2 class="sec-title" id="settingsCap" data-i18n="settings"></h2></div>
+    <div class="sec-body">
+    <div class="set-row"><span class="set-label" id="lblTheme" data-i18n="theme"></span>
+      <div class="opts" role="group" aria-labelledby="lblTheme" data-opt="theme"><button type="button" class="opt-btn" data-val="auto" data-i18n="auto"></button><button type="button" class="opt-btn" data-val="light" data-i18n="light"></button><button type="button" class="opt-btn" data-val="dark" data-i18n="dark"></button></div></div>
+    <div class="set-row"><span class="set-label" id="lblNewTab" data-i18n="newTab"></span>
+      <button type="button" class="opt-btn" role="switch" data-switch="newTab" aria-labelledby="lblNewTab"></button></div>
+    <div class="set-row"><span class="set-label" id="lblBackup" data-i18n="backup"></span>
+      <div class="opts" role="group" aria-labelledby="lblBackup"><button type="button" class="opt-btn" id="exportBtn" data-i18n="export"></button><button type="button" class="opt-btn" id="importBtn" data-i18n="import"></button><button type="button" class="opt-btn danger" id="resetBtn" data-i18n="reset"></button></div></div>
+    <p class="note" data-i18n="importNote"></p>
+    <input type="file" id="importFile" accept=".json,.html,.htm,application/json,text/html" hidden>
+    </div>
+  </section>
+  </div>
 </div>
 
 <div class="toast-wrap"><div class="toast-col">
@@ -357,19 +414,26 @@ select.input option { background: var(--bg); color: var(--ink); }
   </form>
 </dialog>
 
-<dialog id="setDlg" tabindex="-1" aria-labelledby="setTitle">
-  <h2 class="dlg-title" id="setTitle" data-i18n="settings"></h2>
-  <div class="set-row"><span class="set-label" id="lblTheme" data-i18n="theme"></span>
-    <div class="opts" role="group" aria-labelledby="lblTheme" data-opt="theme"><button type="button" class="opt-btn" data-val="auto" data-i18n="auto"></button><button type="button" class="opt-btn" data-val="light" data-i18n="light"></button><button type="button" class="opt-btn" data-val="dark" data-i18n="dark"></button></div></div>
-  <div class="set-row stack"><span class="set-label" id="lblEngine" data-i18n="engine"></span>
-    <div class="opts" role="group" aria-labelledby="lblEngine" data-opt="engine" id="engineOpts"></div></div>
-  <div class="set-row"><span class="set-label" id="lblNewTab" data-i18n="newTab"></span>
-    <button type="button" class="opt-btn" role="switch" data-switch="newTab" aria-labelledby="lblNewTab"></button></div>
-  <div class="set-row"><span class="set-label" id="lblBackup" data-i18n="backup"></span>
-    <div class="opts" role="group" aria-labelledby="lblBackup"><button type="button" class="opt-btn" id="exportBtn" data-i18n="export"></button><button type="button" class="opt-btn" id="importBtn" data-i18n="import"></button><button type="button" class="opt-btn danger" id="resetBtn" data-i18n="reset"></button></div></div>
-  <p class="note" data-i18n="importNote"></p>
-  <input type="file" id="importFile" accept=".json,.html,.htm,application/json,text/html" hidden>
-  <div class="actions"><span class="sp"></span><button type="button" class="btn primary" data-close data-i18n="done"></button></div>
+<dialog id="engDlg" tabindex="-1" aria-labelledby="engTitle">
+  <form id="engForm" novalidate>
+    <h2 class="dlg-title" id="engTitle"></h2>
+    <div class="fields">
+      <label class="field"><span class="field-label" data-i18n="url"></span>
+        <input class="input" id="eUrl" type="text" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://example.com/search?q=%s" aria-describedby="eNote eErr">
+        <span class="err" id="eErr" data-i18n="invalidUrl" role="alert" hidden></span>
+        <span class="note eng-note" id="eNote" data-i18n="engUrlNote"></span></label>
+      <label class="field"><span class="field-label" data-i18n="engName"></span>
+        <input class="input" id="eName" type="text" autocomplete="off"></label>
+      <div class="set-row" id="eDefRow"><span class="set-label" id="lblEDef" data-i18n="engDefault"></span>
+        <button type="button" class="opt-btn" role="switch" id="eDef" aria-labelledby="lblEDef"></button></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn danger" id="engDel" data-i18n="delete"></button>
+      <span class="sp"></span>
+      <button type="button" class="btn" data-close data-i18n="cancel"></button>
+      <button type="submit" class="btn primary" data-i18n="save"></button>
+    </div>
+  </form>
 </dialog>
 
 <script>
@@ -379,7 +443,8 @@ select.input option { background: var(--bg); color: var(--ink); }
 /* ---------- i18n ---------- */
 const I18N = {
   en: {
-    title: 'New Tab', searchPh: 'Search or type a URL', searchLabel: 'Search',
+    title: 'New Tab', searchPh: 'Search {e} or type a URL', searchPhShort: 'Search {e}', searchLabel: 'Search',
+    switchEngine: 'Search engine: {e}. Click or press Tab to switch', tabSwitch: 'Tab to switch',
     clear: 'Clear', edit: 'Edit', done: 'Done', settings: 'Settings', newGroup: 'New group', addGroup: '+ New group',
     captionMouse: 'Drag to reorder · Click to edit', captionTouch: 'Drag to reorder · Tap to edit',
     add: '+ Add', empty: 'No links yet.', addFirst: 'Add a link', bookmarks: 'Bookmarks', suggestions: 'Suggestions',
@@ -389,17 +454,20 @@ const I18N = {
     renameGroup: 'Rename group', renameAria: 'Rename group: {g}', groupName: 'Name',
     addTo: 'Add link to {g}', kbdHint: 'Alt + arrow keys to move, Delete to remove',
     deleteGroup: 'Delete group', theme: 'Appearance', auto: 'Auto', light: 'Light', dark: 'Dark',
-    engine: 'Search with', newTab: 'Open links in a new tab', on: 'On', off: 'Off',
+    engines: 'Search engines', newEngine: 'New search engine', editEngine: 'Edit search engine', engName: 'Name',
+    engUrlNote: 'Put %s where the search words go.', engDefault: 'Default', isDefault: 'default', addEngine: 'Add search engine',
+    newTab: 'Open links in a new tab', on: 'On', off: 'Off',
     backup: 'Backup', export: 'Export', import: 'Import', reset: 'Reset',
     importNote: 'Import a .json backup or browser bookmarks (.html).',
     deleted: '“{n}” deleted', groupDeleted: 'Group deleted', undo: 'Undo', imported: 'Imported {n} links',
     importFail: 'Couldn’t read that file', restored: 'Backup restored', resetDone: 'Reset to defaults',
     noStorage: 'Changes can’t be saved in this browser mode', moved: 'Moved to position {i} in {g}',
-    groupMoved: 'Group moved to position {i}', undone: 'Undone',
+    groupMoved: 'Group moved to position {i}', engMoved: 'Moved to position {i}', undone: 'Undone',
     favorites: 'Favorites', tools: 'Tools', untitled: 'Untitled', importedGroup: 'Imported'
   },
   zh: {
-    title: '新标签页', searchPh: '搜索或输入网址', searchLabel: '搜索',
+    title: '新标签页', searchPh: '用 {e} 搜索或输入网址', searchPhShort: '用 {e} 搜索', searchLabel: '搜索',
+    switchEngine: '搜索引擎：{e}，点击或按 Tab 切换', tabSwitch: 'Tab 切换',
     clear: '清除', edit: '编辑', done: '完成', settings: '设置', newGroup: '新建分组', addGroup: '+ 新建分组',
     captionMouse: '拖动调整顺序 · 点击编辑', captionTouch: '拖动调整顺序 · 轻点编辑',
     add: '+ 添加', empty: '还没有链接。', addFirst: '添加链接', bookmarks: '书签', suggestions: '建议',
@@ -409,25 +477,28 @@ const I18N = {
     renameGroup: '重命名分组', renameAria: '重命名分组：{g}', groupName: '名称',
     addTo: '添加链接到“{g}”', kbdHint: 'Alt + 方向键移动，Delete 删除',
     deleteGroup: '删除分组', theme: '外观', auto: '自动', light: '浅色', dark: '深色',
-    engine: '搜索引擎', newTab: '在新标签页打开链接', on: '开', off: '关',
+    engines: '搜索引擎', newEngine: '新建搜索引擎', editEngine: '编辑搜索引擎', engName: '名称',
+    engUrlNote: '用 %s 表示搜索词的位置。', engDefault: '默认', isDefault: '默认', addEngine: '添加搜索引擎',
+    newTab: '在新标签页打开链接', on: '开', off: '关',
     backup: '备份', export: '导出', import: '导入', reset: '重置',
     importNote: '可导入 .json 备份或浏览器书签（.html）。',
     deleted: '已删除“{n}”', groupDeleted: '已删除分组', undo: '撤销', imported: '已导入 {n} 个链接',
     importFail: '无法读取该文件', restored: '已恢复备份', resetDone: '已恢复默认',
     noStorage: '当前浏览器模式无法保存更改', moved: '已移到“{g}”第 {i} 位',
-    groupMoved: '分组已移到第 {i} 位', undone: '已撤销',
+    groupMoved: '分组已移到第 {i} 位', engMoved: '已移到第 {i} 位', undone: '已撤销',
     favorites: '常用', tools: '工具', untitled: '未命名', importedGroup: '导入'
   }
 };
 
-const ENGINES = {
-  google:     { name: 'Google',     url: 'https://www.google.com/search?q=' },
-  bing:       { name: 'Bing',       url: 'https://www.bing.com/search?q=' },
-  duckduckgo: { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
-  baidu:      { name: 'Baidu', zh: '百度', url: 'https://www.baidu.com/s?wd=' },
-  perplexity: { name: 'Perplexity', url: 'https://www.perplexity.ai/search?q=' },
-  github:     { name: 'GitHub',     url: 'https://github.com/search?type=repositories&q=' }
-};
+// Defaults for the editable engine list; %s marks where the query goes.
+const DEFAULT_ENGINES = [
+  { id: 'google',     name: 'Google',     url: 'https://www.google.com/search?q=%s' },
+  { id: 'bing',       name: 'Bing',       url: 'https://www.bing.com/search?q=%s' },
+  { id: 'duckduckgo', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s' },
+  { id: 'baidu',      name: 'Baidu', zh: '百度', url: 'https://www.baidu.com/s?wd=%s' },
+  { id: 'perplexity', name: 'Perplexity', url: 'https://www.perplexity.ai/search?q=%s' },
+  { id: 'github',     name: 'GitHub',     url: 'https://github.com/search?type=repositories&q=%s' }
+];
 
 /* ---------- helpers ---------- */
 const $ = (s, el = document) => el.querySelector(s);
@@ -471,7 +542,7 @@ const KEY = 'startpage.v2', OLD_KEY = 'startpage.v1';
 const L = (title, url) => ({ id: uid(), title, url });
 function defaults() {
   return {
-    settings: { lang: 'en', theme: 'auto', engine: 'google', newTab: false },
+    settings: { lang: 'en', theme: 'auto', engines: DEFAULT_ENGINES.map(e => ({ ...e })), engine: 'google', newTab: false },
     groups: [
       { id: uid(), key: '', name: 'fav', links: [
         L('kiseki log', 'https://ki-seki.github.io/'),
@@ -495,11 +566,15 @@ function defaults() {
 function sanitize(s) {
   if (!s || !Array.isArray(s.groups)) return null;
   const i = s.settings || {};
+  const engs = (Array.isArray(i.engines) ? i.engines : []).filter(e => e && e.name && e.url)
+    .map(e => ({ id: String(e.id || uid()), name: String(e.name), url: String(e.url), ...(e.zh ? { zh: String(e.zh) } : {}) }));
+  if (!engs.length) engs.push(...DEFAULT_ENGINES.map(e => ({ ...e })));
   return {
     settings: {
       lang: i.lang === 'zh' ? 'zh' : 'en',
       theme: ['light', 'dark'].includes(i.theme) ? i.theme : 'auto',
-      engine: ENGINES[i.engine] ? i.engine : 'google',
+      engines: engs,
+      engine: engs.some(e => e.id === i.engine) ? i.engine : engs[0].id,
       newTab: !!i.newTab
     },
     groups: s.groups.filter(g => g && Array.isArray(g.links)).map(g => ({
@@ -538,8 +613,10 @@ const t = (k, vars) => {
   return s;
 };
 const groupName = (g) => g.name || (g.key ? t(g.key) : t('untitled'));
-const engine = () => ENGINES[S().engine] || ENGINES.google;
+const engines = () => S().engines;
+const engine = () => engines().find(e => e.id === S().engine) || engines()[0];
 const engineName = (e = engine()) => (S().lang === 'zh' && e.zh) || e.name;
+const searchUrl = (e, query) => e.url.includes('%s') ? e.url.split('%s').join(encodeURIComponent(query)) : e.url + encodeURIComponent(query);
 const findGroup = (id) => state.groups.find(g => g.id === id);
 const findLink = (id) => { for (const g of state.groups) { const i = g.links.findIndex(l => l.id === id); if (i > -1) return { g, i, link: g.links[i] }; } return null; };
 const linkCount = () => state.groups.reduce((n, g) => n + g.links.length, 0);
@@ -549,7 +626,8 @@ const linkText = (l) => l.title || hostOf(l.url) || l.url;
 const root = document.documentElement, body = document.body;
 const q = $('#q'), clearBtn = $('#clearBtn');
 const slot = $('#slot'), indexEl = $('#index'), sugEl = $('#suggest'), live = $('#live');
-const linkDlg = $('#linkDlg'), groupDlg = $('#groupDlg'), setDlg = $('#setDlg');
+const linkDlg = $('#linkDlg'), groupDlg = $('#groupDlg'), engDlg = $('#engDlg');
+const phEng = $('#phEng'), prefs = $('#prefs'), enginesEl = $('#engines');
 const fUrl = $('#fUrl'), fTitle = $('#fTitle'), fGroup = $('#fGroup'), fErr = $('#fErr'), gName = $('#gName');
 
 /* ---------- theme + text ---------- */
@@ -572,10 +650,15 @@ function applyText() {
   lb.textContent = zh ? 'EN' : '中文'; lb.lang = zh ? 'en' : 'zh-CN'; // named in the target language
   lb.setAttribute('aria-label', zh ? 'English' : '中文');
   $('#editBtn').textContent = t(editing ? 'done' : 'edit');
-  $('#caption').textContent = t(coarseMQ.matches ? 'captionTouch' : 'captionMouse');
+  $$('.js-hint').forEach(el => { el.textContent = t(coarseMQ.matches ? 'captionTouch' : 'captionMouse'); });
   updatePlaceholder();
 }
-function updatePlaceholder() { q.placeholder = t('searchPh'); }
+// Phones get the short form so the engine name is never cut off.
+function updatePlaceholder() {
+  const [a, b] = t(phoneMQ.matches ? 'searchPhShort' : 'searchPh').split('{e}'), name = engineName();
+  $('.ph-a').textContent = a; $('.ph-b').textContent = b || '';
+  phEng.textContent = name; phEng.setAttribute('aria-label', t('switchEngine', { e: name }));
+}
 
 /* ---------- index ---------- */
 function rowEl(l) {
@@ -618,8 +701,8 @@ function render() {
     sec.append(ul);
     indexEl.append(sec);
   });
-  // Edit mode shows where the next group would go, the way '+ Add' ends each list.
-  const ng = h('div', 'group-new'), nb = h('button', 'new-btn', t('addGroup'));
+  // Edit mode ends the bookmarks with '+ New group', the way '+ Add' ends each list.
+  const ng = h('div', 'group-new'), nb = h('button', 'add-btn new-btn', t('addGroup'));
   nb.type = 'button'; nb.dataset.act = 'group';
   ng.append(nb); indexEl.append(ng);
   layout();
@@ -691,15 +774,15 @@ function withUndo(msg, mutate, whole = false) {
   });
 }
 // Moves keep one silent undo step (Cmd/Ctrl+Z), no toast.
-function commitMove(mutate) { const snap = JSON.stringify(state.groups); mutate(); save(); lastMove = { snap, v: ver }; }
+function commitMove(mutate) { const snap = JSON.stringify(state); mutate(); save(); lastMove = { snap, v: ver }; }
 function undoMove() {
   const m = lastMove; lastMove = null;
   if (!m || m.v !== ver) return;
-  state.groups = JSON.parse(m.snap); save(); render(); announce(t('undone'));
+  state = JSON.parse(m.snap); save(); refresh(); announce(t('undone'));
 }
 function announce(msg) { live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 30); }
 function announceLink(id) { const f = findLink(id); if (f) announce(t('moved', { i: f.i + 1, g: groupName(f.g) })); }
-function refresh() { applyTheme(); applyText(); render(); syncDialogs(); if (q.value) updateSuggest(); }
+function refresh() { applyTheme(); applyText(); render(); syncPrefs(); syncDialogs(); if (q.value) updateSuggest(); }
 
 /* ---------- dialogs ---------- */
 function openDlg(d, focusEl) {
@@ -720,8 +803,9 @@ function refocus() {
   const r = ret, ae = document.activeElement; ret = null;
   // Focus is lost when it sits on <body> or is left behind inside the now-closed dialog.
   if (ae && ae !== body && !ae.closest('dialog:not([open])')) return;
-  const sel = r && (r.id ? `.row[data-id="${CSS.escape(r.id)}"] .link` : r.gid ? `.group[data-gid="${CSS.escape(r.gid)}"] ${r.label ? '.label-btn' : '.add-btn'}` : '');
-  const el = sel && $(sel, indexEl);
+  const sel = r && (r.id ? `.row[data-id="${CSS.escape(r.id)}"] .link` : r.gid ? `.group[data-gid="${CSS.escape(r.gid)}"] ${r.label ? '.label-btn' : '.add-btn'}`
+    : r.eng ? `.eng-btn[data-id="${CSS.escape(r.eng)}"]` : '');
+  const el = sel && $(sel);
   if (el) { el.focus({ preventScroll: true }); if (document.activeElement === el) return; }
   if (fineMQ.matches) q.focus({ preventScroll: true }); // keeps the IME ready for type-to-search
 }
@@ -830,26 +914,92 @@ function syncDialogs() {
     if (linkTarget && !findLink(linkTarget)) closeDlg(linkDlg); else fillGroups(fGroup.value);
   }
   if (groupDlg.open && groupTarget && !findGroup(groupTarget)) closeDlg(groupDlg);
-  if (setDlg.open) syncSettings();
+  if (engDlg.open && engTarget && !engines().some(e => e.id === engTarget)) closeDlg(engDlg);
 }
 
-/* ---------- settings ---------- */
-function syncSettings() {
-  const box = $('#engineOpts');
-  // Built once and then only relabelled, so a focused option survives a setting change.
-  if (!box.children.length) Object.keys(ENGINES).forEach(k => { const b = h('button', 'opt-btn'); b.type = 'button'; b.dataset.val = k; box.append(b); });
-  $$('button', box).forEach(b => { b.textContent = engineName(ENGINES[b.dataset.val]); });
-  $$('[data-opt]', setDlg).forEach(o => $$('button', o).forEach(b => b.setAttribute('aria-pressed', String(S()[o.dataset.opt] === b.dataset.val))));
-  $$('[data-switch]', setDlg).forEach(b => { const on = !!S()[b.dataset.switch]; b.setAttribute('aria-checked', on); b.textContent = t(on ? 'on' : 'off'); });
+/* ---------- settings: laid flat under the bookmarks in edit mode ---------- */
+function syncPrefs() {
+  $$('[data-opt]', prefs).forEach(o => $$('button', o).forEach(b => b.setAttribute('aria-pressed', String(S()[o.dataset.opt] === b.dataset.val))));
+  $$('[data-switch]', prefs).forEach(b => { const on = !!S()[b.dataset.switch]; b.setAttribute('aria-checked', on); b.textContent = t(on ? 'on' : 'off'); });
+  renderEngines();
 }
-function openSettings() { syncSettings(); openDlg(setDlg); }
+// The engine list works like a bookmark group: click a row to edit it, '+ Add' at the end.
+function renderEngines() {
+  const cur = engine();
+  enginesEl.textContent = '';
+  engines().forEach(e => {
+    const li = h('li', 'erow'), b = h('button', 'eng-btn'); b.type = 'button'; li.dataset.id = b.dataset.id = e.id;
+    b.append(h('span', 'n', engineName(e)), h('span', 'h', hostOf(e.url.split('%s').join(''))));
+    if (e === cur) b.append(h('span', 'def', t('isDefault')));
+    li.append(b); enginesEl.append(li);
+  });
+  const li = h('li'), add = h('button', 'add-btn', t('add'));
+  add.type = 'button'; add.dataset.eng = 'new'; add.setAttribute('aria-label', t('addEngine'));
+  li.append(add); enginesEl.append(li);
+}
+function openPrefs() { setEditing(true); prefs.scrollIntoView({ block: 'start', behavior: reduceMQ.matches ? 'auto' : 'smooth' }); }
 function setSetting(k, v) { S()[k] = v; save(); refresh(); }
-setDlg.addEventListener('click', e => {
+prefs.addEventListener('click', e => {
   const opt = e.target.closest('[data-opt] button');
   if (opt) { setSetting(opt.parentNode.dataset.opt, opt.dataset.val); return; }
+  const eb = e.target.closest('.eng-btn, [data-eng]');
+  if (eb) { openEngine(eb.dataset.id || null); return; }
   // A switch row toggles from anywhere on the row, not only its small On/Off word.
   const sw = e.target.closest('[data-switch]') || (!e.target.closest('button') && e.target.closest('.set-row')?.querySelector('[data-switch]'));
   if (sw) setSetting(sw.dataset.switch, !S()[sw.dataset.switch]);
+});
+
+/* engine dialog */
+const eUrl = $('#eUrl'), eName = $('#eName'), eErr = $('#eErr'), eDef = $('#eDef');
+let engTarget = null;
+// Accepts "example.com/search?q=%s"; without %s the query is appended to the end.
+function normalizeTemplate(raw) {
+  const u = String(raw || '').trim();
+  if (!u || /\s/.test(u)) return '';
+  const ok = normalizeUrl(u.split('%s').join('x')); // guesses the scheme and checks the host like a bookmark URL
+  if (!ok) return '';
+  return /^[a-z][\w+.-]*:\/\//i.test(u) ? u : ok.slice(0, ok.indexOf('//') + 2) + u;
+}
+const templateTitle = (u) => titleFromUrl(u.split('%s').join('x'));
+function setEngErr(on) { eErr.hidden = !on; on ? eUrl.setAttribute('aria-invalid', 'true') : eUrl.removeAttribute('aria-invalid'); }
+function setDefSwitch(on, locked) { eDef.setAttribute('aria-checked', String(on)); eDef.textContent = t(on ? 'on' : 'off'); eDef.disabled = locked; }
+function openEngine(id) {
+  const e = engines().find(x => x.id === id);
+  engTarget = e ? id : null; ret = e ? { eng: id } : null;
+  $('#engTitle').textContent = t(e ? 'editEngine' : 'newEngine');
+  eUrl.value = e ? e.url : '';
+  eName.value = e ? engineName(e) : '';
+  eName.placeholder = templateTitle(normalizeTemplate(eUrl.value));
+  setEngErr(false);
+  const isDef = !!e && e === engine();
+  setDefSwitch(isDef, isDef); // the default can only move to another engine, never to none
+  $('#engDel').hidden = !e || engines().length < 2;
+  openDlg(engDlg, !e ? eUrl : fineMQ.matches ? eName : null);
+}
+eUrl.addEventListener('input', () => { setEngErr(false); eName.placeholder = templateTitle(normalizeTemplate(eUrl.value)); });
+$('#eDefRow').addEventListener('click', e => { if (!eDef.disabled && (e.target === eDef || !e.target.closest('button'))) setDefSwitch(eDef.getAttribute('aria-checked') !== 'true', false); });
+$('#engForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const url = normalizeTemplate(eUrl.value);
+  if (!url) { setEngErr(true); eUrl.focus(); return; }
+  const name = eName.value.trim() || templateTitle(url) || hostOf(url.split('%s').join(''));
+  let e = engines().find(x => x.id === engTarget);
+  if (e) { if (name !== engineName(e)) { e.name = name; delete e.zh; } e.url = url; }
+  else { e = { id: uid(), name, url }; engines().push(e); }
+  if (eDef.getAttribute('aria-checked') === 'true') S().engine = e.id;
+  ret = { eng: e.id };
+  save(); refresh(); closeDlg(engDlg);
+});
+$('#engDel').addEventListener('click', () => {
+  const id = engTarget, e = engines().find(x => x.id === id);
+  if (!e || engines().length < 2) return;
+  const i = engines().indexOf(e), nb = engines()[i + 1] || engines()[i - 1];
+  ret = { eng: nb.id };
+  closeDlg(engDlg);
+  withUndo(t('deleted', { n: engineName(e) }), () => {
+    S().engines = engines().filter(x => x.id !== id);
+    if (S().engine === id) S().engine = S().engines[0].id;
+  }, true);
 });
 
 /* backup */
@@ -864,7 +1014,6 @@ $('#importBtn').addEventListener('click', () => $('#importFile').click());
 $('#importFile').addEventListener('change', async e => {
   const file = e.target.files[0]; e.target.value = '';
   if (!file) return;
-  closeDlg(setDlg); // the toast sits under the modal layer otherwise
   try {
     const text = await file.text();
     if (/^\s*[{[]/.test(text)) {
@@ -894,7 +1043,6 @@ function parseBookmarksHtml(html) {
   return [...byName.values()].filter(g => g.links.length);
 }
 $('#resetBtn').addEventListener('click', () => {
-  closeDlg(setDlg);
   withUndo(t('resetDone'), () => { const lang = S().lang; state = defaults(); state.settings.lang = lang; }, true);
 });
 
@@ -947,8 +1095,22 @@ function editKeys(e) {
     const gid = lb.closest('.group').dataset.gid;
     moveGroup(gid, e.key === 'ArrowLeft' ? -1 : 1); focusLabel(gid);
     return true;
+  } else if (e.target.closest?.('.eng-btn') && e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    e.preventDefault();
+    const id = e.target.closest('.eng-btn').dataset.id, list = engines(), i = list.findIndex(x => x.id === id);
+    moveEngine(i, i + (e.key === 'ArrowUp' ? -1 : 1));
+    $(`.eng-btn[data-id="${CSS.escape(id)}"]`)?.focus();
+    return true;
   }
   return false;
+}
+function moveEngine(i, j) {
+  const list = engines();
+  if (i < 0 || j < 0 || j >= list.length || i === j) return false;
+  const first = engineRects();
+  commitMove(() => { const [x] = list.splice(i, 1); list.splice(j, 0, x); });
+  renderEngines(); flip(first, 'li[data-id]', 'id', enginesEl); announce(t('engMoved', { i: j + 1 }));
+  return true;
 }
 function moveLinkBy(id, key) {
   const f = findLink(id); if (!f) return;
@@ -969,13 +1131,14 @@ function moveLinkBy(id, key) {
 let drag = null, pendingSync = false;
 const HOLD_REST = 450, HOLD_EDIT = 200;
 
-indexEl.addEventListener('pointerdown', e => {
+function onPointerDown(e) {
   lastPointer = e.pointerType;
   if (e.button !== 0 || drag) return;
+  const erow = e.target.closest('.erow'); // engine rows only exist in edit mode
   const row = e.target.closest('.row:not(.add)'), lbl = e.target.closest('.label-btn');
   const grp = row ? null : lbl?.closest('.group'); // dragging a group's label moves the whole group
   const touch = e.pointerType !== 'mouse';
-  const base = { row, grp, pid: e.pointerId, x: e.clientX, y: e.clientY, px: e.clientX, py: e.clientY, started: false };
+  const base = { row, grp, erow, pid: e.pointerId, x: e.clientX, y: e.clientY, px: e.clientX, py: e.clientY, started: false };
   if (!editing) {
     // At rest only touch/pen long-press enters edit mode; a slow mouse click still just opens the link.
     if (!touch || !(row || lbl)) return;
@@ -990,10 +1153,12 @@ indexEl.addEventListener('pointerdown', e => {
     }, HOLD_REST);
     return;
   }
-  if (!row && !grp) return;
+  if (!row && !grp && !erow) return;
   drag = { ...base, hold: touch };
   if (drag.hold) drag.timer = setTimeout(() => { if (drag && !drag.started) { navigator.vibrate?.(8); startDrag(); } }, HOLD_EDIT);
-});
+}
+indexEl.addEventListener('pointerdown', onPointerDown);
+enginesEl.addEventListener('pointerdown', onPointerDown);
 addEventListener('pointermove', e => {
   if (!drag || e.pointerId !== drag.pid) return;
   drag.px = e.clientX; drag.py = e.clientY;
@@ -1013,16 +1178,17 @@ addEventListener('pointercancel', e => { if (drag && e.pointerId === drag.pid) e
 addEventListener('scroll', () => { if (drag && !drag.started) endDrag(false); }, { passive: true });
 // Registered up front and non-passive so the browser knows touches here may be claimed;
 // it only blocks scrolling once a drag has actually begun.
-indexEl.addEventListener('touchmove', e => { if (drag?.started) e.preventDefault(); }, { passive: false });
+[indexEl, enginesEl].forEach(el => el.addEventListener('touchmove', e => { if (drag?.started) e.preventDefault(); }, { passive: false }));
 
 function startDrag() {
-  const d = drag, src = d.row || d.grp, handle = d.row || d.grp.querySelector('.label-btn');
+  const d = drag, src = d.row || d.erow || d.grp, handle = d.row || d.erow || d.grp.querySelector('.label-btn');
+  const label = d.row ? d.row.querySelector('.link') : d.erow ? d.erow.querySelector('.n') : handle;
   const r = handle.getBoundingClientRect();
   d.started = true; d.moved = !d.hold; clearTimeout(d.timer); // a mouse drag starts by moving
   d.ox = d.px - r.left; d.oy = Math.min(Math.max(d.py - r.top, 0), r.height);
   try { src.setPointerCapture(d.pid); } catch {}
-  d.ghost = h('div', d.row ? 'ghost' : 'ghost is-group', d.row ? d.row.querySelector('.link').textContent : handle.textContent);
-  d.ghost.style.width = (d.row ? r.width : Math.min(handle.scrollWidth, r.width)) + 18 + 'px';
+  d.ghost = h('div', d.grp ? 'ghost is-group' : 'ghost', label.textContent);
+  d.ghost.style.width = (d.row ? r.width : Math.min(label.scrollWidth, r.width)) + 18 + 'px';
   d.line = h('div', 'insert');
   body.append(d.ghost, d.line);
   src.classList.add('src'); body.classList.add('dragging');
@@ -1034,6 +1200,7 @@ function moveGhost() { drag.ghost.style.transform = `translate3d(${drag.px - dra
 function updateTarget() {
   const d = drag; let best = null, bd = Infinity;
   if (d.grp) { updateGroupTarget(); return; }
+  if (d.erow) { updateEngineTarget(); return; }
   $$('.row', indexEl).forEach(row => {
     const r = row.getBoundingClientRect(); if (!r.height) return;
     const dx = Math.max(r.left - d.px, 0, d.px - r.right), dy = Math.max(r.top - d.py, 0, d.py - r.bottom);
@@ -1065,6 +1232,20 @@ function updateGroupTarget() {
   d.line.style.width = '2px'; d.line.style.height = r.height + 'px';
   d.line.style.transform = `translate3d(${(before ? r.left - gap / 2 : r.right + gap / 2) - 1}px, ${r.top}px, 0)`;
 }
+// Engines are one vertical list: nearest row by y, '+ Add' counts as the end.
+function updateEngineTarget() {
+  const d = drag; let best = null, bd = Infinity;
+  $$('li', enginesEl).forEach(li => {
+    const r = li.getBoundingClientRect(); if (!r.height) return;
+    const dy = Math.max(r.top - d.py, 0, d.py - r.bottom);
+    if (dy < bd) { bd = dy; best = { li, r }; }
+  });
+  if (!best) return;
+  const { li, r } = best, isAdd = !li.dataset.id, before = isAdd || d.py < r.top + r.height / 2;
+  d.target = { index: isAdd ? engines().length : engines().findIndex(x => x.id === li.dataset.id) + (before ? 0 : 1) };
+  d.line.style.width = r.width + 'px';
+  d.line.style.transform = `translate3d(${r.left}px, ${(before ? r.top : r.bottom) - 1}px, 0)`;
+}
 function autoScroll() {
   const d = drag; if (!d || !d.started) return;
   const E = 48, y = d.py;
@@ -1080,9 +1261,9 @@ function endDrag(commit) {
   if (d.started) {
     cancelAnimationFrame(d.raf);
     d.ghost.remove(); d.line.remove();
-    (d.row || d.grp).classList.remove('src'); body.classList.remove('dragging');
+    (d.row || d.erow || d.grp).classList.remove('src'); body.classList.remove('dragging');
     suppressUntil = Date.now() + 400;
-    if (d.grp) { endGroupDrag(d, commit); if (pendingSync) applySync(); return; }
+    if (d.grp || d.erow) { (d.grp ? endGroupDrag : endEngineDrag)(d, commit); if (pendingSync) applySync(); return; }
     const f = findLink(d.row.dataset.id), tg = d.target && findGroup(d.target.gid);
     // An edit-mode touch held past HOLD_EDIT but released in place is a slow tap: open the link.
     if (commit && f && !d.moved && !d.fired) openLink(f.link.id);
@@ -1109,11 +1290,20 @@ function endGroupDrag(d, commit) {
   commitMove(() => { const [g] = state.groups.splice(i, 1); state.groups.splice(j, 0, g); });
   render(); flip(first, '.group[data-gid]', 'gid'); announce(t('groupMoved', { i: j + 1 }));
 }
+function endEngineDrag(d, commit) {
+  const id = d.erow.dataset.id, i = engines().findIndex(x => x.id === id);
+  if (!commit || i < 0) return;
+  if (!d.moved && !d.fired) { openEngine(id); return; } // slow tap on touch
+  if (!d.target) return;
+  let j = d.target.index; if (j > i) j--;
+  moveEngine(i, j);
+}
 const rowRects = () => new Map($$('.row[data-id]', indexEl).map(el => [el.dataset.id, el.getBoundingClientRect()]));
 const groupRects = () => new Map($$('.group[data-gid]', indexEl).map(el => [el.dataset.gid, el.getBoundingClientRect()]));
-function flip(first, sel = '.row[data-id]', key = 'id') {
+const engineRects = () => new Map($$('li[data-id]', enginesEl).map(el => [el.dataset.id, el.getBoundingClientRect()]));
+function flip(first, sel = '.row[data-id]', key = 'id', scope = indexEl) {
   if (reduceMQ.matches) return;
-  $$(sel, indexEl).forEach(el => {
+  $$(sel, scope).forEach(el => {
     const a = first.get(el.dataset[key]); if (!a) return;
     const b = el.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top;
     if (dx || dy) el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 160, easing: 'cubic-bezier(.2,0,0,1)' });
@@ -1130,6 +1320,7 @@ function markMatch(text, lq) {
 function updateSuggest() {
   const raw = q.value.trim(), lq = raw.toLowerCase();
   clearBtn.hidden = !q.value;
+  $('#searchForm').classList.toggle('has-q', !!q.value);
   slot.classList.toggle('searching', !!raw);
   q.setAttribute('aria-expanded', String(!!raw));
   items = [];
@@ -1166,7 +1357,12 @@ function renderSuggest() {
     o.setAttribute('role', 'option'); o.setAttribute('aria-selected', String(i === sel));
     let html;
     if (it.type === 'link') html = `<span class="t">${markMatch(linkText(it.link), lq)}</span><span class="h">${esc(hostOf(it.link.url))}</span>`;
-    else if (it.type === 'search') { const [a, b] = t('searchFor', { e: engineName() }).split('{q}'); html = `<span class="t">${esc(a)}<b>${esc(it.q)}</b>${esc(b || '')}</span>`; }
+    else if (it.type === 'search') {
+      // The engine name is tappable here too, so it can be switched mid-query.
+      const [a, b] = t('searchFor').split('{q}'), name = engineName();
+      const pick = `<span class="eng-pick" title="${esc(t('switchEngine', { e: name }))}">${esc(name)}</span>`;
+      html = `<span class="t">${esc(a).replace('{e}', pick)}<b>${esc(it.q)}</b>${esc(b || '')}</span><span class="tabhint">${esc(t('tabSwitch'))}</span>`;
+    }
     else if (it.type === 'open') { const [a, b] = t('open').split('{u}'); html = `<span class="t">${esc(a)}<b>${esc(it.url.replace(/^https?:\/\//, '').replace(/\/$/, ''))}</b>${esc(b || '')}</span>`; }
     else html = `<span class="t">${esc(t('saveUrl'))}</span>`;
     o.innerHTML = html + '<span class="k" aria-hidden="true">↵</span>';
@@ -1183,9 +1379,27 @@ function activate(it, newTab) {
   if (it.type === 'link') go(it.link.url, newTab || S().newTab);
   else if (it.type === 'open') go(it.url, newTab);
   else if (it.type === 'save') openLink(null, null, it.url);
-  else go(engine().url + encodeURIComponent(it.q), newTab);
+  else go(searchUrl(engine(), it.q), newTab);
 }
 function clearSearch() { q.value = ''; updateSuggest(); }
+
+// Switch engines from the placeholder word, the "Search X for ..." row, or Tab / Shift+Tab in the field.
+function setEngine(id) {
+  S().engine = id; save(); updatePlaceholder(); renderEngines();
+  if (q.value.trim()) { const keep = sel; updateSuggest(); if (keep >= 0 && keep < items.length) { sel = keep; syncSel(); } }
+}
+function cycleEngine(dir) {
+  const list = engines(), i = list.indexOf(engine());
+  setEngine(list[(i + dir + list.length) % list.length].id);
+}
+const blink = (el) => { if (el && !reduceMQ.matches) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'ease-out' }); };
+phEng.addEventListener('pointerdown', e => e.preventDefault()); // keep focus (and the phone keyboard) in the field
+phEng.addEventListener('click', () => { cycleEngine(1); blink(phEng); q.focus({ preventScroll: true }); });
+sugEl.addEventListener('click', e => {
+  if (!e.target.closest('.eng-pick')) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  cycleEngine(1); blink($('.eng-pick', sugEl));
+}, true);
 
 q.addEventListener('input', updateSuggest);
 q.addEventListener('keydown', e => {
@@ -1198,6 +1412,9 @@ q.addEventListener('keydown', e => {
     e.preventDefault(); e.stopPropagation();
     // On desktop the field keeps focus so a Chinese IME is already active for the next query.
     if (q.value) clearSearch(); else if (!fineMQ.matches) q.blur();
+  } else if (e.key === 'Tab' && !e.altKey && !e.metaKey && !e.ctrlKey) {
+    e.preventDefault(); cycleEngine(e.shiftKey ? -1 : 1);
+    blink(q.value.trim() ? $('.eng-pick', sugEl) : phEng);
   } else if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && q.value.trim()) {
     e.preventDefault();
     activate(items[sel] || { type: 'search', q: q.value.trim() }, true);
@@ -1217,13 +1434,12 @@ clearBtn.addEventListener('click', () => { clearSearch(); q.focus(); });
 /* ---------- running head ---------- */
 $('#editBtn').addEventListener('click', () => setEditing(!editing));
 $('#langBtn').addEventListener('click', () => setSetting('lang', S().lang === 'zh' ? 'en' : 'zh'));
-$('#settingsBtn').addEventListener('click', openSettings);
 
 /* ---------- global keys ---------- */
 document.addEventListener('keydown', e => {
   if (e.isComposing || e.keyCode === 229) return;
   const mod = e.metaKey || e.ctrlKey, dlgOpen = !!$('dialog[open]');
-  if (mod && e.key === ',') { e.preventDefault(); if (!dlgOpen) openSettings(); return; }
+  if (mod && e.key === ',') { e.preventDefault(); if (!dlgOpen) openPrefs(); return; }
   if (dlgOpen) return;
   if (e.key === 'Escape' && drag) { endDrag(false); return; }
   const tgt = e.target instanceof Element ? e.target : body;
@@ -1249,7 +1465,7 @@ document.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clie
 document.addEventListener('pointerup', e => {
   const d = down; down = null;
   if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) >= 8 || drag || Date.now() < suppressUntil || $('dialog[open]')) return;
-  if (!(d.t instanceof Element) || d.t.closest('button, a, input, select, label, .row, .label, .head, .search, .suggest, .toast-wrap, dialog')) return;
+  if (!(d.t instanceof Element) || d.t.closest('button, a, input, select, label, .row, .label, .head, .search, .suggest, .prefs, .toast-wrap, dialog')) return;
   if (editing) { if (e.pointerType === 'mouse' || !d.t.closest('.index')) setEditing(false); }
   else if (e.pointerType === 'mouse' && fineMQ.matches) q.focus({ preventScroll: true }); // IME-friendly way in
 });
@@ -1268,11 +1484,12 @@ addEventListener('storage', e => {
 /* ---------- environment changes ---------- */
 darkMQ.addEventListener?.('change', applyTheme);
 coarseMQ.addEventListener?.('change', applyText);
+phoneMQ.addEventListener?.('change', updatePlaceholder);
 let resizeRaf;
 addEventListener('resize', () => { cancelAnimationFrame(resizeRaf); resizeRaf = requestAnimationFrame(layout); });
 
 /* ---------- init ---------- */
-applyTheme(); applyText(); render();
+applyTheme(); applyText(); render(); syncPrefs();
 if (migrated) save();
 if (fineMQ.matches) q.focus({ preventScroll: true });
 })();
