@@ -183,11 +183,16 @@ body.dragging, body.dragging * { cursor: grabbing !important; user-select: none;
 .opt { display: flex; align-items: center; height: 40px; color: var(--text-2); cursor: pointer; white-space: nowrap; }
 .opt .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .opt .h { flex-shrink: 1000; min-width: 0; overflow: hidden; text-overflow: ellipsis; margin-left: 12px; font-size: 13px; color: var(--text-3); }
-.opt .k { margin-left: auto; padding-left: 16px; font-size: 13px; color: var(--text-3); visibility: hidden; }
+.opt .k, .opt .x { display: inline-flex; align-items: center; justify-content: center; flex: none; height: 20px; color: var(--text-3); visibility: hidden; }
+.opt .k { margin-left: auto; padding-left: 16px; }
+.opt .x { width: 28px; margin-right: -8px; cursor: pointer; transition: color 120ms var(--ease); }
+.opt .k svg, .opt .x svg { width: 12px; height: 12px; }
+.opt .clearhist { font-size: 13px; color: var(--text-3); }
 .opt b { font-weight: 600; }
 .opt[aria-selected="true"] { color: var(--ink); }
-.opt[aria-selected="true"] .k { visibility: visible; }
-@media (pointer: coarse) { .opt .k { display: none; } }
+.opt[aria-selected="true"] .k, .opt[aria-selected="true"] .x, .opt:hover .x { visibility: visible; }
+@media (hover: hover) { .opt .x:hover { color: var(--ink); } }
+@media (pointer: coarse) { .opt .k { display: none; } .opt .x { visibility: visible; width: 44px; height: 44px; margin: 0 -14px 0 auto; } }
 
 /* ---------- dialogs ---------- */
 dialog {
@@ -362,6 +367,8 @@ body.editing .prefs { display: block; animation: fade-in 160ms var(--ease); }
       <div class="opts" role="group" aria-labelledby="lblTheme" data-opt="theme"><button type="button" class="opt-btn" data-val="auto" data-i18n="auto"></button><button type="button" class="opt-btn" data-val="light" data-i18n="light"></button><button type="button" class="opt-btn" data-val="dark" data-i18n="dark"></button></div></div>
     <div class="set-row"><span class="set-label" id="lblNewTab" data-i18n="newTab"></span>
       <button type="button" class="opt-btn" role="switch" data-switch="newTab" aria-labelledby="lblNewTab"></button></div>
+    <div class="set-row"><span class="set-label" id="lblHist" data-i18n="history"></span>
+      <div class="opts" role="group" aria-labelledby="lblHist"><button type="button" class="opt-btn" role="switch" data-switch="historyOn" aria-labelledby="lblHist"></button><button type="button" class="opt-btn" id="histClear" data-i18n="clear"></button></div></div>
     <div class="set-row"><span class="set-label" id="lblBackup" data-i18n="backup"></span>
       <div class="opts" role="group" aria-labelledby="lblBackup"><button type="button" class="opt-btn" id="exportBtn" data-i18n="export"></button><button type="button" class="opt-btn" id="importBtn" data-i18n="import"></button><button type="button" class="opt-btn danger" id="resetBtn" data-i18n="reset"></button></div></div>
     <p class="note" data-i18n="importNote"></p>
@@ -445,6 +452,7 @@ const I18N = {
   en: {
     title: 'New Tab', searchPh: 'Search {e} or type a URL', searchPhShort: 'Search {e}', searchLabel: 'Search',
     switchEngine: 'Search engine: {e}. Click or press Tab to switch', tabSwitch: 'Tab to switch',
+    history: 'History', recentTag: 'recent', remove: 'Remove', clearHistory: 'Clear history', historyCleared: 'History cleared',
     clear: 'Clear', edit: 'Edit', done: 'Done', settings: 'Settings', newGroup: 'New group', addGroup: '+ New group',
     captionMouse: 'Drag to reorder · Click to edit', captionTouch: 'Drag to reorder · Tap to edit',
     add: '+ Add', empty: 'No links yet.', addFirst: 'Add a link', bookmarks: 'Bookmarks', suggestions: 'Suggestions',
@@ -468,6 +476,7 @@ const I18N = {
   zh: {
     title: '新标签页', searchPh: '用 {e} 搜索或输入网址', searchPhShort: '用 {e} 搜索', searchLabel: '搜索',
     switchEngine: '搜索引擎：{e}，点击或按 Tab 切换', tabSwitch: 'Tab 切换',
+    history: '历史记录', recentTag: '最近', remove: '移除', clearHistory: '清除历史记录', historyCleared: '已清除历史记录',
     clear: '清除', edit: '编辑', done: '完成', settings: '设置', newGroup: '新建分组', addGroup: '+ 新建分组',
     captionMouse: '拖动调整顺序 · 点击编辑', captionTouch: '拖动调整顺序 · 轻点编辑',
     add: '+ 添加', empty: '还没有链接。', addFirst: '添加链接', bookmarks: '书签', suggestions: '建议',
@@ -541,7 +550,7 @@ const KEY = 'startpage.v2', OLD_KEY = 'startpage.v1';
 const L = (title, url) => ({ id: uid(), title, url });
 function defaults() {
   return {
-    settings: { lang: 'en', theme: 'auto', engines: DEFAULT_ENGINES.map(e => ({ ...e })), engine: 'google', newTab: false },
+    settings: { lang: 'en', theme: 'auto', engines: DEFAULT_ENGINES.map(e => ({ ...e })), engine: 'google', newTab: false, historyOn: true },
     groups: [
       { id: uid(), key: '', name: 'fav', links: [
         L('kiseki log', 'https://ki-seki.github.io/'),
@@ -574,7 +583,8 @@ function sanitize(s) {
       theme: ['light', 'dark'].includes(i.theme) ? i.theme : 'auto',
       engines: engs,
       engine: engs.some(e => e.id === i.engine) ? i.engine : engs[0].id,
-      newTab: !!i.newTab
+      newTab: !!i.newTab,
+      historyOn: i.historyOn !== false
     },
     groups: s.groups.filter(g => g && Array.isArray(g.links)).map(g => ({
       id: String(g.id || uid()), key: ['favorites', 'tools', 'importedGroup'].includes(g.key) ? g.key : '', name: String(g.name || ''),
@@ -1309,6 +1319,35 @@ function flip(first, sel = '.row[data-id]', key = 'id', scope = indexEl) {
   });
 }
 
+/* ---------- history: searches and addresses opened from this page (bookmark clicks are not recorded) ---------- */
+const HKEY = 'startpage.history.v1';
+const loadHist = () => { try { const a = JSON.parse(localStorage.getItem(HKEY)); return Array.isArray(a) ? a.filter(x => x && x.v && (x.k === 'search' || x.k === 'open')) : []; } catch { return []; } };
+let hist = loadHist(), recentOpen = false;
+const saveHist = () => { try { localStorage.setItem(HKEY, JSON.stringify(hist)); } catch {} };
+const histOn = () => S().historyOn !== false;
+const histText = (x) => x.k === 'open' ? x.v.replace(/^https?:\/\//, '').replace(/\/$/, '') : x.v;
+const histKey = (x) => x.k + ':' + (x.k === 'open' ? urlKey(x.v) : x.v.toLowerCase());
+function record(k, v) {
+  if (!histOn() || !v) return;
+  const e = { k, v, t: Date.now() }, key = histKey(e);
+  hist = [e, ...hist.filter(x => histKey(x) !== key)].slice(0, 50); saveHist();
+}
+// Prefix matches first, then anything containing the text; most recent first within each.
+function histMatches(lq, n) {
+  if (!histOn()) return [];
+  const pre = [], mid = [];
+  hist.forEach(x => { const tx = histText(x).toLowerCase(); if (tx.startsWith(lq)) pre.push(x); else if (tx.includes(lq)) mid.push(x); });
+  return [...pre, ...mid].slice(0, n);
+}
+function removeHist(x) { const key = histKey(x); hist = hist.filter(y => histKey(y) !== key); saveHist(); }
+function refreshHist() { const keep = sel; updateSuggest(); if (keep >= 0 && items.length) { sel = Math.min(keep, items.length - 1); syncSel(); } }
+function clearHist() {
+  const snap = hist; hist = []; saveHist(); recentOpen = false; refreshHist();
+  toast(t('historyCleared'), () => { hist = snap; saveHist(); refreshHist(); });
+}
+const ICON_ENTER = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5V6a1 1 0 0 1-1 1H2.5"/><path d="M4.5 5 2.5 7l2 2"/></svg>';
+const ICON_X = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><path d="M3 3l6 6M9 3 3 9"/></svg>';
+
 /* ---------- search: suggestions replace the index in place ---------- */
 let items = [], sel = -1;
 function go(url, newTab) { if (newTab) window.open(url, '_blank', 'noopener'); else location.href = url; }
@@ -1318,11 +1357,14 @@ function markMatch(text, lq) {
 }
 function updateSuggest() {
   const raw = q.value.trim(), lq = raw.toLowerCase();
+  // A click/tap (or Down) on the empty field lists recent entries in place of the bookmarks.
+  const recentMode = recentOpen && !raw && histOn() && hist.length > 0;
   clearBtn.hidden = !q.value;
   $('#searchForm').classList.toggle('has-q', !!q.value);
-  slot.classList.toggle('searching', !!raw);
-  q.setAttribute('aria-expanded', String(!!raw));
+  slot.classList.toggle('searching', !!raw || recentMode);
+  q.setAttribute('aria-expanded', String(!!raw || recentMode));
   items = [];
+  if (recentMode) items = [...hist.slice(0, 8).map(x => ({ type: 'hist', h: x })), { type: 'clearhist' }];
   if (raw) {
     if (editing) setEditing(false);
     const scored = [];
@@ -1335,12 +1377,15 @@ function updateSuggest() {
     const search = { type: 'search', q: raw };
     const url = looksLikeUrl(raw) && normalizeUrl(raw);
     // Enter searches, except that a typed address opens, as in a browser's address bar; bookmarks follow.
+    // Matching history sits between the search/open rows and the bookmarks.
+    const recent = histMatches(lq, 3).filter(x => histText(x).toLowerCase() !== lq && !(url && x.k === 'open' && urlKey(x.v) === urlKey(url)))
+      .map(x => ({ type: 'hist', h: x }));
     if (url) {
       const known = state.groups.some(g => g.links.some(l => urlKey(l.url) === urlKey(url)));
-      items = [{ type: 'open', url }, search, ...(known ? [] : [{ type: 'save', url }]), ...matches];
-    } else items = [search, ...matches];
+      items = [{ type: 'open', url }, search, ...(known ? [] : [{ type: 'save', url }]), ...recent, ...matches];
+    } else items = [search, ...recent, ...matches];
   }
-  sel = items.length ? 0 : -1;
+  sel = items.length && !recentMode ? 0 : -1; // nothing preselected in the recent list, so Enter stays inert
   renderSuggest();
 }
 function renderSuggest() {
@@ -1359,8 +1404,10 @@ function renderSuggest() {
       html = `<span class="t">${esc(a).replace('{e}', pick)}<b>${esc(it.q)}</b>${esc(b || '')}</span><span class="tabhint">${esc(t('tabSwitch'))}</span>`;
     }
     else if (it.type === 'open') { const [a, b] = t('open').split('{u}'); html = `<span class="t">${esc(a)}<b>${esc(it.url.replace(/^https?:\/\//, '').replace(/\/$/, ''))}</b>${esc(b || '')}</span>`; }
+    else if (it.type === 'hist') html = `<span class="t">${markMatch(histText(it.h), lq)}</span>` + (lq ? `<span class="h">${esc(t('recentTag'))}</span>` : '');
+    else if (it.type === 'clearhist') html = `<span class="t clearhist">${esc(t('clearHistory'))}</span>`;
     else html = `<span class="t">${esc(t('saveUrl'))}</span>`;
-    o.innerHTML = html + '<span class="k" aria-hidden="true">↵</span>';
+    o.innerHTML = html + `<span class="k">${ICON_ENTER}</span>` + (it.type === 'hist' ? `<span class="x" role="button" aria-label="${esc(t('remove'))}">${ICON_X}</span>` : '');
     sugEl.append(o);
   });
   syncSel();
@@ -1372,9 +1419,11 @@ function syncSel() {
 function activate(it, newTab) {
   if (!it) return;
   if (it.type === 'link') go(it.link.url, newTab || S().newTab);
-  else if (it.type === 'open') go(it.url, newTab);
+  else if (it.type === 'open') { record('open', it.url); go(it.url, newTab); }
   else if (it.type === 'save') openLink(null, null, it.url);
-  else go(searchUrl(engine(), it.q), newTab);
+  else if (it.type === 'hist') { record(it.h.k, it.h.v); go(it.h.k === 'open' ? it.h.v : searchUrl(engine(), it.h.v), newTab); }
+  else if (it.type === 'clearhist') clearHist();
+  else { record('search', it.q); go(searchUrl(engine(), it.q), newTab); }
 }
 function clearSearch() { q.value = ''; updateSuggest(); }
 
@@ -1417,12 +1466,30 @@ q.addEventListener('keydown', e => {
 });
 $('#searchForm').addEventListener('submit', e => {
   e.preventDefault();
-  const raw = q.value.trim(); if (!raw) return;
+  const raw = q.value.trim(); if (!raw) { if (items[sel]) activate(items[sel], false); return; }
   activate(items[sel] || (normalizeUrl(raw) && looksLikeUrl(raw) ? { type: 'open', url: normalizeUrl(raw) } : { type: 'search', q: raw }), false);
 });
 sugEl.addEventListener('pointerdown', e => e.preventDefault()); // keep focus in the input
 sugEl.addEventListener('click', e => { const o = e.target.closest('.opt'); if (o) activate(items[+o.dataset.i], e.metaKey || e.ctrlKey); });
 sugEl.addEventListener('pointermove', e => { const o = e.target.closest('.opt'); if (o && +o.dataset.i !== sel) { sel = +o.dataset.i; syncSel(); } });
+// History: recent entries on demand, × or Shift+Delete to forget one.
+q.addEventListener('pointerdown', () => { if (!q.value.trim()) { recentOpen = true; setTimeout(updateSuggest, 0); } }); // a real click, not autofocus
+q.addEventListener('keydown', e => {
+  if (e.isComposing || e.keyCode === 229) return;
+  if (e.key === 'Delete' && e.shiftKey && items[sel]?.type === 'hist') { e.preventDefault(); removeHist(items[sel].h); refreshHist(); return; }
+  if (q.value.trim()) return;
+  if (e.key === 'ArrowDown' && !recentOpen && histOn() && hist.length) { e.preventDefault(); recentOpen = true; updateSuggest(); }
+  else if (e.key === 'Escape' && recentOpen) { recentOpen = false; updateSuggest(); }
+});
+q.addEventListener('blur', () => { if (recentOpen) { recentOpen = false; updateSuggest(); } });
+sugEl.addEventListener('click', e => {
+  const x = e.target.closest('.x'); if (!x) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const it = items[+x.closest('.opt').dataset.i]; if (it?.h) { removeHist(it.h); refreshHist(); }
+}, true);
+$('#histClear').addEventListener('click', clearHist);
+// Back from a search (back/forward cache): pick up the entry just recorded.
+addEventListener('pageshow', e => { if (e.persisted) { hist = loadHist(); recentOpen = false; updateSuggest(); } });
 clearBtn.addEventListener('pointerdown', e => e.preventDefault());
 clearBtn.addEventListener('click', () => { clearSearch(); q.focus(); });
 
@@ -1472,6 +1539,7 @@ function applySync() {
   refresh();
 }
 addEventListener('storage', e => {
+  if (e.key === HKEY) { hist = loadHist(); return; }
   if (e.key !== KEY) return;
   if (drag) pendingSync = true; else applySync(); // never re-render under the pointer
 });
