@@ -64,7 +64,6 @@ body.editing .head { position: sticky; top: 0; z-index: 5; background: var(--bg)
 .ctrls { display: flex; gap: 8px; margin-right: -8px; }
 .word { display: inline-flex; align-items: center; height: 40px; padding: 0 8px; font-size: 13px; line-height: 20px; color: var(--text-3); white-space: nowrap; transition: color 120ms var(--ease); }
 #settingsBtn { margin-left: -8px; color: var(--text-2); }
-#newGroupBtn { color: var(--text-2); }
 body.editing #editBtn { color: var(--ink); font-weight: 600; }
 .edit-only { display: none; }
 body.editing .edit-only { display: inline-flex; animation: fade-in 120ms var(--ease); }
@@ -106,15 +105,15 @@ body.editing .caption { opacity: 1; visibility: visible; transition-delay: 0s; }
 @keyframes fade-out { to { opacity: 0; } }
 
 .group { min-width: 0; }
-.group.empty { display: none; }
-body.editing .group.empty { display: block; }
+.group.empty, .group-new { display: none; }
+body.editing .group.empty, body.editing .group-new { display: block; }
 .group.span-2 { grid-column: span 2; }
 .group.span-3 { grid-column: span 3; }
 .group.span-2 ul { column-count: 2; column-gap: 40px; }
 .group.span-3 ul { column-count: 3; column-gap: 40px; }
 .group.span-2 li, .group.span-3 li { break-inside: avoid; }
 .label { margin: 0 0 12px; font: inherit; }
-.label-btn {
+.label-btn, .new-btn {
   display: block; max-width: 100%; padding: 12px 0; margin: -12px 0; cursor: default;
   font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -122,8 +121,9 @@ body.editing .group.empty { display: block; }
   transition: text-decoration-color 160ms var(--ease), color 120ms var(--ease);
   -webkit-touch-callout: none; user-select: none; -webkit-user-select: none;
 }
-:lang(zh) .label-btn { font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: none; }
+:lang(zh) .label-btn, :lang(zh) .new-btn { font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: none; }
 body.editing .label-btn { cursor: pointer; text-decoration-color: currentColor; }
+.new-btn { cursor: pointer; }
 .group ul { list-style: none; margin: 0; padding: 0; }
 .row { position: relative; }
 .link, .add-btn {
@@ -140,10 +140,10 @@ body.editing .link { box-shadow: inset 0 -1px 0 var(--rule); -webkit-user-drag: 
 .row.add { display: none; }
 body.editing .row.add { display: block; animation: fade-in 160ms var(--ease); }
 .add-btn { color: var(--text-3); transition: color 120ms var(--ease); }
-.row.src .link { opacity: .3; }
-@media (pointer: fine) { body.editing .link { cursor: grab; } }
+.row.src .link, .group.src { opacity: .3; }
+@media (pointer: fine) { body.editing .link, body.editing .label-btn { cursor: grab; } }
 @media (hover: hover) {
-  .word:hover, .add-btn:hover, .btn:hover, .opt-btn:hover { color: var(--ink); }
+  .word:hover, .add-btn:hover, .new-btn:hover, .btn:hover, .opt-btn:hover { color: var(--ink); }
   .link:hover { text-decoration-color: var(--ink); }
   body.editing .link:hover { text-decoration-color: transparent; }
 }
@@ -152,6 +152,8 @@ body.editing .row.add { display: block; animation: fade-in 160ms var(--ease); }
   background: var(--bg); border: 1px solid var(--rule-strong); color: var(--ink);
   font-size: 15px; line-height: 22px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.ghost.is-group { font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); }
+:lang(zh) .ghost.is-group { font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: none; }
 .insert { position: fixed; left: 0; top: 0; height: 2px; background: var(--ink); z-index: 49; pointer-events: none; }
 body.dragging, body.dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
 
@@ -206,7 +208,6 @@ select.input option { background: var(--bg); color: var(--ink); }
 .btn:disabled { opacity: .4; cursor: default; }
 .btn.danger { color: var(--danger); }
 .btn.primary { background: var(--ink); color: var(--bg); font-weight: 600; padding: 0 20px; margin-left: 0; }
-.order { display: flex; gap: 8px; }
 
 /* settings: a ruled table */
 .set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px; padding: 6px 0; border-top: 1px solid var(--rule); }
@@ -297,7 +298,6 @@ select.input option { background: var(--bg); color: var(--ink); }
       <button type="button" class="word edit-only" id="settingsBtn" data-i18n="settings"></button>
     </div>
     <nav class="ctrls">
-      <button type="button" class="word edit-only" id="newGroupBtn" data-i18n="newGroup"></button>
       <button type="button" class="word" id="editBtn"></button>
       <button type="button" class="word rest-only" id="langBtn"></button>
     </nav>
@@ -331,11 +331,6 @@ select.input option { background: var(--bg); color: var(--ink); }
         <input class="input" id="fTitle" type="text" autocomplete="off"></label>
       <label class="field"><span class="field-label" data-i18n="group"></span>
         <span class="select"><select class="input" id="fGroup"></select></span></label>
-      <div class="field" id="linkOrder" role="group" aria-labelledby="linkPosLbl"><span class="field-label" id="linkPosLbl" data-i18n="position"></span>
-        <div class="order">
-          <button type="button" class="btn" id="moveU" data-i18n="moveUp"></button>
-          <button type="button" class="btn" id="moveD" data-i18n="moveDown"></button>
-        </div></div>
     </div>
     <div class="actions">
       <button type="button" class="btn danger" id="linkDel" data-i18n="delete"></button>
@@ -352,11 +347,6 @@ select.input option { background: var(--bg); color: var(--ink); }
     <div class="fields">
       <label class="field"><span class="field-label" data-i18n="groupName"></span>
         <input class="input" id="gName" type="text" autocomplete="off"></label>
-      <div class="field" id="orderField" role="group" aria-labelledby="groupPosLbl"><span class="field-label" id="groupPosLbl" data-i18n="position"></span>
-        <div class="order">
-          <button type="button" class="btn" id="moveL" data-i18n="moveLeft"></button>
-          <button type="button" class="btn" id="moveR" data-i18n="moveRight"></button>
-        </div></div>
     </div>
     <div class="actions">
       <button type="button" class="btn danger" id="groupDel" data-i18n="deleteGroup"></button>
@@ -369,8 +359,6 @@ select.input option { background: var(--bg); color: var(--ink); }
 
 <dialog id="setDlg" tabindex="-1" aria-labelledby="setTitle">
   <h2 class="dlg-title" id="setTitle" data-i18n="settings"></h2>
-  <div class="set-row"><span class="set-label" id="lblLang" data-i18n="language"></span>
-    <div class="opts" role="group" aria-labelledby="lblLang" data-opt="lang"><button type="button" class="opt-btn" data-val="en" lang="en">English</button><button type="button" class="opt-btn" data-val="zh" lang="zh-CN">中文</button></div></div>
   <div class="set-row"><span class="set-label" id="lblTheme" data-i18n="theme"></span>
     <div class="opts" role="group" aria-labelledby="lblTheme" data-opt="theme"><button type="button" class="opt-btn" data-val="auto" data-i18n="auto"></button><button type="button" class="opt-btn" data-val="light" data-i18n="light"></button><button type="button" class="opt-btn" data-val="dark" data-i18n="dark"></button></div></div>
   <div class="set-row stack"><span class="set-label" id="lblEngine" data-i18n="engine"></span>
@@ -392,16 +380,15 @@ select.input option { background: var(--bg); color: var(--ink); }
 const I18N = {
   en: {
     title: 'New Tab', searchPh: 'Search or type a URL', searchLabel: 'Search',
-    clear: 'Clear', edit: 'Edit', done: 'Done', settings: 'Settings', newGroup: 'New group',
+    clear: 'Clear', edit: 'Edit', done: 'Done', settings: 'Settings', newGroup: 'New group', addGroup: '+ New group',
     captionMouse: 'Drag to reorder · Click to edit', captionTouch: 'Drag to reorder · Tap to edit',
     add: '+ Add', empty: 'No links yet.', addFirst: 'Add a link', bookmarks: 'Bookmarks', suggestions: 'Suggestions',
     searchFor: 'Search {e} for “{q}”', open: 'Open {u}', saveUrl: 'Save to bookmarks',
     newLink: 'New link', editLink: 'Edit link', url: 'URL', titleField: 'Title', group: 'Group',
     invalidUrl: 'Please enter a valid URL', save: 'Save', cancel: 'Cancel', delete: 'Delete',
-    renameGroup: 'Rename group', renameAria: 'Rename group: {g}', groupName: 'Name', position: 'Position',
-    moveLeft: 'Move left', moveRight: 'Move right', moveUp: 'Move up', moveDown: 'Move down',
+    renameGroup: 'Rename group', renameAria: 'Rename group: {g}', groupName: 'Name',
     addTo: 'Add link to {g}', kbdHint: 'Alt + arrow keys to move, Delete to remove',
-    deleteGroup: 'Delete group', language: 'Language', theme: 'Appearance', auto: 'Auto', light: 'Light', dark: 'Dark',
+    deleteGroup: 'Delete group', theme: 'Appearance', auto: 'Auto', light: 'Light', dark: 'Dark',
     engine: 'Search with', newTab: 'Open links in a new tab', on: 'On', off: 'Off',
     backup: 'Backup', export: 'Export', import: 'Import', reset: 'Reset',
     importNote: 'Import a .json backup or browser bookmarks (.html).',
@@ -413,16 +400,15 @@ const I18N = {
   },
   zh: {
     title: '新标签页', searchPh: '搜索或输入网址', searchLabel: '搜索',
-    clear: '清除', edit: '编辑', done: '完成', settings: '设置', newGroup: '新建分组',
+    clear: '清除', edit: '编辑', done: '完成', settings: '设置', newGroup: '新建分组', addGroup: '+ 新建分组',
     captionMouse: '拖动调整顺序 · 点击编辑', captionTouch: '拖动调整顺序 · 轻点编辑',
     add: '+ 添加', empty: '还没有链接。', addFirst: '添加链接', bookmarks: '书签', suggestions: '建议',
     searchFor: '用 {e} 搜索“{q}”', open: '打开 {u}', saveUrl: '收藏此网址',
     newLink: '新建链接', editLink: '编辑链接', url: '网址', titleField: '名称', group: '分组',
     invalidUrl: '请输入有效的网址', save: '保存', cancel: '取消', delete: '删除',
-    renameGroup: '重命名分组', renameAria: '重命名分组：{g}', groupName: '名称', position: '位置',
-    moveLeft: '左移', moveRight: '右移', moveUp: '上移', moveDown: '下移',
+    renameGroup: '重命名分组', renameAria: '重命名分组：{g}', groupName: '名称',
     addTo: '添加链接到“{g}”', kbdHint: 'Alt + 方向键移动，Delete 删除',
-    deleteGroup: '删除分组', language: '语言', theme: '外观', auto: '自动', light: '浅色', dark: '深色',
+    deleteGroup: '删除分组', theme: '外观', auto: '自动', light: '浅色', dark: '深色',
     engine: '搜索引擎', newTab: '在新标签页打开链接', on: '开', off: '关',
     backup: '备份', export: '导出', import: '导入', reset: '重置',
     importNote: '可导入 .json 备份或浏览器书签（.html）。',
@@ -487,18 +473,21 @@ function defaults() {
   return {
     settings: { lang: 'en', theme: 'auto', engine: 'google', newTab: false },
     groups: [
-      { id: uid(), key: '', name: 'Personal', links: [
-        L('log', 'https://ki-seki.github.io/'),
-        L('gallery', 'https://ki-seki.github.io/gallery/'),
-        L('ouroboros', 'https://ki-seki.github.io/ouroboros/')] },
-      { id: uid(), key: '', name: 'Learning', links: [
-        L('hypo test', 'https://ki-seki.github.io/features/hypothesis-testing-guide/?lang=en'),
-        L('sudoku', 'https://ki-seki.github.io/hodoku-translation/'),
+      { id: uid(), key: '', name: 'fav', links: [
+        L('kiseki log', 'https://ki-seki.github.io/'),
+        L('kiseki gallery', 'https://ki-seki.github.io/gallery/'),
         L('jianlin', 'https://spaces.ac.cn/')] },
-      { id: uid(), key: '', name: 'Entertainment', links: [
+      { id: uid(), key: '', name: 'util', links: [
+        L('ouroboros', 'https://ki-seki.github.io/ouroboros/'),
+        L('hypo test', 'https://ki-seki.github.io/features/hypothesis-testing-guide/?lang=en')] },
+      { id: uid(), key: '', name: 'fun', links: [
         L('fmhy', 'https://fmhy.net/'),
         L('4kvm', 'https://www.4kvm.net/'),
-        L('murdoku', 'https://murdoku.com/')] }
+        L('murdoku', 'https://murdoku.com/'),
+        L('sudoku techniques', 'https://ki-seki.github.io/hodoku-translation/')] },
+      { id: uid(), key: '', name: 'common', links: [
+        L('github', 'https://github.com/'),
+        L('chatgpt', 'https://chatgpt.com/')] }
     ]
   };
 }
@@ -629,6 +618,10 @@ function render() {
     sec.append(ul);
     indexEl.append(sec);
   });
+  // Edit mode shows where the next group would go, the way '+ Add' ends each list.
+  const ng = h('div', 'group-new'), nb = h('button', 'new-btn', t('addGroup'));
+  nb.type = 'button'; nb.dataset.act = 'group';
+  ng.append(nb); indexEl.append(ng);
   layout();
 }
 // Large groups span 2-3 grid columns (their list flows down text columns), clamped to the live column count.
@@ -732,32 +725,14 @@ function refocus() {
   if (el) { el.focus({ preventScroll: true }); if (document.activeElement === el) return; }
   if (fineMQ.matches) q.focus({ preventScroll: true }); // keeps the IME ready for type-to-search
 }
-// Position moves inside a dialog apply live; Cancel, Esc or a backdrop click puts them back.
-let dlgRestore = null;
-function dlgMove(mutate) {
-  if (!dlgRestore) dlgRestore = { snap: JSON.stringify(state.groups) };
-  mutate(); save(); dlgRestore.v = ver;
-}
 $$('dialog').forEach(d => {
   let downOut = false; // a text drag that ends on the backdrop must not close the dialog
   d.addEventListener('pointerdown', e => { downOut = e.target === d && outside(d, e); });
   d.addEventListener('click', e => { if (downOut && e.target === d && outside(d, e)) closeDlg(d); downOut = false; });
   d.addEventListener('cancel', e => { e.preventDefault(); closeDlg(d); });
   $$('[data-close]', d).forEach(b => b.addEventListener('click', () => closeDlg(d)));
-  d.addEventListener('close', () => {
-    if (d !== setDlg && dlgRestore) {
-      if (dlgRestore.v === ver) { state.groups = JSON.parse(dlgRestore.snap); save(); render(); }
-      dlgRestore = null;
-    }
-    if (!$('dialog[open]')) refocus();
-  });
+  d.addEventListener('close', () => { if (!$('dialog[open]')) refocus(); });
 });
-// Disabling the focused button would drop focus to <body>; hand it to a sibling first.
-function setEnds(a, b, aOff, bOff, fallback) {
-  const had = document.activeElement;
-  a.disabled = aOff; b.disabled = bOff;
-  if ((had === a && aOff) || (had === b && bOff)) ((had === a ? !bOff && b : !aOff && a) || fallback).focus();
-}
 
 /* link dialog */
 let linkTarget = null, linkFromSearch = false;
@@ -771,7 +746,7 @@ function setErr(on) { fErr.hidden = !on; on ? fUrl.setAttribute('aria-invalid', 
 function openLink(id, gid, url = '') {
   const f = id ? findLink(id) : null;
   linkTarget = f ? id : null; linkFromSearch = !!url;
-  ret = { id: linkTarget, gid: f ? f.g.id : gid }; dlgRestore = null;
+  ret = { id: linkTarget, gid: f ? f.g.id : gid };
   $('#linkTitle').textContent = t(f ? 'editLink' : 'newLink');
   fillGroups(f ? f.g.id : gid);
   fUrl.value = f ? f.link.url : url;
@@ -779,25 +754,8 @@ function openLink(id, gid, url = '') {
   fTitle.placeholder = titleFromUrl(normalizeUrl(fUrl.value));
   setErr(false);
   $('#linkDel').hidden = !f;
-  syncLinkOrder();
   openDlg(linkDlg, url ? fTitle : (!f || fineMQ.matches) ? fUrl : null);
 }
-// Move up/down: a way to reorder without dragging (touch screen readers, switch access).
-function syncLinkOrder() {
-  const f = linkTarget && findLink(linkTarget);
-  const show = !!f && f.g.id === fGroup.value && f.g.links.length > 1;
-  $('#linkOrder').hidden = !show;
-  if (show) setEnds($('#moveU'), $('#moveD'), f.i <= 0, f.i >= f.g.links.length - 1, fTitle);
-}
-function moveLinkInDlg(dir) {
-  const f = linkTarget && findLink(linkTarget); if (!f) return;
-  const j = f.i + dir; if (j < 0 || j >= f.g.links.length) return;
-  dlgMove(() => { f.g.links.splice(f.i, 1); f.g.links.splice(j, 0, f.link); });
-  render(); syncLinkOrder(); announceLink(f.link.id);
-}
-$('#moveU').addEventListener('click', () => moveLinkInDlg(-1));
-$('#moveD').addEventListener('click', () => moveLinkInDlg(1));
-fGroup.addEventListener('change', syncLinkOrder);
 fUrl.addEventListener('input', () => { setErr(false); fTitle.placeholder = titleFromUrl(normalizeUrl(fUrl.value)); });
 $('#linkForm').addEventListener('submit', e => {
   e.preventDefault();
@@ -812,13 +770,13 @@ $('#linkForm').addEventListener('submit', e => {
     Object.assign(f.link, data);
     if (f.g !== g) { f.g.links.splice(f.i, 1); g.links.push(f.link); }
   } else { id = uid(); g.links.push({ id, ...data }); }
-  ret = { id }; dlgRestore = null;
+  ret = { id };
   save(); render(); closeDlg(linkDlg);
   if (linkFromSearch) clearSearch();
 });
 $('#linkDel').addEventListener('click', () => {
   const id = linkTarget, f = findLink(id), nb = f && (f.g.links[f.i + 1] || f.g.links[f.i - 1]);
-  ret = { id: nb?.id, gid: f?.g.id }; dlgRestore = null;
+  ret = { id: nb?.id, gid: f?.g.id };
   closeDlg(linkDlg); deleteLink(id);
 });
 function deleteLink(id) {
@@ -831,31 +789,23 @@ let groupTarget = null;
 function openGroup(gid) {
   const g = findGroup(gid);
   groupTarget = g ? gid : null;
-  ret = g ? { gid, label: true } : null; dlgRestore = null;
+  ret = g ? { gid, label: true } : null;
   $('#groupTitle').textContent = t(g ? 'renameGroup' : 'newGroup');
   gName.value = g ? groupName(g) : '';
   gName.placeholder = g ? '' : t('untitled');
-  $('#orderField').hidden = $('#groupDel').hidden = !g;
-  syncOrder();
+  $('#groupDel').hidden = !g;
   openDlg(groupDlg, (!g || fineMQ.matches) ? gName : null);
 }
-function syncOrder() {
-  const i = state.groups.findIndex(g => g.id === groupTarget);
-  setEnds($('#moveL'), $('#moveR'), i <= 0, i < 0 || i >= state.groups.length - 1, gName);
-}
-function moveGroup(gid, dir, apply = commitMove) {
+function moveGroup(gid, dir) {
   const i = state.groups.findIndex(g => g.id === gid), j = i + dir;
   if (i < 0 || j < 0 || j >= state.groups.length) return false;
-  apply(() => { const [g] = state.groups.splice(i, 1); state.groups.splice(j, 0, g); });
+  commitMove(() => { const [g] = state.groups.splice(i, 1); state.groups.splice(j, 0, g); });
   render(); announce(t('groupMoved', { i: j + 1 }));
   return true;
 }
-$('#moveL').addEventListener('click', () => { moveGroup(groupTarget, -1, dlgMove); syncOrder(); });
-$('#moveR').addEventListener('click', () => { moveGroup(groupTarget, 1, dlgMove); syncOrder(); });
 $('#groupForm').addEventListener('submit', e => {
   e.preventDefault();
   const name = gName.value.trim(), g = findGroup(groupTarget);
-  dlgRestore = null;
   if (g) {
     if (name && name !== groupName(g)) { g.name = name; g.key = ''; }
     save(); render(); closeDlg(groupDlg);
@@ -869,7 +819,7 @@ $('#groupForm').addEventListener('submit', e => {
 });
 $('#groupDel').addEventListener('click', () => {
   const id = groupTarget, i = state.groups.findIndex(g => g.id === id), nb = state.groups[i + 1] || state.groups[i - 1];
-  ret = nb ? { gid: nb.id, label: true } : null; dlgRestore = null;
+  ret = nb ? { gid: nb.id, label: true } : null;
   closeDlg(groupDlg);
   withUndo(t('groupDeleted'), () => { state.groups = state.groups.filter(g => g.id !== id); });
 });
@@ -877,9 +827,9 @@ $('#groupDel').addEventListener('click', () => {
 /* keep open dialogs pointing at live data after undo / cross-tab sync */
 function syncDialogs() {
   if (linkDlg.open) {
-    if (linkTarget && !findLink(linkTarget)) closeDlg(linkDlg); else { fillGroups(fGroup.value); syncLinkOrder(); }
+    if (linkTarget && !findLink(linkTarget)) closeDlg(linkDlg); else fillGroups(fGroup.value);
   }
-  if (groupDlg.open) { if (groupTarget && !findGroup(groupTarget)) closeDlg(groupDlg); else syncOrder(); }
+  if (groupDlg.open && groupTarget && !findGroup(groupTarget)) closeDlg(groupDlg);
   if (setDlg.open) syncSettings();
 }
 
@@ -959,7 +909,7 @@ addEventListener('click', e => {
 
 indexEl.addEventListener('click', e => {
   const act = e.target.closest('[data-act]');
-  if (act) { openLink(null, act.closest('.group')?.dataset.gid); return; }
+  if (act) { act.dataset.act === 'group' ? openGroup(null) : openLink(null, act.closest('.group')?.dataset.gid); return; }
   const lb = e.target.closest('.label-btn');
   if (lb) { if (editing) openGroup(lb.closest('.group').dataset.gid); return; }
   const a = e.target.closest('.link');
@@ -1023,8 +973,9 @@ indexEl.addEventListener('pointerdown', e => {
   lastPointer = e.pointerType;
   if (e.button !== 0 || drag) return;
   const row = e.target.closest('.row:not(.add)'), lbl = e.target.closest('.label-btn');
+  const grp = row ? null : lbl?.closest('.group'); // dragging a group's label moves the whole group
   const touch = e.pointerType !== 'mouse';
-  const base = { row, pid: e.pointerId, x: e.clientX, y: e.clientY, px: e.clientX, py: e.clientY, started: false };
+  const base = { row, grp, pid: e.pointerId, x: e.clientX, y: e.clientY, px: e.clientX, py: e.clientY, started: false };
   if (!editing) {
     // At rest only touch/pen long-press enters edit mode; a slow mouse click still just opens the link.
     if (!touch || !(row || lbl)) return;
@@ -1032,14 +983,14 @@ indexEl.addEventListener('pointerdown', e => {
     drag.timer = setTimeout(() => {
       if (!drag) return;
       navigator.vibrate?.(8); drag.fired = true;
-      // Edit mode adds '+ Add' rows and empty groups above lower groups; scroll so the held row stays under the finger.
-      const top = row?.getBoundingClientRect().top;
+      // Edit mode adds '+ Add' rows and empty groups above lower groups; scroll so the held item stays under the finger.
+      const el = row || grp, top = el?.getBoundingClientRect().top;
       setEditing(true);
-      if (row) { const dy = row.getBoundingClientRect().top - top; if (dy) scrollBy(0, dy); startDrag(); }
+      if (el) { const dy = el.getBoundingClientRect().top - top; if (dy) scrollBy(0, dy); startDrag(); }
     }, HOLD_REST);
     return;
   }
-  if (!row) return;
+  if (!row && !grp) return;
   drag = { ...base, hold: touch };
   if (drag.hold) drag.timer = setTimeout(() => { if (drag && !drag.started) { navigator.vibrate?.(8); startDrag(); } }, HOLD_EDIT);
 });
@@ -1065,15 +1016,16 @@ addEventListener('scroll', () => { if (drag && !drag.started) endDrag(false); },
 indexEl.addEventListener('touchmove', e => { if (drag?.started) e.preventDefault(); }, { passive: false });
 
 function startDrag() {
-  const d = drag, r = d.row.getBoundingClientRect();
+  const d = drag, src = d.row || d.grp, handle = d.row || d.grp.querySelector('.label-btn');
+  const r = handle.getBoundingClientRect();
   d.started = true; d.moved = !d.hold; clearTimeout(d.timer); // a mouse drag starts by moving
   d.ox = d.px - r.left; d.oy = Math.min(Math.max(d.py - r.top, 0), r.height);
-  try { d.row.setPointerCapture(d.pid); } catch {}
-  d.ghost = h('div', 'ghost', d.row.querySelector('.link').textContent);
-  d.ghost.style.width = r.width + 18 + 'px';
+  try { src.setPointerCapture(d.pid); } catch {}
+  d.ghost = h('div', d.row ? 'ghost' : 'ghost is-group', d.row ? d.row.querySelector('.link').textContent : handle.textContent);
+  d.ghost.style.width = (d.row ? r.width : Math.min(handle.scrollWidth, r.width)) + 18 + 'px';
   d.line = h('div', 'insert');
   body.append(d.ghost, d.line);
-  d.row.classList.add('src'); body.classList.add('dragging');
+  src.classList.add('src'); body.classList.add('dragging');
   suppressUntil = Date.now() + 1e9; // cleared to a short window on drop
   moveGhost(); if (d.moved) updateTarget(); autoScroll();
 }
@@ -1081,6 +1033,7 @@ function moveGhost() { drag.ghost.style.transform = `translate3d(${drag.px - dra
 // Nearest row by both x and y; each row's own rect gives the 2px insertion rule's position and width.
 function updateTarget() {
   const d = drag; let best = null, bd = Infinity;
+  if (d.grp) { updateGroupTarget(); return; }
   $$('.row', indexEl).forEach(row => {
     const r = row.getBoundingClientRect(); if (!r.height) return;
     const dx = Math.max(r.left - d.px, 0, d.px - r.right), dy = Math.max(r.top - d.py, 0, d.py - r.bottom);
@@ -1095,6 +1048,22 @@ function updateTarget() {
   d.target = { gid: g.id, index };
   d.line.style.width = r.width + 'px';
   d.line.style.transform = `translate3d(${r.left}px, ${(before ? r.top : r.bottom) - 1}px, 0)`;
+}
+// Groups sit in a grid: nearest group, before or after it by x; the rule stands in the column gap.
+function updateGroupTarget() {
+  const d = drag; let best = null, bd = Infinity;
+  $$('.group', indexEl).forEach(sec => {
+    const r = sec.getBoundingClientRect(); if (!r.height) return;
+    const dx = Math.max(r.left - d.px, 0, d.px - r.right), dy = Math.max(r.top - d.py, 0, d.py - r.bottom);
+    const dist = dx * dx + dy * dy;
+    if (dist < bd) { bd = dist; best = { sec, r }; }
+  });
+  if (!best) return;
+  const { sec, r } = best, before = d.px < r.left + r.width / 2;
+  d.target = { index: state.groups.findIndex(g => g.id === sec.dataset.gid) + (before ? 0 : 1) };
+  const gap = parseFloat(getComputedStyle(indexEl).columnGap) || 0;
+  d.line.style.width = '2px'; d.line.style.height = r.height + 'px';
+  d.line.style.transform = `translate3d(${(before ? r.left - gap / 2 : r.right + gap / 2) - 1}px, ${r.top}px, 0)`;
 }
 function autoScroll() {
   const d = drag; if (!d || !d.started) return;
@@ -1111,8 +1080,9 @@ function endDrag(commit) {
   if (d.started) {
     cancelAnimationFrame(d.raf);
     d.ghost.remove(); d.line.remove();
-    d.row.classList.remove('src'); body.classList.remove('dragging');
+    (d.row || d.grp).classList.remove('src'); body.classList.remove('dragging');
     suppressUntil = Date.now() + 400;
+    if (d.grp) { endGroupDrag(d, commit); if (pendingSync) applySync(); return; }
     const f = findLink(d.row.dataset.id), tg = d.target && findGroup(d.target.gid);
     // An edit-mode touch held past HOLD_EDIT but released in place is a slow tap: open the link.
     if (commit && f && !d.moved && !d.fired) openLink(f.link.id);
@@ -1128,11 +1098,23 @@ function endDrag(commit) {
   }
   if (pendingSync) applySync();
 }
+function endGroupDrag(d, commit) {
+  const gid = d.grp.dataset.gid, i = state.groups.findIndex(g => g.id === gid);
+  if (!commit || i < 0) return;
+  if (!d.moved && !d.fired) { openGroup(gid); return; } // slow tap in edit mode
+  if (!d.target) return;
+  let j = d.target.index; if (j > i) j--;
+  if (j === i) return;
+  const first = groupRects();
+  commitMove(() => { const [g] = state.groups.splice(i, 1); state.groups.splice(j, 0, g); });
+  render(); flip(first, '.group[data-gid]', 'gid'); announce(t('groupMoved', { i: j + 1 }));
+}
 const rowRects = () => new Map($$('.row[data-id]', indexEl).map(el => [el.dataset.id, el.getBoundingClientRect()]));
-function flip(first) {
+const groupRects = () => new Map($$('.group[data-gid]', indexEl).map(el => [el.dataset.gid, el.getBoundingClientRect()]));
+function flip(first, sel = '.row[data-id]', key = 'id') {
   if (reduceMQ.matches) return;
-  $$('.row[data-id]', indexEl).forEach(el => {
-    const a = first.get(el.dataset.id); if (!a) return;
+  $$(sel, indexEl).forEach(el => {
+    const a = first.get(el.dataset[key]); if (!a) return;
     const b = el.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top;
     if (dx || dy) el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 160, easing: 'cubic-bezier(.2,0,0,1)' });
   });
@@ -1236,7 +1218,6 @@ clearBtn.addEventListener('click', () => { clearSearch(); q.focus(); });
 $('#editBtn').addEventListener('click', () => setEditing(!editing));
 $('#langBtn').addEventListener('click', () => setSetting('lang', S().lang === 'zh' ? 'en' : 'zh'));
 $('#settingsBtn').addEventListener('click', openSettings);
-$('#newGroupBtn').addEventListener('click', () => openGroup(null));
 
 /* ---------- global keys ---------- */
 document.addEventListener('keydown', e => {
