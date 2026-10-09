@@ -1334,15 +1334,11 @@ function updateSuggest() {
     const matches = scored.sort((a, b) => a.score - b.score).slice(0, 6).map(({ l }) => ({ type: 'link', link: l }));
     const search = { type: 'search', q: raw };
     const url = looksLikeUrl(raw) && normalizeUrl(raw);
+    // Enter searches, except that a typed address opens, as in a browser's address bar; bookmarks follow.
     if (url) {
       const known = state.groups.some(g => g.links.some(l => urlKey(l.url) === urlKey(url)));
-      items = [{ type: 'open', url }, ...(known ? [] : [{ type: 'save', url }]), ...matches, search];
-    } else {
-      // Launcher: "git" + Enter opens GitHub when the query is a prefix of the best title or host.
-      const first = matches[0]?.link;
-      const launch = first && !/\s/.test(raw) && (linkText(first).toLowerCase().startsWith(lq) || hostOf(first.url).startsWith(lq));
-      items = launch ? [...matches, search] : [search, ...matches];
-    }
+      items = [{ type: 'open', url }, search, ...(known ? [] : [{ type: 'save', url }]), ...matches];
+    } else items = [search, ...matches];
   }
   sel = items.length ? 0 : -1;
   renderSuggest();
