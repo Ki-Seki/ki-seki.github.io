@@ -465,7 +465,7 @@ const I18N = {
     deleteGroup: 'Delete group', theme: 'Appearance', auto: 'Auto', light: 'Light', dark: 'Dark',
     engines: 'Search engines', newEngine: 'New search engine', editEngine: 'Edit search engine', engName: 'Name',
     engUrlNote: 'Put %s where the search words go.', engDefault: 'Default', isDefault: 'default', addEngine: 'Add search engine',
-    newTab: 'Open links in a new tab', on: 'On', off: 'Off',
+    newTab: 'Open in a new tab', on: 'On', off: 'Off',
     backup: 'Backup', export: 'Export', import: 'Import', reset: 'Reset',
     importNote: 'Import a .json backup or browser bookmarks (.html).',
     deleted: '“{n}” deleted', groupDeleted: 'Group deleted', undo: 'Undo', imported: 'Imported {n} links',
@@ -489,7 +489,7 @@ const I18N = {
     deleteGroup: '删除分组', theme: '外观', auto: '自动', light: '浅色', dark: '深色',
     engines: '搜索引擎', newEngine: '新建搜索引擎', editEngine: '编辑搜索引擎', engName: '名称',
     engUrlNote: '用 %s 表示搜索词的位置。', engDefault: '默认', isDefault: '默认', addEngine: '添加搜索引擎',
-    newTab: '在新标签页打开链接', on: '开', off: '关',
+    newTab: '在新标签页打开', on: '开', off: '关',
     backup: '备份', export: '导出', import: '导入', reset: '重置',
     importNote: '可导入 .json 备份或浏览器书签（.html）。',
     deleted: '已删除“{n}”', groupDeleted: '已删除分组', undo: '撤销', imported: '已导入 {n} 个链接',
@@ -1419,12 +1419,16 @@ function syncSel() {
 }
 function activate(it, newTab) {
   if (!it) return;
-  if (it.type === 'link') go(it.link.url, newTab || S().newTab);
-  else if (it.type === 'open') { record('open', it.url); go(it.url, newTab); }
-  else if (it.type === 'save') openLink(null, null, it.url);
-  else if (it.type === 'hist') { record(it.h.k, it.h.v); go(it.h.k === 'open' ? it.h.v : searchUrl(engine(), it.h.v), newTab); }
-  else if (it.type === 'clearhist') clearHist();
-  else { record('search', it.q); go(searchUrl(engine(), it.q), newTab); }
+  if (it.type === 'save') { openLink(null, null, it.url); return; }
+  if (it.type === 'clearhist') { clearHist(); return; }
+  // The "Open in a new tab" setting covers everything opened from here; Cmd/Ctrl+Enter always does.
+  const nt = newTab || S().newTab;
+  if (it.type === 'link') go(it.link.url, nt);
+  else if (it.type === 'open') { record('open', it.url); go(it.url, nt); }
+  else if (it.type === 'hist') { record(it.h.k, it.h.v); go(it.h.k === 'open' ? it.h.v : searchUrl(engine(), it.h.v), nt); }
+  else { record('search', it.q); go(searchUrl(engine(), it.q), nt); }
+  // This page stays open behind the new tab, so leave it clean for when you come back.
+  if (nt && !newTab) { recentOpen = false; clearSearch(); }
 }
 function clearSearch() { q.value = ''; updateSuggest(); }
 
