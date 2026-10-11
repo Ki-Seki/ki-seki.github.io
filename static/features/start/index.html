@@ -69,7 +69,8 @@ body:not(.editing) .rest-only { animation: fade-in 120ms var(--ease); }
 body.editing .rest-only { display: none; }
 
 /* search line */
-.search { position: relative; margin-top: clamp(64px, 18vh, 168px); }
+/* --vh is measured in script and ignores the phone keyboard, so the search line never jumps when it opens */
+.search { position: relative; margin-top: clamp(64px, calc(var(--vh, 1vh) * 18), 168px); }
 #q {
   display: block; width: 100%; height: 56px; padding: 0 48px 0 0; border: 0; background: transparent;
   font-size: 28px; line-height: 36px; font-weight: 300; letter-spacing: -.015em; color: var(--ink);
@@ -287,7 +288,7 @@ body.editing .prefs { display: block; animation: fade-in 160ms var(--ease); }
   .page { width: 100%; padding-inline: max(20px, env(safe-area-inset-left)) max(20px, env(safe-area-inset-right)); }
   .head { padding-top: max(12px, env(safe-area-inset-top)); }
   .word { height: 44px; }
-  .search { margin-top: clamp(32px, 10vh, 80px); }
+  .search { margin-top: clamp(32px, calc(var(--vh, 1vh) * 10), 80px); }
   #q { height: 52px; font-size: 22px; line-height: 30px; }
   .ph { height: 52px; font-size: 22px; line-height: 30px; }
   .clear { top: 6px; }
@@ -1548,6 +1549,14 @@ addEventListener('storage', e => {
 darkMQ.addEventListener?.('change', applyTheme);
 coarseMQ.addEventListener?.('change', applyText);
 phoneMQ.addEventListener?.('change', updatePlaceholder);
+// The phone keyboard shrinks the viewport (interactive-widget=resizes-content), so 1vh is taken once per
+// screen width on touch devices; only rotation re-measures it. Desktop windows re-measure on any resize.
+let vhWidth = 0;
+function setVh() {
+  if (coarseMQ.matches && innerWidth === vhWidth) return;
+  vhWidth = innerWidth; root.style.setProperty('--vh', innerHeight / 100 + 'px');
+}
+setVh(); addEventListener('resize', setVh);
 let resizeRaf;
 addEventListener('resize', () => { cancelAnimationFrame(resizeRaf); resizeRaf = requestAnimationFrame(layout); });
 
