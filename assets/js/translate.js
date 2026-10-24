@@ -1,68 +1,159 @@
-// Adds a floating button that switches to the DeepSeek translations the build
+// The site's reading language, for the DeepSeek translations the build
 // publishes (see scripts/translate.py).
 //
-// On a post or moment, the script tag carries its translation's URL (data-src)
-// and language (data-lang), and the button swaps the page between its original
-// text and the translation. On list pages (home, posts, tags, archive,
-// moments), the script tag carries the URL of the list translations
-// (data-list), and the button switches the whole list to one reading
-// language, using each entry's translation where its page was written in the
-// other language.
+// A floating button opens a menu of three modes: 原文 (every page as
+// written), English or 中文 (pages written in the other language show their
+// translation). The mode is remembered and shared by every page; until a
+// reader picks one, the browser language decides. The address shows the mode
+// (no parameter for the original, ?lang=en or ?lang=zh), so a link carries
+// it; a mode given that way applies to that page only, without changing the
+// reader's own. On a post or moment the
+// script tag carries the page's translation URL (data-src) and language
+// (data-lang); on list pages (home, posts, tags, archive, moments) it carries
+// the URL of the list translations (data-list).
 //
-// Readers whose browser prefers a translation's language get it on load. A
-// reader's own switch is remembered for later pages.
+// Translations are labelled where they appear: a line under a page's meta
+// line and a tag on each translated list entry.
 (function () {
   const script = document.currentScript;
   const storageKey = "translate-lang";
+  const urlKey = "lang";
 
-  // Button label and tooltip by the language a click switches to
-  const labels = { zh: "中", en: "EN" };
-  const titles = {
-    translation: { zh: "中文翻译", en: "English translation" },
-    original: { zh: "查看原文", en: "Show the original" },
-    list: { zh: "切换到中文", en: "Switch to English" },
-  };
-  // Small note in the bottom-left corner while the translation is on screen
-  const notes = { zh: "DeepSeek 翻译", en: "Translated by DeepSeek" };
-  const failures = { zh: "翻译加载失败", en: "Translation unavailable" };
+  const modes = ["original", "en", "zh"];
+  const menuLabels = { original: "原文", en: "English", zh: "中文" };
+  const buttonTitle = "Language · 语言";
+  const failureTitle = "Translation unavailable · 翻译加载失败";
+  // Material Icons "translate", drawn like the go-to-top arrow next to it
+  const icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+    + '<path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>'
+    + "</svg>";
+  // Labels on translated content, in the translation's language
+  const attributions = { zh: "由 DeepSeek 翻译", en: "Translated by DeepSeek" };
+  const tags = { zh: "DeepSeek 译", en: "Translated by DeepSeek" };
 
-  // The language this reader last switched to, else the first of their
-  // browser languages that is Chinese or English
-  const preferredLanguage = () => {
+  // The mode this reader picked, else the first of their browser languages
+  // that is Chinese or English, else the original
+  const preferredMode = () => {
     try {
       const saved = localStorage.getItem(storageKey);
-      if (saved) {
+      if (modes.includes(saved)) {
         return saved;
       }
     } catch (error) {
       // Storage can be blocked; fall back to the browser languages
     }
     const languages = navigator.languages?.length ? navigator.languages : [navigator.language || ""];
-    return languages.map((language) => language.toLowerCase().slice(0, 2)).find((language) => language === "zh" || language === "en");
+    return languages
+      .map((language) => language.toLowerCase().slice(0, 2))
+      .find((language) => language === "zh" || language === "en") || "original";
   };
 
-  const rememberLanguage = (language) => {
+  const rememberMode = (mode) => {
     try {
-      localStorage.setItem(storageKey, language);
+      localStorage.setItem(storageKey, mode);
     } catch (error) {
       // Not remembered when storage is blocked
     }
   };
 
-  const otherLanguage = (language) => (language === "zh" ? "en" : "zh");
+  // Shows the mode in the address bar, without reloading or adding to the
+  // history: no parameter for the original, ?lang=en or ?lang=zh otherwise
+  const showModeInURL = (mode) => {
+    const url = new URL(location.href);
+    if (mode === "original") {
+      url.searchParams.delete(urlKey);
+    } else {
+      url.searchParams.set(urlKey, mode);
+    }
+    if (url.href !== location.href) {
+      history.replaceState(history.state, "", url);
+    }
+  };
 
-  // The floating button and the (hidden) bottom-left note, added to the page
-  const createControls = (label, title) => {
+  // The mode a page starts in: the one its address asks for (?lang=en, zh or
+  // original), left as given; else the reader's own, shown in the address
+  const startMode = () => {
+    const asked = new URLSearchParams(location.search).get(urlKey);
+    if (modes.includes(asked)) {
+      return asked;
+    }
+    const mode = preferredMode();
+    showModeInURL(mode);
+    return mode;
+  };
+
+  // The floating button and its menu of modes; onSelect gets the picked mode
+  const createControl = (onSelect) => {
+    const control = document.createElement("div");
+    control.className = "translate-control";
+    const menu = document.createElement("div");
+    menu.className = "translate-menu";
+    menu.setAttribute("role", "menu");
+    menu.hidden = true;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "translate-toggle";
-    button.textContent = label;
-    button.title = title;
-    const note = document.createElement("span");
-    note.className = "translate-note";
-    note.hidden = true;
-    document.body.append(note, button);
-    return { button, note };
+    button.setAttribute("aria-haspopup", "menu");
+    button.setAttribute("aria-expanded", "false");
+
+    const setOpen = (open) => {
+      menu.hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+    };
+    const items = modes.map((mode) => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.setAttribute("role", "menuitemradio");
+      const label = document.createElement("span");
+      label.textContent = menuLabels[mode];
+      item.append(label);
+      item.addEventListener("click", () => {
+        setOpen(false);
+        onSelect(mode);
+      });
+      menu.append(item);
+      return item;
+    });
+    button.addEventListener("click", () => setOpen(menu.hidden));
+    document.addEventListener("click", (event) => {
+      if (!control.contains(event.target)) {
+        setOpen(false);
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    });
+    control.append(menu, button);
+    document.body.append(control);
+
+    return {
+      // Marks the current mode in the menu, or that a translation failed to
+      // load (the button then shows "!")
+      show: (mode, failed = false) => {
+        button.disabled = false;
+        if (failed) {
+          button.textContent = "!";
+        } else {
+          button.innerHTML = icon;
+        }
+        button.title = failed ? failureTitle : buttonTitle;
+        button.setAttribute("aria-label", button.title);
+        items.forEach((item, index) => item.setAttribute("aria-checked", String(modes[index] === mode)));
+      },
+      loading: () => {
+        button.disabled = true;
+      },
+    };
+  };
+
+  const fetchJSON = async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.json();
   };
 
   // Swaps one part of the page between its original and a translation. The
@@ -89,9 +180,6 @@
     }
 
     const lang = script.dataset.lang;
-    const { button, note } = createControls(labels[lang], titles.translation[lang]);
-    note.textContent = notes[lang];
-    const sourceLang = otherLanguage(lang);
     const titleNode = titleText(document.querySelector(".post-single .post-title"));
     const originalTitle = titleNode?.textContent;
     const caption = document.querySelector(".post-single .entry-cover figcaption");
@@ -106,6 +194,15 @@
     }));
     let translation = null;
     let showing = false;
+    let mode = startMode();
+
+    // The line under the meta line while the page shows its translation
+    const line = document.createElement("div");
+    line.className = "translate-attribution";
+    line.textContent = attributions[lang];
+    line.hidden = true;
+    (document.querySelector(".post-single .post-meta") || document.querySelector(".post-single .post-title"))
+      .after(line);
 
     const headingText = (heading) => {
       const copy = heading.cloneNode(true);
@@ -134,17 +231,13 @@
     };
 
     const load = async () => {
-      const response = await fetch(script.dataset.src);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await fetchJSON(script.dataset.src);
       const content = document.createElement("div");
       content.className = "post-content";
       content.lang = lang === "zh" ? "zh-CN" : "en";
       content.innerHTML = data.content;
       // Embeds such as GeoGebra take focus once loaded, which would scroll the
-      // page away from the button; load them only when scrolled into view.
+      // page away; load them only when scrolled into view.
       content.querySelectorAll("iframe").forEach((frame) => {
         frame.loading = "lazy";
       });
@@ -200,7 +293,7 @@
       return Promise.resolve();
     };
 
-    const show = (translated) => {
+    const swap = (translated) => {
       const [from, to] = translated ? [original, translation.content] : [translation.content, original];
       const spot = readingSpot(from);
       from.replaceWith(to);
@@ -222,46 +315,46 @@
       window.__siteMediaLightbox?.reload();
       restoreSpot(to, spot);
       prepare(to).then(() => restoreSpot(to, spot));
-      note.hidden = !translated;
-      button.textContent = labels[translated ? sourceLang : lang];
-      button.title = translated ? titles.original[sourceLang] : titles.translation[lang];
       showing = translated;
     };
 
-    const toggle = async () => {
-      if (!translation) {
-        button.disabled = true;
-        button.textContent = "…";
+    let control;
+
+    const show = async (translated) => {
+      if (translated && !translation) {
+        control.loading();
         try {
           translation = await load();
         } catch (error) {
-          // Left enabled, so a click retries
+          // A later pick from the menu retries
           console.error("Translation failed to load:", error);
-          button.textContent = "!";
-          button.title = failures[lang];
-          return false;
-        } finally {
-          button.disabled = false;
+          control.show(mode, true);
+          return;
         }
       }
-      show(!showing);
-      return true;
+      control.show(mode);
+      if (translation && translated !== showing) {
+        swap(translated);
+      }
+      line.hidden = !showing;
     };
 
-    button.addEventListener("click", async () => {
-      if (await toggle()) {
-        rememberLanguage(showing ? lang : sourceLang);
-      }
+    control = createControl((picked) => {
+      mode = picked;
+      rememberMode(mode);
+      showModeInURL(mode);
+      show(mode === lang);
     });
-
-    if (preferredLanguage() === lang) {
-      toggle();
+    control.show(mode);
+    if (mode === lang) {
+      show(true);
     }
   };
 
   const initList = () => {
     // Each entry, by the path of the page it links to, with the parts that
-    // switch: title and summary for posts, title, note and chips for moments
+    // switch: title and summary for posts, title, note and chips for moments,
+    // plus a tag in the entry's meta line while it shows a translation
     const entries = [...document.querySelectorAll("article.post-entry, article.first-entry, .archive-entry, article.moment-card")]
       .map((element) => {
         const link = element.querySelector("a.entry-link, a.moment-open");
@@ -284,10 +377,22 @@
           const set = swappable(() => content.innerHTML, (html) => { content.innerHTML = html; });
           parts.push((item) => set(item?.content));
         }
-        const meta = element.querySelector(".moment-footer .moment-meta");
+        const momentMeta = element.querySelector(".moment-footer .moment-meta");
+        if (momentMeta) {
+          const set = swappable(() => momentMeta.innerHTML, (html) => { momentMeta.innerHTML = html; });
+          parts.push((item) => set(item?.chips && `${momentMeta.querySelector("time")?.outerHTML || ""}${item.chips}`));
+        }
+        const meta = element.querySelector(".entry-footer, .archive-meta, .moment-footer .moment-meta");
         if (meta) {
-          const set = swappable(() => meta.innerHTML, (html) => { meta.innerHTML = html; });
-          parts.push((item) => set(item?.chips && `${meta.querySelector("time")?.outerHTML || ""}${item.chips}`));
+          parts.push((item) => {
+            meta.querySelector(".translate-tag")?.remove();
+            if (item) {
+              const tag = document.createElement("span");
+              tag.className = "translate-tag";
+              tag.textContent = ` · ${tags[item.lang]}`;
+              meta.append(tag);
+            }
+          });
         }
         return { path: new URL(link.href, location.href).pathname, parts };
       })
@@ -296,60 +401,39 @@
       return;
     }
 
-    const { button, note } = createControls(labels.zh, titles.list.zh);
     let list = null;
-    let current = null;
+    let mode = startMode();
+    let control;
 
-    const apply = (language) => {
-      let translated = false;
-      for (const { path, parts } of entries) {
-        const item = list[path]?.lang === language ? list[path] : undefined;
-        parts.forEach((part) => part(item));
-        translated ||= Boolean(item);
-      }
-      window.__siteMediaLightbox?.reload();
-      note.textContent = notes[language];
-      note.hidden = !translated;
-      const next = otherLanguage(language);
-      button.textContent = labels[next];
-      button.title = titles.list[next];
-      current = language;
-    };
-
-    const switchTo = async (language) => {
-      if (!list) {
-        button.disabled = true;
-        button.textContent = "…";
+    const show = async () => {
+      if (mode !== "original" && !list) {
+        control.loading();
         try {
-          const response = await fetch(script.dataset.list);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          list = await response.json();
+          list = await fetchJSON(script.dataset.list);
         } catch (error) {
-          // Left enabled, so a click retries
+          // A later pick from the menu retries
           console.error("Translations failed to load:", error);
-          button.textContent = "!";
-          button.title = failures[language];
-          return false;
-        } finally {
-          button.disabled = false;
+          control.show(mode, true);
+          return;
         }
       }
-      apply(language);
-      return true;
+      control.show(mode);
+      for (const { path, parts } of entries) {
+        const item = mode !== "original" && list[path]?.lang === mode ? list[path] : undefined;
+        parts.forEach((part) => part(item));
+      }
+      window.__siteMediaLightbox?.reload();
     };
 
-    button.addEventListener("click", async () => {
-      const language = current ? otherLanguage(current) : "zh";
-      if (await switchTo(language)) {
-        rememberLanguage(language);
-      }
+    control = createControl((picked) => {
+      mode = picked;
+      rememberMode(mode);
+      showModeInURL(mode);
+      show();
     });
-
-    const preferred = preferredLanguage();
-    if (preferred) {
-      switchTo(preferred);
+    control.show(mode);
+    if (mode !== "original") {
+      show();
     }
   };
 
