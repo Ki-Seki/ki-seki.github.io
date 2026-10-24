@@ -1,10 +1,16 @@
-// Adds a floating button that swaps a post or moment between its original
-// text and the DeepSeek translation that the build publishes next to it as
-// translation.json (see scripts/translate.py). The script tag carries the
-// translation's URL (data-src) and language (data-lang).
+// Adds a floating button that switches to the DeepSeek translations the build
+// publishes (see scripts/translate.py).
 //
-// Readers whose browser prefers the translation's language get it on load.
-// A reader's own switch is remembered for later pages.
+// On a post or moment, the script tag carries its translation's URL (data-src)
+// and language (data-lang), and the button swaps the page between its original
+// text and the translation. On list pages (home, posts, tags, archive,
+// moments), the script tag carries the URL of the list translations
+// (data-list), and the button switches the whole list to one reading
+// language, using each entry's translation where its page was written in the
+// other language.
+//
+// Readers whose browser prefers a translation's language get it on load. A
+// reader's own switch is remembered for later pages.
 (function () {
   const script = document.currentScript;
   const storageKey = "translate-lang";
@@ -14,6 +20,7 @@
   const titles = {
     translation: { zh: "中文翻译", en: "English translation" },
     original: { zh: "查看原文", en: "Show the original" },
+    list: { zh: "切换到中文", en: "Switch to English" },
   };
   // Small note in the bottom-left corner while the translation is on screen
   const notes = { zh: "DeepSeek 翻译", en: "Translated by DeepSeek" };
@@ -42,27 +49,50 @@
     }
   };
 
-  const init = () => {
+  const otherLanguage = (language) => (language === "zh" ? "en" : "zh");
+
+  // The floating button and the (hidden) bottom-left note, added to the page
+  const createControls = (label, title) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "translate-toggle";
+    button.textContent = label;
+    button.title = title;
+    const note = document.createElement("span");
+    note.className = "translate-note";
+    note.hidden = true;
+    document.body.append(note, button);
+    return { button, note };
+  };
+
+  // Swaps one part of the page between its original and a translation. The
+  // original is read on the first swap, after the page scripts (local times,
+  // for one) have run; undefined puts it back.
+  const swappable = (read, write) => {
+    let original;
+    return (value) => {
+      if (original === undefined) {
+        original = read();
+      }
+      write(value ?? original);
+    };
+  };
+
+  // A title's text, without the draft hint or anchor that may follow it
+  const titleText = (element) => [...(element?.childNodes || [])]
+    .find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+
+  const initPage = () => {
     const original = document.querySelector(".post-single .post-content");
     if (!original) {
       return;
     }
 
     const lang = script.dataset.lang;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "translate-toggle";
-    button.textContent = labels[lang];
-    button.title = titles.translation[lang];
-    const note = document.createElement("span");
-    note.className = "translate-note";
+    const { button, note } = createControls(labels[lang], titles.translation[lang]);
     note.textContent = notes[lang];
-    note.hidden = true;
-    document.body.append(note, button);
-
-    const sourceLang = lang === "zh" ? "en" : "zh";
-    const titleNode = [...(document.querySelector(".post-single .post-title")?.childNodes || [])]
-      .find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    const sourceLang = otherLanguage(lang);
+    const titleNode = titleText(document.querySelector(".post-single .post-title"));
     const originalTitle = titleNode?.textContent;
     const caption = document.querySelector(".post-single .entry-cover figcaption");
     const originalCaption = caption?.innerHTML;
@@ -228,6 +258,102 @@
       toggle();
     }
   };
+
+  const initList = () => {
+    // Each entry, by the path of the page it links to, with the parts that
+    // switch: title and summary for posts, title, note and chips for moments
+    const entries = [...document.querySelectorAll("article.post-entry, article.first-entry, .archive-entry, article.moment-card")]
+      .map((element) => {
+        const link = element.querySelector("a.entry-link, a.moment-open");
+        if (!link) {
+          return null;
+        }
+        const parts = [];
+        const title = titleText(element.querySelector(".entry-header h2, .archive-entry-title, .moment-title"));
+        if (title) {
+          const set = swappable(() => title.textContent, (text) => { title.textContent = text; });
+          parts.push((item) => set(item?.title));
+        }
+        const summary = element.querySelector(".entry-content p");
+        if (summary) {
+          const set = swappable(() => summary.textContent, (text) => { summary.textContent = text; });
+          parts.push((item) => set(item?.summary));
+        }
+        const content = element.querySelector(".moment-content");
+        if (content) {
+          const set = swappable(() => content.innerHTML, (html) => { content.innerHTML = html; });
+          parts.push((item) => set(item?.content));
+        }
+        const meta = element.querySelector(".moment-footer .moment-meta");
+        if (meta) {
+          const set = swappable(() => meta.innerHTML, (html) => { meta.innerHTML = html; });
+          parts.push((item) => set(item?.chips && `${meta.querySelector("time")?.outerHTML || ""}${item.chips}`));
+        }
+        return { path: new URL(link.href, location.href).pathname, parts };
+      })
+      .filter(Boolean);
+    if (!entries.length) {
+      return;
+    }
+
+    const { button, note } = createControls(labels.zh, titles.list.zh);
+    let list = null;
+    let current = null;
+
+    const apply = (language) => {
+      let translated = false;
+      for (const { path, parts } of entries) {
+        const item = list[path]?.lang === language ? list[path] : undefined;
+        parts.forEach((part) => part(item));
+        translated ||= Boolean(item);
+      }
+      window.__siteMediaLightbox?.reload();
+      note.textContent = notes[language];
+      note.hidden = !translated;
+      const next = otherLanguage(language);
+      button.textContent = labels[next];
+      button.title = titles.list[next];
+      current = language;
+    };
+
+    const switchTo = async (language) => {
+      if (!list) {
+        button.disabled = true;
+        button.textContent = "…";
+        try {
+          const response = await fetch(script.dataset.list);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          list = await response.json();
+        } catch (error) {
+          // Left enabled, so a click retries
+          console.error("Translations failed to load:", error);
+          button.textContent = "!";
+          button.title = failures[language];
+          return false;
+        } finally {
+          button.disabled = false;
+        }
+      }
+      apply(language);
+      return true;
+    };
+
+    button.addEventListener("click", async () => {
+      const language = current ? otherLanguage(current) : "zh";
+      if (await switchTo(language)) {
+        rememberLanguage(language);
+      }
+    });
+
+    const preferred = preferredLanguage();
+    if (preferred) {
+      switchTo(preferred);
+    }
+  };
+
+  const init = () => (script.dataset.list ? initList() : initPage());
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
