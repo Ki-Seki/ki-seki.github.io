@@ -1,0 +1,39 @@
+{{- /* The page's DeepSeek translation (from data/translations.json, written by
+  scripts/translate.py), rendered for translate.js: a dict with lang, title,
+  cover caption, moment chips and content, or "" when the page has none or it
+  doesn't render. The translated index.md's front matter gives the title,
+  caption and chips; its body is rendered like the page content, so
+  shortcodes, math and images work too. Rendering is costly, so call this
+  with partialCached keyed by the page. */ -}}
+{{- $page := . -}}
+{{- $result := "" -}}
+{{- $entry := "" -}}
+{{- with .File -}}
+  {{- $entry = index (site.Data.translations | default dict) (path.Clean .Dir) -}}
+{{- end -}}
+{{- with $entry -}}
+  {{- with findRESubmatch `(?s)^---\n(.*?)\n---\n(.*)$` ($entry.markdown | default "") 1 -}}
+    {{- $match := index . 0 -}}
+    {{- with try (dict "front" (transform.Unmarshal (printf "---\n%s\n---\n" (index $match 1))) "content" ($page.RenderString (dict "display" "block") (index $match 2))) -}}
+      {{- with .Err -}}
+        {{- warnf "Translation of %s not rendered: %s" $page.File.Path . -}}
+      {{- else -}}
+        {{- $front := .Value.front -}}
+        {{- $content := .Value.content -}}
+        {{- if not ($page.Param "disableAnchoredHeadings") -}}
+          {{- $content = partial "anchored_headings.html" $content -}}
+        {{- end -}}
+        {{- $caption := "" -}}
+        {{- with $front.cover }}{{ with .caption }}{{ $caption = . | markdownify }}{{ end }}{{ end -}}
+        {{- $chips := "" -}}
+        {{- if or $front.location $front.mood -}}
+          {{- $chips = partial "moment/chips.html" (dict "page" (dict "Params" $front)) -}}
+        {{- end -}}
+        {{- $result = dict "lang" $entry.lang "title" ($front.title | default $page.Title) "caption" $caption "chips" $chips "content" $content -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else -}}
+    {{- warnf "Translation of %s has no front matter" $page.File.Path -}}
+  {{- end -}}
+{{- end -}}
+{{- return $result -}}

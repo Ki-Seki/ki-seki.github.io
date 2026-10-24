@@ -46,9 +46,10 @@
 <script defer src="{{ $localTimeJS.RelPermalink }}"></script>
 
 
-{{- /* On pages with a translation, this script adds the floating translate
-  button (the footer is cached across pages, so the button can't live there) */ -}}
-{{ with partial "translation-entry.html" . }}
+{{- /* On pages with a translation that renders, this script adds the floating
+  translate button (the footer is cached across pages, so the button can't
+  live there) */ -}}
+{{ with partialCached "translation.html" . .RelPermalink }}
   {{- $translateJS := resources.Get "js/translate.js" | minify }}
   <script defer src="{{ $translateJS.RelPermalink }}" data-src="{{ ($.OutputFormats.Get "translation").RelPermalink }}" data-lang="{{ .lang }}"></script>
 {{ end }}

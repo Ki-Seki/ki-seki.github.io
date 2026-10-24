@@ -47,11 +47,16 @@ PROMPT_VERSION = 1
 LANGUAGES = {"zh": "Simplified Chinese", "en": "English"}
 PROMPT = """Translate the following Markdown file from a Hugo blog into {language}.
 
-Keep the structure exactly as it is: front matter keys, Markdown syntax, Hugo shortcodes, HTML, math, code, URLs and file paths must not be changed or broken. Translate the text readers see, including front matter values such as the title, summary and captions, link text, and the captions and titles inside shortcodes. Leave dates, tags and other values that aren't prose as they are.
+Keep the structure exactly as it is: front matter keys, Markdown syntax, Hugo shortcodes, HTML, math, code, URLs and file paths must not be changed or broken. Translate the text readers see, including front matter values such as the title, summary and captions, link text, and the captions and titles inside shortcodes. Inside shortcode parameters, write quotation marks as “ ” rather than ", which would end the parameter. Leave dates, tags and other values that aren't prose as they are.
 
 Reply with the translated file only."""
 
 FRONT_MATTER = re.compile(r"---\n(.*?)\n---\n(.*)", re.S)
+SHORTCODE = re.compile(r"\{\{[<%](.*?)[>%]\}\}", re.S)
+# A shortcode's name followed by named or positional parameters, each value
+# quoted, backquoted or bare
+SHORTCODE_VALUE = r'(?:"(?:[^"\\]|\\.)*"|`[^`]*`|[^\s"`]+)'
+SHORTCODE_ARGS = re.compile(rf"\s*/?[\w.-]+(?:\s+(?:[\w-]+={SHORTCODE_VALUE}|{SHORTCODE_VALUE}))*\s*", re.S)
 
 
 class OutOfBalance(Exception):
@@ -96,7 +101,8 @@ def quotes_balanced(front):
 
 def structure(text):
     """What a faithful translation keeps unchanged: front matter keys, valid
-    quoting, and counts of shortcodes, code fences, display math and headings."""
+    quoting in front matter and shortcode parameters, and counts of
+    shortcodes, code fences, display math and headings."""
     match = FRONT_MATTER.match(text)
     if not match:
         return None
@@ -104,6 +110,7 @@ def structure(text):
     return (
         tuple(re.findall(r"^[ \t]*([\w-]+):", front, re.M)),
         quotes_balanced(front),
+        all(SHORTCODE_ARGS.fullmatch(args) for args in SHORTCODE.findall(body)),
         body.count("{{<"),
         body.count("{{%"),
         body.count("```"),
@@ -222,8 +229,11 @@ def main():
                 continue
             name = f"{section}/{path.parent.name}"
             digest = hashlib.sha256(json.dumps([PROMPT_VERSION, MODEL, lang, text]).encode()).hexdigest()
-            if digest in cached:
-                translations[name] = cached[digest]
+            # Cached translations are checked again, so ones that fail a
+            # newer check are redone
+            entry = cached.get(digest)
+            if entry and structure(entry.get("markdown", "")) == structure(text):
+                translations[name] = entry
             else:
                 pending.append({"name": name, "text": text, "lang": lang, "hash": digest})
 
