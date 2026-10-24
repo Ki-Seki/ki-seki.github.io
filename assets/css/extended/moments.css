@@ -132,12 +132,6 @@
   opacity: 0.65;
 }
 
-.moment-chip.mood {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.72rem;
-}
-
 .moment-title {
   font-size: clamp(22px, 4vw, 30px);
   letter-spacing: -0.005em;

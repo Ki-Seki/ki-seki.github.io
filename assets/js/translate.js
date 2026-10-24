@@ -20,7 +20,9 @@
   const urlKey = "lang";
 
   const modes = ["original", "en", "zh"];
-  const menuLabels = { original: "原文", en: "English", zh: "中文" };
+  // English and 中文 name themselves; "original" is said in the reader's
+  // language (see originalLabel)
+  const menuLabels = { original: { zh: "原文", en: "Original" }, en: "English", zh: "中文" };
   const buttonTitle = "Language · 语言";
   const failureTitle = "Translation unavailable · 翻译加载失败";
   // Material Icons "translate", drawn like the go-to-top arrow next to it
@@ -42,11 +44,19 @@
     } catch (error) {
       // Storage can be blocked; fall back to the browser languages
     }
+    return browserLanguage() || "original";
+  };
+
+  // The first of the reader's browser languages that is Chinese or English
+  function browserLanguage() {
     const languages = navigator.languages?.length ? navigator.languages : [navigator.language || ""];
     return languages
       .map((language) => language.toLowerCase().slice(0, 2))
-      .find((language) => language === "zh" || language === "en") || "original";
-  };
+      .find((language) => language === "zh" || language === "en");
+  }
+
+  // "Original" in the reader's language: the mode's, else the browser's
+  const originalLabel = (mode) => menuLabels.original[mode === "original" ? browserLanguage() || "en" : mode];
 
   const rememberMode = (mode) => {
     try {
@@ -105,7 +115,7 @@
       item.type = "button";
       item.setAttribute("role", "menuitemradio");
       const label = document.createElement("span");
-      label.textContent = menuLabels[mode];
+      label.textContent = mode === "original" ? "" : menuLabels[mode];
       item.append(label);
       item.addEventListener("click", () => {
         setOpen(false);
@@ -141,6 +151,7 @@
         button.title = failed ? failureTitle : buttonTitle;
         button.setAttribute("aria-label", button.title);
         items.forEach((item, index) => item.setAttribute("aria-checked", String(modes[index] === mode)));
+        items[modes.indexOf("original")].firstChild.textContent = originalLabel(mode);
       },
       loading: () => {
         button.disabled = true;
@@ -184,8 +195,6 @@
     const originalTitle = titleNode?.textContent;
     const caption = document.querySelector(".post-single .entry-cover figcaption");
     const originalCaption = caption?.innerHTML;
-    const chips = document.querySelector(".post-single .moment-meta--single");
-    const originalChips = chips?.innerHTML;
     const toc = document.querySelector(".post-single .toc");
     const tocLinks = [...(toc?.querySelectorAll("a[href^='#']") || [])].map((link) => ({
       link,
@@ -241,7 +250,7 @@
       content.querySelectorAll("iframe").forEach((frame) => {
         frame.loading = "lazy";
       });
-      return { content, title: data.title, caption: data.caption, chips: data.chips, headings: alignHeadings(content) };
+      return { content, title: data.title, caption: data.caption, headings: alignHeadings(content) };
     };
 
     // Where the reader is: the block at the top of the viewport, by its
@@ -303,9 +312,6 @@
       if (caption && translation.caption) {
         caption.innerHTML = translated ? translation.caption : originalCaption;
       }
-      if (chips && translation.chips) {
-        chips.innerHTML = translated ? translation.chips : originalChips;
-      }
       if (toc) {
         toc.hidden = translated && !translation.headings;
         for (const { link, id, text } of tocLinks) {
@@ -353,8 +359,9 @@
 
   const initList = () => {
     // Each entry, by the path of the page it links to, with the parts that
-    // switch: title and summary for posts, title, note and chips for moments,
-    // plus a tag in the entry's meta line while it shows a translation
+    // switch: title and summary for posts, title and note for moments, plus a
+    // label while it shows a translation (a moment's location and mood chips
+    // stay as written, like tags)
     const entries = [...document.querySelectorAll("article.post-entry, article.first-entry, .archive-entry, article.moment-card")]
       .map((element) => {
         const link = element.querySelector("a.entry-link, a.moment-open");
@@ -377,19 +384,25 @@
           const set = swappable(() => content.innerHTML, (html) => { content.innerHTML = html; });
           parts.push((item) => set(item?.content));
         }
-        const momentMeta = element.querySelector(".moment-footer .moment-meta");
-        if (momentMeta) {
-          const set = swappable(() => momentMeta.innerHTML, (html) => { momentMeta.innerHTML = html; });
-          parts.push((item) => set(item?.chips && `${momentMeta.querySelector("time")?.outerHTML || ""}${item.chips}`));
-        }
-        const meta = element.querySelector(".entry-footer, .archive-meta, .moment-footer .moment-meta");
-        if (meta) {
+        const meta = element.querySelector(".entry-footer, .archive-meta");
+        if (content) {
+          // A moment says so in a line under its note, as a translated page
+          // does under its meta line, leaving the date and chips as they are
+          const line = document.createElement("div");
+          line.className = "translate-attribution";
+          line.hidden = true;
+          content.after(line);
+          parts.push((item) => {
+            line.textContent = item ? attributions[item.lang] : "";
+            line.hidden = !item;
+          });
+        } else if (meta) {
           parts.push((item) => {
             meta.querySelector(".translate-tag")?.remove();
             if (item) {
               const tag = document.createElement("span");
               tag.className = "translate-tag";
-              tag.textContent = ` · ${tags[item.lang]}`;
+              tag.textContent = `\u00a0·\u00a0${tags[item.lang]}`;
               meta.append(tag);
             }
           });
