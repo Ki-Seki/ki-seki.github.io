@@ -31,25 +31,28 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/js/glightbox.min.js"></script>
 
-{{- $mediaLightboxCSS := resources.Get "css/extended/media.css" | minify -}}
+{{- /* Local scripts and styles are fingerprinted like PaperMod's stylesheet:
+  a change gives them a new URL, so browsers never pair a cached old script
+  with new styles after a deploy */ -}}
+{{- $mediaLightboxCSS := resources.Get "css/extended/media.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $mediaLightboxCSS.RelPermalink }}">
 
-{{- $mediaLightboxJS := resources.Get "js/media-lightbox.js" | minify -}}
+{{- $mediaLightboxJS := resources.Get "js/media-lightbox.js" | minify | fingerprint -}}
 <script defer src="{{ $mediaLightboxJS.RelPermalink }}"></script>
 
 {{- /* Load admonition JavaScript */ -}}
-{{- $admonitionJS := resources.Get "js/admonition.js" | minify }}
+{{- $admonitionJS := resources.Get "js/admonition.js" | minify | fingerprint }}
 <script src="{{ $admonitionJS.RelPermalink }}"></script>
 
 {{- /* Load local time script */ -}}
-{{- $localTimeJS := resources.Get "js/local-time.js" | minify }}
+{{- $localTimeJS := resources.Get "js/local-time.js" | minify | fingerprint }}
 <script defer src="{{ $localTimeJS.RelPermalink }}"></script>
 
 
 {{- /* On pages with a translation that renders, and on list pages, this
   script adds the floating translate button (the footer is cached across
   pages, so the button can't live there) */ -}}
-{{- $translateJS := resources.Get "js/translate.js" | minify }}
+{{- $translateJS := resources.Get "js/translate.js" | minify | fingerprint }}
 {{ with partialCached "translation.html" . .RelPermalink }}
   <script defer src="{{ $translateJS.RelPermalink }}" data-src="{{ ($.OutputFormats.Get "translation").RelPermalink }}" data-lang="{{ .lang }}"></script>
 {{ else }}
@@ -59,7 +62,7 @@
 {{ end }}
 
 {{ if eq .Section "moments" }}
-  {{- $momentsJS := resources.Get "js/moments.js" | minify -}}
+  {{- $momentsJS := resources.Get "js/moments.js" | minify | fingerprint -}}
   <script defer src="{{ $momentsJS.RelPermalink }}"></script>
 {{ end }}
 
