@@ -1,0 +1,15 @@
+{{- /* PaperMod's search index, plus each page's DeepSeek translation (title,
+  summary and text) so search also finds pages by their translation. Built in
+  a variable rather than PaperMod's .Scratch, which piles up duplicates across
+  `hugo server` rebuilds. */ -}}
+{{- $index := slice -}}
+{{- range site.RegularPages -}}
+    {{- if and (not .Params.searchHidden) (ne .Layout `archives`) (ne .Layout `search`) }}
+    {{- $translation := "" -}}
+    {{- with partialCached "translation.html" . .RelPermalink -}}
+    {{- $translation = printf "%s\n%s\n%s" .title .summary (.content | plainify | htmlUnescape) -}}
+    {{- end -}}
+    {{- $index = $index | append (dict "title" .Title "content" .Plain "permalink" .Permalink "summary" .Summary "translation" $translation) -}}
+    {{- end }}
+{{- end -}}
+{{- $index | jsonify -}}

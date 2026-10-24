@@ -46,12 +46,16 @@
 <script defer src="{{ $localTimeJS.RelPermalink }}"></script>
 
 
-{{- /* On pages with a translation that renders, this script adds the floating
-  translate button (the footer is cached across pages, so the button can't
-  live there) */ -}}
+{{- /* On pages with a translation that renders, and on list pages, this
+  script adds the floating translate button (the footer is cached across
+  pages, so the button can't live there) */ -}}
+{{- $translateJS := resources.Get "js/translate.js" | minify }}
 {{ with partialCached "translation.html" . .RelPermalink }}
-  {{- $translateJS := resources.Get "js/translate.js" | minify }}
   <script defer src="{{ $translateJS.RelPermalink }}" data-src="{{ ($.OutputFormats.Get "translation").RelPermalink }}" data-lang="{{ .lang }}"></script>
+{{ else }}
+  {{- if and (or .IsNode (eq .Layout "archives")) site.Data.translations }}
+  <script defer src="{{ $translateJS.RelPermalink }}" data-list="{{ (site.Home.OutputFormats.Get "translationlist").RelPermalink }}"></script>
+  {{- end }}
 {{ end }}
 
 {{ if eq .Section "moments" }}

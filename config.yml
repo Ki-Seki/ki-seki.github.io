@@ -65,6 +65,13 @@ outputFormats:
     baseName: "translation"
     isPlainText: true
     notAlternative: true
+  # Translations of the entries on list pages, fetched by their translate
+  # button
+  translationlist:
+    mediaType: "application/json"
+    baseName: "translation-list"
+    isPlainText: true
+    notAlternative: true
 
 outputs:
   home:
@@ -72,6 +79,7 @@ outputs:
     - RSS
     - JSON
     - llms
+    - translationlist
   page:
     - HTML
     - translation
@@ -160,7 +168,7 @@ params:
       distance: 1000
       threshold: 0.4
       minMatchCharLength: 0
-      keys: ["title", "permalink", "summary", "content"]
+      keys: ["title", "permalink", "summary", "content", "translation"]
 
 markup:
   goldmark:

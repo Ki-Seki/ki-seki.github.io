@@ -1,0 +1,17 @@
+{{- /* Translations of the entries on list pages, by page path, for the
+  translate button there: title and summary for posts (the translated summary,
+  else the start of the translated text), title, note and chips for moments */ -}}
+{{- $list := dict -}}
+{{- range $page := where site.RegularPages "Section" "in" (slice "posts" "moments") -}}
+  {{- with partialCached "translation.html" $page $page.RelPermalink -}}
+    {{- $item := dict "lang" .lang "title" .title -}}
+    {{- if eq $page.Section "moments" -}}
+      {{- $item = merge $item (dict "content" .content "chips" .chips) -}}
+    {{- else -}}
+      {{- $summary := .summary | default (.content | plainify | htmlUnescape | strings.TrimSpace | truncate (cond (eq .lang "zh") 120 400)) -}}
+      {{- $item = merge $item (dict "summary" $summary) -}}
+    {{- end -}}
+    {{- $list = merge $list (dict $page.RelPermalink $item) -}}
+  {{- end -}}
+{{- end -}}
+{{- $list | jsonify -}}
