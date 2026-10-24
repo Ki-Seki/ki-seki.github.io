@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IVF 与 PQ：论文配图</title>
+  <style>
+    html { color-scheme: light; background: #fff; color: #233b50; }
+    body { margin: 32px auto; max-width: 1200px; padding: 0 24px; font: 17px/1.7 Arial, "PingFang SC", sans-serif; }
+    figure { margin: 0 0 40px; }
+    img { display: block; width: 100%; height: auto; }
+    figcaption { margin-top: 12px; }
+    a { color: #365f83; }
+    .sources { font-size: 15px; }
+    @media print { body { max-width: none; margin: 0; padding: 0; } figure { break-inside: avoid; } .sources { display: none; } }
+  </style>
+</head>
+<body>
+  <figure>
+    <img src="assets/ivf-index-construction.svg" alt="图2：IVF抽样与中心学习，以及局部倒排列表搜索。">
+    <figcaption>图 2：IVF 的抽样训练与局部搜索。以 1.4B 预训练库的构建配置为例。</figcaption>
+    <div class="sources"><a href="assets/ivf-index-construction.svg">SVG 矢量图</a> · <a href="assets/ivf-index-construction.png">高清 PNG</a></div>
+  </figure>
+  <figure>
+    <img src="assets/pq-encoding.svg" alt="图3：PQ残差码本训练，以及单向量的64字节编码。">
+    <figcaption>图 3：残差 PQ 的码本训练与向量编码。维度、码本及编号为结构示意；编码容量不包含样本 ID 等索引开销。</figcaption>
+    <div class="sources"><a href="assets/pq-encoding.svg">SVG 矢量图</a> · <a href="assets/pq-encoding.png">高清 PNG</a></div>
+  </figure>
+  <p class="sources">生成源稿：<a href="scripts/draw-ivf-pq-refined.cjs">draw-ivf-pq-refined.cjs</a>（复用已确认的 <a href="scripts/draw-ivf-refined-preview.cjs">IVF 绘图源稿</a>）。本页及图片均可离线使用。</p>
+</body>
+</html>

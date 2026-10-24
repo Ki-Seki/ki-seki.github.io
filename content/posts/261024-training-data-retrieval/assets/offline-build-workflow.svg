@@ -1,0 +1,168 @@
+<svg width="1560" height="2060" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 2060" role="img" aria-labelledby="svg-title svg-desc">
+<style><![CDATA[
+
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f8;color:#1e2c3b;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+main{max-width:1600px;margin:0 auto;padding:30px 24px 42px}
+header{margin:0 4px 22px}.kicker{margin:0 0 10px;color:#53647a;font-size:13px;letter-spacing:.08em}
+h1{margin:0 0 12px;font-size:30px;line-height:1.35;font-weight:650}.subtitle{margin:0;max-width:1150px;color:#53647a;line-height:1.7;font-size:15px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;font-size:13px;color:#475569}.legend span{display:inline-flex;align-items:center;gap:7px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block}.cpu{background:#17637b}.gpu{background:#6950a2}.local{background:#27764f}.human{background:#b97817}
+.line-key{display:inline-block;width:25px;border-top:2px solid #6a8095}.line-key.optional{border-top-style:dashed}.line-key.control{border-top-color:#b97817;border-top-style:dashed}
+figure{margin:0;background:#fff;border:1px solid #d8e0e8;border-radius:16px;overflow:hidden}.diagram{overflow:auto;padding:20px 0 0}
+svg{display:block;width:100%;height:auto;min-width:1180px}svg text{font-family:inherit}
+.node-box{fill:#fff;stroke:#b7c8d8;stroke-width:1.4}.optional-box{fill:#f8fafb;stroke-dasharray:6 4}
+.resource{font-size:16px;font-weight:600}.node-title{font-size:23px;fill:#1e344b;font-weight:600}.node-note{font-size:17px;fill:#53677a}
+.edge-halo{stroke:#fff;stroke-width:7;fill:none;stroke-linejoin:round;stroke-linecap:round}.edge{stroke:#6a8095;stroke-width:1.7;fill:none;stroke-linejoin:round}
+.edge.optional{stroke-dasharray:6 5}.edge.control{stroke:#b97817;stroke-dasharray:5 4}
+.edge-label{font-size:17px;fill:#3d586e;paint-order:stroke;stroke:#fff;stroke-width:6;stroke-linejoin:round}
+.edge-sub{font-size:16px;fill:#65788a;paint-order:stroke;stroke:#fff;stroke-width:5;stroke-linejoin:round}
+.human-box{fill:#fff7e9;stroke:#dfb369;stroke-width:1.3}.human-title{font-size:20px;fill:#855512;font-weight:600}.human-note{font-size:16px;fill:#855512}
+figcaption{border-top:1px solid #e3e9ef;padding:18px 24px;font-size:14px;line-height:1.8;color:#526174}figcaption p{margin:0 0 7px}figcaption p:last-child{margin-bottom:0}figcaption strong{color:#293e54;font-weight:600}
+details{margin-top:20px;padding:16px 20px;border:1px solid #d8e0e8;border-radius:12px;background:#fff}summary{font-size:15px;font-weight:600;cursor:pointer}.details-note{font-size:13px;line-height:1.7;color:#5c6e80}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}th,td{padding:10px 12px;border-bottom:1px solid #e8edf2;text-align:left;vertical-align:top;line-height:1.6}th{color:#52677c;font-weight:600}td:first-child{width:140px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;overflow-wrap:anywhere}
+.footer{font-size:12px;color:#6b7a8a;margin:16px 4px 0}
+@media(max-width:700px){main{padding:20px 12px}h1{font-size:24px}.subtitle{font-size:14px}.legend{gap:12px}figcaption{padding:14px}.table-wrap{overflow:auto}table{min-width:640px}}
+@media print{@page{size:A3 portrait;margin:10mm}body{background:#fff}main{max-width:none;padding:0}header{margin-bottom:10px}h1{font-size:23px}figure{border:0}.diagram{overflow:visible;padding:0}svg{min-width:0;width:100%}details,.footer{display:none}figcaption{font-size:10px;padding:8px 0}.subtitle,.legend{font-size:11px}}
+
+svg{width:1560px;height:2060px;min-width:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+]]></style>
+<rect width="1560" height="2060" fill="#ffffff"/>
+
+<title id="svg-title">离线索引构建的资源标注 DAG</title>
+<desc id="svg-desc">冻结输入之后，任务计划、分布式 embedding 和运行资产准备可并行。采样同时依赖采样计划与 embedding；簇心和 PQ 在样本上训练。全量编码汇合全量向量、中心 PQ 以及分配计划，然后分叉到倒排归并与可选统计分支。FAISS 组装还读取训练得到的簇心和 PQ。索引、运行资产以及选用的统计在发布包处汇合，之后进行恢复验收和人工发布确认。</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6.4" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#6a8095"/></marker>
+<marker id="control-arrow" markerWidth="7" markerHeight="7" refX="6.4" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#b97817"/></marker>
+</defs>
+<g class="edge-group" data-from="approve-input" data-to="catalog" data-kind="control"><path d="M780 88 V132" class="edge-halo"/><path d="M780 88 V132" class="edge control" marker-end="url(#control-arrow)"/></g>
+<g class="edge-group" data-from="catalog" data-to="plans" data-kind="data"><path d="M640 264 V305 H260 V350" class="edge-halo"/><path d="M640 264 V305 H260 V350" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="catalog" data-to="embedding" data-kind="data"><path d="M780 264 V350" class="edge-halo"/><path d="M780 264 V350" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="catalog" data-to="runtime-assets" data-kind="data"><path d="M920 264 V305 H1300 V350" class="edge-halo"/><path d="M920 264 V305 H1300 V350" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="plans" data-to="sample" data-kind="data"><path d="M460 422 H510 V630 H560" class="edge-halo"/><path d="M460 422 H510 V630 H560" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="embedding" data-to="sample" data-kind="data"><path d="M780 494 V570" class="edge-halo"/><path d="M780 494 V570" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="embedding" data-to="assignment" data-kind="data"><path d="M1000 422 H1030 V1032 H1000" class="edge-halo"/><path d="M1000 422 H1030 V1032 H1000" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="plans" data-to="assignment" data-kind="data"><path d="M260 494 V1084 H560" class="edge-halo"/><path d="M260 494 V1084 H560" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="sample" data-to="training" data-kind="data"><path d="M780 690 V760" class="edge-halo"/><path d="M780 690 V760" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="training" data-to="assignment" data-kind="data"><path d="M780 904 V990" class="edge-halo"/><path d="M780 904 V990" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="training" data-to="faiss" data-kind="data"><path d="M560 832 H540 V1410 H460 V1450" class="edge-halo"/><path d="M560 832 H540 V1410 H460 V1450" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="assignment" data-to="postings" data-kind="data"><path d="M680 1134 V1180 H310 V1230" class="edge-halo"/><path d="M680 1134 V1180 H310 V1230" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="assignment" data-to="analysis" data-kind="data"><path d="M900 1134 V1180 H1260 V1230" class="edge-halo"/><path d="M900 1134 V1180 H1260 V1230" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="postings" data-to="faiss" data-kind="data"><path d="M310 1362 V1450" class="edge-halo"/><path d="M310 1362 V1450" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="faiss" data-to="package" data-kind="data"><path d="M520 1522 H590 V1565 H650" class="edge-halo"/><path d="M520 1522 H590 V1565 H650" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="analysis" data-to="package" data-kind="optional"><path d="M1260 1362 V1440 H950 V1510" class="edge-halo"/><path d="M1260 1362 V1440 H950 V1510" class="edge optional" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="runtime-assets" data-to="package" data-kind="data"><path d="M1500 422 H1530 V1605 H1090" class="edge-halo"/><path d="M1500 422 H1530 V1605 H1090" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="package" data-to="validate" data-kind="data"><path d="M870 1654 V1730" class="edge-halo"/><path d="M870 1654 V1730" class="edge data" marker-end="url(#arrow)"/></g>
+<g class="edge-group" data-from="validate" data-to="approve-release" data-kind="control"><path d="M870 1850 V1920" class="edge-halo"/><path d="M870 1850 V1920" class="edge control" marker-end="url(#control-arrow)"/></g>
+<text x="290" y="286" class="edge-label">任务计划</text>
+<text x="1088" y="286" class="edge-label">可并行准备</text>
+<text x="280" y="950" class="edge-label">全量分配计划</text>
+<text x="280" y="976" class="edge-sub">无需等待簇心训练结束再准备</text>
+<text x="1051" y="676" class="edge-label">全量向量</text>
+<text x="1051" y="702" class="edge-sub">直接供全量编码；不是只编码样本</text>
+<text x="800" y="953" class="edge-label">簇心 / PQ</text>
+<text x="554" y="1403" class="edge-label">簇心 / PQ</text>
+<text x="670" y="1210" class="edge-sub">可并行；实际并发受资源预算约束</text>
+<text x="1110" y="1475" class="edge-label">启用该能力时加入包</text>
+<text x="1110" y="1586" class="edge-label">回源映射 + 查询模型 / 代码</text>
+<g id="node-approve-input" class="dag-node human-node" data-node="approve-input" data-depends-on="" aria-label="人工确认输入范围与配置"><rect x="560" y="24" width="440" height="64" rx="12" class="human-box"/><text x="580" y="51" class="human-title">人工确认输入范围与配置</text><text x="580" y="75" class="human-note">数据口径、模型参数与资源预算</text></g>
+<g id="node-catalog" class="dag-node" data-node="catalog" data-depends-on="approve-input" data-optional-depends-on="" aria-label="冻结输入清单，Devbox · CPU / 控制端">
+<rect x="560" y="132" width="440" height="132" rx="12" class="node-box"/>
+<rect x="560" y="132" width="5" height="132" rx="2" fill="#17637b"/>
+<text x="580" y="158" class="resource" fill="#17637b">Devbox · CPU / 控制端</text>
+<text x="580" y="191" class="node-title">冻结输入清单</text>
+<text x="580" y="220" class="node-note">数据范围与 source catalog</text>
+<text x="580" y="246" class="node-note">产物：manifest、选择规则与任务身份</text>
+</g>
+<g id="node-plans" class="dag-node" data-node="plans" data-depends-on="catalog" data-optional-depends-on="" aria-label="采样与全量分配计划，Devbox / 小型 CPU 任务">
+<rect x="60" y="350" width="400" height="144" rx="12" class="node-box"/>
+<rect x="60" y="350" width="5" height="144" rx="2" fill="#17637b"/>
+<text x="80" y="376" class="resource" fill="#17637b">Devbox / 小型 CPU 任务</text>
+<text x="80" y="409" class="node-title">采样与全量分配计划</text>
+<text x="80" y="438" class="node-note">准备两类任务计划；无须等模型训练</text>
+<text x="80" y="464" class="node-note">产物：sample plan / assignment plan</text>
+</g>
+<g id="node-embedding" class="dag-node" data-node="embedding" data-depends-on="catalog" data-optional-depends-on="" aria-label="分布式 embedding 提取，UTP · 多节点 GPU + CPU 解码">
+<rect x="560" y="350" width="440" height="144" rx="12" class="node-box"/>
+<rect x="560" y="350" width="5" height="144" rx="2" fill="#6950a2"/>
+<text x="580" y="376" class="resource" fill="#6950a2">UTP · 多节点 GPU + CPU 解码</text>
+<text x="580" y="409" class="node-title">分布式 embedding 提取</text>
+<text x="580" y="438" class="node-note">有界读取 → 解码 → SigLIP2 → 写出</text>
+<text x="580" y="464" class="node-note">产物：全量分片向量、行身份与状态</text>
+</g>
+<g id="node-runtime-assets" class="dag-node" data-node="runtime-assets" data-depends-on="catalog" data-optional-depends-on="" aria-label="回源与运行资产准备，CPU · Devbox / 按规模并行">
+<rect x="1100" y="350" width="400" height="144" rx="12" class="node-box"/>
+<rect x="1100" y="350" width="5" height="144" rx="2" fill="#17637b"/>
+<text x="1120" y="376" class="resource" fill="#17637b">CPU · Devbox / 按规模并行</text>
+<text x="1120" y="409" class="node-title">回源与运行资产准备</text>
+<text x="1120" y="438" class="node-note">准备回源映射、查询模型与代码配置</text>
+<text x="1120" y="464" class="node-note">产物：locator / 运行资产清单</text>
+</g>
+<g id="node-sample" class="dag-node" data-node="sample" data-depends-on="plans embedding" data-optional-depends-on="" aria-label="训练样本抽取，UTP · CPU 并行读取">
+<rect x="560" y="570" width="440" height="120" rx="12" class="node-box"/>
+<rect x="560" y="570" width="5" height="120" rx="2" fill="#17637b"/>
+<text x="580" y="596" class="resource" fill="#17637b">UTP · CPU 并行读取</text>
+<text x="580" y="629" class="node-title">训练样本抽取</text>
+<text x="580" y="652" class="node-note">输入：采样计划 + 全量向量</text>
+<text x="580" y="676" class="node-note">产物：训练样本候选与身份</text>
+</g>
+<g id="node-training" class="dag-node" data-node="training" data-depends-on="sample" data-optional-depends-on="" aria-label="簇心与 PQ 码本训练，GPU Devbox · 多 GPU + RAM / NVMe">
+<rect x="560" y="760" width="440" height="144" rx="12" class="node-box"/>
+<rect x="560" y="760" width="5" height="144" rx="2" fill="#27764f"/>
+<text x="580" y="786" class="resource" fill="#27764f">GPU Devbox · 多 GPU + RAM / NVMe</text>
+<text x="580" y="819" class="node-title">簇心与 PQ 码本训练</text>
+<text x="580" y="848" class="node-note">同机串联：样本整理 → 中心选优 → PQ</text>
+<text x="580" y="874" class="node-note">产物：冻结簇心、码本与质量凭证</text>
+</g>
+<g id="node-assignment" class="dag-node" data-node="assignment" data-depends-on="embedding training plans" data-optional-depends-on="" aria-label="全量分配与 PQ 编码，UTP · 多节点 GPU">
+<rect x="560" y="990" width="440" height="144" rx="12" class="node-box"/>
+<rect x="560" y="990" width="5" height="144" rx="2" fill="#6950a2"/>
+<text x="580" y="1016" class="resource" fill="#6950a2">UTP · 多节点 GPU</text>
+<text x="580" y="1049" class="node-title">全量分配与 PQ 编码</text>
+<text x="580" y="1078" class="node-note">等待：全量向量 + 簇心/PQ + 分配计划</text>
+<text x="580" y="1104" class="node-note">产物：global row、cluster ID、PQ code</text>
+</g>
+<g id="node-postings" class="dag-node" data-node="postings" data-depends-on="assignment" data-optional-depends-on="" aria-label="倒排分组与归并，UTP · CPU 节点池 / I/O 与内存">
+<rect x="100" y="1230" width="420" height="132" rx="12" class="node-box"/>
+<rect x="100" y="1230" width="5" height="132" rx="2" fill="#17637b"/>
+<text x="120" y="1256" class="resource" fill="#17637b">UTP · CPU 节点池 / I/O 与内存</text>
+<text x="120" y="1289" class="node-title">倒排分组与归并</text>
+<text x="120" y="1318" class="node-note">按簇归并分片编码记录</text>
+<text x="120" y="1344" class="node-note">产物：postings、offsets 与行数</text>
+</g>
+<g id="node-analysis" class="dag-node" data-node="analysis" data-depends-on="assignment" data-optional-depends-on="" aria-label="统计与浏览辅助数据，CPU · 协调器 / 分布式任务">
+<rect x="1040" y="1230" width="440" height="132" rx="12" class="node-box optional-box"/>
+<rect x="1040" y="1230" width="5" height="132" rx="2" fill="#17637b"/>
+<text x="1060" y="1256" class="resource" fill="#17637b">CPU · 协调器 / 分布式任务</text>
+<text x="1060" y="1289" class="node-title">统计与浏览辅助数据</text>
+<text x="1060" y="1318" class="node-note">统计汇总、diversity / 浏览元信息</text>
+<text x="1060" y="1344" class="node-note">可选分支；与倒排归并无先后依赖</text>
+</g>
+<g id="node-faiss" class="dag-node" data-node="faiss" data-depends-on="postings training" data-optional-depends-on="" aria-label="FAISS 分片组装与校验，UTP CPU / 容量足够的 Devbox">
+<rect x="100" y="1450" width="420" height="144" rx="12" class="node-box"/>
+<rect x="100" y="1450" width="5" height="144" rx="2" fill="#17637b"/>
+<text x="120" y="1476" class="resource" fill="#17637b">UTP CPU / 容量足够的 Devbox</text>
+<text x="120" y="1509" class="node-title">FAISS 分片组装与校验</text>
+<text x="120" y="1538" class="node-note">输入：postings + 冻结簇心 / PQ</text>
+<text x="120" y="1564" class="node-note">产物：索引分片与查询校验凭证</text>
+</g>
+<g id="node-package" class="dag-node" data-node="package" data-depends-on="faiss runtime-assets" data-optional-depends-on="analysis" aria-label="组装候选发布包，Devbox · CPU / 打包控制">
+<rect x="650" y="1510" width="440" height="144" rx="12" class="node-box"/>
+<rect x="650" y="1510" width="5" height="144" rx="2" fill="#17637b"/>
+<text x="670" y="1536" class="resource" fill="#17637b">Devbox · CPU / 打包控制</text>
+<text x="670" y="1569" class="node-title">组装候选发布包</text>
+<text x="670" y="1598" class="node-note">汇合：索引 + 回源信息 + 运行资产</text>
+<text x="670" y="1624" class="node-note">可选统计按发布能力加入 manifest</text>
+</g>
+<g id="node-validate" class="dag-node" data-node="validate" data-depends-on="package" data-optional-depends-on="" aria-label="独立恢复与端到端验收，Devbox 或 UTP · 按 serving 预算">
+<rect x="650" y="1730" width="440" height="120" rx="12" class="node-box"/>
+<rect x="650" y="1730" width="5" height="120" rx="2" fill="#27764f"/>
+<text x="670" y="1756" class="resource" fill="#27764f">Devbox 或 UTP · 按 serving 预算</text>
+<text x="670" y="1789" class="node-title">独立恢复与端到端验收</text>
+<text x="670" y="1812" class="node-note">恢复校验 → 启动 → 检索 / 读图 / 标注</text>
+<text x="670" y="1836" class="node-note">自动检查通过，不等同于人工发布批准</text>
+</g>
+<g id="node-approve-release" class="dag-node human-node" data-node="approve-release" data-depends-on="validate" aria-label="人工复核典型结果并批准发布"><rect x="650" y="1920" width="440" height="64" rx="12" class="human-box"/><text x="670" y="1947" class="human-title">人工复核典型结果并批准发布</text><text x="670" y="1971" class="human-note">确认实际使用效果与发布范围</text></g>
+<rect x="55" y="2010" width="1450" height="35" rx="8" fill="#f3f5f8"/>
+<text x="75" y="2034" class="edge-sub">依赖未通过验收 → 不启动其下游；已完成且无依赖冲突的其他支路不必回滚。节点内部的分片还可以并行执行。</text>
+</svg>

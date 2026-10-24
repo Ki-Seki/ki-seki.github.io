@@ -52,7 +52,8 @@
     {{- end -}}
     {{- $imageURL := "" -}}
     {{- if $res -}}
-      {{- if or (gt $res.Width 1280) (gt $res.Height 1280) -}}
+      {{- /* SVGs have no pixel size and are never resized */ -}}
+      {{- if and (ne $res.MediaType.Type "image/svg+xml") (or (gt $res.Width 1280) (gt $res.Height 1280)) -}}
         {{- $processed := $res.Fit "1280x1280 q80" -}}
         {{- with $processed -}}
           {{- $thumbRes = . -}}
