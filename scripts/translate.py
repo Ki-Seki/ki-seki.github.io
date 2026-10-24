@@ -38,6 +38,9 @@ API_URL = "https://api.deepseek.com/chat/completions"
 MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-flash")
 MAX_CHARS = int(os.environ.get("TRANSLATE_MAX_CHARS", "1000000"))
 WORKERS = int(os.environ.get("TRANSLATE_WORKERS", "8"))
+# Requests per page. A reply that fails the structure check is usually a
+# one-off slip (a stray quote) that a fresh request doesn't repeat.
+ATTEMPTS = 3
 # USD per million tokens at peak hours (cache-miss input, output), for the
 # cost estimate only. See https://api-docs.deepseek.com/quick_start/pricing
 PRICES = {"deepseek-flash": (0.3, 1.2), "deepseek-v4-pro": (1.32, 3.96)}
@@ -184,10 +187,11 @@ def request_translation(text, lang, key):
 
 
 def translate(page, key, stop, budget):
-    """Translate a page, retrying once; return (entry or None, usage, note)."""
+    """Translate a page in up to ATTEMPTS requests; return (entry or None,
+    usage, note)."""
     total = {"prompt_tokens": 0, "completion_tokens": 0}
     note = ""
-    for attempt in range(2):
+    for attempt in range(ATTEMPTS):
         if stop.is_set():
             return None, total, "stopped"
         if not budget.take(len(page["text"])):
