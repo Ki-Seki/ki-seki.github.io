@@ -18,6 +18,11 @@ mainsections:
   - posts
   - archives
 
+# Only Markdown is content, so other files in a page bundle (such as .html
+# attachments) are published as plain resources.
+contentTypes:
+  text/markdown: {}
+
 
 minify:
   disableXML: false
