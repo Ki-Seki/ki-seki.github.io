@@ -43,11 +43,11 @@ WORKERS = int(os.environ.get("TRANSLATE_WORKERS", "8"))
 PRICES = {"deepseek-flash": (0.3, 1.2), "deepseek-v4-pro": (1.32, 3.96)}
 
 # Bump to retranslate every page after changing the prompt.
-PROMPT_VERSION = 1
+PROMPT_VERSION = 2
 LANGUAGES = {"zh": "Simplified Chinese", "en": "English"}
 PROMPT = """Translate the following Markdown file from a Hugo blog into {language}.
 
-Keep the structure exactly as it is: front matter keys, Markdown syntax, Hugo shortcodes, HTML, math, code, URLs and file paths must not be changed or broken. Translate the text readers see, including front matter values such as the title, summary and captions, link text, and the captions and titles inside shortcodes. Inside shortcode parameters, write quotation marks as “ ” rather than ", which would end the parameter. Leave dates, tags and other values that aren't prose as they are.
+Keep the structure exactly as it is: front matter keys, Markdown syntax, Hugo shortcodes, HTML, math, code, URLs and file paths must not be changed or broken. Translate the text readers see, including front matter values such as the title, summary and captions, link text, and the captions and titles inside shortcodes. Inside shortcode parameters, write quotation marks as “ ” rather than ", which would end the parameter. Leave dates, tags and other values that aren't prose as they are. Keep people's names written in Latin letters exactly as they are: never turn a pinyin name into Chinese characters, which can't be told from the spelling.
 
 Reply with the translated file only."""
 
