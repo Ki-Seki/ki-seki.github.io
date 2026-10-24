@@ -1,30 +1,4 @@
-{{- /* Renders the page's translated index.md: its front matter for the title,
-  cover caption and moment chips, its body the same way as the page content,
-  so shortcodes, math and images work in the translation too. */ -}}
-{{- $page := . -}}
-{{- with partial "translation-entry.html" . -}}
-  {{- $entry := . -}}
-  {{- with findRESubmatch `(?s)^---\n(.*?)\n---\n(.*)$` ($entry.markdown | default "") 1 -}}
-    {{- $match := index . 0 -}}
-    {{- with try (dict "front" (transform.Unmarshal (printf "---\n%s\n---\n" (index $match 1))) "content" ($page.RenderString (dict "display" "block") (index $match 2))) -}}
-      {{- with .Err -}}
-        {{- warnf "Translation of %s not rendered: %s" $page.File.Path . -}}
-      {{- else -}}
-        {{- $front := .Value.front -}}
-        {{- $content := .Value.content -}}
-        {{- if not ($page.Param "disableAnchoredHeadings") -}}
-          {{- $content = partial "anchored_headings.html" $content -}}
-        {{- end -}}
-        {{- $caption := "" -}}
-        {{- with $front.cover }}{{ with .caption }}{{ $caption = . | markdownify }}{{ end }}{{ end -}}
-        {{- $chips := "" -}}
-        {{- if or $front.location $front.mood -}}
-          {{- $chips = partial "moment/chips.html" (dict "page" (dict "Params" $front)) -}}
-        {{- end -}}
-        {{- dict "lang" $entry.lang "title" ($front.title | default $page.Title) "caption" $caption "chips" $chips "content" $content | jsonify -}}
-      {{- end -}}
-    {{- end -}}
-  {{- else -}}
-    {{- warnf "Translation of %s has no front matter" $page.File.Path -}}
-  {{- end -}}
+{{- /* The page's translation, fetched by its translate button */ -}}
+{{- with partialCached "translation.html" . .RelPermalink -}}
+  {{- . | jsonify -}}
 {{- end -}}

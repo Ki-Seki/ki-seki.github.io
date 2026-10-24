@@ -1,7 +1,0 @@
-{{- /* The page's DeepSeek translation from data/translations.json (written by
-  scripts/translate.py): a dict with lang, title and body, or nil. */ -}}
-{{- $entry := "" -}}
-{{- with .File -}}
-  {{- $entry = index (site.Data.translations | default dict) (path.Clean .Dir) -}}
-{{- end -}}
-{{- return $entry -}}
