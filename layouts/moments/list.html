@@ -26,7 +26,7 @@
       {{ $year := $page.Date.Format "2006" }}
       {{ if ne $year $currentYear }}
         {{ $currentYear = $year }}
-        <div class="moment-year-separator" aria-label="Year {{ $year }}">
+        <div class="moment-year-separator" aria-label="{{ i18n "year_label" $year }}">
           <span class="moment-year-label">{{ $year }}</span>
         </div>
       {{ end }}
@@ -51,8 +51,8 @@
           </div>
 
           {{ if $isLong }}
-            <button class="moment-toggle" type="button" data-moment-toggle aria-expanded="false" aria-controls="{{ $contentID }}" data-expand-label="Read full note" data-collapse-label="Hide note">
-              Read full note
+            <button class="moment-toggle" type="button" data-moment-toggle aria-expanded="false" aria-controls="{{ $contentID }}" data-expand-label="{{ i18n "read_full_note" }}" data-collapse-label="{{ i18n "hide_note" }}">
+              {{ i18n "read_full_note" }}
             </button>
           {{ end }}
 
@@ -61,18 +61,18 @@
               <time datetime="{{ $page.Date | time.Format "2006-01-02T15:04:05Z07:00" }}">{{ $page.Date | time.Format "Jan 2, 2006" }}</time>
               {{ partial "moment/chips.html" (dict "page" $page) }}
             </div>
-            <a class="moment-open" href="{{ $page.RelPermalink }}" aria-label="Open this moment">Open note →</a>
+            <a class="moment-open" href="{{ $page.RelPermalink }}" aria-label="{{ i18n "open_this_moment" }}">{{ i18n "open_note" }} →</a>
           </footer>
         </div>
       </article>
     {{ else }}
-      <p class="moments-empty">No moments yet—check back soon.</p>
+      <p class="moments-empty">{{ i18n "no_moments" }}</p>
     {{ end }}
   </div>
 
   {{ if gt $paginator.TotalPages 1 }}
   <footer class="page-footer">
-    <nav class="pagination" aria-label="Moments navigation">
+    <nav class="pagination" aria-label="{{ i18n "moments_navigation" }}">
       {{ if $paginator.HasPrev }}
       <a class="prev" href="{{ $paginator.Prev.URL | absURL }}" rel="prev">
         «&nbsp;{{ i18n "prev_page" }}&nbsp;

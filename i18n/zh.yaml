@@ -1,0 +1,26 @@
+- id: updated
+  translation: "更新于"
+
+- id: last_modified
+  translation: "最后修改"
+
+- id: read_full_note
+  translation: "阅读全文"
+
+- id: hide_note
+  translation: "收起内容"
+
+- id: open_note
+  translation: "打开记录"
+
+- id: open_this_moment
+  translation: "打开这条记录"
+
+- id: no_moments
+  translation: "还没有中文记录，稍后再来看看。"
+
+- id: moments_navigation
+  translation: "瞬间翻页"
+
+- id: year_label
+  translation: "{{ . }} 年"

@@ -1,6 +1,8 @@
 baseURL: https://ki-seki.github.io/
 title: The Kiseki Log
 languageCode: en
+defaultContentLanguage: en
+defaultContentLanguageInSubdir: false
 hasCJKLanguage: true
 copyright: "© 2023-2026 Shichao Song [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
 theme: PaperMod
@@ -30,6 +32,7 @@ pagination:
 languages:
   en:
     languageName: "English"
+    languageCode: en
     weight: 1
     taxonomies:
       category: categories
@@ -52,6 +55,56 @@ languages:
         - name: Tags
           url: tags/
           weight: 10
+  zh:
+    languageName: "简体中文"
+    languageCode: zh-CN
+    weight: 2
+    taxonomies:
+      category: categories
+      tag: tags
+      series: series
+    menu:
+      main:
+        - name: 文章
+          url: posts/
+          weight: 1
+        - name: 瞬间
+          url: moments/
+          weight: 3
+        - name: 归档
+          url: archives/
+          weight: 5
+        - name: 搜索
+          url: search/
+          weight: 10
+        - name: 标签
+          url: tags/
+          weight: 10
+    params:
+      description: 宋世超的个人博客
+      DateFormat: "2006年1月2日"
+      homeInfoParams:
+        Title: 👋 你好！
+        Content: >
+          我是宋世超，一名博士候选人，目前主要研究基础模型。
+          这里记录我的研究与生活。
+      editPost:
+        Text: 建议修改
+      socialIcons:
+        - name: googlescholar
+          url: https://scholar.google.com/citations?user=6t4_yXMAAAAJ
+        - name: github
+          url: https://github.com/Ki-Seki
+        - name: gallery
+          url: https://ki-seki.github.io/gallery/
+        - name: X
+          url: https://x.com/songsc_
+        - name: huggingface
+          url: https://huggingface.co/Ki-Seki
+        - name: linkedin
+          url: https://www.linkedin.com/in/song-sc/
+        - name: rss
+          url: https://ki-seki.github.io/zh/posts/index.xml
 outputFormats:
   llms:
     mediaType: "text/plain"
@@ -78,6 +131,7 @@ params:
   ShowShareButtons: true
   ShowReadingTime: true
   displayFullLangName: true
+  disableLangToggle: false
   ShowPostNavLinks: true
   ShowBreadCrumbs: true
   ShowCodeCopyButtons: true

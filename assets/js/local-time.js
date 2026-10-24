@@ -6,7 +6,7 @@ function initLocalTime() {
         if (datetime) {
             const utcDate = new Date(datetime);
             if (!isNaN(utcDate.getTime())) {
-                const localDateString = utcDate.toLocaleString(undefined, {
+                const localDateString = utcDate.toLocaleString(document.documentElement.lang || undefined, {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',

@@ -39,6 +39,25 @@ To serve the site locally:
 
    The site will be available at http://localhost:1313.
 
+## Languages
+
+English is the default language and keeps the existing URLs at `/`.
+Simplified Chinese pages are published under `/zh/`. The header switches
+between the two language homepages; translated articles also link directly
+to each other beside their metadata.
+
+Use `index.zh.md` for a Chinese post and `index.en.md` for its English
+translation in the same page bundle. Existing `index.md` files remain in
+English. Give translations the same `translationKey` when their filenames
+or directories differ. Each language has its own archive, search index,
+and RSS feed; untranslated articles only appear in their own language.
+
+The Chinese retrieval article lives in
+`content/posts/261024-training-data-retrieval/index.zh.md`. To translate it,
+add `index.en.md` in that directory with
+`translationKey: training-data-retrieval`. Its figures and standalone HTML
+attachments are shared from `static/post-assets/261024-training-data-retrieval/`.
+
 ## License
 
 <a href="https://ki-seki.github.io/">The Kiseki Log</a> © 2023-2026 by Shichao Song is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><span style="margin-left:.2em;"></span>

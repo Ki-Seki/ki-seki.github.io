@@ -1,0 +1,26 @@
+- id: updated
+  translation: "Updated"
+
+- id: last_modified
+  translation: "Last modified"
+
+- id: read_full_note
+  translation: "Read full note"
+
+- id: hide_note
+  translation: "Hide note"
+
+- id: open_note
+  translation: "Open note"
+
+- id: open_this_moment
+  translation: "Open this moment"
+
+- id: no_moments
+  translation: "No moments yet—check back soon."
+
+- id: moments_navigation
+  translation: "Moments navigation"
+
+- id: year_label
+  translation: "Year {{ . }}"

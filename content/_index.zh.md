@@ -1,0 +1,3 @@
+---
+title: "The Kiseki Log"
+---
