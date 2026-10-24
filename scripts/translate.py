@@ -58,6 +58,22 @@ class OutOfBalance(Exception):
     pass
 
 
+class Budget:
+    """Source characters left to send in this run, shared by all requests,
+    retries included."""
+
+    def __init__(self, chars):
+        self.left = chars
+        self.lock = threading.Lock()
+
+    def take(self, chars):
+        with self.lock:
+            if chars > self.left:
+                return False
+            self.left -= chars
+            return True
+
+
 def target_language(text):
     """Chinese pages go to English, everything else to Chinese; None if no text."""
     prose = re.sub(r"```.*?```|\{\{[<%].*?[%>]\}\}|\]\([^)]*\)|https?://\S+", " ", text, flags=re.S)
@@ -145,13 +161,15 @@ def request_translation(text, lang, key):
     return (fenced.group(1) if fenced else reply) + "\n", finish, usage
 
 
-def translate(page, key, stop):
+def translate(page, key, stop, budget):
     """Translate a page, retrying once; return (entry or None, usage, note)."""
     total = {"prompt_tokens": 0, "completion_tokens": 0}
     note = ""
     for attempt in range(2):
         if stop.is_set():
             return None, total, "stopped"
+        if not budget.take(len(page["text"])):
+            return None, total, "; ".join(filter(None, [note, "over TRANSLATE_MAX_CHARS"]))
         try:
             text, finish, usage = request_translation(page["text"], page["lang"], key)
         except urllib.error.HTTPError as error:
@@ -210,31 +228,25 @@ def main():
                 pending.append({"name": name, "text": text, "lang": lang, "hash": digest})
 
     key = os.environ.get("DEEPSEEK_API_KEY", "")
-    queue, deferred, budget = [], [], MAX_CHARS
-    for page in pending:
-        if args.only and args.only not in page["name"]:
-            continue
-        if len(page["text"]) > budget:
-            deferred.append((page["name"], "over TRANSLATE_MAX_CHARS"))
-        else:
-            budget -= len(page["text"])
-            queue.append(page)
+    queue = [page for page in pending if not args.only or args.only in page["name"]]
     print(f"{len(translations)} cached, {len(pending)} new or changed, {len(queue)} to translate "
-          f"({MAX_CHARS - budget} characters)")
+          f"({sum(len(page['text']) for page in queue)} characters; at most {MAX_CHARS} sent)")
     for page in queue:
         print(f"  {page['name']} -> {page['lang']}")
     if args.dry_run:
         return
+    deferred = []
     if queue and not key:
         print("DEEPSEEK_API_KEY is not set; new and changed pages stay untranslated.")
-        deferred += [(page["name"], "no API key") for page in queue]
+        deferred = [(page["name"], "no API key") for page in queue]
         queue = []
 
     stop = threading.Event()
+    budget = Budget(MAX_CHARS)
     usage = {"prompt_tokens": 0, "completion_tokens": 0}
     failed = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        jobs = {pool.submit(translate, page, key, stop): page for page in queue}
+        jobs = {pool.submit(translate, page, key, stop, budget): page for page in queue}
         for job in concurrent.futures.as_completed(jobs):
             page = jobs[job]
             try:
@@ -248,7 +260,7 @@ def main():
                 print(f"  translated {page['name']} ({used['completion_tokens']} tokens)")
             else:
                 failed.append((page["name"], note))
-                print(f"  FAILED {page['name']}: {note}")
+                print(f"  not translated {page['name']}: {note}")
 
     output = json.dumps(dict(sorted(translations.items())), ensure_ascii=False, indent=1)
     for path in (data_file, ROOT / "static" / "translations.json"):
@@ -263,6 +275,7 @@ def main():
         f"- Model: `{MODEL}`",
         f"- Pages with a translation: {len(translations)}",
         f"- Translated in this run: {len(queue) - len(failed)}",
+        f"- Characters sent: {MAX_CHARS - budget.left} (limit {MAX_CHARS})",
         f"- Tokens: {usage['prompt_tokens']} in, {usage['completion_tokens']} out"
         + (f" (about ${cost:.3f} at peak prices)" if cost else ""),
     ]

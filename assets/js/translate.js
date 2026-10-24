@@ -69,6 +69,11 @@
     const chips = document.querySelector(".post-single .moment-meta--single");
     const originalChips = chips?.innerHTML;
     const toc = document.querySelector(".post-single .toc");
+    const tocLinks = [...(toc?.querySelectorAll("a[href^='#']") || [])].map((link) => ({
+      link,
+      id: decodeURIComponent(link.hash.slice(1)),
+      text: link.textContent,
+    }));
     let translation = null;
     let showing = false;
 
@@ -78,31 +83,24 @@
       return copy.textContent.trim();
     };
 
-    // Pairs each table of contents link with the heading at the same position
-    // in the translation; null when the headings don't line up.
-    const mapToc = (content) => {
-      if (!toc) {
-        return null;
-      }
+    // Gives the translation's headings the IDs of the original's, so the table
+    // of contents and in-page links keep their targets. Returns each heading's
+    // translated text by ID, or null when the headings don't line up.
+    const alignHeadings = (content) => {
       const selector = "h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]";
       const from = [...original.querySelectorAll(selector)];
       const to = [...content.querySelectorAll(selector)];
-      if (from.length !== to.length) {
+      if (from.length !== to.length || from.some((heading, index) => heading.tagName !== to[index].tagName)) {
         return null;
       }
-      const links = [];
-      for (const link of toc.querySelectorAll("a[href^='#']")) {
-        const index = from.findIndex((heading) => heading.id === decodeURIComponent(link.hash.slice(1)));
-        if (index < 0 || from[index].tagName !== to[index].tagName) {
-          return null;
-        }
-        links.push({
-          link,
-          original: [link.textContent, link.getAttribute("href")],
-          translated: [headingText(to[index]), `#${to[index].id}`],
-        });
-      }
-      return links;
+      const texts = new Map();
+      to.forEach((heading, index) => {
+        const id = from[index].id;
+        heading.id = id;
+        heading.querySelector(".anchor")?.setAttribute("href", `#${id}`);
+        texts.set(id, headingText(heading));
+      });
+      return texts;
     };
 
     const load = async () => {
@@ -120,7 +118,7 @@
       content.querySelectorAll("iframe").forEach((frame) => {
         frame.loading = "lazy";
       });
-      return { content, title: data.title, caption: data.caption, chips: data.chips, toc: mapToc(content) };
+      return { content, title: data.title, caption: data.caption, chips: data.chips, headings: alignHeadings(content) };
     };
 
     // Where the reader is: the block at the top of the viewport, by its
@@ -186,11 +184,9 @@
         chips.innerHTML = translated ? translation.chips : originalChips;
       }
       if (toc) {
-        toc.hidden = translated && !translation.toc;
-        for (const item of translation.toc || []) {
-          const [text, href] = translated ? item.translated : item.original;
-          item.link.textContent = text;
-          item.link.setAttribute("href", href);
+        toc.hidden = translated && !translation.headings;
+        for (const { link, id, text } of tocLinks) {
+          link.textContent = (translated && translation.headings?.get(id)) || text;
         }
       }
       window.__siteMediaLightbox?.reload();
@@ -209,12 +205,14 @@
         try {
           translation = await load();
         } catch (error) {
+          // Left enabled, so a click retries
           console.error("Translation failed to load:", error);
           button.textContent = "!";
           button.title = failures[lang];
           return false;
+        } finally {
+          button.disabled = false;
         }
-        button.disabled = false;
       }
       show(!showing);
       return true;
