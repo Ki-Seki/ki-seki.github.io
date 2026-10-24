@@ -65,6 +65,12 @@ jobs:
           } > "${sitemap}"
           echo "Generated ${sitemap}:"
           cat "${sitemap}"
+      - name: Translate posts and moments
+        # Only deployments from main spend DeepSeek credit; other builds reuse
+        # the translations published with the last deployment.
+        env:
+          DEEPSEEK_API_KEY: ${{ github.event_name == 'push' && secrets.DEEPSEEK_API_KEY || '' }}
+        run: python3 scripts/translate.py
       - name: Build with Hugo
         run: |
           hugo \

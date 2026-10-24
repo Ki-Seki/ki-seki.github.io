@@ -58,6 +58,13 @@ outputFormats:
     baseName: "llms"
     isPlainText: true
     notAlternative: true
+  # DeepSeek translation of a post or moment, fetched by its translate button
+  # (see scripts/translate.py)
+  translation:
+    mediaType: "application/json"
+    baseName: "translation"
+    isPlainText: true
+    notAlternative: true
 
 outputs:
   home:
@@ -65,6 +72,9 @@ outputs:
     - RSS
     - JSON
     - llms
+  page:
+    - HTML
+    - translation
 
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.

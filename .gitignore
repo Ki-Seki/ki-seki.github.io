@@ -23,6 +23,9 @@ _testmain.go
 *.test
 
 /public
+/data/translations.json
+/static/translations.json
+__pycache__/
 .DS_Store
 .hugo_build.lock
 resources/_gen/
