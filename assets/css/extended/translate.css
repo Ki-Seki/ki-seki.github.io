@@ -21,6 +21,20 @@
     color: var(--primary);
 }
 
+/* PaperMod lifts go-to-top by 5rem on narrow list pages (and not when motion
+   is reduced); lift the translate button with it so they stay stacked */
+@media screen and (max-width: 900px) {
+    .list .translate-toggle {
+        transform: translateY(-5rem);
+    }
+}
+
+@media (prefers-reduced-motion) {
+    .translate-toggle {
+        transform: none;
+    }
+}
+
 .translate-toggle:disabled {
     cursor: default;
 }

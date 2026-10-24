@@ -1,0 +1,8 @@
+/* Long display formulas scroll on their own instead of widening the page,
+   which on phones also drags the fixed buttons (go to top, translate) off to
+   the side */
+.post-content .katex-display,
+.post-content mjx-container[display="true"] {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
