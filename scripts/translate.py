@@ -47,7 +47,7 @@ PROMPT_VERSION = 2
 LANGUAGES = {"zh": "Simplified Chinese", "en": "English"}
 PROMPT = """Translate the following Markdown file from a Hugo blog into {language}.
 
-Keep the structure exactly as it is: front matter keys, Markdown syntax, Hugo shortcodes, HTML, math, code, URLs and file paths must not be changed or broken. Translate the text readers see, including front matter values such as the title, summary and captions, link text, and the captions and titles inside shortcodes. Inside shortcode parameters, write quotation marks as “ ” rather than ", which would end the parameter. Leave dates, tags and other values that aren't prose as they are. Keep people's names written in Latin letters exactly as they are: never turn a pinyin name into Chinese characters, which can't be told from the spelling.
+Keep the structure exactly as it is: front matter keys, Markdown syntax, Hugo shortcodes, HTML, math, code, URLs and file paths must not be changed or broken. Translate the text readers see, including front matter values such as the title, summary and captions, link text, and the captions and titles inside shortcodes. Inside shortcode parameters, write quotation marks as “ ” rather than ", which would end the parameter; in the front matter, keep the quotes around each value exactly as they are. Leave dates, tags and other values that aren't prose as they are. Keep people's names written in Latin letters exactly as they are: never turn a pinyin name into Chinese characters, which can't be told from the spelling.
 
 Reply with the translated file only."""
 
@@ -122,6 +122,9 @@ def structure(text):
     return (
         tuple(re.findall(r"^[ \t]*([\w-]+):", front, re.M)),
         quotes_balanced(front),
+        # The quote each front matter value opens with: a translated title
+        # wrapped in “ ” instead of " " would show the curly quotes
+        tuple(re.findall(r"^[ \t]*(?:- |[\w-]+:[ \t]*)(['\"“”‘’]?)", front, re.M)),
         shortcodes_valid(body),
         body.count("{{<"),
         body.count("{{%"),

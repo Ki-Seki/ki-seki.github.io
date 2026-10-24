@@ -87,8 +87,8 @@
     border-bottom: 2px solid currentColor;
 }
 
-/* Line under a page's meta line while it shows a translation, styled like
-   the meta line */
+/* Line under a page's meta line, or under a moment card's note, while it
+   shows a translation; styled like the meta line */
 .translate-attribution {
     margin-top: 4px;
     color: var(--secondary);
@@ -99,7 +99,13 @@
     display: none;
 }
 
-/* Tag in the meta line of a translated list entry */
+/* A moment card spaces its parts 1.25rem apart; keep the line close under
+   the note it describes */
+.moment-body > .translate-attribution {
+    margin-top: -0.75rem;
+}
+
+/* Tag in the meta line of a translated post in a list */
 .translate-tag {
     color: var(--secondary);
 }

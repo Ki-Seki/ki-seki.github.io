@@ -1,11 +1,11 @@
 {{- /* The page's DeepSeek translation (from data/translations.json, written by
   scripts/translate.py), rendered for translate.js: a dict with lang, title,
-  summary, cover caption, moment chips and content, or "" when the page has
-  none or it
+  summary, cover caption and content, or "" when the page has none or it
   doesn't render. The translated index.md's front matter gives the title,
-  caption and chips; its body is rendered like the page content, so
-  shortcodes, math and images work too. Rendering is costly, so call this
-  with partialCached keyed by the page. */ -}}
+  summary and caption (a moment's location and mood stay as written, like
+  tags); its body is rendered like the page content, so shortcodes, math and
+  images work too. Rendering is costly, so call this with partialCached
+  keyed by the page. */ -}}
 {{- $page := . -}}
 {{- $result := "" -}}
 {{- $entry := "" -}}
@@ -26,11 +26,7 @@
         {{- end -}}
         {{- $caption := "" -}}
         {{- with $front.cover }}{{ with .caption }}{{ $caption = . | markdownify }}{{ end }}{{ end -}}
-        {{- $chips := "" -}}
-        {{- if or $front.location $front.mood -}}
-          {{- $chips = partial "moment/chips.html" (dict "page" (dict "Params" $front)) -}}
-        {{- end -}}
-        {{- $result = dict "lang" $entry.lang "title" ($front.title | default $page.Title) "summary" ($front.summary | default "") "caption" $caption "chips" $chips "content" $content -}}
+        {{- $result = dict "lang" $entry.lang "title" ($front.title | default $page.Title) "summary" ($front.summary | default "") "caption" $caption "content" $content -}}
       {{- end -}}
     {{- end -}}
   {{- else -}}
