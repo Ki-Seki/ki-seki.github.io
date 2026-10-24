@@ -26,11 +26,9 @@ math: false
 系统由离线索引构建和在线检索服务两部分组成。离线阶段包括数据清单整理与样本映射、图像表征提取、聚类与向量量化、分片索引构建及完整性校验。我们采用 SigLIP2 提取图像表征，并基于 FAISS，将倒排文件索引（Inverted File，IVF）与乘积量化（Product Quantization，PQ）结合，构建压缩检索索引。
 
 {{< media
-src="assets/offline-build-workflow.png"
+src="assets/offline-build-workflow.svg"
 caption="图 1：离线索引构建的阶段依赖与资源划分。实线表示必需产物依赖，灰色虚线表示可选能力依赖，橙色虚线表示人工确认；实际并发由资源预算与编排策略决定。"
 >}}
-
-[查看矢量图](assets/offline-build-workflow.svg) · [查看离线 HTML](offline-build-workflow.html)
 
 ### 1.2.1 数据准备与图像表征
 
@@ -79,8 +77,6 @@ PQ 的分段数与每段编码位数也由配置决定：这里采用 64 段、�
 src="assets/pq-encoding.svg"
 caption="图 3：PQ64 的码本抽样训练与全量编码示意。码本在整个索引中共享；容量比较仅针对向量编码，不代表完整索引大小。"
 >}}
-
-[查看图 2–3 的离线源稿](ivf-pq-paper-figures.html)
 
 聚类中心和 PQ 码本确定后，全量簇分配与编码可分布式执行。随后将样本标识和量化编码按簇归并，组装为多个 FAISS 索引分片；同一索引的各分片共享中心与码本。索引的聚类数、PQ 编码长度与查询时探测的簇数（`nprobe`）共同影响资源开销与检索效果：增加探测簇数通常有助于提高召回，但需要扫描更多候选；PQ 则以量化误差换取更低的存储与扫描成本，因此基于该索引的召回属于近似检索。
 
