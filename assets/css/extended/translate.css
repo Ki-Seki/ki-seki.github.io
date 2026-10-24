@@ -1,58 +1,105 @@
-/* Floating translate button, stacked above PaperMod's go-to-top button and
-   styled like it */
-.translate-toggle {
+/* Floating language button, stacked above PaperMod's go-to-top button and
+   styled like it, with its menu opening above */
+.translate-control {
     position: fixed;
     bottom: 112px;
     right: 30px;
     z-index: 99;
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    border: 0;
-    border-radius: 64px;
-    background: var(--tertiary);
-    color: var(--secondary);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-.translate-toggle:hover {
-    color: var(--primary);
 }
 
 /* PaperMod lifts go-to-top by 5rem on narrow list pages (and not when motion
-   is reduced); lift the translate button with it so they stay stacked */
+   is reduced); lift the language button with it so they stay stacked */
 @media screen and (max-width: 900px) {
-    .list .translate-toggle {
+    .list .translate-control {
         transform: translateY(-5rem);
     }
 }
 
 @media (prefers-reduced-motion) {
-    .translate-toggle {
+    .translate-control {
         transform: none;
     }
 }
 
-.translate-toggle:disabled {
-    cursor: default;
-}
-
-/* "Machine-translated" note in the bottom-left corner while a translation
-   shows */
-.translate-note {
-    position: fixed;
-    bottom: 12px;
-    left: 12px;
-    z-index: 99;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: var(--theme);
+/* Same as PaperMod's go-to-top button: an icon in a grey circle */
+.translate-toggle {
+    width: 42px;
+    height: 42px;
+    padding: 12px;
+    border: 0;
+    border-radius: 64px;
+    background: var(--tertiary);
     color: var(--secondary);
-    font-size: 11px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
 }
 
-.translate-note[hidden] {
+.translate-toggle svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.translate-toggle:hover,
+.translate-toggle[aria-expanded="true"] {
+    color: var(--primary);
+}
+
+.translate-toggle:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+/* The menu is a box like the table of contents, its items like the header
+   menu: the current one bold and underlined */
+.translate-menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    padding: 0.4em 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    white-space: nowrap;
+}
+
+.translate-menu[hidden] {
     display: none;
+}
+
+.translate-menu button {
+    display: block;
+    width: 100%;
+    padding: 4px 16px;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    font-size: 16px;
+    text-align: start;
+    cursor: pointer;
+}
+
+.translate-menu button[aria-checked="true"] span {
+    font-weight: 500;
+    border-bottom: 2px solid currentColor;
+}
+
+/* Line under a page's meta line while it shows a translation, styled like
+   the meta line */
+.translate-attribution {
+    margin-top: 4px;
+    color: var(--secondary);
+    font-size: 14px;
+}
+
+.translate-attribution[hidden] {
+    display: none;
+}
+
+/* Tag in the meta line of a translated list entry */
+.translate-tag {
+    color: var(--secondary);
 }
