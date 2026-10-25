@@ -57,6 +57,8 @@ A retrieval system over text-to-image training data usually has to support both 
 
 ### Distributed Embedding Extraction
 
+Embedding extraction is the most compute-intensive step of the build: it has to schedule work efficiently across a cluster, overlap data preparation with inference, and keep the GPUs busy.
+
 #### Inputs and Model
 
 We organize the input manifest according to the data in scope for retrieval, with Parquet shards as the processing unit, recording each source file's location and row count. Images can be read either from the image bytes embedded in a shard or from the S3 path recorded in it, and are then decoded, resized and pixel-normalized with a fixed configuration.
@@ -86,6 +88,10 @@ These choices came from what we saw in production, where extraction was largely 
 | Large design images, ≥ 2048 px | ~530 images/s | ~66 images/s |
 
 Shards dominated by large PNGs are the slow tail, at about 12 images/s per GPU, which is why the dynamic scheduling above matters.
+
+#### Implementation
+
+In code, I'd avoid Ray actors or any other distributed processing framework. Plain Python is enough: an SPMD design with one process per GPU launched by torchrun, a node-local queue from which processes claim shards, and asynchronous I/O. That schedules work efficiently and correctly.
 
 #### Checkpointing and Validation
 
@@ -135,7 +141,7 @@ caption="Figure 6: Computing approximate distances in an IVF-PQ query."
 3. **Look up and add.** An entry's 64 codes each point to one cell in their segment's row of the distance table; adding up those 64 values gives the approximate distance between q and that sample. Each entry costs only 64 lookups and additions, with no vector decoding, which is why PQ can scan large numbers of candidates quickly.
 4. **Keep the nearest k.** Pool the entries from all probed lists and keep the k with the smallest approximate distances as candidates.
 
-### Building the Full Index and Its Specifications
+### Building the Full Index
 
 Once the centroids and PQ codebooks are fixed, assigning all vectors to clusters and encoding them can run in a distributed way. Sample IDs and quantized codes are then merged by cluster and assembled into several FAISS index shards, so that no single index file is too large to load and query efficiently; all shards of an index share the same centroids and codebooks. The number of clusters, the PQ code length and the number of clusters probed at query time (`nprobe`) together determine resource cost and retrieval quality: probing more clusters usually improves recall but scans more candidates, while PQ trades quantization error for lower storage and scan cost, so recall from this index is approximate.
 
@@ -147,7 +153,7 @@ Taking the 1.4B-sample library as an example, the resulting index has the follow
 | Embeddings | SigLIP2 SO400M, 1,152-d FP16; about 3.19 TB of raw vectors |
 | Distance | Squared L2 on normalized vectors, equivalent to cosine similarity |
 | IVF | K = 10,000, spherical mini-batch k-means[^dhillon_spherical][^sculley_minibatch]; 99 million training and 1 million held-out vectors; after full assignment all 10,000 lists are non-empty, with 297–946,850 entries per list |
-| PQ | 64 segments × 8 bits, 18 dimensions and 256 codewords per segment; 2 million training and 100,000 held-out vectors; 64 bytes per vector |
+| PQ | 64 segments × 8 bits, 18 dimensions and 256 codewords per segment; 2 million training and 0.1 million held-out vectors; 64 bytes per vector |
 | Index shards | 8, split by contiguous cluster ID, about 1,250 clusters and 167–180 million entries each; 12.1–13.0 GB per shard, 100.2 GB in total, about 1/32 of the raw vectors |
 | Build | Full assignment and encoding in 64 parallel tasks; about 1.6–3.6 minutes to assemble each shard; each shard read back and checked with nprobe = 32; about 7.3 hours from finishing the 100M sample to passing the checks |
 | Serving | One shard per GPU across 8 GPUs; default nprobe = 32, so each query scans only 0.32% of the lists, about 4.4 million codes at the average list length |
@@ -183,7 +189,7 @@ On top of this, several annotators can vote on low-quality or non-compliant clus
 
 ### Other Features
 
-Beyond basic FAISS ANN search, AI-assisted programming made it easy for the system to offer extra features. These are the ones we use most in practice:
+AI-assisted programming made it easy for the system to offer extra features. These are the ones we use most in practice:
 
 - **Batch independent queries.** For a set of model failure cases or evaluation samples, batch queries run each one separately so results can be compared side by side, instead of submitting single queries over and over. Researchers can narrow candidates by attributes such as data source and size, gather hand-picked samples into collections that persist across queries, and export a JSONL list with source paths and row numbers for downstream data recovery, review and re-annotation. Query parameters and result snapshots can also be saved as share links, so a team can review the same set of candidates together.
 - **Result verification.** For a chosen number of top candidates, the system reads the source images back, regenerates full vectors with the current encoding configuration, computes cosine similarity without PQ approximation, and can rerank within those candidates. It also computes pHash[^zauner_phash] Hamming distances and compares file SHA-256 hashes, flagging near-duplicates and byte-identical images.
