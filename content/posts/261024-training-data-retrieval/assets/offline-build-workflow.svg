@@ -66,66 +66,66 @@ svg{width:1560px;height:2060px;min-width:0;font-family:-apple-system,BlinkMacSys
 <text x="1110" y="1475" class="edge-label">Added to the package when enabled</text>
 <text x="1110" y="1586" class="edge-label">Source mapping + query model / code</text>
 <g id="node-approve-input" class="dag-node human-node" data-node="approve-input" data-depends-on="" aria-label="Human check of input scope and config"><rect x="560" y="24" width="440" height="64" rx="12" class="human-box"/><text x="580" y="51" class="human-title">Human check of input scope and config</text><text x="580" y="75" class="human-note">Data scope, model parameters, resource budget</text></g>
-<g id="node-catalog" class="dag-node" data-node="catalog" data-depends-on="approve-input" data-optional-depends-on="" aria-label="Freeze input manifest, Devbox · CPU / controller">
+<g id="node-catalog" class="dag-node" data-node="catalog" data-depends-on="approve-input" data-optional-depends-on="" aria-label="Freeze input manifest, Single machine · CPU / controller">
 <rect x="560" y="132" width="440" height="132" rx="12" class="node-box"/>
 <rect x="560" y="132" width="5" height="132" rx="2" fill="#17637b"/>
-<text x="580" y="158" class="resource" fill="#17637b">Devbox · CPU / controller</text>
+<text x="580" y="158" class="resource" fill="#17637b">Single machine · CPU / controller</text>
 <text x="580" y="191" class="node-title">Freeze input manifest</text>
 <text x="580" y="220" class="node-note">Data scope and source catalog</text>
 <text x="580" y="246" class="node-note">Output: manifest, selection rules, task IDs</text>
 </g>
-<g id="node-plans" class="dag-node" data-node="plans" data-depends-on="catalog" data-optional-depends-on="" aria-label="Sample and full assignment plans, Devbox / small CPU job">
+<g id="node-plans" class="dag-node" data-node="plans" data-depends-on="catalog" data-optional-depends-on="" aria-label="Sample and full assignment plans, Single machine / small CPU job">
 <rect x="60" y="350" width="400" height="144" rx="12" class="node-box"/>
 <rect x="60" y="350" width="5" height="144" rx="2" fill="#17637b"/>
-<text x="80" y="376" class="resource" fill="#17637b">Devbox / small CPU job</text>
+<text x="80" y="376" class="resource" fill="#17637b">Single machine / small CPU job</text>
 <text x="80" y="409" class="node-title">Sample and full assignment plans</text>
 <text x="80" y="438" class="node-note">Prepare both plans; no need to wait for training</text>
 <text x="80" y="464" class="node-note">Output: sample plan / assignment plan</text>
 </g>
-<g id="node-embedding" class="dag-node" data-node="embedding" data-depends-on="catalog" data-optional-depends-on="" aria-label="Distributed embedding extraction, UTP · multi-node GPU + CPU decoding">
+<g id="node-embedding" class="dag-node" data-node="embedding" data-depends-on="catalog" data-optional-depends-on="" aria-label="Distributed embedding extraction, Cluster · multi-node GPU + CPU decoding">
 <rect x="560" y="350" width="440" height="144" rx="12" class="node-box"/>
 <rect x="560" y="350" width="5" height="144" rx="2" fill="#6950a2"/>
-<text x="580" y="376" class="resource" fill="#6950a2">UTP · multi-node GPU + CPU decoding</text>
+<text x="580" y="376" class="resource" fill="#6950a2">Cluster · multi-node GPU + CPU decoding</text>
 <text x="580" y="409" class="node-title">Distributed embedding extraction</text>
 <text x="580" y="438" class="node-note">Bounded read → decode → SigLIP2 → write</text>
 <text x="580" y="464" class="node-note">Output: vectors for all shards, row IDs, status</text>
 </g>
-<g id="node-runtime-assets" class="dag-node" data-node="runtime-assets" data-depends-on="catalog" data-optional-depends-on="" aria-label="Source lookup and runtime assets, CPU · Devbox / parallel by scale">
+<g id="node-runtime-assets" class="dag-node" data-node="runtime-assets" data-depends-on="catalog" data-optional-depends-on="" aria-label="Source lookup and runtime assets, CPU · single machine / parallel by scale">
 <rect x="1100" y="350" width="400" height="144" rx="12" class="node-box"/>
 <rect x="1100" y="350" width="5" height="144" rx="2" fill="#17637b"/>
-<text x="1120" y="376" class="resource" fill="#17637b">CPU · Devbox / parallel by scale</text>
+<text x="1120" y="376" class="resource" fill="#17637b">CPU · single machine / parallel by scale</text>
 <text x="1120" y="409" class="node-title">Source lookup and runtime assets</text>
 <text x="1120" y="438" class="node-note">Prepare source map, query model, config</text>
 <text x="1120" y="464" class="node-note">Output: locator / runtime asset list</text>
 </g>
-<g id="node-sample" class="dag-node" data-node="sample" data-depends-on="plans embedding" data-optional-depends-on="" aria-label="Training sample extraction, UTP · parallel CPU reads">
+<g id="node-sample" class="dag-node" data-node="sample" data-depends-on="plans embedding" data-optional-depends-on="" aria-label="Training sample extraction, Cluster · parallel CPU reads">
 <rect x="560" y="570" width="440" height="120" rx="12" class="node-box"/>
 <rect x="560" y="570" width="5" height="120" rx="2" fill="#17637b"/>
-<text x="580" y="596" class="resource" fill="#17637b">UTP · parallel CPU reads</text>
+<text x="580" y="596" class="resource" fill="#17637b">Cluster · parallel CPU reads</text>
 <text x="580" y="629" class="node-title">Training sample extraction</text>
 <text x="580" y="652" class="node-note">Input: sample plan + all vectors</text>
 <text x="580" y="676" class="node-note">Output: training samples and their IDs</text>
 </g>
-<g id="node-training" class="dag-node" data-node="training" data-depends-on="sample" data-optional-depends-on="" aria-label="Centroid and PQ codebook training, GPU Devbox · multi-GPU + RAM / NVMe">
+<g id="node-training" class="dag-node" data-node="training" data-depends-on="sample" data-optional-depends-on="" aria-label="Centroid and PQ codebook training, GPU machine · multi-GPU + RAM / NVMe">
 <rect x="560" y="760" width="440" height="144" rx="12" class="node-box"/>
 <rect x="560" y="760" width="5" height="144" rx="2" fill="#27764f"/>
-<text x="580" y="786" class="resource" fill="#27764f">GPU Devbox · multi-GPU + RAM / NVMe</text>
+<text x="580" y="786" class="resource" fill="#27764f">GPU machine · multi-GPU + RAM / NVMe</text>
 <text x="580" y="819" class="node-title">Centroid and PQ codebook training</text>
 <text x="580" y="848" class="node-note">One machine: prepare samples → pick centroids → PQ</text>
 <text x="580" y="874" class="node-note">Output: frozen centroids, codebooks, quality report</text>
 </g>
-<g id="node-assignment" class="dag-node" data-node="assignment" data-depends-on="embedding training plans" data-optional-depends-on="" aria-label="Full assignment and PQ encoding, UTP · multi-node GPU">
+<g id="node-assignment" class="dag-node" data-node="assignment" data-depends-on="embedding training plans" data-optional-depends-on="" aria-label="Full assignment and PQ encoding, Cluster · multi-node GPU">
 <rect x="560" y="990" width="440" height="144" rx="12" class="node-box"/>
 <rect x="560" y="990" width="5" height="144" rx="2" fill="#6950a2"/>
-<text x="580" y="1016" class="resource" fill="#6950a2">UTP · multi-node GPU</text>
+<text x="580" y="1016" class="resource" fill="#6950a2">Cluster · multi-node GPU</text>
 <text x="580" y="1049" class="node-title">Full assignment and PQ encoding</text>
 <text x="580" y="1078" class="node-note">Waits for: all vectors + centroids/PQ + assignment plan</text>
 <text x="580" y="1104" class="node-note">Output: global row, cluster ID, PQ code</text>
 </g>
-<g id="node-postings" class="dag-node" data-node="postings" data-depends-on="assignment" data-optional-depends-on="" aria-label="Inverted-list grouping and merge, UTP · CPU node pool / I/O and memory">
+<g id="node-postings" class="dag-node" data-node="postings" data-depends-on="assignment" data-optional-depends-on="" aria-label="Inverted-list grouping and merge, Cluster · CPU node pool / I/O and memory">
 <rect x="100" y="1230" width="420" height="132" rx="12" class="node-box"/>
 <rect x="100" y="1230" width="5" height="132" rx="2" fill="#17637b"/>
-<text x="120" y="1256" class="resource" fill="#17637b">UTP · CPU node pool / I/O and memory</text>
+<text x="120" y="1256" class="resource" fill="#17637b">Cluster · CPU node pool / I/O and memory</text>
 <text x="120" y="1289" class="node-title">Inverted-list grouping and merge</text>
 <text x="120" y="1318" class="node-note">Merge encoded shard records by cluster</text>
 <text x="120" y="1344" class="node-note">Output: postings, offsets, row counts</text>
@@ -138,26 +138,26 @@ svg{width:1560px;height:2060px;min-width:0;font-family:-apple-system,BlinkMacSys
 <text x="1060" y="1318" class="node-note">Summary stats, diversity / browsing metadata</text>
 <text x="1060" y="1344" class="node-note">Optional branch; independent of the merge</text>
 </g>
-<g id="node-faiss" class="dag-node" data-node="faiss" data-depends-on="postings training" data-optional-depends-on="" aria-label="FAISS shard assembly and checks, UTP CPU / Devbox with enough capacity">
+<g id="node-faiss" class="dag-node" data-node="faiss" data-depends-on="postings training" data-optional-depends-on="" aria-label="FAISS shard assembly and checks, Cluster CPU / large single machine">
 <rect x="100" y="1450" width="420" height="144" rx="12" class="node-box"/>
 <rect x="100" y="1450" width="5" height="144" rx="2" fill="#17637b"/>
-<text x="120" y="1476" class="resource" fill="#17637b">UTP CPU / Devbox with enough capacity</text>
+<text x="120" y="1476" class="resource" fill="#17637b">Cluster CPU / large single machine</text>
 <text x="120" y="1509" class="node-title">FAISS shard assembly and checks</text>
 <text x="120" y="1538" class="node-note">Input: postings + frozen centroids / PQ</text>
 <text x="120" y="1564" class="node-note">Output: index shards, query check report</text>
 </g>
-<g id="node-package" class="dag-node" data-node="package" data-depends-on="faiss runtime-assets" data-optional-depends-on="analysis" aria-label="Assemble release candidate, Devbox · CPU / packaging">
+<g id="node-package" class="dag-node" data-node="package" data-depends-on="faiss runtime-assets" data-optional-depends-on="analysis" aria-label="Assemble release candidate, Single machine · CPU / packaging">
 <rect x="650" y="1510" width="440" height="144" rx="12" class="node-box"/>
 <rect x="650" y="1510" width="5" height="144" rx="2" fill="#17637b"/>
-<text x="670" y="1536" class="resource" fill="#17637b">Devbox · CPU / packaging</text>
+<text x="670" y="1536" class="resource" fill="#17637b">Single machine · CPU / packaging</text>
 <text x="670" y="1569" class="node-title">Assemble release candidate</text>
 <text x="670" y="1598" class="node-note">Joins: index + source lookup + runtime assets</text>
 <text x="670" y="1624" class="node-note">Optional stats join the manifest if enabled</text>
 </g>
-<g id="node-validate" class="dag-node" data-node="validate" data-depends-on="package" data-optional-depends-on="" aria-label="Clean restore and end-to-end acceptance, Devbox or UTP · per serving budget">
+<g id="node-validate" class="dag-node" data-node="validate" data-depends-on="package" data-optional-depends-on="" aria-label="Clean restore and end-to-end acceptance, Machine or cluster · per serving budget">
 <rect x="650" y="1730" width="440" height="120" rx="12" class="node-box"/>
 <rect x="650" y="1730" width="5" height="120" rx="2" fill="#27764f"/>
-<text x="670" y="1756" class="resource" fill="#27764f">Devbox or UTP · per serving budget</text>
+<text x="670" y="1756" class="resource" fill="#27764f">Machine or cluster · per serving budget</text>
 <text x="670" y="1789" class="node-title">Clean restore and E2E acceptance</text>
 <text x="670" y="1812" class="node-note">Restore check → start → search / images / labels</text>
 <text x="670" y="1836" class="node-note">Passing automated checks is not release approval</text>
