@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="744" viewBox="0 0 1140 744" role="img" aria-labelledby="title desc">
+<title id="title">Searching an IVF-PQ index: choosing lists and scoring PQ codes by table lookup</title><desc id="desc">1. q is compared with all 10,000 centroids and only the nprobe nearest inverted lists are searched. 2. For each probed list, the residual r = q − c is cut into 64 parts of 18 dimensions, and a table T holds the distance from each part to each of its subspace's 256 codewords. 3. Each list entry is one image: its sample ID and one code per part. Each code picks the cell in its column of T, and the 64 picked values add up to the entry's approximate distance d, so no vector is decoded. 4. Entries from all probed lists are ranked by d and the k smallest are returned as candidates. All numbers and sample IDs are illustrative.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#566b7b" stroke-width="1.5"/></marker><marker id="arrowGold" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#ba8137" stroke-width="1.5"/></marker></defs>
+<rect x="0" y="0" width="1140" height="744" rx="0" fill="white" stroke="none" stroke-width="1"/>
+<g font-family="Arial, PingFang SC, Heiti SC, Microsoft YaHei, sans-serif">
+<text x="28" y="84" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">1  Choose lists</text>
+<text x="336" y="44" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">nprobe = 2</text>
+<polyline points="226,60 226,54 446,54 446,60" fill="none" stroke="#3574a6" stroke-width="1.2" stroke-linejoin="round"/>
+<rect x="220" y="62" width="110" height="34" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1.2"/>
+<text x="232" y="84" font-size="16" text-anchor="start" fill="#3574a6" font-weight="500">c2</text>
+<text x="318" y="84" font-size="16" text-anchor="end" fill="#3574a6" font-weight="400">0.42</text>
+<rect x="342" y="62" width="110" height="34" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1.2"/>
+<text x="354" y="84" font-size="16" text-anchor="start" fill="#3574a6" font-weight="500">c5</text>
+<text x="440" y="84" font-size="16" text-anchor="end" fill="#3574a6" font-weight="400">0.47</text>
+<rect x="464" y="62" width="110" height="34" rx="3" fill="white" stroke="#cfdae2" stroke-width="1"/>
+<text x="476" y="84" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">c1</text>
+<text x="562" y="84" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">0.58</text>
+<rect x="586" y="62" width="110" height="34" rx="3" fill="white" stroke="#cfdae2" stroke-width="1"/>
+<text x="598" y="84" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">c6</text>
+<text x="684" y="84" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">0.63</text>
+<rect x="708" y="62" width="110" height="34" rx="3" fill="white" stroke="#cfdae2" stroke-width="1"/>
+<text x="720" y="84" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">c3</text>
+<text x="806" y="84" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">0.70</text>
+<text x="838" y="84" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<text x="28" y="169" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">2  Distance table</text>
+<text x="304" y="140" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">r = q − <tspan fill="#3574a6" font-weight="500">c2</tspan></text>
+<rect x="304" y="150" width="72" height="26" rx="2" fill="#3574a6" stroke="none" stroke-width="1"/>
+<text x="340" y="168" font-size="16" text-anchor="middle" fill="white" font-weight="500">r1</text>
+<rect x="380" y="150" width="72" height="26" rx="2" fill="#629ac3" stroke="none" stroke-width="1"/>
+<text x="416" y="168" font-size="16" text-anchor="middle" fill="white" font-weight="500">r2</text>
+<rect x="456" y="150" width="72" height="26" rx="2" fill="#3574a6" stroke="none" stroke-width="1"/>
+<text x="492" y="168" font-size="16" text-anchor="middle" fill="white" font-weight="500">r3</text>
+<text x="544" y="168" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="150" width="72" height="26" rx="2" fill="#3574a6" stroke="none" stroke-width="1"/>
+<text x="596" y="168" font-size="16" text-anchor="middle" fill="white" font-weight="500">r64</text>
+<text x="288" y="168" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">codeword j</text>
+<text x="288" y="200" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">0</text>
+<rect x="304" y="182" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="340" y="200" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.021</text>
+<rect x="380" y="182" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="416" y="200" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.015</text>
+<rect x="456" y="182" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="492" y="200" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.010</text>
+<text x="544" y="200" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="182" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="596" y="200" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.018</text>
+<text x="288" y="226" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">1</text>
+<rect x="304" y="208" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="340" y="226" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.013</text>
+<rect x="380" y="208" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="416" y="226" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.024</text>
+<rect x="456" y="208" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="492" y="226" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.019</text>
+<text x="544" y="226" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="208" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="596" y="226" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.008</text>
+<text x="282" y="248" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="340" y="248" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="416" y="248" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="492" y="248" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="596" y="248" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="288" y="270" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">8</text>
+<rect x="304" y="252" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="340" y="270" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.017</text>
+<rect x="380" y="252" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="416" y="270" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.009</text>
+<rect x="456" y="252" width="72" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.6"/>
+<text x="492" y="270" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">0.003</text>
+<text x="544" y="270" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="252" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="596" y="270" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.020</text>
+<text x="282" y="292" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="340" y="292" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="416" y="292" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="492" y="292" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="596" y="292" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="288" y="314" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">17</text>
+<rect x="304" y="296" width="72" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.6"/>
+<text x="340" y="314" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">0.004</text>
+<rect x="380" y="296" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="416" y="314" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.018</text>
+<rect x="456" y="296" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="492" y="314" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.022</text>
+<text x="544" y="314" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="296" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="596" y="314" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.013</text>
+<text x="282" y="336" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="340" y="336" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="416" y="336" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="492" y="336" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="596" y="336" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="288" y="358" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">93</text>
+<rect x="304" y="340" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="340" y="358" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.026</text>
+<rect x="380" y="340" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="416" y="358" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.012</text>
+<rect x="456" y="340" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="492" y="358" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.016</text>
+<text x="544" y="358" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="340" width="72" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.6"/>
+<text x="596" y="358" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">0.005</text>
+<text x="282" y="380" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="340" y="380" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="416" y="380" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="492" y="380" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="596" y="380" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="288" y="402" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">204</text>
+<rect x="304" y="384" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="340" y="402" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.011</text>
+<rect x="380" y="384" width="72" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.6"/>
+<text x="416" y="402" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">0.006</text>
+<rect x="456" y="384" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="492" y="402" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.025</text>
+<text x="544" y="402" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="384" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="596" y="402" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.017</text>
+<text x="282" y="424" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="340" y="424" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="416" y="424" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="492" y="424" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="596" y="424" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="288" y="446" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">255</text>
+<rect x="304" y="428" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="340" y="446" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.019</text>
+<rect x="380" y="428" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="416" y="446" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.027</text>
+<rect x="456" y="428" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="492" y="446" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.014</text>
+<text x="544" y="446" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="560" y="428" width="72" height="26" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="596" y="446" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">0.023</text>
+<rect x="700" y="210" width="321" height="176" rx="4" fill="#fafbfc" stroke="#e3e9ee" stroke-width="1"/>
+<circle cx="728" cy="236" r="4" fill="#c3ced7"/>
+<circle cx="772" cy="260" r="4" fill="#c3ced7"/>
+<circle cx="815" cy="230" r="4" fill="#c3ced7"/>
+<circle cx="878" cy="244" r="4" fill="#c3ced7"/>
+<circle cx="922" cy="226" r="4" fill="#c3ced7"/>
+<circle cx="978" cy="252" r="4" fill="#c3ced7"/>
+<circle cx="740" cy="310" r="4" fill="#c3ced7"/>
+<circle cx="790" cy="360" r="4" fill="#c3ced7"/>
+<circle cx="908" cy="298" r="4" fill="#c3ced7"/>
+<circle cx="950" cy="320" r="4" fill="#c3ced7"/>
+<circle cx="994" cy="294" r="4" fill="#c3ced7"/>
+<circle cx="736" cy="370" r="4" fill="#c3ced7"/>
+<circle cx="854" cy="370" r="4" fill="#c3ced7"/>
+<circle cx="914" cy="364" r="4" fill="#c3ced7"/>
+<circle cx="992" cy="366" r="4" fill="#c3ced7"/>
+<circle cx="956" cy="270" r="4" fill="#c3ced7"/>
+<polyline points="810,310 846,276" fill="none" stroke="#ba8137" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<polyline points="810,310 970,362" fill="none" stroke="#9fadb8" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<circle cx="846" cy="276" r="5" fill="#ba8137"/>
+<circle cx="970" cy="362" r="5" fill="#9fadb8"/>
+<circle cx="810" cy="310" r="6" fill="#3574a6"/>
+<text x="796" y="316" font-size="16" text-anchor="end" fill="#3574a6" font-weight="500">r1</text>
+<text x="856" y="272" font-size="16" text-anchor="start" fill="#ba8137" font-weight="500">17</text>
+<text x="980" y="360" font-size="16" text-anchor="start" fill="#566b7b" font-weight="500">0</text>
+<text x="836" y="304" font-size="16" text-anchor="start" fill="#ba8137" font-weight="500">0.004</text>
+<text x="882" y="350" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">0.021</text>
+<text x="700" y="410" font-size="16" text-anchor="start" fill="#9fadb8" font-weight="400">subspace 1</text>
+<text x="28" y="511" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">3  Look up and add</text>
+<text x="288" y="478" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">sample ID</text>
+<text x="288" y="511" font-size="16" text-anchor="end" fill="#233b50" font-weight="500">#4812</text>
+<rect x="312" y="490" width="56" height="30" rx="3" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<text x="340" y="511" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">17</text>
+<polyline points="340,486 340,460" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrowGold)"/>
+<rect x="388" y="490" width="56" height="30" rx="3" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<text x="416" y="511" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">204</text>
+<polyline points="416,486 416,460" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrowGold)"/>
+<rect x="464" y="490" width="56" height="30" rx="3" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<text x="492" y="511" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">8</text>
+<polyline points="492,486 492,460" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrowGold)"/>
+<text x="544" y="511" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="568" y="490" width="56" height="30" rx="3" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<text x="596" y="511" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">93</text>
+<polyline points="596,486 596,460" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrowGold)"/>
+<text x="652" y="511" font-size="16" text-anchor="start" fill="#233b50" font-weight="400">d = <tspan fill="#ba8137" font-weight="500">0.004</tspan> + <tspan fill="#ba8137" font-weight="500">0.006</tspan> + <tspan fill="#ba8137" font-weight="500">0.003</tspan> + ⋯ + <tspan fill="#ba8137" font-weight="500">0.005</tspan> = 0.38</text>
+<text x="288" y="551" font-size="16" text-anchor="end" fill="#233b50" font-weight="500">#77</text>
+<rect x="312" y="530" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="340" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">142</text>
+<rect x="388" y="530" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="416" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">9</text>
+<rect x="464" y="530" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="492" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">61</text>
+<text x="544" y="551" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="568" y="530" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="596" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">230</text>
+<text x="652" y="551" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">d = 0.52</text>
+<text x="288" y="591" font-size="16" text-anchor="end" fill="#233b50" font-weight="500">#9310</text>
+<rect x="312" y="570" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="340" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">61</text>
+<rect x="388" y="570" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="416" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">77</text>
+<rect x="464" y="570" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="492" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">3</text>
+<text x="544" y="591" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
+<rect x="568" y="570" width="56" height="30" rx="3" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="596" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">14</text>
+<text x="652" y="591" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">d = 0.41</text>
+<text x="264" y="626" font-size="18" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="28" y="711" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">4  Keep top-k</text>
+<text x="442" y="674" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">top-k</text>
+<polyline points="226,688 226,682 658,682 658,688" fill="none" stroke="#233b50" stroke-width="1.2" stroke-linejoin="round"/>
+<rect x="220" y="690" width="140" height="34" rx="3" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<text x="232" y="712" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">#4812</text>
+<text x="290" y="712" font-size="16" text-anchor="start" fill="#3574a6" font-weight="400">c2</text>
+<text x="348" y="712" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">0.38</text>
+<rect x="372" y="690" width="140" height="34" rx="3" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<text x="384" y="712" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">#9310</text>
+<text x="442" y="712" font-size="16" text-anchor="start" fill="#3574a6" font-weight="400">c2</text>
+<text x="500" y="712" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">0.41</text>
+<rect x="524" y="690" width="140" height="34" rx="3" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<text x="536" y="712" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">#305</text>
+<text x="594" y="712" font-size="16" text-anchor="start" fill="#3574a6" font-weight="400">c5</text>
+<text x="652" y="712" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">0.44</text>
+<rect x="676" y="690" width="140" height="34" rx="3" fill="white" stroke="#cfdae2" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="688" y="712" font-size="16" text-anchor="start" fill="#9fadb8" font-weight="500">#77</text>
+<text x="746" y="712" font-size="16" text-anchor="start" fill="#9fadb8" font-weight="400">c2</text>
+<text x="804" y="712" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">0.52</text>
+</g>
+</svg>

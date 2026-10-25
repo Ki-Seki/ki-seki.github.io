@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="720" viewBox="0 0 1140 720" role="img" aria-labelledby="title desc">
+<title id="title">Data storage: a logical table and its physical Parquet layout</title><desc id="desc">Logically, the data is one huge table keyed by image: the caption is the core sidecar, and layout, tags, source, aesthetic score and category are other sidecars. Physically, a dataset revision is a set of Parquet shards; each main shard stores image bytes or an S3 path, and sidecar Parquet files are row-aligned with it. A sample is located by (dataset_revision_id, source_file_id, source_row). Sample values are illustrative.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#566b7b" stroke-width="1.5"/></marker></defs>
+<rect x="0" y="0" width="1140" height="720" rx="0" fill="white" stroke="none" stroke-width="1"/>
+<g font-family="Arial, PingFang SC, Heiti SC, Microsoft YaHei, sans-serif">
+<text x="28" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(a) Logical view</text>
+<polyline points="28,57 1111,57" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<text x="83" y="86" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">key</text>
+<polyline points="34,102 34,96 132,96 132,102" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round"/>
+<text x="308" y="86" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">core sidecar</text>
+<polyline points="144,102 144,96 472,96 472,102" fill="none" stroke="#3574a6" stroke-width="1.2" stroke-linejoin="round"/>
+<text x="794.5" y="86" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">other sidecars</text>
+<polyline points="484,102 484,96 1105,96 1105,102" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round"/>
+<rect x="28" y="108" width="1083" height="36" rx="0" fill="#f4f7f9" stroke="none" stroke-width="1"/>
+<rect x="138" y="108" width="340" height="36" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="138" y="144" width="340" height="138" rx="0" fill="#f3f8fc" stroke="none" stroke-width="1"/>
+<polyline points="28,190 1111,190" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="28,236 1111,236" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="28,144 1111,144" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="138,108 138,282" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="478,108 478,282" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="593,108 593,282" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="718,108 718,282" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="833,108 833,282" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="973,108 973,282" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<rect x="28" y="108" width="1083" height="174" rx="0" fill="none" stroke="#cfdae2" stroke-width="1"/>
+<text x="83" y="131" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">image</text>
+<text x="308" y="131" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">caption</text>
+<text x="535.5" y="131" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">layout</text>
+<text x="655.5" y="131" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">tags</text>
+<text x="775.5" y="131" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">source</text>
+<text x="903" y="131" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">aesthetic score</text>
+<text x="1042" y="131" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">category</text>
+<rect x="55" y="150" width="56" height="34" rx="3" fill="#e6ecf0" stroke="none" stroke-width="1"/>
+<polygon points="61,179 75,164 83,171 94,159 107,179" fill="#aab8c3"/>
+<circle cx="99" cy="159" r="4" fill="#c3ced7"/>
+<text x="152" y="172" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">A red bicycle leaning on a brick wall…</text>
+<rect x="513.5" y="152" width="44" height="30" rx="0" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<rect x="525.5" y="159" width="22" height="17" rx="0" fill="#eef2f5" stroke="#9fadb8" stroke-width="1"/>
+<text x="655.5" y="172" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">bike · street</text>
+<text x="775.5" y="172" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">web</text>
+<text x="903" y="172" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">6.1</text>
+<text x="1042" y="172" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">photo</text>
+<rect x="55" y="196" width="56" height="34" rx="3" fill="#e6ecf0" stroke="none" stroke-width="1"/>
+<rect x="63" y="203" width="40" height="6" rx="0" fill="#aab8c3" stroke="none" stroke-width="1"/>
+<rect x="63" y="213" width="28" height="3.5" rx="0" fill="#c3ced7" stroke="none" stroke-width="1"/>
+<rect x="63" y="219" width="34" height="3.5" rx="0" fill="#c3ced7" stroke="none" stroke-width="1"/>
+<text x="152" y="218" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">Sale poster, bold title “SUMMER SALE”…</text>
+<rect x="513.5" y="198" width="44" height="30" rx="0" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<rect x="518.5" y="202" width="34" height="7" rx="0" fill="#eef2f5" stroke="#9fadb8" stroke-width="1"/>
+<rect x="518.5" y="213" width="22" height="4" rx="0" fill="#eef2f5" stroke="#9fadb8" stroke-width="1"/>
+<rect x="518.5" y="220" width="28" height="4" rx="0" fill="#eef2f5" stroke="#9fadb8" stroke-width="1"/>
+<text x="655.5" y="218" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">poster · text</text>
+<text x="775.5" y="218" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">stock</text>
+<text x="903" y="218" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">5.4</text>
+<text x="1042" y="218" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">design</text>
+<rect x="55" y="242" width="56" height="34" rx="3" fill="#e6ecf0" stroke="none" stroke-width="1"/>
+<polygon points="59,271 71,260 81,266 91,254 107,271" fill="#aab8c3"/>
+<circle cx="69" cy="251" r="4" fill="#c3ced7"/>
+<text x="152" y="264" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">Watercolor fox in a snowy pine forest…</text>
+<rect x="513.5" y="244" width="44" height="30" rx="0" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<rect x="521.5" y="253" width="18" height="16" rx="0" fill="#eef2f5" stroke="#9fadb8" stroke-width="1"/>
+<rect x="541.5" y="249" width="11" height="7" rx="0" fill="#eef2f5" stroke="#9fadb8" stroke-width="1"/>
+<text x="655.5" y="264" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">fox · winter</text>
+<text x="775.5" y="264" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">web</text>
+<text x="903" y="264" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">7.2</text>
+<text x="1042" y="264" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">illustration</text>
+<text x="83" y="306" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="308" y="306" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="535.5" y="306" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="655.5" y="306" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="775.5" y="306" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="903" y="306" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="1042" y="306" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="28" y="352" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(b) Physical layout</text>
+<polyline points="28,370 1111,370" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<text x="28" y="402" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Dataset revisions</text>
+<text x="258" y="402" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Source shards</text>
+<text x="500" y="402" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Inside shard part-00001</text>
+<rect x="28" y="430" width="180" height="38" rx="4" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<text x="44" y="454" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">rev 1 · base</text>
+<rect x="28" y="476" width="180" height="38" rx="4" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<text x="44" y="500" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">rev 2 · filtered</text>
+<rect x="28" y="522" width="180" height="38" rx="4" fill="#dcefec" stroke="#27877e" stroke-width="1.2"/>
+<text x="44" y="546" font-size="16" text-anchor="start" fill="#27877e" font-weight="500">rev 3 · re-captioned</text>
+<text x="118" y="590" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<text x="118" y="614" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">dozens of versions</text>
+<polyline points="212,541 254,541" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="258" y="416" width="200" height="246" rx="4" fill="#fafbfc" stroke="#d8e0e6" stroke-width="1"/>
+<path d="M278,434 h9 l4,4 v14 h-13 z" fill="white" stroke="#9fadb8" stroke-width="1"/>
+<text x="300" y="448" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">part-00000.parquet</text>
+<rect x="266" y="466" width="184" height="30" rx="3" fill="#ebe8f2" stroke="#8275a2" stroke-width="1.2"/>
+<path d="M278,472 h9 l4,4 v14 h-13 z" fill="white" stroke="#8275a2" stroke-width="1"/>
+<text x="300" y="486" font-size="16" text-anchor="start" fill="#8275a2" font-weight="500">part-00001.parquet</text>
+<path d="M278,510 h9 l4,4 v14 h-13 z" fill="white" stroke="#9fadb8" stroke-width="1"/>
+<text x="300" y="524" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">part-00002.parquet</text>
+<path d="M278,548 h9 l4,4 v14 h-13 z" fill="white" stroke="#9fadb8" stroke-width="1"/>
+<text x="300" y="562" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">part-00003.parquet</text>
+<path d="M278,586 h9 l4,4 v14 h-13 z" fill="white" stroke="#9fadb8" stroke-width="1"/>
+<text x="300" y="600" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">part-00004.parquet</text>
+<text x="358" y="640" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<polyline points="462,481 496,481" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="500" y="416" width="611" height="246" rx="4" fill="#fafbfc" stroke="#d8e0e6" stroke-width="1"/>
+<text x="624" y="440" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">main parquet</text>
+<polyline points="550,456 550,450 698,450 698,456" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round"/>
+<text x="892" y="440" font-size="16" text-anchor="middle" fill="#566b7b" font-weight="400">sidecar parquets, row-aligned with main</text>
+<polyline points="724,456 724,450 1060,450 1060,456" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round"/>
+<text x="532" y="482" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">row</text>
+<text x="532" y="510" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">0</text>
+<text x="532" y="536" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">1</text>
+<text x="532" y="562" font-size="16" text-anchor="end" fill="#ba8137" font-weight="500">2</text>
+<text x="532" y="588" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">3</text>
+<text x="532" y="614" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">4</text>
+<text x="532" y="640" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">5</text>
+<rect x="544" y="462" width="160" height="30" rx="0" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="624" y="482" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">bytes / S3 path</text>
+<rect x="544" y="492" width="160" height="156" rx="0" fill="white" stroke="#cfdae2" stroke-width="1"/>
+<polyline points="544,518 704,518" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="544,544 704,544" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="544,570 704,570" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="544,596 704,596" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="544,622 704,622" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<rect x="556" y="498" width="20" height="14" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="586" y="502.5" width="96" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="556" y="524" width="20" height="14" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="586" y="528.5" width="70" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="544" y="544" width="160" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<rect x="556" y="550" width="20" height="14" rx="2" fill="#dcc6a0" stroke="none" stroke-width="1"/>
+<rect x="586" y="554.5" width="88" height="5" rx="0" fill="#dcc6a0" stroke="none" stroke-width="1"/>
+<rect x="556" y="576" width="20" height="14" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="586" y="580.5" width="104" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="556" y="602" width="20" height="14" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="586" y="606.5" width="64" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="556" y="628" width="20" height="14" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="586" y="632.5" width="80" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="718" y="462" width="120" height="30" rx="0" fill="#dbe9f4" stroke="#cfdae2" stroke-width="1"/>
+<text x="778" y="482" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">caption</text>
+<rect x="718" y="492" width="120" height="156" rx="0" fill="white" stroke="#cfdae2" stroke-width="1"/>
+<polyline points="718,518 838,518" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="718,544 838,544" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="718,570 838,570" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="718,596 838,596" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="718,622 838,622" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<rect x="730" y="502.5" width="92" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="730" y="528.5" width="78" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="718" y="544" width="120" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<rect x="730" y="554.5" width="100" height="5" rx="0" fill="#dcc6a0" stroke="none" stroke-width="1"/>
+<rect x="730" y="580.5" width="70" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="730" y="606.5" width="96" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="730" y="632.5" width="84" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="852" y="462" width="100" height="30" rx="0" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="902" y="482" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">layout</text>
+<rect x="852" y="492" width="100" height="156" rx="0" fill="white" stroke="#cfdae2" stroke-width="1"/>
+<polyline points="852,518 952,518" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="852,544 952,544" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="852,570 952,570" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="852,596 952,596" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="852,622 952,622" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<rect x="864" y="502.5" width="60" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="864" y="528.5" width="40" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="852" y="544" width="100" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<rect x="864" y="554.5" width="72" height="5" rx="0" fill="#dcc6a0" stroke="none" stroke-width="1"/>
+<rect x="864" y="580.5" width="50" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="864" y="606.5" width="66" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="864" y="632.5" width="44" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="966" y="462" width="100" height="30" rx="0" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="1016" y="482" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">scores</text>
+<rect x="966" y="492" width="100" height="156" rx="0" fill="white" stroke="#cfdae2" stroke-width="1"/>
+<polyline points="966,518 1066,518" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="966,544 1066,544" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="966,570 1066,570" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="966,596 1066,596" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<polyline points="966,622 1066,622" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<rect x="978" y="502.5" width="30" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="978" y="528.5" width="44" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="966" y="544" width="100" height="26" rx="0" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.2"/>
+<rect x="978" y="554.5" width="26" height="5" rx="0" fill="#dcc6a0" stroke="none" stroke-width="1"/>
+<rect x="978" y="580.5" width="50" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="978" y="606.5" width="38" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="978" y="632.5" width="34" height="5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<text x="1088" y="482" font-size="18" text-anchor="middle" fill="#9fadb8" font-weight="400">…</text>
+<polyline points="536,557 544,557" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<polyline points="704,557 718,557" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<polyline points="838,557 852,557" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<polyline points="952,557 966,557" fill="none" stroke="#ba8137" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<text x="570" y="700" font-size="18" text-anchor="middle" fill="#233b50" font-weight="400">Locator (<tspan fill="#27877e" font-weight="500">dataset_revision_id</tspan>, <tspan fill="#8275a2" font-weight="500">source_file_id</tspan>, <tspan fill="#ba8137" font-weight="500">source_row</tspan>)</text>
+</g>
+</svg>

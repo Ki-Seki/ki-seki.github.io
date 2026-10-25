@@ -1,0 +1,288 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="1040" viewBox="0 0 1140 1040" role="img" aria-labelledby="title desc">
+<title id="title">Distributed embedding extraction</title><desc id="desc">Each Parquet shard in the input manifest is one task. Shards are split across nodes by estimated load, and inside a node the GPU worker processes pull the next shard whenever they finish one, so a slow shard no longer leaves the other workers idle at the end. Inside a worker, reading, decoding, GPU inference and writing overlap so the GPU stays busy, while only a few shards are in flight. Ready images from different shards that share a decode path are merged into one full batch, and each vector is written back to its own shard and row. Shards are checkpointed by block, so an interrupted shard resumes from its last checkpoint; finished shards are skipped and missing outputs go to a rerun list. Before delivery every source row must have an output row; failed rows keep their place and status. Timings and row numbers are illustrative.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#566b7b" stroke-width="1.5"/></marker></defs>
+<rect x="0" y="0" width="1140" height="1040" rx="0" fill="white" stroke="none" stroke-width="1"/>
+<g font-family="Arial, PingFang SC, Heiti SC, Microsoft YaHei, sans-serif">
+<text x="28" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(a) Shards to nodes to GPU workers</text>
+<polyline points="28,57 1111,57" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<text x="28" y="92" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Input manifest</text>
+<text x="28" y="116" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">one task per Parquet shard</text>
+<text x="268" y="92" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Nodes</text>
+<text x="268" y="116" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">balanced by estimated load</text>
+<text x="600" y="92" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Inside node 1</text>
+<text x="600" y="116" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">w1–w4: the node's GPU worker processes</text>
+<rect x="28" y="136" width="150" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="154" width="90" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="172" width="180" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="190" width="60" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="208" width="120" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="226" width="95" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="244" width="140" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="262" width="70" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<rect x="28" y="280" width="110" height="12" rx="2" fill="#d7dfe5" stroke="none" stroke-width="1"/>
+<text x="118" y="306" font-size="18" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<polyline points="216,208 262,208" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="268" y="136" width="280" height="52" rx="4" fill="white" stroke="#3574a6" stroke-width="1.2"/>
+<text x="280" y="157" font-size="16" text-anchor="start" fill="#3574a6" font-weight="500">node 1 · see right</text>
+<rect x="280" y="166" width="60" height="12" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1"/>
+<rect x="340" y="166" width="40" height="12" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1"/>
+<rect x="380" y="166" width="90" height="12" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1"/>
+<rect x="470" y="166" width="66" height="12" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1"/>
+<rect x="268" y="200" width="280" height="52" rx="4" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<text x="280" y="221" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">node 2</text>
+<rect x="280" y="230" width="80" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<rect x="360" y="230" width="50" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<rect x="410" y="230" width="70" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<rect x="480" y="230" width="56" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<rect x="268" y="290" width="280" height="52" rx="4" fill="white" stroke="#bdcad4" stroke-width="1"/>
+<text x="280" y="311" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">node N</text>
+<rect x="280" y="320" width="45" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<rect x="325" y="320" width="95" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<rect x="420" y="320" width="60" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<rect x="480" y="320" width="56" height="12" rx="0" fill="#d7dfe5" stroke="white" stroke-width="1"/>
+<text x="408" y="278" font-size="18" text-anchor="middle" fill="#9fadb8" font-weight="400">⋮</text>
+<polyline points="552,162 594,162" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="600" y="146" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">Fixed split</text>
+<text x="628" y="171" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w1</text>
+<rect x="640" y="156" width="130" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="705" y="171" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">1</text>
+<rect x="770" y="156" width="104" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="822" y="171" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">5</text>
+<rect x="874" y="156" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="913" y="171" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">9</text>
+<rect x="953" y="157" width="102" height="18" rx="2" fill="none" stroke="#9fadb8" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="1004" y="171" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">idle</text>
+<text x="628" y="195" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w2</text>
+<rect x="640" y="180" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="679" y="195" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">2</text>
+<rect x="718" y="180" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="757" y="195" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">6</text>
+<rect x="796" y="180" width="104" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="848" y="195" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">10</text>
+<rect x="901" y="181" width="154" height="18" rx="2" fill="none" stroke="#9fadb8" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="978" y="195" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">idle</text>
+<text x="628" y="219" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w3</text>
+<rect x="640" y="204" width="208" height="20" rx="0" fill="#f6ecdc" stroke="white" stroke-width="1.5"/>
+<text x="744" y="219" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">3 · slow</text>
+<rect x="848" y="204" width="156" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="926" y="219" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">7</text>
+<rect x="1004" y="204" width="52" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="1030" y="219" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">11</text>
+<text x="628" y="243" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w4</text>
+<rect x="640" y="228" width="52" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="666" y="243" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">4</text>
+<rect x="692" y="228" width="52" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="718" y="243" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">8</text>
+<rect x="744" y="228" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="783" y="243" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">12</text>
+<rect x="823" y="229" width="232" height="18" rx="2" fill="none" stroke="#9fadb8" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="939" y="243" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">idle</text>
+<polyline points="1056,150 1056,252" fill="none" stroke="#566b7b" stroke-width="1" stroke-linejoin="round" stroke-dasharray="4 3"/>
+<text x="1050" y="146" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">done at 16</text>
+<text x="600" y="280" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">Pull when free (small claim-ahead)</text>
+<text x="628" y="305" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w1</text>
+<rect x="640" y="290" width="130" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="705" y="305" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">1</text>
+<rect x="770" y="290" width="156" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="848" y="305" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">7</text>
+<text x="628" y="329" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w2</text>
+<rect x="640" y="314" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="679" y="329" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">2</text>
+<rect x="718" y="314" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="757" y="329" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">6</text>
+<rect x="796" y="314" width="52" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="822" y="329" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">8</text>
+<rect x="848" y="314" width="104" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="900" y="329" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">10</text>
+<text x="628" y="353" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w3</text>
+<rect x="640" y="338" width="208" height="20" rx="0" fill="#f6ecdc" stroke="white" stroke-width="1.5"/>
+<text x="744" y="353" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">3 · slow</text>
+<rect x="848" y="338" width="52" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="874" y="353" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">11</text>
+<rect x="901" y="339" width="50" height="18" rx="2" fill="none" stroke="#9fadb8" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="926" y="353" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">idle</text>
+<text x="628" y="377" font-size="16" text-anchor="end" fill="#9fadb8" font-weight="400">w4</text>
+<rect x="640" y="362" width="52" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="666" y="377" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">4</text>
+<rect x="692" y="362" width="104" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="744" y="377" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">5</text>
+<rect x="796" y="362" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="835" y="377" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">9</text>
+<rect x="874" y="362" width="78" height="20" rx="0" fill="#dbe9f4" stroke="white" stroke-width="1.5"/>
+<text x="913" y="377" font-size="16" text-anchor="middle" fill="#233b50" font-weight="400">12</text>
+<polyline points="952,284 952,386" fill="none" stroke="#566b7b" stroke-width="1" stroke-linejoin="round" stroke-dasharray="4 3"/>
+<text x="946" y="280" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">done at 12</text>
+<text x="28" y="434" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(b) Inside one worker: overlap and cross-shard batches</text>
+<polyline points="28,452 1111,452" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<text x="28" y="486" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Pipeline over time</text>
+<text x="28" y="510" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">the GPU stays busy while later batches load</text>
+<text x="690" y="486" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">One cross-shard batch</text>
+<text x="690" y="510" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">same decode path, different shards</text>
+<text x="124" y="550" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">read</text>
+<polyline points="136,564 622,564" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<text x="124" y="590" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">decode</text>
+<polyline points="136,604 622,604" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<text x="124" y="630" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">infer (GPU)</text>
+<polyline points="136,644 622,644" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<text x="124" y="670" font-size="16" text-anchor="end" fill="#566b7b" font-weight="400">write</text>
+<polyline points="136,684 622,684" fill="none" stroke="#e3e9ee" stroke-width="1" stroke-linejoin="round"/>
+<rect x="138" y="530" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="163" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="192" y="570" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="217" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="246" y="610" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="271" y="631" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="300" y="650" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="325" y="671" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="192" y="530" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="217" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="246" y="570" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="271" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="300" y="610" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="325" y="631" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="354" y="650" width="50" height="30" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="379" y="671" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A</text>
+<rect x="246" y="530" width="25" height="30" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="271" y="530" width="25" height="30" rx="0" fill="#dcefec" stroke="none" stroke-width="1"/>
+<rect x="246" y="530" width="50" height="30" rx="3" fill="none" stroke="#ba8137" stroke-width="1.6"/>
+<text x="271" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A+B</text>
+<rect x="300" y="570" width="25" height="30" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="325" y="570" width="25" height="30" rx="0" fill="#dcefec" stroke="none" stroke-width="1"/>
+<rect x="300" y="570" width="50" height="30" rx="3" fill="none" stroke="#ba8137" stroke-width="1.6"/>
+<text x="325" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A+B</text>
+<rect x="354" y="610" width="25" height="30" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="379" y="610" width="25" height="30" rx="0" fill="#dcefec" stroke="none" stroke-width="1"/>
+<rect x="354" y="610" width="50" height="30" rx="3" fill="none" stroke="#ba8137" stroke-width="1.6"/>
+<text x="379" y="631" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A+B</text>
+<rect x="408" y="650" width="25" height="30" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="433" y="650" width="25" height="30" rx="0" fill="#dcefec" stroke="none" stroke-width="1"/>
+<rect x="408" y="650" width="50" height="30" rx="3" fill="none" stroke="#ba8137" stroke-width="1.6"/>
+<text x="433" y="671" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">A+B</text>
+<rect x="300" y="530" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="325" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="354" y="570" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="379" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="408" y="610" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="433" y="631" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="462" y="650" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="487" y="671" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="354" y="530" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="379" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="408" y="570" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="433" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="462" y="610" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="487" y="631" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="516" y="650" width="50" height="30" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="541" y="671" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">B</text>
+<rect x="408" y="530" width="50" height="30" rx="3" fill="#ebe8f2" stroke="#8275a2" stroke-width="1"/>
+<text x="433" y="551" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">C</text>
+<rect x="462" y="570" width="50" height="30" rx="3" fill="#ebe8f2" stroke="#8275a2" stroke-width="1"/>
+<text x="487" y="591" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">C</text>
+<rect x="516" y="610" width="50" height="30" rx="3" fill="#ebe8f2" stroke="#8275a2" stroke-width="1"/>
+<text x="541" y="631" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">C</text>
+<rect x="570" y="650" width="50" height="30" rx="3" fill="#ebe8f2" stroke="#8275a2" stroke-width="1"/>
+<text x="595" y="671" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">C</text>
+<rect x="242" y="606" width="328" height="38" rx="4" fill="none" stroke="#3574a6" stroke-width="1.2"/>
+<text x="406" y="720" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">GPU lane: no gaps once data flows</text>
+<text x="28" y="750" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">Reads run ahead of the GPU, but each worker keeps only a few shards in flight.</text>
+<rect x="712" y="538" width="20" height="22" rx="2" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<rect x="736" y="538" width="20" height="22" rx="2" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<rect x="760" y="538" width="20" height="22" rx="2" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<rect x="712" y="582" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="736" y="582" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="760" y="582" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="784" y="582" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="808" y="582" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="690" y="555" font-size="16" text-anchor="start" fill="#3574a6" font-weight="500">A</text>
+<text x="690" y="599" font-size="16" text-anchor="start" fill="#27877e" font-weight="500">B</text>
+<text x="790" y="555" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">last 3 rows</text>
+<text x="838" y="599" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">first 5</text>
+<polyline points="898,571 914,571" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="918" y="556" width="193" height="32" rx="3" fill="white" stroke="#ba8137" stroke-width="1.6"/>
+<rect x="924" y="561" width="20" height="22" rx="2" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<rect x="947" y="561" width="20" height="22" rx="2" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<rect x="970" y="561" width="20" height="22" rx="2" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<rect x="993" y="561" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="1016" y="561" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="1039" y="561" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="1062" y="561" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<rect x="1085" y="561" width="20" height="22" rx="2" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="1014.5" y="546" font-size="16" text-anchor="middle" fill="#233b50" font-weight="500">1 full batch → GPU</text>
+<polyline points="1014.5,592 1014.5,612" fill="none" stroke="#566b7b" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="918" y="618" width="193" height="28" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="930" y="637" font-size="16" text-anchor="start" fill="#3574a6" font-weight="500">A · rows 997–999</text>
+<rect x="918" y="654" width="193" height="28" rx="3" fill="#dcefec" stroke="#27877e" stroke-width="1"/>
+<text x="930" y="673" font-size="16" text-anchor="start" fill="#27877e" font-weight="500">B · rows 0–4</text>
+<text x="690" y="720" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">Vectors go back to their own shard and row.</text>
+<text x="28" y="800" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(c) Resume and checks</text>
+<polyline points="28,818 1111,818" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
+<text x="28" y="852" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Block checkpoints</text>
+<text x="28" y="876" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">an interrupted shard resumes, not restarts</text>
+<text x="600" y="852" font-size="18" text-anchor="start" fill="#233b50" font-weight="500">Checks before delivery</text>
+<text x="600" y="876" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">one output row for every source row</text>
+<rect x="28" y="896" width="80" height="34" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="68" y="918" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">block 1 ✓</text>
+<rect x="112" y="896" width="80" height="34" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="152" y="918" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">block 2 ✓</text>
+<rect x="196" y="896" width="80" height="34" rx="3" fill="#dbe9f4" stroke="#3574a6" stroke-width="1"/>
+<text x="236" y="918" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="500">block 3 ✓</text>
+<rect x="280" y="896" width="80" height="34" rx="3" fill="#f6ecdc" stroke="#ba8137" stroke-width="1.6"/>
+<text x="320" y="918" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">block 4</text>
+<rect x="364" y="896" width="80" height="34" rx="3" fill="white" stroke="#9fadb8" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="404" y="918" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">block 5</text>
+<rect x="448" y="896" width="80" height="34" rx="3" fill="white" stroke="#9fadb8" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="488" y="918" font-size="16" text-anchor="middle" fill="#9fadb8" font-weight="400">block 6</text>
+<polyline points="34,938 34,944 270,944 270,938" fill="none" stroke="#3574a6" stroke-width="1.2" stroke-linejoin="round"/>
+<text x="152" y="964" font-size="16" text-anchor="middle" fill="#3574a6" font-weight="400">checkpoints reused</text>
+<text x="320" y="964" font-size="16" text-anchor="middle" fill="#ba8137" font-weight="500">resume here</text>
+<text x="28" y="1000" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">Finished shards are skipped; missing outputs go to a rerun list.</text>
+<rect x="600" y="886" width="56" height="24" rx="0" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="612" y="903" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">row</text>
+<rect x="656" y="886" width="160" height="24" rx="0" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="668" y="903" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">status</text>
+<rect x="816" y="886" width="180" height="24" rx="0" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
+<text x="828" y="903" font-size="16" text-anchor="start" fill="#233b50" font-weight="500">vector</text>
+<rect x="600" y="910" width="56" height="22" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<rect x="656" y="910" width="160" height="22" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<rect x="816" y="910" width="180" height="22" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="612" y="927" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">0</text>
+<text x="668" y="927" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">ok</text>
+<rect x="828" y="916" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="841" y="916" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="854" y="916" width="12" height="10" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="867" y="916" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="880" y="916" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="893" y="916" width="12" height="10" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="906" y="916" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="919" y="916" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="932" y="916" width="12" height="10" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="945" y="916" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="958" y="916" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="971" y="916" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="600" y="932" width="56" height="22" rx="0" fill="#f6ecdc" stroke="#e3e9ee" stroke-width="1"/>
+<rect x="656" y="932" width="160" height="22" rx="0" fill="#f6ecdc" stroke="#e3e9ee" stroke-width="1"/>
+<rect x="816" y="932" width="180" height="22" rx="0" fill="#f6ecdc" stroke="#e3e9ee" stroke-width="1"/>
+<text x="612" y="949" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">1</text>
+<text x="668" y="949" font-size="16" text-anchor="start" fill="#ba8137" font-weight="500">decode failed</text>
+<text x="828" y="949" font-size="16" text-anchor="start" fill="#ba8137" font-weight="400">—</text>
+<rect x="600" y="954" width="56" height="22" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<rect x="656" y="954" width="160" height="22" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<rect x="816" y="954" width="180" height="22" rx="0" fill="white" stroke="#e3e9ee" stroke-width="1"/>
+<text x="612" y="971" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">2</text>
+<text x="668" y="971" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">ok</text>
+<rect x="958" y="960" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="971" y="960" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="828" y="960" width="12" height="10" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="841" y="960" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="854" y="960" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="867" y="960" width="12" height="10" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="880" y="960" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="893" y="960" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="906" y="960" width="12" height="10" rx="0" fill="#dbe9f4" stroke="none" stroke-width="1"/>
+<rect x="919" y="960" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<rect x="932" y="960" width="12" height="10" rx="0" fill="#3574a6" stroke="none" stroke-width="1"/>
+<rect x="945" y="960" width="12" height="10" rx="0" fill="#629ac3" stroke="none" stroke-width="1"/>
+<text x="600" y="1000" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">Failed rows keep their place and status.</text>
+<text x="600" y="1022" font-size="16" text-anchor="start" fill="#566b7b" font-weight="400">Vectors checked: 1,152-d, FP16, L2 norm ≈ 1.</text>
+</g>
+</svg>
