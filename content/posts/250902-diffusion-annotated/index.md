@@ -2,7 +2,7 @@
 date: '2025-09-02T18:49:24+08:00'
 title: 'Fully Annotated Guide to "What are Diffusion Models?"'
 author:
-  - Shichao Song
+  - Elliot Shichao Song
 summary: 'Diffusion models are the de facto standard for image generation. Lilian Weng’s "What Are Diffusion Models?" is an excellent introduction to it, but readers without a solid mathematical background may struggle. This article fills that gap with clear, step‑by‑step derivations and explanations.'
 cover:
   image: "Diffusion_Diagram.png"
