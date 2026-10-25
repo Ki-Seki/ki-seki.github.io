@@ -1,181 +1,198 @@
 ---
 date: '2026-10-24T13:41:46+08:00'
-title: '大规模文生图模型预训练中的数据检索系统'
+title: 'A Data Retrieval System for Large-Scale Text-to-Image Pretraining'
 author:
   - Elliot Song
-summary: '从零训练文生图模型时，需要在十亿级图文数据中查找、检查和筛选样本。本文以一个 1.4B 样本的检索系统为例，介绍数据存储与管理、分布式表征提取、IVF-PQ 索引的构建与查询，以及在线检索与类簇浏览。'
+summary: 'Training a text-to-image model from scratch means finding, inspecting and filtering samples across billions of image–text pairs. Using a retrieval system over 1.4B samples as an example, this post covers data storage and management, distributed embedding extraction, building and querying an IVF-PQ index, and online retrieval and cluster browsing.'
 cover:
   image: "assets/semantic-islands-cover.png"
-  caption: "语义岛屿：从海量图片中检索相似样本（由 [ChatGPT Images](https://chatgpt.com/) 生成）"
+  caption: "Semantic islands: retrieving similar samples from a sea of images (generated with [ChatGPT Images](https://chatgpt.com/))"
 tags:
   - text-to-image
   - training-data
   - retrieval
+  - ivf-pq
+  - large-scale
 math: false
 ---
 
-## 引言
+## Introduction
 
-从零训练大型文生图模型时，需要构建面向大规模训练数据的，交互式图文检索与类簇浏览工具，帮助研究与数据团队从样本与类簇中查找和检查数据，并查看其内容、标注与来源。它最主要应用场景包括三个：
+Training a large text-to-image model from scratch calls for an interactive image–text retrieval and cluster-browsing tool built over the full training data. It lets research and data teams find and inspect data at the level of both samples and clusters, and look at each sample's content, annotations and source. Its three main uses are:
 
-- **预训练数据筛选、清理与配比。** 通过类簇搜索与代表样本浏览检查数据分布，按既定安全与质量策略审核和剔除 NSFW 等不合格样本或类簇，并调整不同类簇或数据源的采样权重（比如对高质量的风景，设计图进行上采样）与配额，提高或降低其在训练集中的占比。
-- **后训练数据回捞与筛选。** 围绕模型薄弱项、目标样例和特定能力需求，从数据池中检索、回捞相关候选样本，经人工筛选、质量检查和必要标注后组织为数据集，为 SFT 与 RL 中的特定能力（比如文字渲染，人像细节图，特定风格图等）增强提供数据支持。
-- **评测数据泄漏风险排查。** 将评测图像或构建评测提示词时使用的参考图片作为查询，单独或批量检索相同及近重复的训练样本，辅助排查训练与评测数据的重合。
+- **Filtering, cleaning and mixing pretraining data.** Browse clusters and their representative samples to check the data distribution; review and remove NSFW or otherwise unqualified samples and clusters under established safety and quality policies; and adjust the sampling weights and quotas of clusters or data sources (for example, upsampling high-quality landscapes and designs) to raise or lower their share of the training set.
+- **Recovering and selecting post-training data.** Around a model's weak spots, target examples and specific capability needs, retrieve and recover candidate samples from the data pool, then turn them into datasets through human selection, quality checks and annotation where needed. These datasets support targeted capability gains in SFT and RL, such as text rendering, detailed portraits or particular styles.
+- **Checking for evaluation data leakage.** Use evaluation images, or the reference images behind evaluation prompts, as queries, one at a time or in batches, to find identical and near-duplicate training samples and check whether training and evaluation data overlap.
 
-构建这种大规模查询系统并不是一个 trivial 的任务，下面就以构建一个 1.4 billion图文样本的检索系统为例，介绍设计与实现思路。
+Building a retrieval system at this scale is far from trivial. Below, using a retrieval system with 1.4 billion image–text samples as an example, we walk through its design and implementation.
 
-## 数据存储格式与管理
+## Data Storage Format and Management
 
-首先要明确我们的数据存储格式。逻辑上来看，它实际上就是以图片为键的一个巨大的表，图片最核心的 sidecar 数据是他的文本 caption 描述，毕竟我们在训练文生图模型。其他 sidecar 数据可能包括布局、标签、来源、美学打分、各种类别标签等等。
+First, the storage format. Logically, the data is one huge table keyed by image. Each image's most important sidecar is its text caption; we are training a text-to-image model, after all. Other sidecars may include layout, tags, source, aesthetic scores and various category labels.
 
-数据的物理布局上，我们可以考虑把图像数据单独存储成一个个分片的 main parquets[^parquet]，保存图像数据或引用，而各类其他关联信息可以通过和 main parquet 对齐的 sidecar parquets 存储，从而实现图像与其属性的高效管理与访问。样本通过 `(dataset_revision_id, source_file_id, source_row)` 三元组统一定位，分别对应数据集版本、源分片编号和分片内行号，便于统一访问与来源追溯。
+Physically, we store the image data on its own as sharded main parquets[^parquet], which hold the image bytes or references to them. All other associated information lives in sidecar parquets that are row-aligned with the main parquets, which keeps images and their attributes efficient to manage and access. Every sample is located by the triple `(dataset_revision_id, source_file_id, source_row)`, that is, the dataset revision, the source shard and the row within that shard, which gives uniform access and traceability back to the source.
 
 {{< media
 src="assets/data-storage-format.svg"
-caption="图 1：数据存储的逻辑视图与物理布局。样本由数据集版本、源分片编号和分片内行号三元组定位。"
+caption="Figure 1: Logical view and physical layout of the data. A sample is located by the triple of dataset revision, source shard and row within the shard."
 >}}
 
-这样的数据管理方式能够尽可能同时满足数据团队和训练团队的需求：
+This way of managing data serves the needs of both the data team and the training team:
 
-- **数据团队需求。** 大规模、多阶段训练中的数据筛选、重采样与标注迭代可能形成数十种派生数据集或版本，增加数据管理和样本追溯的难度。
-- **训练团队需求。** 训练时的尽量少的数据处理开销，能够通过一些简单的谓词过滤快速定位所需样本，减少对图像数据的重复读取和解码，提高训练效率。当然，有时候分片内部也可能存在不均匀的数据分布，数据团队可能需要对分片内的数据进行重采样或调整，以保证训练数据的均衡性。
+- **What the data team needs.** Filtering, resampling and re-annotation over large-scale, multi-stage training can produce dozens of derived datasets or versions, which makes the data harder to manage and samples harder to trace.
+- **What the training team needs.** As little data-processing overhead as possible during training: quickly locating the needed samples with simple predicate filters, and avoiding repeated reads and decodes of image data, so training runs efficiently. However, the data inside a shard can also be unevenly distributed, so the data team may need to resample or adjust it within a shard to keep the training data balanced.
 
-## 离线索引构建
+## Offline Index Construction
 
-billion 样本级别的检索系统不可能使用精确查找，所以一定是一个最近邻查询系统，简单来说就是构建 embeddings，把样本映射到向量空间，通过最近邻算法，比如我们用到的 FAISS[^douze_faiss][^johnson_faiss_gpu] 中的 IVF-PQ[^jegou_pq]，进行检索。
+At billions of samples, exact search is out of the question, so the system has to be a nearest-neighbor search system. In short: compute embeddings that map samples into a vector space, then retrieve with a nearest-neighbor algorithm, in our case IVF-PQ[^jegou_pq] from FAISS[^douze_faiss][^johnson_faiss_gpu].
 
-构建过程主要包括数据清单整理与样本映射、图像表征提取、聚类与向量量化、分片索引构建及完整性校验，如图 2 所示。
+The build consists mainly of organizing the input manifest and sample mapping, extracting image embeddings, clustering and vector quantization, building the sharded index, and integrity checks, as shown in Figure 2.
 
 {{< media
 src="assets/offline-build-workflow.svg"
-caption="图 2：离线索引构建的阶段依赖与资源划分。实线表示必需产物依赖，灰色虚线表示可选能力依赖，橙色虚线表示人工确认；实际并发由资源预算与编排策略决定。"
+caption="Figure 2: Stage dependencies and resource allocation of the offline index build. Solid lines are required artifact dependencies, grey dashed lines are optional capability dependencies, and orange dashed lines are human sign-offs; actual concurrency depends on the resource budget and orchestration policy."
 >}}
 
-面向文生图训练数据的检索系统通常要同时支持文本语义查询和图片语义查询，所以文和图应该能够被映射在同一向量空间，一般要采用通过图文对比学习训练出的模型[^radford_clip][^zhai_siglip]，这里我们采用 SigLIP2[^tschannen_siglip2] 提取图像表征。接下来，我们可以基于 FAISS，将倒排文件索引（Inverted File，IVF）[^sivic_video_google]与乘积量化（Product Quantization，PQ）[^jegou_pq]结合，构建压缩检索索引。这样可以在保证检索效率的同时，显著降低存储开销。下面依次介绍分布式表征提取、聚类与压缩索引，以及全量索引的构建。
+A retrieval system over text-to-image training data usually has to support both text and image semantic queries, so text and images must map into the same vector space. That generally calls for a model trained with image–text contrastive learning[^radford_clip][^zhai_siglip]; here we use SigLIP2[^tschannen_siglip2] to extract image embeddings. On top of FAISS, we then combine an inverted file index (IVF)[^sivic_video_google] with product quantization (PQ)[^jegou_pq] to build a compressed retrieval index, which keeps search efficient while cutting storage substantially. The following sections cover distributed embedding extraction, clustering and compressed indexing, and building the full index.
 
-### 分布式表征提取
+### Distributed Embedding Extraction
 
-我们根据待检索的数据范围整理输入清单，以 Parquet 分片为处理单位，记录源文件位置与行数。图像既可从分片内嵌的图片字节读取，也可从分片记录的 S3 路径获取，随后按固定配置完成解码、尺寸调整和像素归一化。
+#### Inputs and Model
 
-图像编码采用 SigLIP2 SO400M（patch14，384 × 384 输入），为有效图像生成 1,152 维向量，经 L2 归一化后以 FP16 存储。在线查询使用同一模型的图像或文本编码器，将参考图片和文本映射到共享表征空间，从而在同一图像索引上支持以图搜图和以文搜图。
+We organize the input manifest according to the data in scope for retrieval, with Parquet shards as the processing unit, recording each source file's location and row count. Images can be read either from the image bytes embedded in a shard or from the S3 path recorded in it, and are then decoded, resized and pixel-normalized with a fixed configuration.
 
-对于十亿级图像数据，表征提取不仅涉及 GPU 推理，还包含对象存储读取、图像解码和结果写出。我们以 Parquet 分片为任务单元，按分片大小估计初始负载，将任务分配到多个计算节点，并由节点内的多个 GPU 工作进程并行处理，各分片独立写出结果。
+Images are encoded with SigLIP2 SO400M (patch14, 384 × 384 input), which produces a 1,152-dimensional vector for each valid image; the vectors are L2-normalized and stored in FP16. Online queries use the image or text encoder of the same model, mapping reference images and text into a shared embedding space, so a single image index supports both image-to-image and text-to-image search.
 
-不同图片格式、尺寸和存储读取延迟会造成任务耗时不均。我们从任务调度、数据供给和推理组批三个方面提高处理效率：
+#### Scaling Out
 
-- **节点内动态任务调度。** 工作进程完成任务后继续领取尚未处理的分片，配合有限的提前领取窗口，避免少数进程积压慢任务而其他进程空闲，缓解负载不均与任务收尾时的长尾等待，缩短整批任务的完成时间。
-- **流水线重叠与有界预取。** 在 GPU 计算当前批次时提前准备后续数据，使读取、解码与推理尽量重叠，减少 GPU 等待数据的时间；同时限制每个进程在途的分片数量，避免过量占用资源。
-- **跨分片组批。** 在同一工作进程内，将不同 Parquet 分片中就绪且解码路径相同的图片合并为推理批次，减少分片边界或数据筛选造成的小批次推理，提高批次填充率。推理结果仍按原始分片和行号回写，保持样本对应关系。
+For billions of images, embedding extraction involves not only GPU inference but also object-storage reads, image decoding and writing results. Each Parquet shard is one task: we estimate the initial load from shard sizes, assign tasks to multiple compute nodes, and process them in parallel with several GPU worker processes per node, each shard writing its results independently.
+
+Different image formats and sizes, and varying storage read latency, make task durations uneven. We improve throughput on three fronts, task scheduling, data feeding and inference batching:
 
 {{< media
 src="assets/embedding-extraction.svg"
-caption="图 3：分布式表征提取示意。(a) 分片按估计负载分到各节点，节点内 GPU 工作进程空闲即领取下一个分片，相比固定分配可避免慢分片造成的长尾；(b) 单个工作进程内读取、解码、推理与写出重叠执行，不同分片中就绪的图片可拼成满批次，结果按原分片和行号写回。时长与行号仅作示意。"
+caption="Figure 3: Distributed embedding extraction. (a) Shards are assigned to nodes by estimated load, and GPU workers within a node claim the next shard whenever they are free, which avoids the long tail a slow shard causes under a fixed split. (b) Within one worker, reading, decoding, inference and writing overlap, and ready images from different shards can fill one batch, with results written back by original shard and row. Durations and row numbers are illustrative."
 >}}
 
-为降低长时间任务中断后的重算成本，我们按分片内的数据块保存检查点。构建完成后，核对源分片与输出的覆盖范围和行数，汇总下载、解码等失败状态，并抽查样本标识的对应关系以及向量的维度、数据类型和 L2 范数。失败样本保留原始位置与状态，避免因直接丢弃记录造成行号错位；缺失或异常输出需处理并复核后再交付。
+- **Dynamic task scheduling within a node.** A worker that finishes a task goes on to claim the next unprocessed shard, with a small claim-ahead window. This keeps a few workers from piling up slow tasks while others sit idle, eases load imbalance and the long tail at the end of a run, and shortens the time to finish the whole batch.
+- **Pipeline overlap and bounded prefetch.** While the GPU computes the current batch, later data is prepared in advance so that reading, decoding and inference overlap as much as possible and the GPU spends less time waiting for data. The number of shards in flight per worker is capped to avoid over-using resources.
+- **Cross-shard batching.** Within one worker, ready images from different Parquet shards that share a decode path are merged into one inference batch. This reduces small batches caused by shard boundaries or data filtering and raises batch fill. Results are still written back by original shard and row, so every vector stays matched to its sample.
 
-### 聚类与压缩索引
+These choices came from what we saw in production, where extraction was largely I/O-bound. A typical Parquet shard was 300–500 MiB and downloaded at a median of 26–28 MiB/s, so while SigLIP2 needed only 3–5 seconds for a 1,000-image shard, the slowest downloads took 20–75 seconds. With the optimizations above in place, we measured end-to-end throughput on a single node with eight NVIDIA RTX PRO 6000 GPUs:
 
-按每张图像对应一个 1,152 维 FP16 向量计算，十亿张图像仅向量数值就占 2.304 TB（十进制，不含图像、标注及文件格式开销），运行时内存太大，并且逐一比较也难以满足交实时检索需求。我们采用 IVF-PQ，将缩小搜索范围与向量压缩结合。
+| Images | Per node | Per GPU |
+|---|---|---|
+| Web photos, mostly JPEG | ~1,750 images/s | ~220 images/s |
+| Large design images, ≥ 2048 px | ~530 images/s | ~66 images/s |
 
-#### IVF 聚类
+Shards dominated by large PNGs are the slow tail, at about 12 images/s per GPU, which is why the dynamic scheduling above matters.
 
-IVF 需要聚类得到簇中心，PQ 码本训练也要在各个子空间上分别聚类，而且要在 IVF 中心确定之后进行（见下文），所以两者都要先跑聚类算法。在全量的数据上跑聚类非常慢；通常我们会取一个较小的样本集，在抽样 N 条向量数据上训练。
+#### Checkpointing and Validation
 
-下面以 1.4B 预训练库的参考构建配置为例，N取100M 条向量：按各输入 embedding 分片的行数比例分配配额，再在每个分片内按行区间分层抽样，按行区间读取。这种分层块抽样可利用对象存储的范围读取，避免为取少量样本下载整个向量文件；它并非逐行独立的全局均匀随机抽样。该样本集划分为 9900 万条 IVF 训练样本与 100 万条留出样本，后者只用于该阶段的聚类评估。
+Lastly, to reduce recomputation after a long job is interrupted, we checkpoint by data block within each shard. After the build, we check the coverage and row counts of source shards against the outputs, summarize download, decode and other failures, and spot-check the sample-ID mapping as well as the dimension, data type and L2 norm of the vectors. Failed samples keep their original position and status, so that dropping records outright never shifts row numbers; missing or abnormal outputs are fixed and reviewed before delivery.
+
+### Clustering and Compressed Indexing
+
+At one 1,152-dimensional FP16 vector per image, a billion images take 2.304 TB for the vector values alone (decimal units, excluding images, annotations and file-format overhead). That is too much memory to serve, and comparing against every vector is far too slow for real-time search. We use IVF-PQ, which combines narrowing the search scope with vector compression.
+
+#### IVF Clustering
+
+IVF needs clustering to obtain its centroids, and PQ codebook training also clusters each subspace separately, after the IVF centroids are fixed (see below), so both start with a clustering step. Clustering over the full data is very slow, so we usually train on a smaller sample of N vectors.
+
+As an example, take the reference build configuration of the 1.4B pretraining library, with N = 100M vectors. Quotas are allocated in proportion to the row counts of the input embedding shards, then each shard is sampled by stratified row ranges and read by row range. This stratified block sampling takes advantage of ranged reads from object storage, avoiding downloading a whole vector file just to take a few samples; it is not independent, row-by-row, globally uniform random sampling. The sample is split into 99 million IVF training vectors and 1 million held-out vectors, which are used only to evaluate clustering at this stage.
 
 {{< media
 src="assets/ivf-index-construction.svg"
-caption="图 4：IVF 的抽样、中心训练与查询范围示意，以 1.4B 预训练库的参考构建配置为例；二维簇位置和查询探测范围仅作示意。"
+caption="Figure 4: IVF sampling, centroid training and search scope, using the reference build configuration of the 1.4B pretraining library as an example."
 >}}
 
-IVF 的簇数预设为 `K=10,000`，训练根据上述 9900 万条向量学习中心位置。随后将全量向量分配到最接近的中心，并将同一簇的样本组织为倒排列表。查询时先找到与查询向量接近的若干中心，再扫描对应列表，避免遍历整个数据集。
+The number of IVF clusters is set to `K=10,000`, and training learns the centroid positions from the 99 million vectors above. All vectors are then assigned to their nearest centroid, and the samples of each cluster are organized into an inverted list. At query time, the system first finds the centroids closest to the query vector and then scans only their lists, avoiding a pass over the whole dataset.
 
-#### PQ 压缩与编码
+#### PQ Compression and Encoding
 
-在压缩方面，我们对向量与所属聚类中心之差，即残差，进行乘积量化（PQ）。从同一份 100M 条样本资产中进行再采样（依然为了加速聚类速度，因此没有全部使用 100M 条样本），按样本分片均衡分配读取配额、取各分片的前缀，共选取 210 万条向量，其中 200 万条用于 PQ 训练，10 万条留出用于量化重构误差评估。
+For compression, we apply product quantization (PQ) to the residual, the difference between a vector and its assigned centroid. We resample from the same 100M-vector sample (again to speed up clustering, so not all 100M vectors are used), allocating read quotas evenly across sample shards. This yields 2.1 million vectors: 2 million for PQ training and 0.1 million held out to evaluate quantization reconstruction error.
 
 {{< media
 src="assets/pq-encoding.svg"
-caption="图 5：PQ64 的码本抽样训练与全量编码示意。码本在整个索引中共享；容量比较仅针对向量编码，不代表完整索引大小。"
+caption="Figure 5: Sampled codebook training and full encoding for PQ64. The codebooks are shared across the whole index."
 >}}
 
-PQ 的分段数与每段编码位数也由配置决定：这里采用 64 段、每段 8 位的 PQ64 配置，每段为 18 维，8 位编号对应每个子码本中的 256 个代表向量。先计算 PQ 训练样本相对于已确定的 IVF 中心的残差，再汇集各 IVF 簇中相同段位置的子向量，分别执行 256 类的 K-means，得到 64 套在整个索引中共享的码本。
+The number of PQ segments and bits per segment are also set by configuration. Here we use PQ64 with 64 segments of 8 bits each: each segment has 18 dimensions, and its 8-bit code indexes one of 256 codewords in that segment's sub-codebook. We first compute the residuals of the PQ training samples against the already fixed IVF centroids, then gather the sub-vectors at the same segment position across all IVF clusters and run 256-way k-means on each, giving 64 codebooks shared across the whole index.
 
-编码时，每个残差子向量选择对应码本中最近的代表向量，仅保存其 0–255 的编号。由此，原本占 2,304 字节的 1,152 维 FP16 向量被表示为 64 字节的量化编码。
+To encode, each residual sub-vector picks the nearest codeword in its codebook and stores only that codeword's ID, from 0 to 255. A 1,152-dimensional FP16 vector that took 2,304 bytes is thus represented by a 64-byte quantized code.
 
-#### IVF-PQ 的查询过程
+#### How an IVF-PQ Query Works
 
-建好的 IVF-PQ 索引中，倒排列表的每个条目只保存样本标识和 64 字节的 PQ 编码，不保存原始向量。查询时也不需要把编码还原成向量，近似距离可以直接查表得到，过程分为四步，如图 6 所示。
+In the finished IVF-PQ index, each entry of an inverted list stores only a sample ID and a 64-byte PQ code, not the original vector. Queries never decode codes back into vectors either: approximate distances come straight from table lookups, in four steps, as shown in Figure 6.
 
 {{< media
 src="assets/ivf-pq-search.svg"
-caption="图 6：IVF-PQ 查询时的近似距离计算。先选出最近的 nprobe 个倒排列表；对每个列表计算查询残差与各子码本代表向量的距离表，条目的 64 个编号查表累加即得近似距离，最后保留最近的 k 个。数值与样本编号仅作示意。"
+caption="Figure 6: Computing approximate distances in an IVF-PQ query."
 >}}
 
-1. **选择倒排列表。** 计算查询向量 q 与全部 10,000 个聚类中心的距离，只搜索最近的 `nprobe` 个簇对应的倒排列表，其余列表直接跳过。
-2. **构建距离表。** PQ 编码的是向量相对所属聚类中心的残差，因此对每个被探测的列表，先计算查询残差 r = q − c，按与编码相同的方式切成 64 段、每段 18 维；再计算每一段与对应子码本中 256 个代表向量的距离，得到一张 64 × 256 的距离表。每个列表只需计算一次，列表内所有条目共用这张表。
-3. **查表累加。** 条目的 64 个编号分别指向距离表中对应段的一个位置，取出这 64 个值相加，就是 q 与该样本的近似距离。每个条目只需 64 次查表与加法，无需解码向量，这正是 PQ 能快速扫描大量候选的原因。
-4. **保留最近的 k 个。** 汇总所有被探测列表中的条目，按近似距离保留最小的 k 个作为候选。
+1. **Choose inverted lists.** Compute the distance from the query vector q to all 10,000 centroids and search only the inverted lists of the nearest `nprobe` clusters, skipping the rest.
+2. **Build a distance table.** PQ encodes a vector's residual relative to its centroid, so for each probed list we first compute the query residual r = q − c and cut it into 64 segments of 18 dimensions, the same way as in encoding. We then compute the distance from each segment to the 256 codewords of its sub-codebook, giving a 64 × 256 distance table. It is computed once per list and shared by every entry in that list.
+3. **Look up and add.** An entry's 64 codes each point to one cell in their segment's row of the distance table; adding up those 64 values gives the approximate distance between q and that sample. Each entry costs only 64 lookups and additions, with no vector decoding, which is why PQ can scan large numbers of candidates quickly.
+4. **Keep the nearest k.** Pool the entries from all probed lists and keep the k with the smallest approximate distances as candidates.
 
-### 全量索引构建与规格
+### Building the Full Index and Its Specifications
 
-聚类中心和 PQ 码本确定后，全量簇分配与编码可分布式执行。随后将样本标识和量化编码按簇归并，组装为多个 FAISS 索引分片，避免单个索引文件太大导致无法高效加载与查询；同一索引的各分片共享中心与码本。索引的聚类数、PQ 编码长度与查询时探测的簇数（`nprobe`）共同影响资源开销与检索效果：增加探测簇数通常有助于提高召回，但需要扫描更多候选；PQ 则以量化误差换取更低的存储与扫描成本，因此基于该索引的召回属于近似检索。
+Once the centroids and PQ codebooks are fixed, assigning all vectors to clusters and encoding them can run in a distributed way. Sample IDs and quantized codes are then merged by cluster and assembled into several FAISS index shards, so that no single index file is too large to load and query efficiently; all shards of an index share the same centroids and codebooks. The number of clusters, the PQ code length and the number of clusters probed at query time (`nprobe`) together determine resource cost and retrieval quality: probing more clusters usually improves recall but scans more candidates, while PQ trades quantization error for lower storage and scan cost, so recall from this index is approximate.
 
-以1.4B 样本库例子来看，构建出的索引的 specification：
+Taking the 1.4B-sample library as an example, the resulting index has the following specifications:
 
 |  |  |
 |---|---|
-| 样本数 | 1,386,418,079，来自 1,264 个 embedding 分片 |
-| 表征 | SigLIP2 SO400M，1,152 维 FP16，原始向量约 3.19 TB |
-| 距离 | 归一化向量上的平方 L2，与余弦相似度等价 |
-| IVF | K = 10,000，球面 mini-batch k-means[^dhillon_spherical][^sculley_minibatch]；9,900 万条训练、100 万条留出；全量分配后 10,000 个列表均非空，单个列表 297–946,850 条 |
-| PQ | 64 段 × 8 位，每段 18 维、256 个代表向量；200 万条训练、10 万条留出；每个向量 64 字节 |
-| 索引分片 | 8 个，按簇编号连续切分，每片约 1,250 个簇、1.67–1.80 亿条；单片 12.1–13.0 GB，合计 100.2 GB，约为原始向量的 1/32 |
-| 构建 | 全量分配与编码用 64 个并行任务；每个分片组装约 1.6–3.6 分钟；每个分片回读后用 nprobe = 32 做检索校验；从 1 亿抽样完成到校验通过约 7.3 小时 |
-| 在线服务 | 8 张 GPU 各加载一个分片；默认 nprobe = 32，即每次查询只扫描 0.32% 的列表，按平均列表长度约 440 万条编码 |
+| Samples | 1,386,418,079, from 1,264 embedding shards |
+| Embeddings | SigLIP2 SO400M, 1,152-d FP16; about 3.19 TB of raw vectors |
+| Distance | Squared L2 on normalized vectors, equivalent to cosine similarity |
+| IVF | K = 10,000, spherical mini-batch k-means[^dhillon_spherical][^sculley_minibatch]; 99 million training and 1 million held-out vectors; after full assignment all 10,000 lists are non-empty, with 297–946,850 entries per list |
+| PQ | 64 segments × 8 bits, 18 dimensions and 256 codewords per segment; 2 million training and 100,000 held-out vectors; 64 bytes per vector |
+| Index shards | 8, split by contiguous cluster ID, about 1,250 clusters and 167–180 million entries each; 12.1–13.0 GB per shard, 100.2 GB in total, about 1/32 of the raw vectors |
+| Build | Full assignment and encoding in 64 parallel tasks; about 1.6–3.6 minutes to assemble each shard; each shard read back and checked with nprobe = 32; about 7.3 hours from finishing the 100M sample to passing the checks |
+| Serving | One shard per GPU across 8 GPUs; default nprobe = 32, so each query scans only 0.32% of the lists, about 4.4 million codes at the average list length |
 
-## 在线检索系统
+## Online Retrieval System
 
-### 图文语义查询服务
+### Image–Text Semantic Search Service
 
-在线检索接受参考图像、文本或二者的组合。系统使用与离线建库配套的 SigLIP2 编码器生成归一化查询向量；多图或图文输入可先汇聚为一个查询向量，也可分别召回后按相似度或排名融合[^cormack_rrf]结果。每路查询并行搜索各索引分片，服务端按样本标识合并去重，并按 PQ 近似距离排序保留候选。
+Online retrieval accepts reference images, text, or both. The system generates a normalized query vector with the same SigLIP2 encoder used to build the index. Multiple images, or images plus text, can either be pooled into a single query vector first, or retrieved separately and fused by similarity or rank[^cormack_rrf]. Each query route searches all index shards in parallel, and the server merges and deduplicates results by sample ID and keeps candidates sorted by approximate PQ distance.
 
 {{< media
 src="assets/online-query-flow.svg"
-caption="图 7：一次在线查询的处理流程。查询可以是文本、图片或二者组合，编码为查询向量后并行搜索各索引分片，服务端按样本标识合并去重，并按距离排序保留候选。"
+caption="Figure 7: How one online query is processed."
 >}}
 
-结果浏览将检索排名与样本内容、标注和来源关联起来。用户可从缩略图进入详情，查看描述文本、原始 JSON 及与标注对齐的展示图，以及数据集版本、源文件路径和行号等信息，如图 8 所示。
+Result browsing ties the retrieval ranking to each sample's content, annotations and source. From a thumbnail, users can open the details to see the caption, the raw JSON, a display image aligned with the annotations, and the dataset revision, source file path and row number, as shown in Figure 8.
 
 {{< media
 src="assets/search-ui-example.png"
-caption="图 8：检索界面示例。"
+caption="Figure 8: An example of the search interface."
 >}}
 
-### 类簇浏览与数据配比
+### Cluster Browsing and Data Mixing
 
-预训练数据清理与配比，更多是在类簇层面完成的。我们以离线聚类得到的类簇为单位提供浏览工具：每个簇附有自动生成、可搜索的语义标签，可按美学、紧密度或多样性排序；簇内样本按与簇中心的余弦相似度排列，便于快速判断一个簇的内容与质量。簇中心经 UMAP[^mcinnes_umap] 投影到二维后可交互浏览，用于从整体上观察数据分布。
+Cleaning and mixing pretraining data happens mostly at the cluster level. We provide a browsing tool organized around the clusters from offline clustering: each cluster carries automatically generated, searchable semantic labels and can be sorted by aesthetics, tightness or diversity; samples within a cluster are ordered by cosine similarity to the cluster center, so the content and quality of a cluster can be judged at a glance. The cluster centers are projected to 2D with UMAP[^mcinnes_umap] and can be browsed interactively to see the overall data distribution.
 
 {{< media
 src="assets/umap-cluster-view.png"
-caption="图 9：类簇浏览界面示例。"
+caption="Figure 9: An example of the cluster-browsing interface."
 >}}
 
-在此基础上，多名标注者可对低质量或不合规的类簇投票，并导出删除清单；配比工具则按「簇 × 数据集」求解采样配额，研究人员设定各数据源的目标占比后，即可导出相应的采样计划。
+On top of this, several annotators can vote on low-quality or non-compliant clusters and export a removal list, and a mixing tool solves for sampling quotas over clusters × datasets: once researchers set target shares for each data source, the tool exports the corresponding sampling plan.
 
-### 其他功能
+### Other Features
 
-除了基础的 FAISS ANN，借助 AI编程，系统还可以很方便地额外提供一些功能，下面是实践中我们常用的几种：
+Beyond basic FAISS ANN search, AI-assisted programming made it easy for the system to offer extra features. These are the ones we use most in practice:
 
-- **批量独立查询。** 针对一组模型坏例或评测样本，批量独立查询可逐条检索并对照结果，减少反复提交单次查询的操作。研究人员可按数据来源、尺寸等属性缩小候选范围，将人工选定的样本整理为跨查询保留的素材集，并导出包含源路径和行号的 JSONL 清单，衔接后续数据回捞、复核和重标注。查询参数与结果快照还可保存为分享链接，便于团队围绕同一批候选协作检查。
-- **辅助结果核验。** 为辅助结果核验，系统对指定数量的前排候选回源读取图像，按当前编码配置重新生成完整向量，计算不经 PQ 近似的余弦相似度，并支持在这些候选内重排；同时计算 pHash[^zauner_phash] 汉明距离并比对文件 SHA-256，标出近重复与字节级完全相同的图片。
-- **更灵活的查询组合。** 多张参考图有三种合并方式：取共同特征（向量平均）、像其中任意一张即可（各自检索后取最优）、多图共识（按排名融合，不易被个别离群图带偏）。图文同时给出时，可用滑杆调节两者权重，默认图片 80%、文本 20%。任一结果都可以一键「用此图搜」或加入参考图，也可以直接粘贴存储路径作为查询图片。
-- 等等
+- **Batch independent queries.** For a set of model failure cases or evaluation samples, batch queries run each one separately so results can be compared side by side, instead of submitting single queries over and over. Researchers can narrow candidates by attributes such as data source and size, gather hand-picked samples into collections that persist across queries, and export a JSONL list with source paths and row numbers for downstream data recovery, review and re-annotation. Query parameters and result snapshots can also be saved as share links, so a team can review the same set of candidates together.
+- **Result verification.** For a chosen number of top candidates, the system reads the source images back, regenerates full vectors with the current encoding configuration, computes cosine similarity without PQ approximation, and can rerank within those candidates. It also computes pHash[^zauner_phash] Hamming distances and compares file SHA-256 hashes, flagging near-duplicates and byte-identical images.
+- **More flexible query combinations.** Multiple reference images can be combined in three ways: common features (averaging the vectors), any reference (searching each separately and taking the best), and consensus (rank fusion, which resists being pulled off course by one outlier image). When both images and text are given, a slider sets their relative weight, 80% image and 20% text by default. Any result can be used as a new query or added as a reference with one click, and a storage path can be pasted directly as a query image.
+- And more.
 
-## 总结
+## Conclusion
 
-本文介绍了大规模图像训练数据的检索与管理方法，包括数据存储与管理、向量构建、聚类与压缩索引，以及在线检索与样本检查的流程与技术细节。
+This post described methods for retrieving and managing large-scale image training data, covering data storage and management, embedding construction, clustering and compressed indexing, and the workflows and technical details of online retrieval and sample inspection.
 
 ## Citation
 

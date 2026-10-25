@@ -116,8 +116,8 @@
 <rect x="267" y="264" width="23" height="3.5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
 <polyline points="278.5,289 278.5,301 176,301" fill="none" stroke="#cfdae2" stroke-width="1.1" stroke-linejoin="round"/>
 <polyline points="176,301 176,353" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="194" y="323" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Stratified sampling</text>
-<text x="194" y="348" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">seed = 42</text>
+<text x="190" y="323" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">Stratified sampling</text>
+<text x="190" y="347" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">seed = 42</text>
 <rect x="65" y="365" width="17" height="5.3" rx="0.8" fill="#629ac3" stroke="none" stroke-width="1"/>
 <rect x="87" y="365" width="17" height="5.3" rx="0.8" fill="#dbe9f4" stroke="none" stroke-width="1"/>
 <rect x="109" y="365" width="17" height="5.3" rx="0.8" fill="#dbe9f4" stroke="none" stroke-width="1"/>
@@ -218,17 +218,17 @@
 <rect x="219" y="437" width="17" height="5.3" rx="0.8" fill="#dbe9f4" stroke="none" stroke-width="1"/>
 <rect x="241" y="437" width="17" height="5.3" rx="0.8" fill="#629ac3" stroke="none" stroke-width="1"/>
 <rect x="263" y="437" width="17" height="5.3" rx="0.8" fill="#ba8137" stroke="none" stroke-width="1"/>
-<text x="175" y="468" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">Sample N = 100M</text>
+<text x="176" y="468" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">Sample N = 100M</text>
 <circle cx="71" cy="492" r="4.5" fill="#3574a6" stroke="none" stroke-width="1"/>
 <text x="85" y="499" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">99M train</text>
 <circle cx="204" cy="492" r="4.5" fill="#ba8137" stroke="none" stroke-width="1"/>
 <text x="218" y="499" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">1M held out</text>
-<polyline points="133,510 133,542" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<rect x="54" y="550" width="234" height="62" rx="6" fill="#f1f6fa" stroke="#b5cbdc" stroke-width="1.1"/>
-<text x="171" y="576" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">K-means</text>
-<text x="171" y="600" font-size="19" text-anchor="middle" fill="#566b7b" font-weight="400">K = 10,000</text>
-<polyline points="171,618 171,638" fill="none" stroke="#566b7b" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="171" y="663" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">IVF centroids C</text>
+<polyline points="176,510 176,542" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="59" y="550" width="234" height="62" rx="6" fill="#f1f6fa" stroke="#b5cbdc" stroke-width="1.1"/>
+<text x="176" y="576" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">K-means</text>
+<text x="176" y="600" font-size="19" text-anchor="middle" fill="#566b7b" font-weight="400">K = 10,000</text>
+<polyline points="176,618 176,638" fill="none" stroke="#566b7b" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="176" y="663" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">IVF centroids C</text>
 <text x="562" y="117" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">Vector space and centroids</text>
 <text x="743" y="148" font-size="19" text-anchor="end" fill="#566b7b" font-weight="400">nprobe = 2</text>
 <polygon points="379,168 530.2810650887574,168 529.0978623259463,267.98063345754065 467.6739876949492,323.8662898841036 379,319.4078212290503" fill="#fafcfd" stroke="#d4dfe6" stroke-width="1"/>
@@ -435,13 +435,13 @@
 <text x="599" y="301" font-size="23" text-anchor="start" fill="#ba8137" font-weight="500">q</text>
 <circle cx="394" cy="523" r="3.5" fill="#9fadb8" stroke="none" stroke-width="1"/>
 <text x="408" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Vector</text>
-<polyline points="514,523 526,523" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="520,517 520,529" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="514,523 526,523" fill="none" stroke="#566b7b" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="520,517 520,529" fill="none" stroke="#566b7b" stroke-width="2" stroke-linejoin="round"/>
-<text x="534" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Centroid</text>
-<path d="M630,518 L635,523 L630,528 L625,523Z" fill="white" stroke="#ba8137" stroke-width="2"/>
-<text x="643" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Query</text>
+<polyline points="486,523 498,523" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="492,517 492,529" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="486,523 498,523" fill="none" stroke="#566b7b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="492,517 492,529" fill="none" stroke="#566b7b" stroke-width="2" stroke-linejoin="round"/>
+<text x="506" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Centroid</text>
+<path d="M605,518 L610,523 L605,528 L600,523Z" fill="white" stroke="#ba8137" stroke-width="2"/>
+<text x="618" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Query</text>
 <text x="946" y="117" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">Inverted lists</text>
 <text x="946" y="148" font-size="18" text-anchor="middle" fill="#566b7b" font-weight="400">Sample ID / PQ code</text>
 <text x="802" y="208" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">c1</text>

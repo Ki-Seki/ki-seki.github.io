@@ -56,8 +56,8 @@ svg{width:1560px;height:2060px;min-width:0;font-family:-apple-system,BlinkMacSys
 <g class="edge-group" data-from="validate" data-to="approve-release" data-kind="control"><path d="M870 1850 V1920" class="edge-halo"/><path d="M870 1850 V1920" class="edge control" marker-end="url(#control-arrow)"/></g>
 <text x="290" y="286" class="edge-label">Task plans</text>
 <text x="1088" y="286" class="edge-label">Prepared in parallel</text>
-<text x="280" y="950" class="edge-label">Full assignment plan</text>
-<text x="280" y="976" class="edge-sub">No need to wait for centroid training</text>
+<text x="276" y="950" class="edge-label">Full assignment plan</text>
+<text x="276" y="976" class="edge-sub" style="font-size:15px">No need to wait for centroid training</text>
 <text x="1051" y="676" class="edge-label">All vectors</text>
 <text x="1051" y="702" class="edge-sub">Feed full encoding directly, not just the samples</text>
 <text x="800" y="953" class="edge-label">Centroids / PQ</text>
