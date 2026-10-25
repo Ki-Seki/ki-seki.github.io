@@ -25,7 +25,17 @@ Training a large text-to-image model from scratch calls for an interactive image
 - **Recovering and selecting post-training data.** Around a model's weak spots, target examples and specific capability needs, retrieve and recover candidate samples from the data pool, then turn them into datasets through human selection, quality checks and annotation where needed. These datasets support targeted capability gains in SFT and RL, such as text rendering, detailed portraits or particular styles.
 - **Checking for evaluation data leakage.** Use evaluation images, or the reference images behind evaluation prompts, as queries, one at a time or in batches, to find identical and near-duplicate training samples and check whether training and evaluation data overlap.
 
-Building a retrieval system at this scale is far from trivial. Below, using a retrieval system with 1.4 billion image–text samples as an example, we walk through its design and implementation.
+Building a retrieval system at this scale is far from trivial. In this post, I'll use a retrieval system with 1.4 billion image–text samples as an example, and I'll walk through its design and implementation.
+
+## Related Work
+
+**Searching billion-scale image–text training data.** The closest public system is LAION's clip-retrieval, built for the LAION-5B dataset[^schuhmann_laion5b]. Beaumont[^beaumont_billions] describes computing CLIP embeddings for its five billion images on 32 A100 GPUs, compressing them into an 800 GB product-quantized index with autofaiss, and serving it from a single machine through memory mapping. Vespa's billion-scale vector search series[^bergum_vespa] uses the same data to study serving architectures built on an HNSW-indexed inverted file. These systems offer general search over an open dataset, whereas ours serves in-house training data.
+
+**Vector compression and search.** Beyond the original papers on product quantization[^jegou_pq] and FAISS[^douze_faiss], Pinecone's guide to product quantization[^pinecone_pq] and McCormick's IVF-PQ tutorial[^mccormick_ivfpq] are gentler introductions to the mechanisms shown in Figures 4–6 below.
+
+**Embedding-based data curation.** Clustering in embedding space is also widely used to curate pretraining data. Vo et al.[^vo_curation] apply hierarchical k-means and balanced sampling to build curated datasets automatically, SemDeDup[^abbas_semdedup] removes semantic near-duplicates within k-means clusters, and NVIDIA NeMo Curator[^nemo_curator] packages CLIP embedding, quality filtering and semantic deduplication into a GPU pipeline. The cluster browser and mixing tool described later serve a similar purpose but keep people in the loop. For exploring embeddings interactively, Nomic Atlas[^nomic_atlas] offers a similar 2D map with vector search.
+
+Existing write-ups tend to cover one piece: how an open dataset was indexed, how product quantization works, or how to curate data by clustering. This post puts the whole path in one place, from how the data is stored, through embedding extraction and building and querying an IVF-PQ index, to the tools a data team uses day to day. Each step is grounded in a real deployment over 1.4B samples, with measured throughput, the actual index specifications and the engineering choices behind them.
 
 ## Data Storage Format and Management
 
@@ -232,3 +242,21 @@ This post described methods for retrieving and managing large-scale image traini
 [^zauner_phash]: **Zauner, Christoph.** *Implementation and Benchmarking of Perceptual Image Hash Functions*. Master's thesis, Upper Austria University of Applied Sciences, 2010. https://www.phash.org/docs/pubs/thesis_zauner.pdf.
 
 [^mcinnes_umap]: **McInnes, Leland, John Healy, and James Melville.** *UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction*. 2018. *arXiv*, https://arxiv.org/abs/1802.03426.
+
+[^schuhmann_laion5b]: **Schuhmann, Christoph, et al.** "LAION-5B: An Open Large-Scale Dataset for Training Next Generation Image-Text Models." *Advances in Neural Information Processing Systems 35 (Datasets and Benchmarks Track)*, 2022. *arXiv*, https://arxiv.org/abs/2210.08402.
+
+[^beaumont_billions]: **Beaumont, Romain.** "Semantic Search at Billions Scale." *Medium*, 31 Mar. 2022, https://rom1504.medium.com/semantic-search-at-billions-scale-95f21695689a.
+
+[^bergum_vespa]: **Bergum, Jo Kristian.** "Building Billion-Scale Vector Search: Part Two." *Vespa Blog*, 26 Oct. 2022, https://blog.vespa.ai/building-billion-scale-vector-search-part-two/.
+
+[^pinecone_pq]: **Pinecone.** "Product Quantization: Compressing High-Dimensional Vectors by 97%." *Faiss: The Missing Manual*, https://www.pinecone.io/learn/series/faiss/product-quantization/.
+
+[^mccormick_ivfpq]: **McCormick, Chris.** "Product Quantizers for k-NN Tutorial Part 2." 22 Oct. 2017, https://mccormickml.com/2017/10/22/product-quantizer-tutorial-part-2/.
+
+[^vo_curation]: **Vo, Huy V., et al.** "Automatic Data Curation for Self-Supervised Learning: A Clustering-Based Approach." *Transactions on Machine Learning Research*, 2024. *arXiv*, https://arxiv.org/abs/2405.15613.
+
+[^abbas_semdedup]: **Abbas, Amro, et al.** *SemDeDup: Data-Efficient Learning at Web-Scale through Semantic Deduplication*. 2023. *arXiv*, https://arxiv.org/abs/2303.09540.
+
+[^nemo_curator]: **NVIDIA.** "About Image Curation." *NeMo Curator Documentation*, https://docs.nvidia.com/nemo/curator/latest/curate-images/index.html.
+
+[^nomic_atlas]: **Nomic AI.** "Nomic Atlas." https://atlas.nomic.ai/.
