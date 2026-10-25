@@ -2,7 +2,7 @@ baseURL: https://ki-seki.github.io/
 title: The Kiseki Log
 languageCode: en
 hasCJKLanguage: true
-copyright: "© 2023-2026 Shichao Song [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
+copyright: "© 2023-2026 Elliot Shichao Song [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
 theme: PaperMod
 
 timeout: 360
@@ -86,7 +86,7 @@ outputs:
 
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
-  description: Shichao's personal blog
+  description: Elliot Shichao Song's personal blog
   author:
     - Shichao Song
 
@@ -121,7 +121,7 @@ params:
   homeInfoParams:
     Title: 👋 Hi, all!
     Content: >
-      I am Shichao Song, a PhD candidate.
+      I am Elliot Shichao Song, a PhD candidate.
       My current research focuses on foundation models.
       I blog about my research and life.
 

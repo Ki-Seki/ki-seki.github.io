@@ -2,7 +2,7 @@
 date: '{{ .Date }}'
 title: '{{ replace .File.ContentBaseName "-" " " | title }}'
 author:
-  - Shichao Song
+  - Elliot Song
 summary: ''
 tags: []
 math: true
