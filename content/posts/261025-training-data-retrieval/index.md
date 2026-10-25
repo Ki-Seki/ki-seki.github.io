@@ -2,7 +2,7 @@
 date: '2026-10-25T20:12:06+08:00'
 title: 'A Billion-Scale Retrieval System for Text-to-Image Training Data'
 author:
-  - Elliot Song
+  - Elliot Shichao Song
 summary: 'Training a text-to-image model from scratch means finding, inspecting and filtering samples across billions of image–text pairs. Using a retrieval system over 1.4B samples as an example, this post covers data storage and management, distributed embedding extraction, building and querying an IVF-PQ index, and online retrieval and cluster browsing.'
 cover:
   image: "assets/semantic-islands-cover.png"
