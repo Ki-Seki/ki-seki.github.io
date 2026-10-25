@@ -1,5 +1,5 @@
 ---
-date: '2026-10-24T13:41:46+08:00'
+date: '2026-10-25T20:12:06+08:00'
 title: 'A Data Retrieval System for Large-Scale Text-to-Image Pretraining'
 author:
   - Elliot Song
