@@ -2,7 +2,7 @@
 date: '2026-03-22T18:21:33+08:00'
 title: 'Product Requirements Document of Ouroboros'
 author:
-  - Elliot Shichao Song
+  - Shichao Song
   - Qingchen Yu
   - Huayi Lai
   - Xiaonan Zhang

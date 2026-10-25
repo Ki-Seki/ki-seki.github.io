@@ -2,7 +2,7 @@
 date: '2026-04-30T14:25:31+08:00'
 title: 'Fully Annotated Guide to "The Multi-Armed Bandit Problem and Its Solutions"'
 author:
-  - Elliot Shichao Song
+  - Shichao Song
 summary: "The multi-armed bandit problem is a classic exploration–exploitation dilemma in reinforcement learning. Lilian Weng's post is an excellent introduction, but some mathematical details and motivations can be cryptic. This article annotates it with step-by-step explanations and supplementary notes."
 cover:
   image: "multi-armed-bandit.png"

@@ -2,7 +2,7 @@
 date: '2025-12-26T17:29:47+08:00'
 title: 'How is the Speculative Decoding Algorithm Constructed?'
 author:
-  - Elliot Shichao Song
+  - Shichao Song
 summary: 'A simple mathematical derivation of the algorithm construction process from the paper "Fast Inference from Transformers via Speculative Decoding".'
 cover:
   image: "Single_Step_Spec_Sample.png"
