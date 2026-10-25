@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1140" height="680" viewBox="0 0 1140 680" role="img" aria-labelledby="title desc">
-<title id="title">PQ 残差码本训练与向量编码</title><desc id="desc">1.4B 预训练库参考配置。100M 样本资产中再取 2M 训练、0.1M 留出，利用已训练 IVF 中心计算残差，分成 64 个十八维子空间，每个子空间训练 256 个代表向量。右侧的矩阵数值和选中行仅为结构示意，单图存储 64 个八位编号，共 64 字节。</desc>
+<title id="title">PQ residual codebook training and vector encoding</title><desc id="desc">Reference configuration for the 1.4B pre-training library: from the 100M sampled vectors, 2M are used for training and 0.1M held out. Residuals against the trained IVF centroids are split into 64 subspaces of 18 dimensions, and 256 codewords are trained for each. The matrix values and highlighted row on the right only illustrate the structure; each image stores 64 eight-bit codes, 64 bytes in total.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#566b7b" stroke-width="1.5"/></marker></defs>
 <rect x="0" y="0" width="1140" height="680" rx="0" fill="white" stroke="none" stroke-width="1"/>
 <g font-family="Arial, PingFang SC, Heiti SC, Microsoft YaHei, sans-serif">
-<text x="28" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(a) 残差码本训练</text>
-<text x="379" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(b) 单向量编码</text>
+<text x="28" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(a) Residual codebooks</text>
+<text x="379" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(b) Encoding one vector</text>
 <polyline points="28,57 312,57" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
 <polyline points="379,57 1111,57" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
 <polyline points="342,82 342,650" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
-<text x="173" y="103" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">抽样向量资产</text>
+<text x="173" y="103" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">Sampled vectors</text>
 <text x="173" y="132" font-size="20" text-anchor="middle" fill="#566b7b" font-weight="400">N = 100M</text>
 <rect x="73" y="162" width="219" height="84" rx="2" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
 <rect x="67" y="156" width="219" height="84" rx="2" fill="#fbfcfd" stroke="#cfdae2" stroke-width="1"/>
@@ -158,14 +158,14 @@
 <rect x="252" y="220" width="8" height="5.5" rx="0" fill="#dce6ee" stroke="none" stroke-width="1"/>
 <rect x="263.5" y="220" width="8" height="5.5" rx="0" fill="#dce6ee" stroke="none" stroke-width="1"/>
 <polyline points="173,245 173,280" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="192" y="265" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">均衡分片配额</text>
+<text x="192" y="265" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">Shard quotas</text>
 <circle cx="58" cy="306" r="4.5" fill="#3574a6"/>
-<text x="71" y="313" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">2M 训练</text>
+<text x="71" y="313" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">2M train</text>
 <circle cx="195" cy="306" r="4.5" fill="#ba8137"/>
-<text x="208" y="313" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">0.1M 留出</text>
+<text x="208" y="313" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">0.1M held out</text>
 <polyline points="112,323 112,339 173,339 173,377" fill="none" stroke="#566b7b" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="190" y="366" font-size="19" text-anchor="start" fill="#566b7b" font-weight="400">r = x − c(x)</text>
-<text x="173" y="404" font-size="20" text-anchor="middle" fill="#233b50" font-weight="500">训练残差 · 2M × 1,152</text>
+<text x="173" y="404" font-size="20" text-anchor="middle" fill="#233b50" font-weight="500">Training residuals · 2M × 1,152</text>
 <rect x="62" y="423" width="8.8" height="5.7" rx="0" fill="#dbe6ef" stroke="none" stroke-width="1"/>
 <rect x="73.2" y="423" width="8.8" height="5.7" rx="0" fill="#aac5da" stroke="none" stroke-width="1"/>
 <rect x="84.4" y="423" width="8.8" height="5.7" rx="0" fill="#dbe6ef" stroke="none" stroke-width="1"/>
@@ -327,14 +327,14 @@
 <rect x="263.6" y="482.5" width="8.8" height="5.7" rx="0" fill="#d6dee4" stroke="none" stroke-width="1"/>
 <rect x="274.79999999999995" y="482.5" width="8.8" height="5.7" rx="0" fill="#b0bfcb" stroke="none" stroke-width="1"/>
 <polyline points="173,500 173,537" fill="none" stroke="#566b7b" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="190" y="522" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">64 个子空间</text>
+<text x="190" y="522" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">64 subspaces</text>
 <rect x="54" y="545" width="234" height="62" rx="6" fill="#f1f6fa" stroke="#b5cbdc" stroke-width="1.1"/>
-<text x="171" y="572" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">每组 k-means</text>
-<text x="171" y="598" font-size="19" text-anchor="middle" fill="#566b7b" font-weight="400">256 个代表向量</text>
+<text x="171" y="572" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">k-means per subspace</text>
+<text x="171" y="598" font-size="19" text-anchor="middle" fill="#566b7b" font-weight="400">256 codewords each</text>
 <polyline points="171,615 171,638" fill="none" stroke="#566b7b" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="171" y="663" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">64 套共享码本</text>
-<text x="386" y="108" font-size="23" text-anchor="start" fill="#233b50" font-weight="500">完整向量 x</text>
-<text x="1100" y="108" font-size="19" text-anchor="end" fill="#566b7b" font-weight="400">1,152 维 · FP16 · 2,304 B</text>
+<text x="171" y="663" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">64 shared codebooks</text>
+<text x="386" y="108" font-size="23" text-anchor="start" fill="#233b50" font-weight="500">Full vector x</text>
+<text x="1100" y="108" font-size="19" text-anchor="end" fill="#566b7b" font-weight="400">1,152-d · FP16 · 2,304 B</text>
 <rect x="386" y="139" width="9.0734375" height="33" rx="1" fill="#8aaecb" stroke="none" stroke-width="1"/>
 <rect x="397.1734375" y="139" width="9.0734375" height="33" rx="1" fill="#82b9b4" stroke="none" stroke-width="1"/>
 <rect x="408.346875" y="139" width="9.0734375" height="33" rx="1" fill="#b7afc9" stroke="none" stroke-width="1"/>
@@ -400,8 +400,8 @@
 <rect x="1078.7531250000002" y="139" width="9.0734375" height="33" rx="1" fill="#dde6ec" stroke="none" stroke-width="1"/>
 <rect x="1089.9265625" y="139" width="9.0734375" height="33" rx="1" fill="#a3b5c2" stroke="none" stroke-width="1"/>
 <polyline points="743,183 743,216" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="762" y="205" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">减去所属 IVF 中心 c(x)</text>
-<text x="743" y="242" font-size="20" text-anchor="middle" fill="#566b7b" font-weight="400">64 个 18 维子向量</text>
+<text x="762" y="205" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Subtract its IVF centroid c(x)</text>
+<text x="743" y="242" font-size="20" text-anchor="middle" fill="#566b7b" font-weight="400">64 sub-vectors × 18 dims</text>
 <rect x="386" y="256" width="116" height="48" rx="3" fill="#eff4f8" stroke="#a4c0d7" stroke-width="1.1"/>
 <text x="444" y="285" font-size="26" text-anchor="middle" fill="#3574a6" font-weight="500">r<tspan baseline-shift="sub" font-size="17">1</tspan></text>
 <polyline points="444,311 444,328" fill="none" stroke="#566b7b" stroke-width="1.35" stroke-linejoin="round" marker-end="url(#arrow)"/>
@@ -577,7 +577,7 @@
 <polyline points="1040,520 1040,552" fill="none" stroke="#566b7b" stroke-width="1.35" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <rect x="982" y="565" width="116" height="49" rx="3" fill="#eff2f5" stroke="#b0bfcb" stroke-width="1.15"/>
 <text x="1040" y="598" font-size="27" text-anchor="middle" fill="#617f96" font-weight="500">93</text>
-<text x="743" y="349" font-size="19" text-anchor="middle" fill="#566b7b" font-weight="400">查找最近的代表向量</text>
+<text x="743" y="349" font-size="19" text-anchor="middle" fill="#566b7b" font-weight="400">Find the nearest codeword</text>
 <polyline points="386,627 386,637 1098,637 1098,627" fill="none" stroke="#cfdae2" stroke-width="1.2" stroke-linejoin="round"/>
 <text x="743" y="667" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">64 × 8 bit = 64 B</text>
 </g></svg>

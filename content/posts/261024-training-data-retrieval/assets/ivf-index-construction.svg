@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1140" height="680" viewBox="0 0 1140 680" role="img" aria-labelledby="title desc">
-<title id="title">IVF 抽样构建与局部搜索：配图风格预览</title><desc id="desc">1.4B 库配置示例。抽样 100M 向量，99M 用于训练、1M 用于验证，学习 10000 个 IVF 中心。向量空间和分区为机制示意，并非实际数据投影。查询探测两个邻近中心，扫描对应倒排列表。</desc>
+<title id="title">IVF sampling, centroid training and local search</title><desc id="desc">Example configuration for the 1.4B library: 100M vectors are sampled, 99M for training and 1M held out, to learn 10,000 IVF centroids. The vector space and partitions illustrate the mechanism and are not a projection of real data. A query probes two nearby centroids and scans their inverted lists.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8.7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#566b7b" stroke-width="1.5"/></marker></defs>
 <rect x="0" y="0" width="1140" height="680" rx="0" fill="white" stroke="none" stroke-width="1"/>
 <g font-family="Arial, PingFang SC, Heiti SC, Microsoft YaHei, sans-serif">
-<text x="28" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(a) 抽样与中心学习</text>
-<text x="379" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(b) IVF 局部搜索</text>
+<text x="28" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(a) Sampling and training</text>
+<text x="379" y="39" font-size="24" text-anchor="start" fill="#233b50" font-weight="500">(b) IVF local search</text>
 <polyline points="28,57 312,57" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
 <polyline points="379,57 1111,57" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
 <polyline points="342,82 342,650" fill="none" stroke="#cfdae2" stroke-width="1" stroke-linejoin="round"/>
-<text x="176" y="103" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">全库图像向量</text>
-<text x="176" y="132" font-size="20" text-anchor="middle" fill="#566b7b" font-weight="400">约 1.4B × 1,152</text>
+<text x="176" y="103" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">All image vectors</text>
+<text x="176" y="132" font-size="20" text-anchor="middle" fill="#566b7b" font-weight="400">≈ 1.4B × 1,152</text>
 <rect x="49" y="158" width="33" height="128" rx="2" fill="#f4f7f9" stroke="#cfdae2" stroke-width="1"/>
 <rect x="46" y="154" width="33" height="128" rx="2" fill="white" stroke="#bdcad4" stroke-width="1"/>
 <rect x="51" y="162" width="23" height="3.5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
@@ -116,7 +116,7 @@
 <rect x="267" y="264" width="23" height="3.5" rx="0" fill="#d7dfe5" stroke="none" stroke-width="1"/>
 <polyline points="278.5,289 278.5,301 176,301" fill="none" stroke="#cfdae2" stroke-width="1.1" stroke-linejoin="round"/>
 <polyline points="176,301 176,353" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="194" y="323" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">分层块抽样</text>
+<text x="194" y="323" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Stratified sampling</text>
 <text x="194" y="348" font-size="17" text-anchor="start" fill="#566b7b" font-weight="400">seed = 42</text>
 <rect x="65" y="365" width="17" height="5.3" rx="0.8" fill="#629ac3" stroke="none" stroke-width="1"/>
 <rect x="87" y="365" width="17" height="5.3" rx="0.8" fill="#dbe9f4" stroke="none" stroke-width="1"/>
@@ -218,18 +218,18 @@
 <rect x="219" y="437" width="17" height="5.3" rx="0.8" fill="#dbe9f4" stroke="none" stroke-width="1"/>
 <rect x="241" y="437" width="17" height="5.3" rx="0.8" fill="#629ac3" stroke="none" stroke-width="1"/>
 <rect x="263" y="437" width="17" height="5.3" rx="0.8" fill="#ba8137" stroke="none" stroke-width="1"/>
-<text x="175" y="468" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">抽样 N = 100M</text>
+<text x="175" y="468" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">Sample N = 100M</text>
 <circle cx="71" cy="492" r="4.5" fill="#3574a6" stroke="none" stroke-width="1"/>
-<text x="85" y="499" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">99M 训练</text>
+<text x="85" y="499" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">99M train</text>
 <circle cx="204" cy="492" r="4.5" fill="#ba8137" stroke="none" stroke-width="1"/>
-<text x="218" y="499" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">1M 留出</text>
+<text x="218" y="499" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">1M held out</text>
 <polyline points="133,510 133,542" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <rect x="54" y="550" width="234" height="62" rx="6" fill="#f1f6fa" stroke="#b5cbdc" stroke-width="1.1"/>
 <text x="171" y="576" font-size="23" text-anchor="middle" fill="#233b50" font-weight="500">K-means</text>
 <text x="171" y="600" font-size="19" text-anchor="middle" fill="#566b7b" font-weight="400">K = 10,000</text>
 <polyline points="171,618 171,638" fill="none" stroke="#566b7b" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="171" y="663" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">IVF 簇中心 C</text>
-<text x="562" y="117" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">向量空间与簇中心</text>
+<text x="171" y="663" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">IVF centroids C</text>
+<text x="562" y="117" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">Vector space and centroids</text>
 <text x="743" y="148" font-size="19" text-anchor="end" fill="#566b7b" font-weight="400">nprobe = 2</text>
 <polygon points="379,168 530.2810650887574,168 529.0978623259463,267.98063345754065 467.6739876949492,323.8662898841036 379,319.4078212290503" fill="#fafcfd" stroke="#d4dfe6" stroke-width="1"/>
 <polygon points="530.2810650887574,168 745,168 745,220.4626168224299 621.6278628368974,312.7034670378337 529.0978623259463,267.98063345754065" fill="#edf4f9" stroke="#d4dfe6" stroke-width="1"/>
@@ -434,16 +434,16 @@
 <path d="M587,285 L595,293 L587,301 L579,293Z" fill="white" stroke="#ba8137" stroke-width="2"/>
 <text x="599" y="301" font-size="23" text-anchor="start" fill="#ba8137" font-weight="500">q</text>
 <circle cx="394" cy="523" r="3.5" fill="#9fadb8" stroke="none" stroke-width="1"/>
-<text x="408" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">图像向量</text>
+<text x="408" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Vector</text>
 <polyline points="514,523 526,523" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="520,517 520,529" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="514,523 526,523" fill="none" stroke="#566b7b" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="520,517 520,529" fill="none" stroke="#566b7b" stroke-width="2" stroke-linejoin="round"/>
-<text x="534" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">簇中心</text>
+<text x="534" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Centroid</text>
 <path d="M630,518 L635,523 L630,528 L625,523Z" fill="white" stroke="#ba8137" stroke-width="2"/>
-<text x="643" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">查询</text>
-<text x="946" y="117" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">倒排列表</text>
-<text x="946" y="148" font-size="18" text-anchor="middle" fill="#566b7b" font-weight="400">样本标识 / PQ 编码</text>
+<text x="643" y="530" font-size="18" text-anchor="start" fill="#566b7b" font-weight="400">Query</text>
+<text x="946" y="117" font-size="22" text-anchor="middle" fill="#233b50" font-weight="500">Inverted lists</text>
+<text x="946" y="148" font-size="18" text-anchor="middle" fill="#566b7b" font-weight="400">Sample ID / PQ code</text>
 <text x="802" y="208" font-size="20" text-anchor="middle" fill="#9fadb8" font-weight="400">c1</text>
 <rect x="828" y="184" width="71" height="36" rx="2" fill="#fafbfc" stroke="#d8e0e6" stroke-width="0.8"/>
 <polyline points="853,185 853,219" fill="none" stroke="#d8e0e6" stroke-width="0.8" stroke-linejoin="round"/>
@@ -532,7 +532,7 @@
 <text x="1084" y="478" font-size="22" text-anchor="middle" fill="#9fadb8" font-weight="400">⋯</text>
 <polyline points="1114,256 1114,552 958,552 958,566" fill="none" stroke="#566b7b" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <rect x="821" y="574" width="280" height="48" rx="5" fill="#f2f6f8" stroke="#c8d7e1" stroke-width="1.1"/>
-<text x="961" y="605" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">PQ 近似距离估计</text>
+<text x="961" y="605" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">Approximate PQ distance</text>
 <polyline points="961,629 961,644" fill="none" stroke="#566b7b" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="961" y="669" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">Top-k 候选</text>
+<text x="961" y="669" font-size="21" text-anchor="middle" fill="#233b50" font-weight="500">Top-k candidates</text>
 </g></svg>
