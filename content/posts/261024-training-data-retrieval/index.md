@@ -109,7 +109,7 @@ As an example, take the reference build configuration of the 1.4B pretraining li
 
 {{< media
 src="assets/ivf-index-construction.svg"
-caption="Figure 4: IVF sampling, centroid training and search scope, using the reference build configuration of the 1.4B pretraining library as an example."
+caption="Figure 4: IVF sampling, centroid training and search scope, using the reference build configuration of the 1.4B pretraining library as an example. The 2D cluster positions and probed region are illustrative."
 >}}
 
 The number of IVF clusters is set to `K=10,000`, and training learns the centroid positions from the 99 million vectors above. All vectors are then assigned to their nearest centroid, and the samples of each cluster are organized into an inverted list. At query time, the system first finds the centroids closest to the query vector and then scans only their lists, avoiding a pass over the whole dataset.
@@ -133,12 +133,12 @@ In the finished IVF-PQ index, each entry of an inverted list stores only a sampl
 
 {{< media
 src="assets/ivf-pq-search.svg"
-caption="Figure 6: Computing approximate distances in an IVF-PQ query."
+caption="Figure 6: Computing approximate distances in an IVF-PQ query. Values and sample IDs are illustrative."
 >}}
 
 1. **Choose inverted lists.** Compute the distance from the query vector q to all 10,000 centroids and search only the inverted lists of the nearest `nprobe` clusters, skipping the rest.
 2. **Build a distance table.** PQ encodes a vector's residual relative to its centroid, so for each probed list we first compute the query residual r = q − c and cut it into 64 segments of 18 dimensions, the same way as in encoding. We then compute the distance from each segment to the 256 codewords of its sub-codebook, giving a 64 × 256 distance table. It is computed once per list and shared by every entry in that list.
-3. **Look up and add.** An entry's 64 codes each point to one cell in their segment's row of the distance table; adding up those 64 values gives the approximate distance between q and that sample. Each entry costs only 64 lookups and additions, with no vector decoding, which is why PQ can scan large numbers of candidates quickly.
+3. **Look up and add.** Each of an entry's 64 codes picks one cell in its segment's column of the distance table; adding up those 64 values gives the approximate distance between q and that sample. Each entry costs only 64 lookups and additions, with no vector decoding, which is why PQ can scan large numbers of candidates quickly.
 4. **Keep the nearest k.** Pool the entries from all probed lists and keep the k with the smallest approximate distances as candidates.
 
 ### Building the Full Index
