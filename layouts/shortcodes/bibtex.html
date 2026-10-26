@@ -15,12 +15,50 @@
 {{- end -}}
 {{- end -}}
 {{- $author := .Get "author" | default $pageAuthor -}}
+{{- $authors := split $author " and " -}}
 
-{{- $firstAuthor := index (split $author " and ") 0 -}}
-{{- $authorKey := $firstAuthor | lower | replaceRE "[^a-zA-Z]" "" -}}
-{{- $titleKey := $title | lower | replaceRE "[^a-zA-Z0-9]" "" | truncate 15 "" -}}
+{{- /* Key: first author's last name, year and first meaningful word of the post folder, e.g. song2026training */ -}}
+{{- $firstAuthor := index $authors 0 -}}
+{{- $nameParts := split $firstAuthor " " -}}
+{{- $lastName := index $nameParts (sub (len $nameParts) 1) -}}
+{{- $authorKey := $lastName | lower | replaceRE "[^a-z]" "" -}}
+{{- $stopWords := slice "a" "an" "the" "of" "for" "on" "in" "to" "and" "or" "with" "at" "by" "from" "how" "what" "why" "is" "are" "i" "my" "we" "our" "into" "about" -}}
+{{- $titleKey := "" -}}
+{{- $slug := "" -}}
+{{- with .Page.File -}}{{- $slug = path.Base .Dir -}}{{- end -}}
+{{- range split (trim (replaceRE "[^a-z0-9]+" " " (lower (replaceRE "^[0-9]+-" "" $slug))) " ") " " -}}
+{{- if and (not $titleKey) . (not (in $stopWords .)) -}}
+{{- $titleKey = . -}}
+{{- end -}}
+{{- end -}}
 {{- $bib_key := .Get "key" | default (printf "%s%s%s" $authorKey $year $titleKey) -}}
 
+{{- /* MLA 9: Last, First. "Title." Website, Day Mon. Year, URL. */ -}}
+{{- $inverted := $firstAuthor -}}
+{{- if gt (len $nameParts) 1 -}}
+{{- $inverted = printf "%s, %s" $lastName (delimit (first (sub (len $nameParts) 1) $nameParts) " ") -}}
+{{- end -}}
+{{- $mlaAuthor := $inverted -}}
+{{- if eq (len $authors) 2 -}}
+{{- $mlaAuthor = printf "%s, and %s" $inverted (index $authors 1) -}}
+{{- else if gt (len $authors) 2 -}}
+{{- $mlaAuthor = printf "%s, et al" $inverted -}}
+{{- end -}}
+{{- $mlaTitle := replaceRE `"([^"]*)"` "‘$1’" $title -}}
+{{- if not (findRE `[.?!。？！][’']?$` $mlaTitle) -}}
+{{- if findRE `’$` $mlaTitle -}}
+{{- $mlaTitle = replaceRE `’$` ".’" $mlaTitle -}}
+{{- else -}}
+{{- $mlaTitle = printf "%s." $mlaTitle -}}
+{{- end -}}
+{{- end -}}
+{{- $months := slice "Jan." "Feb." "Mar." "Apr." "May" "June" "July" "Aug." "Sept." "Oct." "Nov." "Dec." -}}
+{{- $mlaDate := printf "%s %s %s" (.Page.Date.Format "2") (index $months (sub (int (.Page.Date.Format "1")) 1)) $year -}}
+
+<div class="citation">
+<p class="citation-label">MLA</p>
+<p class="citation-mla">{{ $mlaAuthor }}. “{{ $mlaTitle }}” <em>{{ $journal }}</em>, {{ $mlaDate }}, <a href="{{ $url }}">{{ $url }}</a>.</p>
+<p class="citation-label">BibTeX</p>
 <pre tabindex="0" class="chroma"><code class="language-bibtex" data-lang="bibtex"><span class="line"><span class="cl"><span class="nc">@article</span><span class="p">{</span><span class="nl">{{ $bib_key }}</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">  <span class="na">title</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $title }}{{"}"}}</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">  <span class="na">author</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $author }}{{"}"}}</span><span class="p">,</span>
@@ -30,3 +68,4 @@
 </span></span><span class="line"><span class="cl">  <span class="na">url</span> <span class="p">=</span> <span class="s">{{"{"}}{{ $url }}{{"}"}}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre>
+</div>

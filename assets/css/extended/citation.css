@@ -1,0 +1,21 @@
+/* Citation block rendered by the bibtex shortcode: an MLA line above the BibTeX entry. */
+.citation-label {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--secondary);
+}
+
+.citation-label:first-child {
+  margin-top: 0;
+}
+
+.post-content .citation-mla {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
