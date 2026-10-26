@@ -3,7 +3,7 @@ title: 'CaptionExam: A Hard QA Benchmark for Image Captioners'
 author:
   - Elliot Shichao Song
 summary: 'Text-to-image models now learn from detailed captions, so the captioner that writes them matters. CaptionExam grades a caption by how many fine-grained questions about the image a text-only judge can answer from it, and tells apart what the caption left out from what it got wrong.'
-draft: true
+draft: false
 tags:
   - image-captioning
   - benchmark
