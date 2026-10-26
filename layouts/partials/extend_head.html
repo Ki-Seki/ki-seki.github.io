@@ -56,7 +56,7 @@
 {{ with partialCached "translation.html" . .RelPermalink }}
   <script defer src="{{ $translateJS.RelPermalink }}" data-src="{{ ($.OutputFormats.Get "translation").RelPermalink }}" data-lang="{{ .lang }}"></script>
 {{ else }}
-  {{- if and (or .IsNode (eq .Layout "archives")) site.Data.translations }}
+  {{- if and (or .IsBranch (eq .Layout "archives")) hugo.Data.translations }}
   <script defer src="{{ $translateJS.RelPermalink }}" data-list="{{ (site.Home.OutputFormats.Get "translationlist").RelPermalink }}"></script>
   {{- end }}
 {{ end }}

@@ -10,7 +10,7 @@
 {{- $result := "" -}}
 {{- $entry := "" -}}
 {{- with .File -}}
-  {{- $entry = index (site.Data.translations | default dict) (path.Clean .Dir) -}}
+  {{- $entry = index (hugo.Data.translations | default dict) (path.Clean .Dir) -}}
 {{- end -}}
 {{- with $entry -}}
   {{- with findRESubmatch `(?s)^---\n(.*?)\n---\n(.*)$` ($entry.markdown | default "") 1 -}}

@@ -242,7 +242,7 @@
     const load = async () => {
       const data = await fetchJSON(script.dataset.src);
       const content = document.createElement("div");
-      content.className = "post-content";
+      content.className = original.className;
       content.lang = lang === "zh" ? "zh-CN" : "en";
       content.innerHTML = data.content;
       // Embeds such as GeoGebra take focus once loaded, which would scroll the

@@ -1,0 +1,4 @@
+/* Keep the arrow on a search result full size when the title wraps to two lines. */
+.searchResults li svg {
+  flex-shrink: 0;
+}

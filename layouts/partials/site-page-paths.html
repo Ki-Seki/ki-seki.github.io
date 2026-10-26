@@ -3,7 +3,7 @@
   well as the HTML pages. For partials/local-favicon.html; called with
   partialCached, so it is built once per build. */ -}}
 {{- $s := newScratch -}}
-{{- range site.AllPages -}}
+{{- range site.Pages -}}
   {{- range .OutputFormats -}}
     {{- $s.SetInMap "paths" (strings.TrimSuffix "/" .RelPermalink | lower) true -}}
   {{- end -}}
