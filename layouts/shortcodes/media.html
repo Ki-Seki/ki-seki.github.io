@@ -68,8 +68,29 @@
       {{- $imageURL = $src -}}
     {{- end -}}
     {{- $thumbURL := $imageURL -}}
+    {{- /* Width and height reserve the image's space before it loads, so lazy images don't shift the page */ -}}
+    {{- $w := "" -}}
+    {{- $h := "" -}}
     {{- with $thumbRes -}}
       {{- $thumbURL = .RelPermalink -}}
+      {{- if eq .MediaType.Type "image/svg+xml" -}}
+        {{- with index (findRESubmatch `<svg[^>]*>` .Content 1) 0 -}}
+          {{- $root := index . 0 -}}
+          {{- $width := findRESubmatch `\swidth="([\d.]+)(px)?"` $root 1 -}}
+          {{- $height := findRESubmatch `\sheight="([\d.]+)(px)?"` $root 1 -}}
+          {{- $viewBox := findRESubmatch `\sviewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"` $root 1 -}}
+          {{- if and $width $height -}}
+            {{- $w = index $width 0 1 -}}
+            {{- $h = index $height 0 1 -}}
+          {{- else if $viewBox -}}
+            {{- $w = index $viewBox 0 1 -}}
+            {{- $h = index $viewBox 0 2 -}}
+          {{- end -}}
+        {{- end -}}
+      {{- else if eq .ResourceType "image" -}}
+        {{- $w = string .Width -}}
+        {{- $h = string .Height -}}
+      {{- end -}}
     {{- end -}}
     {{- $galleryID := printf "media-gallery-%s" (md5 .Page.RelPermalink) -}}
     {{- $captionText := "" -}}
@@ -77,7 +98,7 @@
       {{- $captionText = (strings.TrimSpace (. | markdownify | plainify)) -}}
     {{- end -}}
     <a href="{{ $imageURL }}" class="media-lightbox-trigger glightbox" data-gallery="{{ $galleryID }}"{{ if $captionText }} data-title="{{ $captionText }}"{{ end }}>
-  <img src="{{ $thumbURL }}" alt="{{ $caption }}" loading="lazy" style="max-width: 100%; height: auto;"{{ if $res }} data-fullsrc="{{ $imageURL }}"{{ end }}>
+  <img src="{{ $thumbURL }}" alt="{{ $caption }}"{{ with $w }} width="{{ . }}" height="{{ $h }}"{{ end }} loading="lazy" style="max-width: 100%; height: auto;"{{ if $res }} data-fullsrc="{{ $imageURL }}"{{ end }}>
     </a>
 {{- end -}}
 
