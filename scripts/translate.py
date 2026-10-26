@@ -63,6 +63,8 @@ SHORTCODE_VALUE = r'(?:"(?:[^"\\]|\\.)*"|`[^`]*`|[^\s"`=]+)'
 SHORTCODE_ARGS = re.compile(
     rf"\s*/?[\w.-]+(?:(?:\s+[\w-]+={SHORTCODE_VALUE})*|(?:\s+{SHORTCODE_VALUE})*)\s*", re.S
 )
+# A horizontal rule (three or more -, * or _) or a setext heading underline (=)
+RULE_LINE = re.compile(r"^ {0,3}(?:(?:-[ \t]*){3,}|(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|=+[ \t]*)$", re.M)
 
 
 class OutOfBalance(Exception):
@@ -117,7 +119,7 @@ def shortcodes_valid(body):
 def structure(text):
     """What a faithful translation keeps unchanged: front matter keys, valid
     quoting in front matter and shortcode parameters, and counts of
-    shortcodes, code fences, display math and headings."""
+    shortcodes, code fences, display math, headings and rule lines."""
     match = FRONT_MATTER.match(text)
     if not match:
         return None
@@ -134,6 +136,8 @@ def structure(text):
         body.count("```"),
         body.count("$$"),
         len(re.findall(r"^#{1,6} ", body, re.M)),
+        # A stray --- after the last line turns that line into a heading
+        len(RULE_LINE.findall(body)),
     )
 
 
