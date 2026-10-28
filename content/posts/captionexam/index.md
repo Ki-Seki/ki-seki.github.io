@@ -4,6 +4,10 @@ title: 'CaptionExam：一个高难度的 captioner QA benchmark'
 author:
   - Elliot Shichao Song
 summary: '在 CaptionExam benchmark 上，目前 GPT 系列最强模型 GPT-6 Astra 的图像描述能力也才刚刚及格，得分 61.2%。'
+cover:
+  image: "assets/captionexam-cover.png"
+  relative: true
+  caption: "一份 caption 经过判官，分成答对、漏述和幻觉三路（[ChatGPT Images](https://chatgpt.com/) 生成）"
 tags:
   - image-captioning
   - benchmark
@@ -136,7 +140,12 @@ caption="图 6：每一行是一张图。左起第一列是原图，其余各列
 
 ## 结论
 
-CaptionExam 是一个包含 109 张图，3099 道题的高难度 captioner 评测 benchmark，能够支持最近的文生图，图生文模型的开发。
+CaptionExam 是一个包含 109 张图，3099 道题的高难度 captioner 评测 benchmark，能够支持最近的文生图，图生文模型的开发。并且，我们发现：
+
+- **最强的模型也远没到头。** 得分最高的 GPT-6 Astra 只有 61.2%，最强的开源模型 Qwen3.5-397B-A17B 是 42.9%。
+- **写得长不等于写得好。** token 数相近的模型，准确率可以差出 27 个点；多出来的 token 常常花在重复、格式和客套，以及笼统的描述上。token 少而准确率高的大多是 OpenAI 的模型。
+- **规模不总是有用。** 同一系列里，更大的模型有时并不更强。
+- **caption 的分数会体现在生成的图上。** 把 caption 交给 MOSS-Image，得分越高的 caption 生成的图越接近原图，看着生成的图答题，准确率也按同样的顺序排列。
 
 ## 引用
 
