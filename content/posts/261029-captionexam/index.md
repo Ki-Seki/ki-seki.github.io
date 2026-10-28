@@ -1,5 +1,5 @@
 ---
-date: '2026-10-26T21:31:14+08:00'
+date: '2026-10-29T00:07:13+08:00'
 title: 'CaptionExam: A Challenging QA Benchmark for Captioners'
 author:
   - Elliot Shichao Song
