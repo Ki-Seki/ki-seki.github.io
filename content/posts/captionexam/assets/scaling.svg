@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="440" viewBox="0 0 760 440" role="img" aria-label="Accuracy against total parameters for 23 Qwen VLMs, one line per generation.">
+<rect x="0" y="0" width="760" height="440" fill="white"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif">
+<line x1="58" y1="373.7" x2="640" y2="373.7" stroke="#e6ecf0"/><text x="50.0" y="377.7" font-size="12" fill="#8b9aa6" text-anchor="end">10%</text><line x1="58" y1="282.1" x2="640" y2="282.1" stroke="#e6ecf0"/><text x="50.0" y="286.1" font-size="12" fill="#8b9aa6" text-anchor="end">20%</text><line x1="58" y1="190.5" x2="640" y2="190.5" stroke="#e6ecf0"/><text x="50.0" y="194.5" font-size="12" fill="#8b9aa6" text-anchor="end">30%</text><line x1="58" y1="98.9" x2="640" y2="98.9" stroke="#e6ecf0"/><text x="50.0" y="102.9" font-size="12" fill="#8b9aa6" text-anchor="end">40%</text>
+<line x1="102.2" y1="44" x2="102.2" y2="392" stroke="#e6ecf0"/>
+<text x="102.2" y="410.0" font-size="12" fill="#8b9aa6" text-anchor="middle">1B</text>
+<line x1="197.3" y1="44" x2="197.3" y2="392" stroke="#e6ecf0"/>
+<text x="197.3" y="410.0" font-size="12" fill="#8b9aa6" text-anchor="middle">3B</text>
+<line x1="301.5" y1="44" x2="301.5" y2="392" stroke="#e6ecf0"/>
+<text x="301.5" y="410.0" font-size="12" fill="#8b9aa6" text-anchor="middle">10B</text>
+<line x1="396.5" y1="44" x2="396.5" y2="392" stroke="#e6ecf0"/>
+<text x="396.5" y="410.0" font-size="12" fill="#8b9aa6" text-anchor="middle">30B</text>
+<line x1="500.7" y1="44" x2="500.7" y2="392" stroke="#e6ecf0"/>
+<text x="500.7" y="410.0" font-size="12" fill="#8b9aa6" text-anchor="middle">100B</text>
+<line x1="595.8" y1="44" x2="595.8" y2="392" stroke="#e6ecf0"/>
+<text x="595.8" y="410.0" font-size="12" fill="#8b9aa6" text-anchor="middle">300B</text>
+<line x1="58" y1="392" x2="640" y2="392" stroke="#c3ced7"/>
+<text x="349.0" y="432.0" font-size="13" fill="#233b50" text-anchor="middle">Total parameters (log scale)</text>
+<text transform="translate(16,218.0) rotate(-90)" font-size="13" fill="#233b50" text-anchor="middle">Accuracy</text>
+<polyline points="162.2,360.9 270.6,342.6 472.3,323.4" fill="none" stroke="#86b6ef" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="162.2" cy="360.9" r="4.5" fill="#86b6ef" stroke="#86b6ef" stroke-width="2"/>
+<circle cx="270.6" cy="342.6" r="4.5" fill="#86b6ef" stroke="#86b6ef" stroke-width="2"/>
+<circle cx="472.3" cy="323.4" r="4.5" fill="#86b6ef" stroke="#86b6ef" stroke-width="2"/>
+<text x="482.3" y="327.4" font-size="12.5" fill="#233b50" text-anchor="start">Qwen2-VL</text>
+<polyline points="197.3,358.0 270.6,320.8 402.1,254.0 472.3,246.3" fill="none" stroke="#5598e7" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="197.3" cy="358.0" r="4.5" fill="#5598e7" stroke="#5598e7" stroke-width="2"/>
+<circle cx="270.6" cy="320.8" r="4.5" fill="#5598e7" stroke="#5598e7" stroke-width="2"/>
+<circle cx="402.1" cy="254.0" r="4.5" fill="#5598e7" stroke="#5598e7" stroke-width="2"/>
+<circle cx="472.3" cy="246.3" r="4.5" fill="#5598e7" stroke="#5598e7" stroke-width="2"/>
+<text x="482.3" y="250.3" font-size="12.5" fill="#233b50" text-anchor="start">Qwen2.5-VL</text>
+<polyline points="162.2,227.1 222.2,148.8 282.2,150.8 396.5,159.7 402.1,100.9 574.7,76.7" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="162.2" cy="227.1" r="4.5" fill="#2a78d6" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="222.2" cy="148.8" r="4.5" fill="#2a78d6" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="282.2" cy="150.8" r="4.5" fill="#2a78d6" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="396.5" cy="159.7" r="4.5" fill="white" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="402.1" cy="100.9" r="4.5" fill="#2a78d6" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="574.7" cy="76.7" r="4.5" fill="white" stroke="#2a78d6" stroke-width="2"/>
+<text x="580.7" y="98.7" font-size="12.5" fill="#233b50" text-anchor="start">Qwen3-VL</text>
+<polyline points="82.9,233.6 162.2,164.1 222.2,134.9 292.3,122.2 387.4,73.4 409.9,88.2 517.9,95.6 620.0,71.9" fill="none" stroke="#1c5cab" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="82.9" cy="233.6" r="4.5" fill="#1c5cab" stroke="#1c5cab" stroke-width="2"/>
+<circle cx="162.2" cy="164.1" r="4.5" fill="#1c5cab" stroke="#1c5cab" stroke-width="2"/>
+<circle cx="222.2" cy="134.9" r="4.5" fill="#1c5cab" stroke="#1c5cab" stroke-width="2"/>
+<circle cx="292.3" cy="122.2" r="4.5" fill="#1c5cab" stroke="#1c5cab" stroke-width="2"/>
+<circle cx="387.4" cy="73.4" r="4.5" fill="#1c5cab" stroke="#1c5cab" stroke-width="2"/>
+<circle cx="409.9" cy="88.2" r="4.5" fill="white" stroke="#1c5cab" stroke-width="2"/>
+<circle cx="517.9" cy="95.6" r="4.5" fill="white" stroke="#1c5cab" stroke-width="2"/>
+<circle cx="620.0" cy="71.9" r="4.5" fill="white" stroke="#1c5cab" stroke-width="2"/>
+<text x="630.0" y="67.9" font-size="12.5" fill="#233b50" text-anchor="start">Qwen3.5</text>
+<polyline points="387.4,88.5 409.9,85.8" fill="none" stroke="#0d366b" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="387.4" cy="88.5" r="4.5" fill="#0d366b" stroke="#0d366b" stroke-width="2"/>
+<circle cx="409.9" cy="85.8" r="4.5" fill="white" stroke="#0d366b" stroke-width="2"/>
+<text x="417.9" y="76.8" font-size="12.5" fill="#233b50" text-anchor="start">Qwen3.6</text>
+<line x1="58" y1="18" x2="76" y2="18" stroke="#86b6ef" stroke-width="2"/><circle cx="67" cy="18" r="3.5" fill="#86b6ef"/><text x="82.0" y="22.0" font-size="13" fill="#566b7b" text-anchor="start">Qwen2-VL</text><line x1="157.6" y1="18" x2="175.6" y2="18" stroke="#5598e7" stroke-width="2"/><circle cx="166.6" cy="18" r="3.5" fill="#5598e7"/><text x="181.6" y="22.0" font-size="13" fill="#566b7b" text-anchor="start">Qwen2.5-VL</text><line x1="271.6" y1="18" x2="289.6" y2="18" stroke="#2a78d6" stroke-width="2"/><circle cx="280.6" cy="18" r="3.5" fill="#2a78d6"/><text x="295.6" y="22.0" font-size="13" fill="#566b7b" text-anchor="start">Qwen3-VL</text><line x1="371.20000000000005" y1="18" x2="389.20000000000005" y2="18" stroke="#1c5cab" stroke-width="2"/><circle cx="380.20000000000005" cy="18" r="3.5" fill="#1c5cab"/><text x="395.2" y="22.0" font-size="13" fill="#566b7b" text-anchor="start">Qwen3.5</text><line x1="463.6" y1="18" x2="481.6" y2="18" stroke="#0d366b" stroke-width="2"/><circle cx="472.6" cy="18" r="3.5" fill="#0d366b"/><text x="487.6" y="22.0" font-size="13" fill="#566b7b" text-anchor="start">Qwen3.6</text>
+<circle cx="560.0" cy="18" r="4" fill="white" stroke="#566b7b" stroke-width="1.6"/>
+<text x="570.0" y="22.0" font-size="13" fill="#566b7b" text-anchor="start">mixture of experts</text>
+</g></svg>

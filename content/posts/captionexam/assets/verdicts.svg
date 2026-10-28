@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="646" viewBox="0 0 760 646" role="img" aria-label="Share of correct, omitted and hallucinated answers for each of the 35 captioners, sorted by accuracy.">
+<rect x="0" y="0" width="760" height="646" fill="white"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif">
+<line x1="170.0" y1="40" x2="170.0" y2="606" stroke="#e6ecf0"/>
+<text x="170.0" y="622.0" font-size="12" fill="#8b9aa6" text-anchor="middle">0%</text>
+<line x1="300.0" y1="40" x2="300.0" y2="606" stroke="#e6ecf0"/>
+<text x="300.0" y="622.0" font-size="12" fill="#8b9aa6" text-anchor="middle">25%</text>
+<line x1="430.0" y1="40" x2="430.0" y2="606" stroke="#e6ecf0"/>
+<text x="430.0" y="622.0" font-size="12" fill="#8b9aa6" text-anchor="middle">50%</text>
+<line x1="560.0" y1="40" x2="560.0" y2="606" stroke="#e6ecf0"/>
+<text x="560.0" y="622.0" font-size="12" fill="#8b9aa6" text-anchor="middle">75%</text>
+<line x1="690.0" y1="40" x2="690.0" y2="606" stroke="#e6ecf0"/>
+<text x="690.0" y="622.0" font-size="12" fill="#8b9aa6" text-anchor="middle">100%</text>
+<circle cx="12" cy="54.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="58.5" font-size="12" fill="#233b50" text-anchor="start">GPT-6 Astra</text>
+<rect x="170.0" y="48.5" width="317.5" height="11" fill="#2f7d5b"/>
+<rect x="488.5" y="48.5" width="129.7" height="11" fill="#d3dbe1"/>
+<rect x="619.2" y="48.5" width="69.8" height="11" fill="#b2453f"/>
+<text x="698.0" y="58.5" font-size="11.5" fill="#b2453f" text-anchor="start">13.6%</text>
+<circle cx="12" cy="70.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="74.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5.6 Sol</text>
+<rect x="170.0" y="64.5" width="262.6" height="11" fill="#2f7d5b"/>
+<rect x="433.6" y="64.5" width="175.0" height="11" fill="#d3dbe1"/>
+<rect x="609.6" y="64.5" width="79.4" height="11" fill="#b2453f"/>
+<text x="698.0" y="74.5" font-size="11.5" fill="#b2453f" text-anchor="start">15.5%</text>
+<circle cx="12" cy="86.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="90.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5</text>
+<rect x="170.0" y="80.5" width="256.1" height="11" fill="#2f7d5b"/>
+<rect x="427.1" y="80.5" width="170.5" height="11" fill="#d3dbe1"/>
+<rect x="598.6" y="80.5" width="90.4" height="11" fill="#b2453f"/>
+<text x="698.0" y="90.5" font-size="11.5" fill="#b2453f" text-anchor="start">17.6%</text>
+<circle cx="12" cy="102.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="106.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5.4</text>
+<rect x="170.0" y="96.5" width="254.2" height="11" fill="#2f7d5b"/>
+<rect x="425.2" y="96.5" width="187.3" height="11" fill="#d3dbe1"/>
+<rect x="613.5" y="96.5" width="75.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="106.5" font-size="11.5" fill="#b2453f" text-anchor="start">14.7%</text>
+<circle cx="12" cy="118.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="122.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5 mini</text>
+<rect x="170.0" y="112.5" width="244.2" height="11" fill="#2f7d5b"/>
+<rect x="415.2" y="112.5" width="193.5" height="11" fill="#d3dbe1"/>
+<rect x="609.6" y="112.5" width="79.4" height="11" fill="#b2453f"/>
+<text x="698.0" y="122.5" font-size="11.5" fill="#b2453f" text-anchor="start">15.5%</text>
+<circle cx="12" cy="134.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="138.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5.6 Terra</text>
+<rect x="170.0" y="128.5" width="242.8" height="11" fill="#2f7d5b"/>
+<rect x="413.8" y="128.5" width="194.5" height="11" fill="#d3dbe1"/>
+<rect x="609.3" y="128.5" width="79.7" height="11" fill="#b2453f"/>
+<text x="698.0" y="138.5" font-size="11.5" fill="#b2453f" text-anchor="start">15.5%</text>
+<circle cx="12" cy="150.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="154.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5.6 Luna</text>
+<rect x="170.0" y="144.5" width="228.7" height="11" fill="#2f7d5b"/>
+<rect x="399.7" y="144.5" width="212.6" height="11" fill="#d3dbe1"/>
+<rect x="613.3" y="144.5" width="75.7" height="11" fill="#b2453f"/>
+<text x="698.0" y="154.5" font-size="11.5" fill="#b2453f" text-anchor="start">14.7%</text>
+<circle cx="12" cy="166.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="170.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-397B-A17B</text>
+<rect x="170.0" y="160.5" width="222.3" height="11" fill="#2f7d5b"/>
+<rect x="393.3" y="160.5" width="200.5" height="11" fill="#d3dbe1"/>
+<rect x="594.9" y="160.5" width="94.1" height="11" fill="#b2453f"/>
+<text x="698.0" y="170.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.3%</text>
+<circle cx="12" cy="182.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="186.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-27B</text>
+<rect x="170.0" y="176.5" width="221.5" height="11" fill="#2f7d5b"/>
+<rect x="392.5" y="176.5" width="199.0" height="11" fill="#d3dbe1"/>
+<rect x="592.5" y="176.5" width="96.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="186.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.7%</text>
+<circle cx="12" cy="198.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="202.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3-VL-235B-A22B</text>
+<rect x="170.0" y="192.5" width="219.7" height="11" fill="#2f7d5b"/>
+<rect x="390.7" y="192.5" width="210.3" height="11" fill="#d3dbe1"/>
+<rect x="601.9" y="192.5" width="87.1" height="11" fill="#b2453f"/>
+<text x="698.0" y="202.5" font-size="11.5" fill="#b2453f" text-anchor="start">16.9%</text>
+<circle cx="12" cy="214.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="218.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.6-35B-A3B</text>
+<rect x="170.0" y="208.5" width="214.5" height="11" fill="#2f7d5b"/>
+<rect x="385.5" y="208.5" width="207.4" height="11" fill="#d3dbe1"/>
+<rect x="593.9" y="208.5" width="95.1" height="11" fill="#b2453f"/>
+<text x="698.0" y="218.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.5%</text>
+<circle cx="12" cy="230.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="234.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-35B-A3B</text>
+<rect x="170.0" y="224.5" width="213.1" height="11" fill="#2f7d5b"/>
+<rect x="384.1" y="224.5" width="211.3" height="11" fill="#d3dbe1"/>
+<rect x="596.4" y="224.5" width="92.6" height="11" fill="#b2453f"/>
+<text x="698.0" y="234.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.0%</text>
+<circle cx="12" cy="246.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="250.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.6-27B</text>
+<rect x="170.0" y="240.5" width="212.9" height="11" fill="#2f7d5b"/>
+<rect x="383.9" y="240.5" width="210.6" height="11" fill="#d3dbe1"/>
+<rect x="595.5" y="240.5" width="93.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="250.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.2%</text>
+<circle cx="12" cy="262.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="266.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-122B-A10B</text>
+<rect x="170.0" y="256.5" width="208.9" height="11" fill="#2f7d5b"/>
+<rect x="379.9" y="256.5" width="205.6" height="11" fill="#d3dbe1"/>
+<rect x="586.5" y="256.5" width="102.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="266.5" font-size="11.5" fill="#b2453f" text-anchor="start">19.9%</text>
+<circle cx="12" cy="278.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="282.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3-VL-32B</text>
+<rect x="170.0" y="272.5" width="205.9" height="11" fill="#2f7d5b"/>
+<rect x="376.9" y="272.5" width="217.6" height="11" fill="#d3dbe1"/>
+<rect x="595.5" y="272.5" width="93.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="282.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.2%</text>
+<circle cx="12" cy="294.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="298.5" font-size="12" fill="#233b50" text-anchor="start">GPT-6 Luna</text>
+<rect x="170.0" y="288.5" width="195.5" height="11" fill="#2f7d5b"/>
+<rect x="366.5" y="288.5" width="256.4" height="11" fill="#d3dbe1"/>
+<rect x="623.9" y="288.5" width="65.1" height="11" fill="#b2453f"/>
+<text x="698.0" y="298.5" font-size="11.5" fill="#b2453f" text-anchor="start">12.7%</text>
+<circle cx="12" cy="310.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="314.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5.4 mini</text>
+<rect x="170.0" y="304.5" width="195.3" height="11" fill="#2f7d5b"/>
+<rect x="366.3" y="304.5" width="254.4" height="11" fill="#d3dbe1"/>
+<rect x="621.7" y="304.5" width="67.3" height="11" fill="#b2453f"/>
+<text x="698.0" y="314.5" font-size="11.5" fill="#b2453f" text-anchor="start">13.1%</text>
+<circle cx="12" cy="326.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="330.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-9B</text>
+<rect x="170.0" y="320.5" width="193.8" height="11" fill="#2f7d5b"/>
+<rect x="364.8" y="320.5" width="228.7" height="11" fill="#d3dbe1"/>
+<rect x="594.5" y="320.5" width="94.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="330.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.4%</text>
+<circle cx="12" cy="342.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="346.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-4B</text>
+<rect x="170.0" y="336.5" width="186.6" height="11" fill="#2f7d5b"/>
+<rect x="357.6" y="336.5" width="230.4" height="11" fill="#d3dbe1"/>
+<rect x="589.0" y="336.5" width="100.0" height="11" fill="#b2453f"/>
+<text x="698.0" y="346.5" font-size="11.5" fill="#b2453f" text-anchor="start">19.4%</text>
+<circle cx="12" cy="358.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="362.5" font-size="12" fill="#233b50" text-anchor="start">GPT-6 Sol</text>
+<rect x="170.0" y="352.5" width="185.9" height="11" fill="#2f7d5b"/>
+<rect x="356.9" y="352.5" width="273.5" height="11" fill="#d3dbe1"/>
+<rect x="631.4" y="352.5" width="57.6" height="11" fill="#b2453f"/>
+<text x="698.0" y="362.5" font-size="11.5" fill="#b2453f" text-anchor="start">11.3%</text>
+<circle cx="12" cy="374.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="378.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3-VL-4B</text>
+<rect x="170.0" y="368.5" width="178.7" height="11" fill="#2f7d5b"/>
+<rect x="349.7" y="368.5" width="243.5" height="11" fill="#d3dbe1"/>
+<rect x="594.2" y="368.5" width="94.8" height="11" fill="#b2453f"/>
+<text x="698.0" y="378.5" font-size="11.5" fill="#b2453f" text-anchor="start">18.4%</text>
+<circle cx="12" cy="390.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="394.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3-VL-8B</text>
+<rect x="170.0" y="384.5" width="177.5" height="11" fill="#2f7d5b"/>
+<rect x="348.5" y="384.5" width="254.2" height="11" fill="#d3dbe1"/>
+<rect x="603.8" y="384.5" width="85.2" height="11" fill="#b2453f"/>
+<text x="698.0" y="394.5" font-size="11.5" fill="#b2453f" text-anchor="start">16.6%</text>
+<circle cx="12" cy="406.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="410.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3-VL-30B-A3B</text>
+<rect x="170.0" y="400.5" width="172.5" height="11" fill="#2f7d5b"/>
+<rect x="343.5" y="400.5" width="263.9" height="11" fill="#d3dbe1"/>
+<rect x="608.5" y="400.5" width="80.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="410.5" font-size="11.5" fill="#b2453f" text-anchor="start">15.7%</text>
+<circle cx="12" cy="422.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="426.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-2B</text>
+<rect x="170.0" y="416.5" width="170.0" height="11" fill="#2f7d5b"/>
+<rect x="341.0" y="416.5" width="264.1" height="11" fill="#d3dbe1"/>
+<rect x="606.1" y="416.5" width="82.9" height="11" fill="#b2453f"/>
+<text x="698.0" y="426.5" font-size="11.5" fill="#b2453f" text-anchor="start">16.1%</text>
+<circle cx="12" cy="438.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="442.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5 nano</text>
+<rect x="170.0" y="432.5" width="145.5" height="11" fill="#2f7d5b"/>
+<rect x="316.5" y="432.5" width="303.4" height="11" fill="#d3dbe1"/>
+<rect x="620.9" y="432.5" width="68.1" height="11" fill="#b2453f"/>
+<text x="698.0" y="442.5" font-size="11.5" fill="#b2453f" text-anchor="start">13.3%</text>
+<circle cx="12" cy="454.0" r="3.5" fill="#eb6834"/>
+<text x="22.0" y="458.5" font-size="12" fill="#233b50" text-anchor="start">GPT-5.4 nano</text>
+<rect x="170.0" y="448.5" width="135.8" height="11" fill="#2f7d5b"/>
+<rect x="306.8" y="448.5" width="303.2" height="11" fill="#d3dbe1"/>
+<rect x="611.0" y="448.5" width="78.0" height="11" fill="#b2453f"/>
+<text x="698.0" y="458.5" font-size="11.5" fill="#b2453f" text-anchor="start">15.2%</text>
+<circle cx="12" cy="470.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="474.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3-VL-2B</text>
+<rect x="170.0" y="464.5" width="134.2" height="11" fill="#2f7d5b"/>
+<rect x="305.2" y="464.5" width="317.0" height="11" fill="#d3dbe1"/>
+<rect x="623.2" y="464.5" width="65.8" height="11" fill="#b2453f"/>
+<text x="698.0" y="474.5" font-size="11.5" fill="#b2453f" text-anchor="start">12.8%</text>
+<circle cx="12" cy="486.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="490.5" font-size="12" fill="#233b50" text-anchor="start">Qwen3.5-0.8B</text>
+<rect x="170.0" y="480.5" width="130.6" height="11" fill="#2f7d5b"/>
+<rect x="301.6" y="480.5" width="312.8" height="11" fill="#d3dbe1"/>
+<rect x="615.3" y="480.5" width="73.7" height="11" fill="#b2453f"/>
+<text x="698.0" y="490.5" font-size="11.5" fill="#b2453f" text-anchor="start">14.4%</text>
+<circle cx="12" cy="502.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="506.5" font-size="12" fill="#233b50" text-anchor="start">Qwen2.5-VL-72B</text>
+<rect x="170.0" y="496.5" width="123.3" height="11" fill="#2f7d5b"/>
+<rect x="294.3" y="496.5" width="336.9" height="11" fill="#d3dbe1"/>
+<rect x="632.3" y="496.5" width="56.7" height="11" fill="#b2453f"/>
+<text x="698.0" y="506.5" font-size="11.5" fill="#b2453f" text-anchor="start">11.1%</text>
+<circle cx="12" cy="518.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="522.5" font-size="12" fill="#233b50" text-anchor="start">Qwen2.5-VL-32B</text>
+<rect x="170.0" y="512.5" width="119.0" height="11" fill="#2f7d5b"/>
+<rect x="290.0" y="512.5" width="335.3" height="11" fill="#d3dbe1"/>
+<rect x="626.2" y="512.5" width="62.8" height="11" fill="#b2453f"/>
+<text x="698.0" y="522.5" font-size="11.5" fill="#b2453f" text-anchor="start">12.3%</text>
+<circle cx="12" cy="534.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="538.5" font-size="12" fill="#233b50" text-anchor="start">Qwen2.5-VL-7B</text>
+<rect x="170.0" y="528.5" width="81.1" height="11" fill="#2f7d5b"/>
+<rect x="252.1" y="528.5" width="389.5" height="11" fill="#d3dbe1"/>
+<rect x="642.5" y="528.5" width="46.5" height="11" fill="#b2453f"/>
+<text x="698.0" y="538.5" font-size="11.5" fill="#b2453f" text-anchor="start">9.1%</text>
+<circle cx="12" cy="550.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="554.5" font-size="12" fill="#233b50" text-anchor="start">Qwen2-VL-72B</text>
+<rect x="170.0" y="544.5" width="79.5" height="11" fill="#2f7d5b"/>
+<rect x="250.5" y="544.5" width="398.9" height="11" fill="#d3dbe1"/>
+<rect x="650.4" y="544.5" width="38.6" height="11" fill="#b2453f"/>
+<text x="698.0" y="554.5" font-size="11.5" fill="#b2453f" text-anchor="start">7.6%</text>
+<circle cx="12" cy="566.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="570.5" font-size="12" fill="#233b50" text-anchor="start">Qwen2-VL-7B</text>
+<rect x="170.0" y="560.5" width="68.6" height="11" fill="#2f7d5b"/>
+<rect x="239.6" y="560.5" width="410.3" height="11" fill="#d3dbe1"/>
+<rect x="650.9" y="560.5" width="38.1" height="11" fill="#b2453f"/>
+<text x="698.0" y="570.5" font-size="11.5" fill="#b2453f" text-anchor="start">7.5%</text>
+<circle cx="12" cy="582.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="586.5" font-size="12" fill="#233b50" text-anchor="start">Qwen2.5-VL-3B</text>
+<rect x="170.0" y="576.5" width="59.9" height="11" fill="#2f7d5b"/>
+<rect x="230.9" y="576.5" width="422.0" height="11" fill="#d3dbe1"/>
+<rect x="653.9" y="576.5" width="35.1" height="11" fill="#b2453f"/>
+<text x="698.0" y="586.5" font-size="11.5" fill="#b2453f" text-anchor="start">6.9%</text>
+<circle cx="12" cy="598.0" r="3.5" fill="#2a78d6"/>
+<text x="22.0" y="602.5" font-size="12" fill="#233b50" text-anchor="start">Qwen2-VL-2B</text>
+<rect x="170.0" y="592.5" width="58.2" height="11" fill="#2f7d5b"/>
+<rect x="229.2" y="592.5" width="422.3" height="11" fill="#d3dbe1"/>
+<rect x="652.6" y="592.5" width="36.4" height="11" fill="#b2453f"/>
+<text x="698.0" y="602.5" font-size="11.5" fill="#b2453f" text-anchor="start">7.2%</text>
+<rect x="170" y="14" width="12" height="12" rx="2" fill="#2f7d5b"/><text x="188.0" y="24.0" font-size="13" fill="#566b7b" text-anchor="start">correct</text><rect x="256.4" y="14" width="12" height="12" rx="2" fill="#d3dbe1"/><text x="274.4" y="24.0" font-size="13" fill="#566b7b" text-anchor="start">omission</text><rect x="350.0" y="14" width="12" height="12" rx="2" fill="#b2453f"/><text x="368.0" y="24.0" font-size="13" fill="#566b7b" text-anchor="start">hallucination</text>
+<circle cx="12" cy="20" r="3.5" fill="#2a78d6"/><text x="20.0" y="24.0" font-size="12" fill="#566b7b" text-anchor="start">Qwen</text>
+<circle cx="68" cy="20" r="3.5" fill="#eb6834"/><text x="76.0" y="24.0" font-size="12" fill="#566b7b" text-anchor="start">OpenAI</text>
+<text x="698.0" y="24.0" font-size="11.5" fill="#566b7b" text-anchor="start">halluc.</text>
+</g></svg>
