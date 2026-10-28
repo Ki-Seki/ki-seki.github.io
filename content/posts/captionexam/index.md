@@ -1,13 +1,13 @@
 ---
 date: '2026-10-26T21:31:14+08:00'
-title: 'CaptionExam：一个高难度的 captioner QA benchmark'
+title: 'CaptionExam: A Challenging QA Benchmark for Captioners'
 author:
   - Elliot Shichao Song
-summary: '在 CaptionExam benchmark 上，目前 GPT 系列最强模型 GPT-6 Astra 的图像描述能力也才刚刚及格，得分 61.2%。'
+summary: 'On CaptionExam, even GPT-6 Astra only just passes at describing images, with a score of 61.2%.'
 cover:
   image: "assets/captionexam-cover.png"
   relative: true
-  caption: "一份 caption 经过判官，分成答对、漏述和幻觉三路（[ChatGPT Images](https://chatgpt.com/) 生成）"
+  caption: "A caption passes through the judge and splits three ways: correct, omission and hallucination (generated with [ChatGPT Images](https://chatgpt.com/))"
 tags:
   - image-captioning
   - benchmark
@@ -17,141 +17,141 @@ tags:
 math: false
 ---
 
-- **代码：** <https://github.com/Ki-Seki/CaptionExam>
-- **数据：** [Ki-Seki/CaptionExam](https://huggingface.co/datasets/Ki-Seki/CaptionExam)（109 张图、3,099 道题）
-- **评测结果：** [Ki-Seki/CaptionExam-Results](https://huggingface.co/datasets/Ki-Seki/CaptionExam-Results)（35 个 captioner 的 caption、判定和排行榜）
+- **Code:** <https://github.com/Ki-Seki/CaptionExam>
+- **Data:** [Ki-Seki/CaptionExam](https://huggingface.co/datasets/Ki-Seki/CaptionExam) (109 images, 3,099 questions)
+- **Results:** [Ki-Seki/CaptionExam-Results](https://huggingface.co/datasets/Ki-Seki/CaptionExam-Results) (captions, verdicts and leaderboard for 35 captioners)
 
-## 引言
+## Introduction
 
-越来越多的图像生成模型选择用详细丰富的 caption 来训练，比如说最近的开源模型 Ideogram 4[^ideogram_4] 和 MOSS-Image[^mosi_moss]，都在训练中加入了非常长的 caption 的图文对。而且如今的这些 renderer 已经能还原 caption 中的大部分信息。
+More and more image generation models are trained on detailed, rich captions. Recent open models such as Ideogram 4 [^ideogram_4] and MOSS-Image [^mosi_moss] both add image–text pairs with very long captions to their training data. And today's renderers can already reproduce most of the information in a caption.
 
-renderer 还原得越好，captioner 就越决定上限：它漏掉的每个细节，生成模型都学不会控制；它编造的每个细节，都在教生成模型错误的东西。因此，一个好的 captioner，也就是负责标注训练数据的模型，和生成模型本身同样重要。字节的 Context Scaling[^chen_contextscaling] 更是在明确探索 caption 的 scaling law。
+The better the renderer reproduces a caption, the more the captioner sets the ceiling: every detail it leaves out is one the generator never learns to control, and every detail it makes up teaches the generator something wrong. A good captioner, the model that labels the training data, therefore matters as much as the generator itself. ByteDance's Context Scaling [^chen_contextscaling] goes further and explicitly studies scaling laws for captions.
 
-要得到强大的 captioner，有两件事要做好。一是结构：现在的 caption 大多设计为 region-wise 的 JSON 结构，这非常方便扩展标注的细致程度。二是信息量：caption 到底说对了多少、漏了多少、编了多少。结构可以照着设计，信息量却只能靠评测来衡量，而目前还缺少一个足够难、能拉开强模型差距，又足够具体、能指出每个模型错在哪里的 benchmark。所以我们设计了 CaptionExam，一个非常具有挑战性的 captioner QA benchmark。
+Getting a strong captioner takes two things. The first is structure: most captions today are designed as region-wise JSON, which makes it easy to scale up how detailed the annotation is. The second is information: how much a caption gets right, how much it leaves out and how much it makes up. Structure can be designed, but information can only be measured by evaluation, and what's still missing is a benchmark hard enough to separate strong models and specific enough to show where each model goes wrong. So we built CaptionExam, a very challenging QA benchmark for captioners.
 
 {{< media
 src="assets/how-it-works.svg"
-caption="图 1：被测 captioner 为图像写 caption；一个只读文字、看不到图的判官，仅凭 caption 回答关于这张图的选择题。"
+caption="Figure 1: The captioner under test writes a caption for an image; a judge that reads only text and never sees the image answers multiple-choice questions about the image from the caption alone."
 >}}
 
-benchmark 包括 109 张图，每张图都配有一组关于其细节的选择题。待评测的 captioner 写出 caption 后，判官模型读 caption，但看不到图，仅凭 caption 回答每道题。
+The benchmark has 109 images, each with a set of multiple-choice questions about its details. Once the captioner under test has written its caption, the judge model reads the caption, without seeing the image, and answers every question from the caption alone.
 
-显而易见，captioner 的描述越细致准确，判官就越容易根据 caption 回答正确，从而获得更高的评分。
+Clearly, the more detailed and accurate a captioner's description, the more questions the judge can answer correctly from it, and the higher the score.
 
-## 相关工作
+## Related Work
 
-目前最接近的是 **CapProbe**[^huang_capprobe]，而且也是同时期的工作。它同样让一个只读文字的判官仅凭 caption 回答选择题，并用一个 *Uncertain* 选项区分 caption 漏掉的和说错的内容。它的题目按区域覆盖整个画面生成：346 张图、25,650 道题、10 个语义类别，用有效准确率和基于信息密度的指标打分。
+The closest work is **CapProbe** [^huang_capprobe], which appeared at about the same time. It also has a text-only judge answer multiple-choice questions from the caption alone, and uses an *Uncertain* option to tell what a caption leaves out from what it gets wrong. Its questions are generated region by region to cover the whole image: 346 images, 25,650 questions and 10 semantic categories, scored with effective accuracy and an information-density metric.
 
-CaptionExam 的不同在于题目的来源：我们的题是从真实 captioning 模型的失误中挖出来的，而不是为了覆盖画面而生成的，因此题量更小（109 张图、3,099 道题），对强 captioner 来说却很难。另外，CapProbe 的数据和代码尚未公开；CaptionExam 的代码和数据都已开源，判官在本地一张 GPU 上就能运行，可能更方便直接使用。
+CaptionExam differs in where its questions come from: ours are mined from the failures of real captioning models rather than generated to cover the image. So there are fewer of them (109 images, 3,099 questions), yet they are hard for strong captioners. Also, CapProbe's data and code are not yet public, while CaptionExam's code and data are both open source and its judge runs locally on one GPU, which may make it easier to use directly.
 
 ## CaptionExam Benchmark
 
-### 数据构造方式
+### How the Data Is Built
 
-题目是从真实的proprietary captioning 模型（抱歉，这不能开源）的失误中挖出来的：
+The questions are mined from the failures of real proprietary captioning models (sorry, those can't be open-sourced):
 
-1. Gemini 3.1 Pro（preview）同时看一张图和某个模型为它写的 caption，找出这份 caption 最严重的事实性失误（说错的内容，以及漏掉的显著内容），并针对每个失误写一道选择题。
-2. Gemini 3.1 Pro 和 GPT-5.6 Sol 分别在看图的情况下回答每道候选题。只有两者都答对的题才会保留，这样可以去掉有歧义的题目和答案有误的题目。
-3. 每道保留下来的题在进入 benchmark 之前都经过人工审核，审核时可以修改题面和区域。
+1. Gemini 3.1 Pro (preview) looks at an image together with a caption some model wrote for it, finds the caption's most serious factual failures (things it gets wrong, and salient things it leaves out), and writes a multiple-choice question for each failure.
+2. Gemini 3.1 Pro and GPT-5.6 Sol each answer every candidate question while looking at the image. Only questions both answer correctly are kept, which removes ambiguous questions and questions with wrong answers.
+3. Every question that is kept is reviewed by a person before it enters the benchmark, and the reviewer can edit the question and its region.
 
-### 数据统计
+### Statistics
 
 | | |
 |---|---|
-| 图像 | 109 张：照片、插画、商品图、海报、书籍封面、文字密集的图形 |
-| 题目 | 3,099 道，每张图 15–42 道（平均 28 道） |
-| 选项 | 每题 3–6 个（多数为 5 个），其中一个是「未提及」 |
-| 区域 | 120 道题针对整张图，其余题目各自指向一个区域，区域通常只占全图的 4% 左右 |
-| 随机猜测 | 在「未提及」以外的选项中均匀随机选择，准确率为 26.6% |
+| Images | 109: photos, illustrations, product shots, posters, book covers and text-heavy graphics |
+| Questions | 3,099, 15–42 per image (28 on average) |
+| Options | 3–6 per question (usually 5), one of which is “not mentioned” |
+| Regions | 120 questions are about the whole image; each of the rest points to a region, usually about 4% of the image |
+| Random guessing | Choosing uniformly at random among the options other than “not mentioned” gives 26.6% accuracy |
 
-### 题目问什么
+### What the Questions Ask
 
-题目可以涉及图中任何可见的方面：有哪些物体、有几个，姿态与朝向，空间关系与版式，颜色及其具体色调，材质与表面质感，光照，图中文字及其确切内容，重复出现的文字，字体、字重与大小写，图形风格与绘制手法，背景，以及被画面边缘截断的内容。
+A question can be about any visible aspect of the image: which objects there are and how many, pose and orientation, spatial relations and layout, colors and their exact shades, materials and surface texture, lighting, text in the image and its exact content, repeated text, typeface, weight and case, graphic style and rendering technique, the background, and things cut off by the edge of the frame.
 
 {{< media
 src="assets/question-types.svg"
-caption="图 2：3,099 道题按考察内容的分布。GPT-5.6 Luna 根据题面、选项和答案把每道题归入十类之一。"
+caption="Figure 2: The 3,099 questions by what they test. GPT-5.6 Luna sorted each question into one of ten types from its wording, options and answer."
 >}}
 
-近三成的题问的是有什么物体、是什么场景；颜色、位置与版式各占约 15%；问文字内容和字体的题合计约 13%。图 3 是一张示例图和它的四道题。
+Nearly 30% of the questions ask what objects or scene are present; color, and position and layout, each take about 15%; questions about text content and typography add up to about 13%. Figure 3 shows an example image and four of its questions.
 
 {{< media
 src="assets/example-questions.webp"
-caption="图 3：一张示例图和其中的四道题。"
+caption="Figure 3: An example image and four of its questions."
 >}}
 
-### 判官模型打分
+### Scoring with a Judge Model
 
-用最强的闭源模型当判官或许更准，但每次评测都要花钱、占用 API 配额，还依赖一个可能随时变化的模型。我们选择了 Phi-4[^abdin_phi4]：一个 14B 的模型。
+The strongest closed model might make a more accurate judge, but every evaluation would cost money, use up API quota and depend on a model that can change at any time. We chose Phi-4 [^abdin_phi4], a 14B model.
 
-在众多小规模模型中，Phi-4 和前沿模型的校准程度是非常高的。让 GPT-5.6 Sol 分别判 Qwen2.5-VL-72B、Qwen3-VL-235B-A22B 和 Qwen3.5-397B-A17B 的 caption。两个判官在 76.9% 的判定上一致（Cohen's κ = 0.61）。准确率几乎相同：Qwen2.5-VL-72B 都是 23.2%，Qwen3-VL-235B-A22B 是 41.5% 对 41.6%；Qwen3.5-397B-A17B 差了 3 个点（41.4% 对 44.5%），它和 Qwen3-VL-235B-A22B 的先后也因此换了位置，不过两者在全部题目上本来只差 0.5 个点。
+Among the many small models, Phi-4 is very well calibrated against frontier models. We also had GPT-5.6 Sol judge the captions of Qwen2.5-VL-72B, Qwen3-VL-235B-A22B and Qwen3.5-397B-A17B on all 3,099 questions. The two judges agree on 77.4% of verdicts (Cohen's κ = 0.62). Accuracy under Phi-4 and under GPT-5.6 Sol is close: 23.9% against 24.1% for Qwen2.5-VL-72B, 42.4% against 43.4% for Qwen3-VL-235B-A22B, and 42.9% against 45.1% for Qwen3.5-397B-A17B, so the three models rank in the same order under both judges.
 
-## 一些评测结果
+## Evaluation Results
 
-我们评价了 23 个 Qwen 视觉语言模型 和 12 个 OpenAI 模型。
+We evaluated 23 Qwen vision-language models and 12 OpenAI models.
 
-- Qwen：Qwen2-VL（2B、7B、72B）、Qwen2.5-VL（3B、7B、32B、72B）、Qwen3-VL（2B、4B、8B、32B、30B-A3B、235B-A22B）、Qwen3.5（0.8B、2B、4B、9B、27B、35B-A3B、122B-A10B、397B-A17B）和 Qwen3.6（27B、35B-A3B）
-- OpenAI：GPT-5（nano，mini，base）、GPT-5.4（nano，mini，base）、GPT-5.6（Luna，Terra，Sol）、GPT-6（Luna，Sol，Astra）
+- Qwen: Qwen2-VL (2B, 7B, 72B), Qwen2.5-VL (3B, 7B, 32B, 72B), Qwen3-VL (2B, 4B, 8B, 32B, 30B-A3B, 235B-A22B), Qwen3.5 (0.8B, 2B, 4B, 9B, 27B, 35B-A3B, 122B-A10B, 397B-A17B) and Qwen3.6 (27B, 35B-A3B)
+- OpenAI: GPT-5 (nano, mini, base), GPT-5.4 (nano, mini, base), GPT-5.6 (Luna, Terra, Sol) and GPT-6 (Luna, Sol, Astra)
 
-所有模型都尽可能关闭思考模式，尽可能保持 greedy 解码，使用相同 prompt，要求尽可能详尽地描述图中一切可见内容。
+All models run with thinking turned off and greedy decoding wherever possible, and all use the same prompt, which asks for as detailed a description of everything visible in the image as possible.
 
-### 准确率与长度
+### Accuracy and Length
 
-显而易见，说的越多，更容易面面俱到，但也可能带来冗余和不必要的 token。Context Scaling[^chen_contextscaling] 也发现，把自然语言 caption 写得更长，几乎不改善生成模型的训练，起作用的是 caption 中与图像对应的信息量。下面是各模型在 token 数与准确率上的表现。目前，token 数与准确率表现俱佳的大多是 OpenAI 的模型。
+Clearly, saying more makes it easier to cover everything, but it can also bring redundancy and unnecessary tokens. Context Scaling [^chen_contextscaling] also finds that making natural-language captions longer barely improves the generator's training; what matters is how much image-grounded information the caption carries. Below is how each model does on token count and accuracy. For now, the models that do well on both are mostly OpenAI's.
 
 {{< media
 src="assets/pareto.html"
-caption="图 4：每个 captioner 为每张图平均输出的 token 数与准确率。左上绿色区域里的模型比中位模型 token 更少、准确率更高。"
+caption="Figure 4: Average output tokens per image and accuracy for each captioner. Models in the green area at the top left use fewer tokens than the median model and score higher."
 >}}
 
-一个很有意思的现象是，同一个系列的模型，比如 Qwen3.5 系列，他们的表现有时候并不随模型规模的增加而提升。
+Interestingly, within one series, such as Qwen3.5, a larger model sometimes does no better.
 
-### 冗余发生的地方
+### Where the Extra Tokens Go
 
-token 数相近的模型，准确率可以差得很远：GPT-5.6 Sol 和 Qwen2.5-VL-32B 都写 630 个 token 左右，准确率差了 27 个点。多写的 token 大致花在三个地方：
+Models that write about the same number of tokens can be far apart in accuracy: GPT-5.6 Sol and Qwen2.5-VL-32B both write about 630 tokens, and their accuracy differs by 27 points. The extra tokens go to roughly three places:
 
-- **重复。** 小模型会陷入循环，把同一段话反复写到 4,096 个 token 的上限。Qwen3-VL-2B 的 109 份 caption 里有 9 份如此，Qwen3.5-0.8B 有 4 份，Qwen3-VL-4B 有 3 份。
-- **格式和客套。** GPT-5.4 nano 平均每份 caption 有 6 个小标题、38 个列表项；20% 的 caption 带一段总结，把前文再说一遍；24% 在末尾主动提出 “If you want, I can also…”。这些 token 不带来任何新事实。
-- **写得多，却不具体。** 长 caption 常把篇幅花在笼统的风格、质感和不确定性说明上，而题目问的是具体的东西：在哪里、什么颜色、被画面哪条边截断。
+- **Repetition.** Small models get stuck in loops, writing the same passage over and over until they hit the 4,096-token limit. This happens in 9 of Qwen3-VL-2B's 109 captions, 4 of Qwen3.5-0.8B's and 3 of Qwen3-VL-4B's.
+- **Formatting and pleasantries.** GPT-5.4 nano's captions have 6 headings and 38 list items on average; 20% end with a summary that repeats what came before, and 24% close by offering “If you want, I can also…”. None of these tokens add a new fact.
+- **Long but not specific.** Long captions often spend their length on general remarks about style, texture and uncertainty, while the questions ask about specifics: where something is, what color it is, which edge of the frame cuts it off.
 
-举个例子，图 5 是同一张木瓜插画的两份 caption。GPT-5.4 nano 写了 678 个词（980 个 token），38 道题只答对 5 道；GPT-6 Sol 只写了 201 个词（265 个 token），答对 16 道。
+For example, Figure 5 shows two captions of the same papaya illustration. GPT-5.4 nano wrote 678 words (980 tokens) and got only 5 of the 38 questions right; GPT-6 Sol wrote just 201 words (265 tokens) and got 16 right.
 
 {{< media
 src="assets/papaya-captions.webp"
-caption="图 5：GPT-5.4 nano 和 GPT-6 Sol 为同一张木瓜插画写的完整 caption，按模型输出原样排版（## 和 ### 是 nano 自己写的 Markdown 标题）。右上的横条是这张图 38 道题的判定：绿色答对，灰色漏述，红色幻觉。"
+caption="Figure 5: Captions of the same papaya illustration by GPT-5.4 nano and GPT-6 Sol."
 >}}
 
-nano 的 caption 一直在说「很多切开的木瓜」，却没有提到画面里还有完整的木瓜，也没有交代每个木瓜在哪里、哪些被边缘截断，于是这些题判官只能选「未提及」；问到画里的木瓜是什么形态时，判官据它选了「只有切半的和切块的」，算作幻觉。Sol 的 caption 只有它的三分之一长，却逐个交代了切开的和完整的木瓜各在哪里、哪些被截断。
+Nano's caption keeps talking about “many cut papayas” but never mentions that the picture also has whole papayas, or says where each papaya is and which ones are cut off by the edge, so for those questions the judge can only choose “not mentioned”. Asked what forms the papayas take, the judge went by the caption and chose “Halved fruits and diced pieces only”, which counts as a hallucination. Sol's caption is a third as long, yet it says where each cut and each whole papaya is and which ones are cut off.
 
-### 从 caption 回到图像
+### From Captions Back to Images
 
-Qwen 的三个 2B 尺寸模型Qwen2-VL-2B（准确率 11.4%）、Qwen3-VL-2B（准确率 26.0%）、Qwen3.5-2B（准确率 32.9%）表现恰好从低分到高分的趋势。我们可以把他们的 caption 拿给 MOSS-Image[^mosi_moss] 生成图像，看看是否生成的图像也更能还原原图，另放最强的 captioner GPT-6 Astra 作参照（图 6）。
+Qwen's three 2B models, Qwen2-VL-2B (11.4% accuracy), Qwen3-VL-2B (26.0%) and Qwen3.5-2B (32.9%), happen to run from low to high scores. We can give their captions to MOSS-Image [^mosi_moss] to generate images and see whether the generated images also come closer to the original, with the strongest captioner, GPT-6 Astra, as a reference (Figure 6).
 
-非常直观，caption 在 CaptionExam 上得分越高，生成的图越接近原图：低分 caption 只够还原「一套石榴石首饰」「一间酒店客房」这样的大意，物体怎么摆、画面里写了什么字，都由生成模型自己补；高分 caption 把这些写了出来，构图也就跟着对了。脚部解剖图最明显：Qwen2-VL-2B 没有写出图中的标注文字，MOSS-Image 便自己编了一套中文标注。
+It is plain to see: the higher a caption scores on CaptionExam, the closer the generated image is to the original. Low-scoring captions carry only the gist, such as “a set of garnet jewelry” or “a hotel room”, and leave the generator to fill in how objects are arranged and what text the picture contains; high-scoring captions spell these out, and the composition follows. The foot anatomy chart shows it most clearly: Qwen2-VL-2B didn't write out the labels in the image, so MOSS-Image made up a set of Chinese labels of its own.
 
 {{< media
 src="assets/caption-to-image.webp"
-caption="图 6：每一行是一张图。左起第一列是原图，其余各列是 MOSS-Image 根据各个 captioner 的 caption 生成的图（seed 42，50 步，cfg 3.0），按 captioner 的总体准确率从低到高排列，最右一列 GPT-6 Astra 作参照。每张生成图下方是这份 caption 在该图题目上的准确率。"
+caption="Figure 6: Each row is one image. The first column is the original; the other columns are the images MOSS-Image generated from each captioner’s caption (seed 42, 50 steps, cfg 3.0). Under each generated image is that caption’s accuracy on the image’s questions."
 >}}
 
-题目从不提及 caption，因此也可以直接用来评估生成的图像。我们让 GPT-5.6 Sol 看着生成的图而不是原图，回答这六张图的全部 184 道题。看原图时它答对 93.5%；看由 caption 生成的图时，准确率依次是 Qwen2-VL-2B 43.5%、Qwen3-VL-2B 66.8%、Qwen3.5-2B 69.6%、GPT-6 Astra 85.3%，和这些 caption 本身在 CaptionExam 上的排序完全一致。
+The questions never mention captions, so they can also be used directly to evaluate generated images. We had GPT-5.6 Sol answer all 184 questions for these six images while looking at the generated images instead of the originals. Looking at the originals, it gets 93.5% right; on the images generated from captions, its accuracy is 43.5% for Qwen2-VL-2B, 66.8% for Qwen3-VL-2B, 69.6% for Qwen3.5-2B and 85.3% for GPT-6 Astra, exactly the same order as the captions' own scores on CaptionExam.
 
-这意味着两件事。训练时，**captioner 漏掉或写错的细节，生成模型都学不到正确的对应**；使用时，用户随手写的 prompt 往往比低分 caption 还要简略，**扩写prompt为具体、准确的描述，同样决定了生成结果离想要的画面有多近**。
+This means two things. In training, **whatever a captioner leaves out or gets wrong, the generator can never learn the right correspondence for**; in use, the prompts people dash off are often even sketchier than low-scoring captions, so **expanding a prompt into a specific, accurate description likewise decides how close the result comes to the picture they want**.
 
-## 结论
+## Conclusion
 
-CaptionExam 是一个包含 109 张图，3099 道题的高难度 captioner 评测 benchmark，能够支持最近的文生图，图生文模型的开发。并且，我们发现：
+CaptionExam is a challenging captioner benchmark of 109 images and 3,099 questions that can support the development of recent text-to-image and image-to-text models. We also found that:
 
-- **最强的模型也远没到头。** 得分最高的 GPT-6 Astra 只有 61.2%，最强的开源模型 Qwen3.5-397B-A17B 是 42.9%。
-- **写得长不等于写得好。** token 数相近的模型，准确率可以差出 27 个点；多出来的 token 常常花在重复、格式和客套，以及笼统的描述上。token 少而准确率高的大多是 OpenAI 的模型。
-- **规模不总是有用。** 同一系列里，更大的模型有时并不更强。
-- **caption 的分数会体现在生成的图上。** 把 caption 交给 MOSS-Image，得分越高的 caption 生成的图越接近原图，看着生成的图答题，准确率也按同样的顺序排列。
+- **Even the strongest models are far from the ceiling.** The top scorer, GPT-6 Astra, gets only 61.2%, and the strongest open model, Qwen3.5-397B-A17B, gets 42.9%.
+- **Longer is not better.** Models that write about the same number of tokens can differ by 27 points in accuracy; the extra tokens often go to repetition, formatting and pleasantries, and general description. The models that score high with few tokens are mostly OpenAI's.
+- **Scale doesn't always help.** Within one series, a larger model is sometimes no stronger.
+- **A caption's score shows in the images generated from it.** Given to MOSS-Image, higher-scoring captions produce images closer to the original, and answering the questions from the generated images puts them in the same order.
 
-## 引用
+## Citation
 
 {{< bibtex >}}
 
-## 参考文献
+## References
 
 [^abdin_phi4]: **Abdin, Marah, et al.** *Phi-4 Technical Report*. 2024. *arXiv*, https://arxiv.org/abs/2412.08905.
 
