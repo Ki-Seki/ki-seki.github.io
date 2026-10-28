@@ -35,6 +35,12 @@
     Your browser does not support the video tag.
   </video>
 
+{{/* ---------- Local/Remote Web Page (an interactive figure) ---------- */}}
+{{- else if hasSuffix $src ".html" -}}
+  {{- /* The page follows the site's theme and sets the frame's height itself; height is only the first guess */ -}}
+  {{- $res := .Page.Resources.GetMatch $src -}}
+  <iframe src="{{ with $res }}{{ .RelPermalink }}{{ else }}{{ cond (fileExists (printf "static/%s" $src)) (relURL $src) $src }}{{ end }}" title="{{ $caption | markdownify | plainify }}" loading="lazy" scrolling="no" style="display: block; width: 100%; height: {{ .Get "height" | default "600px" }}; border: 0;"></iframe>
+
 {{/* ---------- Local/Remote Image ---------- */}}
 {{- else -}}
   {{- $res := .Page.Resources.GetMatch $src -}}
