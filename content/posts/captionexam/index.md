@@ -4,7 +4,6 @@ title: 'CaptionExam：一个高难度的 captioner QA benchmark'
 author:
   - Elliot Shichao Song
 summary: '文生图模型越来越依赖详细的 caption 来训练，写 caption 的 captioner 因此变得重要。CaptionExam 让一个只读文字的判官仅凭 caption 回答关于图像的细粒度问题，按答对多少来给 caption 打分，并区分 caption 是漏说了还是说错了。'
-draft: false
 tags:
   - image-captioning
   - benchmark
@@ -20,26 +19,18 @@ math: false
 
 ## 引言
 
-越来越多的图像生成模型选择用详细丰富的 caption 来训练，而不是网络图片自带的简短 alt 文本。DALL·E 3 证明，用专门的 captioner 把训练集重新标注一遍，能让文生图模型明显更好地遵循 prompt[^betker_dalle3]；PixArt-α、Stable Diffusion 3 和 Playground v3 也都用密集的合成 caption 训练[^chen_pixart][^esser_sd3][^liu_pgv3]。如今的 renderer 已经能还原 caption 中的大部分信息，比如 MOSS-Image 就以渲染密集、准确的文字和连贯的版式为目标[^mosi_moss]。
+越来越多的图像生成模型选择用详细丰富的 caption 来训练，比如说最近的开源模型 ideogram4， MOSS-Image 都在训练中加入了非常长的 cpation 的图文对。而且如今的这些 renderer s 已经能还原 caption 中的大部分信息。
 
-renderer 还原得越好，captioner 就越决定上限：它漏掉的每个细节，生成模型都学不会控制；它编造的每个细节，都在教生成模型错误的东西。因此，一个好的 captioner，也就是负责标注训练数据的模型，和生成模型本身同样重要。
+renderer 还原得越好，captioner 就越决定上限：它漏掉的每个细节，生成模型都学不会控制；它编造的每个细节，都在教生成模型错误的东西。因此，一个好的 captioner，也就是负责标注训练数据的模型，和生成模型本身同样重要。https://heheyas.github.io/context-scaling/ 字节的 Context Scaling 更是在明确探索 caption 的 scaling law。
 
-要选出这样的 captioner，需要一个足够难、能拉开强模型差距，又足够具体、能指出每个模型错在哪里的 benchmark。BLEU、CIDEr 这类基于参考答案的指标只看和一段简短参考文本的词语重合，面对长 caption 基本失效；让 LLM 给整段 caption 打分，又只能得到一个总分，指不出到底哪个事实错了。CaptionExam 换了个思路：让 caption 参加一场考试。
-
-### 工作方式
+为了选出强大的 captioner，目前有两个重要因素要做好。一个从结构出发，大多都设计为 region-wise 的 json 结构，这非常方便扩展标注细致程度。但是这里面的信息量高低还是缺少需要一个足够难、能拉开强模型差距，又足够具体、能指出每个模型错在哪里的 benchmark。所以我们设计了CaptionExam ，一个非常具有挑战性的 captioner QA benchmark。
 
 {{< media
 src="assets/how-it-works.svg"
 caption="图 1：被测 captioner 为图像写 caption；一个只读文字、看不到图的判官，仅凭 caption 回答关于这张图的选择题。"
 >}}
 
-每张图都配有一组关于其细节的选择题。判官模型读 caption，但看不到图，仅凭 caption 回答每道题。每道题都多给一个选项 *"not mentioned / indeterminable"*（未提及），所以每次作答都落入以下三种结果之一：
-
-- **答对**（correct）：判官选中了正确答案，说明 caption 说清了这个事实；
-- **漏述**（omission）：判官选了「未提及」，说明 caption 没有说；
-- **幻觉**（hallucination）：判官选了错误选项，说明 caption 说错了。
-
-一道题长这样：
+每张图都配有一组关于其细节的选择题。待评测的 captioner 写出 caption 后，判官模型读 caption，但看不到图，仅凭 caption 回答每道题。比如说对于一张图，判官需要回答的其中一道题长这样：
 
 ```json
 {"id": "img_0001_q02", "image_id": "img_0001",
@@ -50,15 +41,26 @@ caption="图 1：被测 captioner 为图像写 caption；一个只读文字、�
  "bbox": [453, 552, 622, 804]}
 ```
 
-几个错误选项对这张图来说都说得通，所以如果没有从 caption 中得知卡车的颜色，判官猜不出答案。一份 caption 的**准确率**（accuracy）就是答对题目的比例，其余部分分别计为**漏述率**和**幻觉率**。
-
 ## 相关工作
 
-与我们最接近的是 **CapProbe**[^huang_capprobe]。它同样让一个只读文字的判官仅凭 caption 回答选择题，并用一个 *Uncertain* 选项区分 caption 漏掉的和说错的内容。它的题目按区域覆盖整个画面生成：346 张图、25,650 道题、10 个语义类别，用有效准确率和基于信息密度的指标打分。CaptionExam 的不同在于题目的来源：我们的题是从真实 captioning 模型的失误中挖出来的，而不是为了覆盖画面而生成的，因此题量更小（109 张图、3,099 道题），对强 captioner 来说却很难。另外，CapProbe 的数据和代码尚未公开；CaptionExam 的代码和数据都已开源，判官在本地一张 GPU 上就能运行，可能更方便直接使用。
+与我们最接近的是 **CapProbe**[^huang_capprobe]，而且也是同时期的工作。它同样让一个只读文字的判官仅凭 caption 回答选择题，并用一个 *Uncertain* 选项区分 caption 漏掉的和说错的内容。它的题目按区域覆盖整个画面生成：346 张图、25,650 道题、10 个语义类别，用有效准确率和基于信息密度的指标打分。CaptionExam 的不同在于题目的来源：我们的题是从真实 captioning 模型的失误中挖出来的，而不是为了覆盖画面而生成的，因此题量更小（109 张图、3,099 道题），对强 captioner 来说却很难。另外，CapProbe 的数据和代码尚未公开；CaptionExam 的代码和数据都已开源，判官在本地一张 GPU 上就能运行，可能更方便直接使用。
 
-Playground v3 一同提出的 **CapsBench**[^liu_pgv3] 也是让模型仅凭 caption 回答问题：200 张图、17 个类别、2,471 道是非题。它的答案大多为「是」，而 CaptionExam 的错误选项都说得通，caption 中的错误陈述会直接表现为幻觉。**CCCaption**[^tang_cccaption] 在强化学习中用视觉问题奖励 caption 的完整性，同时用断言级的正确性奖励约束错误。另一些详细 caption 评测不出题，而是把 caption 与结构化参考比对：DeCapBench 用 DCScore 逐条检查 caption 拆出的原子事实[^ye_decapbench]，CompreCap 则将 caption 与人工标注的有向场景图比对[^lu_comprecap]。
+## CaptionExam Benchmark
 
-## Benchmark 构成
+### 数据构造方式
+
+**题目从哪里来。** 题目是从真实 captioning 模型的失误中挖出来的：
+
+1. Gemini 3.1 Pro（preview）同时看一张图和某个模型为它写的 caption，找出这份 caption 最严重的事实性失误（说错的内容，以及漏掉的显著内容），并针对每个失误写一道选择题。
+2. Gemini 3.1 Pro 和 GPT-5.6 Sol 分别在看图的情况下回答每道候选题。只有两者都答对的题才会保留，这样可以去掉有歧义的题目和答案有误的题目。
+3. 每道保留下来的题在进入 benchmark 之前都经过人工审核，审核时可以修改题面和区域。
+
+**两个设计取舍。**
+
+- *每个错误选项都必须对这张图说得通。* 如果只有一个选项看起来合理，判官单凭常识或措辞就能选中答案，这道题就等于白送分。这是对题目唯一的硬性要求。
+- *不单设「文字精确匹配」题型。* 图中的文字可能倾斜、使用艺术字，或者被设计成图形，文字的标准答案本身就不稳定，用字符级的严格判定去测不稳定的标准答案，测出来的主要是噪声。逐元素比对还会受 captioner 如何切分文字的影响。改成选择题之后，写错、漏写、多写和重复这几种失误，都统一体现在漏述率和幻觉率里。
+
+### 数据统计
 
 | | |
 |---|---|
@@ -82,18 +84,13 @@ src="assets/example-questions.webp"
 caption="图 3：一张示例图和它的四道题。黄框是每道题指向的区域，绿色是正确答案。"
 >}}
 
-**题目从哪里来。** 题目是从真实 captioning 模型的失误中挖出来的：
-
-1. Gemini 3.1 Pro（preview）同时看一张图和某个模型为它写的 caption，找出这份 caption 最严重的事实性失误（说错的内容，以及漏掉的显著内容），并针对每个失误写一道选择题。
-2. Gemini 3.1 Pro 和 GPT-5.6 Sol 分别在看图的情况下回答每道候选题。只有两者都答对的题才会保留，这样可以去掉有歧义的题目和答案有误的题目。
-3. 每道保留下来的题在进入 benchmark 之前都经过人工审核，审核时可以修改题面和区域。
-
-**两个设计取舍。**
-
-- *每个错误选项都必须对这张图说得通。* 如果只有一个选项看起来合理，判官单凭常识或措辞就能选中答案，这道题就等于白送分。这是对题目唯一的硬性要求。
-- *不单设「文字精确匹配」题型。* 图中的文字可能倾斜、使用艺术字，或者被设计成图形，文字的标准答案本身就不稳定，用字符级的严格判定去测不稳定的标准答案，测出来的主要是噪声。逐元素比对还会受 captioner 如何切分文字的影响。改成选择题之后，写错、漏写、多写和重复这几种失误，都统一体现在漏述率和幻觉率里。
-
 **打分。** 判官是 Phi-4[^abdin_phi4]，用 vLLM 在本地部署，temperature 为 0，答案被约束为某个选项的原文。每条判定都记录了题目和 caption 的指纹；排行榜只在所有模型都有有效判定的公共题目上比较。
+
+### 判官模型打分
+
+用最强的闭源模型当判官或许更准，但每次评测都要花钱、占用 API 配额，还依赖一个可能随时变化的模型。我们选择了 Phi-4：一个 14B 的模型，一张 GPU 就能运行，不按调用计费。在此前对 11 个 captioner、约 3,100 道题的校准中，它与一个强大的闭源判官在 75.5% 的题目上答案一致（三类结果上的 Cohen's κ = 0.62），两个判官对 captioner 的排名也几乎相同（Spearman ρ = 0.89）。模型排名是稳定的，但单条判定并不等于真值。
+
+这次我们在三个 Qwen 模型的 caption 上重复了这项比较：从 3,099 道题里随机抽 1,000 道，让 GPT-5.6 Sol 分别判 Qwen2.5-VL-72B、Qwen3-VL-235B-A22B 和 Qwen3.5-397B-A17B 的 caption。两个判官在 76.9% 的判定上一致（Cohen's κ = 0.61），与此前的校准相当。准确率几乎相同：Qwen2.5-VL-72B 都是 23.2%，Qwen3-VL-235B-A22B 是 41.5% 对 41.6%；Qwen3.5-397B-A17B 差了 3 个点（41.4% 对 44.5%），它和 Qwen3-VL-235B-A22B 的先后也因此换了位置，不过两者在全部题目上本来只差 0.5 个点。分歧有一个偏向：Phi-4 判为选错、而 GPT-5.6 Sol 判为「未提及」的有 161 条，反过来只有 55 条，所以 Phi-4 给出的幻觉率要高 3 到 7 个点。比较模型时，准确率和排名更可靠，幻觉率的绝对值要谨慎看待。
 
 ## 评测三年来的 Qwen VLM
 
@@ -166,24 +163,9 @@ caption="图 8：每一行是一张图。左起第一列是原图，其余各列
 
 题目从不提及 caption，因此也可以直接用来评估生成的图像。我们让 GPT-5.6 Sol 看着生成的图而不是原图，回答这六张图的全部 184 道题。看原图时它答对 93.5%；看由 caption 生成的图时，准确率依次是 Qwen2-VL-2B 43.5%、Qwen2.5-VL-3B 57.1%、Qwen3-VL-2B 66.8%、Qwen3.5-2B 69.6%、GPT-6 Astra 85.3%，和这些 caption 本身在 CaptionExam 上的排序完全一致。生成的图总会画出点什么，所以看图时答错几乎都是选了错误选项，而不是「未提及」：从 Qwen2-VL-2B 的 caption 生成的图上，38.6% 的题选错了。只有六张图，这些数字只能说明大致趋势。
 
-## 小模型当判官够用吗？
-
-用最强的闭源模型当判官或许更准，但每次评测都要花钱、占用 API 配额，还依赖一个可能随时变化的模型。我们选择了 Phi-4：一个 14B 的模型，一张 GPU 就能运行，不按调用计费。在此前对 11 个 captioner、约 3,100 道题的校准中，它与一个强大的闭源判官在 75.5% 的题目上答案一致（三类结果上的 Cohen's κ = 0.62），两个判官对 captioner 的排名也几乎相同（Spearman ρ = 0.89）。模型排名是稳定的，但单条判定并不等于真值。
-
-这次我们在三个 Qwen 模型的 caption 上重复了这项比较：从 3,099 道题里随机抽 1,000 道，让 GPT-5.6 Sol 分别判 Qwen2.5-VL-72B、Qwen3-VL-235B-A22B 和 Qwen3.5-397B-A17B 的 caption。两个判官在 76.9% 的判定上一致（Cohen's κ = 0.61），与此前的校准相当。准确率几乎相同：Qwen2.5-VL-72B 都是 23.2%，Qwen3-VL-235B-A22B 是 41.5% 对 41.6%；Qwen3.5-397B-A17B 差了 3 个点（41.4% 对 44.5%），它和 Qwen3-VL-235B-A22B 的先后也因此换了位置，不过两者在全部题目上本来只差 0.5 个点。分歧有一个偏向：Phi-4 判为选错、而 GPT-5.6 Sol 判为「未提及」的有 161 条，反过来只有 55 条，所以 Phi-4 给出的幻觉率要高 3 到 7 个点。比较模型时，准确率和排名更可靠，幻觉率的绝对值要谨慎看待。
-
-## 局限性
-
-- **判官会出错。** 不同判官给出的模型排名高度一致，但单条判定并不一致；分数只有在同一个判官下才能比较。
-- **图像数量少。** 只有 109 张图，模型之间一两个点的差距在噪声范围之内。
-- **题目偏向某些细节。** 题目是从特定 captioner 的失误中挖出来的，因此会侧重这些 captioner 容易漏掉的细节。它衡量的是 caption 是否完整、是否忠实，而不是行文是否流畅、组织是否清晰。
-- **只用了一个 prompt。** 每个 captioner 只用一个 prompt 测试（Qwen 用 greedy 解码，OpenAI 的模型用 API 的默认设置），换一个 prompt 可能会改变分数。
-
 ## 结论
 
 CaptionExam 用一个本地的小判官，把 caption 的好坏拆成答对、漏述和幻觉三部分。在 35 个 captioner 上，结论相当清楚：代际比规模重要，Qwen3.5-2B 已经超过两代之前的 72B 模型，但 Qwen 的最高分从 Qwen3-VL 起就停在 43% 左右；caption 写得长不等于写得好，帕累托前沿上几乎都是 OpenAI 的模型，它们用更少或相近的 token 说出了更多具体的事实；即使是最强的 GPT-6 Astra，也有四分之一的题没有提到。把 caption 交给 MOSS-Image 生成图像，得分越高的 caption 生成的图越接近原图：captioner 的能力直接决定了生成模型能学到什么、画出什么。
-
-CaptionExam 的代码见 [github.com/Ki-Seki/CaptionExam](https://github.com/Ki-Seki/CaptionExam)，数据见 [huggingface.co/datasets/Ki-Seki/CaptionExam](https://huggingface.co/datasets/Ki-Seki/CaptionExam)。
 
 ## 引用
 
