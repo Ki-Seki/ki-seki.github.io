@@ -14,6 +14,10 @@ tags:
 math: false
 ---
 
+- **代码：** <https://github.com/Ki-Seki/CaptionExam>
+- **数据：** [Ki-Seki/CaptionExam](https://huggingface.co/datasets/Ki-Seki/CaptionExam)（109 张图、3,099 道题）
+- **评测结果：** [Ki-Seki/CaptionExam-Results](https://huggingface.co/datasets/Ki-Seki/CaptionExam-Results)（35 个 captioner 的 caption、判定和排行榜）
+
 ## 引言
 
 越来越多的图像生成模型选择用详细丰富的 caption 来训练，而不是网络图片自带的简短 alt 文本。DALL·E 3 证明，用专门的 captioner 把训练集重新标注一遍，能让文生图模型明显更好地遵循 prompt[^betker_dalle3]；PixArt-α、Stable Diffusion 3 和 Playground v3 也都用密集的合成 caption 训练[^chen_pixart][^esser_sd3][^liu_pgv3]。如今的 renderer 已经能还原 caption 中的大部分信息，比如 MOSS-Image 就以渲染密集、准确的文字和连贯的版式为目标[^mosi_moss]。
