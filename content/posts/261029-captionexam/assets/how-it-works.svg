@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1124" height="290" viewBox="0 0 1124 290" role="img" aria-label="An image is captioned by the model under test; a text-only judge reads the caption and answers a question about the image; the verdict is correct, omission or hallucination.">
+<rect x="0" y="0" width="1124" height="290" fill="white"/>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#566b7b" stroke-width="1.6"/></marker></defs>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif">
+<rect x="24" y="160" width="124" height="100" rx="6" fill="#e6ecf0"/>
+<polygon points="38,246 72,206 90,224 112,198 136,246" fill="#aab8c3"/>
+<circle cx="122" cy="186" r="9" fill="#c3ced7"/>
+<text x="86" y="288" text-anchor="middle" font-size="15" fill="#566b7b">image</text>
+<line x1="152" y1="210" x2="186" y2="210" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="190" y="178" width="150" height="64" rx="6" fill="#ffffff" stroke="#bdcad4"/><text x="265.0" y="206" text-anchor="middle" font-size="17" font-weight="600" fill="#233b50">Captioner</text><text x="265.0" y="227" text-anchor="middle" font-size="14" fill="#566b7b">model under test</text>
+<line x1="344" y1="210" x2="378" y2="210" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="382" y="160" width="168" height="100" rx="6" fill="#ffffff" stroke="#bdcad4"/>
+<rect x="398" y="176" width="136" height="6" rx="3" fill="#c3ced7"/>
+<rect x="398" y="191" width="120" height="6" rx="3" fill="#c3ced7"/>
+<rect x="398" y="206" width="140" height="6" rx="3" fill="#c3ced7"/>
+<rect x="398" y="221" width="98" height="6" rx="3" fill="#c3ced7"/>
+<rect x="398" y="236" width="126" height="6" rx="3" fill="#c3ced7"/>
+<text x="466" y="288" text-anchor="middle" font-size="15" fill="#566b7b">caption</text>
+<line x1="554" y1="210" x2="588" y2="210" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="592" y="178" width="160" height="64" rx="6" fill="#dbe9f4" stroke="#629ac3"/><text x="672.0" y="206" text-anchor="middle" font-size="17" font-weight="600" fill="#1f5a88">Judge</text><text x="672.0" y="227" text-anchor="middle" font-size="14" fill="#566b7b">reads text only</text>
+<rect x="562" y="14" width="220" height="128" rx="6" fill="#ffffff" stroke="#bdcad4"/>
+<text x="578" y="41" font-size="15" font-weight="600" fill="#233b50">What color is the truck?</text>
+<circle cx="584" cy="59" r="5" fill="none" stroke="#9fadb8" stroke-width="1.3"/>
+<text x="598" y="64" font-size="14" fill="#566b7b">white</text>
+<circle cx="584" cy="80" r="5" fill="none" stroke="#9fadb8" stroke-width="1.3"/>
+<text x="598" y="85" font-size="14" fill="#566b7b">dark blue</text>
+<circle cx="584" cy="101" r="5" fill="none" stroke="#9fadb8" stroke-width="1.3"/>
+<text x="598" y="106" font-size="14" fill="#566b7b">red</text>
+<circle cx="584" cy="122" r="5" fill="none" stroke="#9fadb8" stroke-width="1.3"/>
+<text x="598" y="127" font-size="14" fill="#566b7b">not mentioned</text>
+<line x1="672" y1="142" x2="672" y2="174" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<polyline points="756,210 772,210" fill="none" stroke="#566b7b" stroke-width="1.4"/><polyline points="772,164 772,256" fill="none" stroke="#566b7b" stroke-width="1.4"/>
+<line x1="772" y1="164" x2="784" y2="164" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="788" y="147" width="316" height="34" rx="17" fill="#e3f1ea"/>
+<path d="M802,164 l4,4.5 l8,-9" fill="none" stroke="#2f7d5b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="826" y="169" font-size="15" font-weight="600" fill="#2f7d5b">correct</text>
+<text x="1090" y="169" text-anchor="end" font-size="14" fill="#566b7b">picked the answer</text>
+<line x1="772" y1="210" x2="784" y2="210" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="788" y="193" width="316" height="34" rx="17" fill="#eef2f5"/>
+<path d="M802,210 h12" stroke="#566b7b" stroke-width="2.2" stroke-linecap="round"/>
+<text x="826" y="215" font-size="15" font-weight="600" fill="#566b7b">omission</text>
+<text x="1090" y="215" text-anchor="end" font-size="14" fill="#566b7b">picked “not mentioned”</text>
+<line x1="772" y1="256" x2="784" y2="256" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="788" y="239" width="316" height="34" rx="17" fill="#f7e4e2"/>
+<path d="M803,251 l10,10 M813,251 l-10,10" stroke="#b2453f" stroke-width="2.2" stroke-linecap="round"/>
+<text x="826" y="261" font-size="15" font-weight="600" fill="#b2453f">hallucination</text>
+<text x="1090" y="261" text-anchor="end" font-size="14" fill="#566b7b">picked a wrong option</text>
+</g></svg>

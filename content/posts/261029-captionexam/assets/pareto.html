@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CaptionExam: accuracy against output tokens</title>
+<style>
+:root{--theme:rgb(255,255,255);--entry:rgb(255,255,255);--primary:rgb(30,30,30);--secondary:rgb(108,108,108);--tertiary:rgb(214,214,214);--content:rgb(31,31,31);--border:rgb(238,238,238);color-scheme:light}
+:root[data-theme="dark"]{--theme:rgb(29,30,32);--entry:rgb(46,46,51);--primary:rgb(218,218,219);--secondary:rgb(155,156,157);--tertiary:rgb(65,66,68);--content:rgb(196,196,197);--border:rgb(51,51,51);color-scheme:dark}
+body{margin:0;background:var(--theme);color:var(--content);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;font-size:18px;line-height:1.6}
+main{max-width:720px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;color:var(--primary);margin:0 0 4px}h2{font-size:19px;color:var(--primary);margin:48px 0 2px}
+p{margin:0 0 8px;font-size:15px;color:var(--secondary)}
+.bar{display:flex;gap:8px;align-items:center;margin:8px 0 0;font-size:14px;color:var(--secondary)}
+.bar button{font:inherit;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--entry);color:var(--primary);cursor:pointer}
+.bar button[aria-pressed="true"]{border-color:var(--primary)}
+html,body{background:transparent}main{max-width:none;padding:0}.ce-pareto{margin:0}</style>
+<style>
+.ce-pareto{--cp-ink:var(--primary,rgb(30,30,30));--cp-ink2:var(--secondary,rgb(108,108,108));--cp-grid:var(--border,rgb(238,238,238));
+--cp-base:var(--tertiary,rgb(214,214,214));--cp-surface:var(--theme,#fff);--cp-muted:#9a9a9a;
+--cp-qwen:#2a78d6;--cp-gpt:#eb6834;--cp-quad:rgba(47,125,91,.09);--cp-quad-ink:#2f7d5b;--cp-dom:rgba(30,30,30,.045);
+--cp-box:rgba(235,104,52,.10);
+--cp-s0:#86b6ef;--cp-s1:#5598e7;--cp-s2:#2a78d6;--cp-s3:#1c5cab;--cp-s4:#0d366b;--cp-s5:#f2a074;--cp-s6:#eb6834;--cp-s7:#c24e1c;--cp-s8:#8f3510;
+margin:1.5em 0;position:relative}
+:root[data-theme="dark"] .ce-pareto{--cp-muted:#7b7c7e;--cp-qwen:#3987e5;--cp-gpt:#d95926;--cp-quad:rgba(80,190,135,.10);--cp-quad-ink:#6cc39a;
+--cp-dom:rgba(255,255,255,.045);--cp-box:rgba(217,89,38,.10);
+--cp-s0:#1c5cab;--cp-s1:#2a78d6;--cp-s2:#5598e7;--cp-s3:#86b6ef;--cp-s4:#b7d3f6;--cp-s5:#a8461c;--cp-s6:#d95926;--cp-s7:#ec7a45;--cp-s8:#f5a477}
+.ce-pareto .cp-legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 6px;padding-left:52px;font-size:13px;line-height:1.3}
+.ce-pareto .cp-key{all:unset;display:inline-flex;align-items:center;gap:6px;color:var(--cp-ink2);cursor:pointer;padding:2px 0}
+.ce-pareto .cp-key:focus-visible{outline:2px solid var(--cp-qwen);outline-offset:2px;border-radius:3px}
+.ce-pareto .cp-key:hover span,.ce-pareto .cp-key.on span{color:var(--cp-ink)}
+.ce-pareto .cp-plot{position:relative}
+.ce-pareto .cp-plot svg{display:block;width:100%;height:auto;overflow:visible;font-family:inherit}
+.ce-pareto .cp-key svg{flex:none;display:block}
+.ce-pareto .cp-grid{stroke:var(--cp-grid);stroke-width:1}
+.ce-pareto .cp-base{stroke:var(--cp-base);stroke-width:1}
+.ce-pareto .cp-tick{font-size:12px;fill:var(--cp-ink2);font-variant-numeric:tabular-nums}
+.ce-pareto .cp-axis{font-size:13px;fill:var(--cp-ink)}
+.ce-pareto .cp-note{font-size:11px;fill:var(--cp-ink2)}
+.ce-pareto .cp-lab{fill:var(--cp-ink2);transition:fill .12s}
+.ce-pareto .cp-lab.cp-strong{fill:var(--cp-ink);font-weight:600}
+.ce-pareto .cp-lab.hot{fill:var(--cp-ink);font-weight:600}
+.ce-pareto .cp-leader{stroke:var(--cp-ink2);stroke-width:.8;opacity:.55}
+.ce-pareto .cp-guess{stroke:var(--cp-base);stroke-width:1;stroke-dasharray:3 4}
+.ce-pareto .cp-hit{fill:transparent;cursor:pointer}
+.ce-pareto .cp-dot{stroke:var(--cp-surface);stroke-width:2;transition:opacity .12s}
+.ce-pareto .fam-qwen{fill:var(--cp-qwen)}.ce-pareto .fam-gpt{fill:var(--cp-gpt)}
+.ce-pareto .s0{fill:var(--cp-s0)}.ce-pareto .s1{fill:var(--cp-s1)}.ce-pareto .s2{fill:var(--cp-s2)}.ce-pareto .s3{fill:var(--cp-s3)}
+.ce-pareto .s4{fill:var(--cp-s4)}.ce-pareto .s5{fill:var(--cp-s5)}.ce-pareto .s6{fill:var(--cp-s6)}.ce-pareto .s7{fill:var(--cp-s7)}.ce-pareto .s8{fill:var(--cp-s8)}
+.ce-pareto .cp-faint{opacity:.5}
+.ce-pareto .cp-pt.hot .cp-dot{opacity:1;stroke-width:2.5}
+.ce-pareto.dim .cp-pt:not(.sel) .cp-dot{opacity:.12}
+.ce-pareto.dim .cp-lab:not(.sel){opacity:.15}
+.ce-pareto .cp-quad{fill:var(--cp-quad)}
+.ce-pareto .cp-quad-label{font-size:13px;font-weight:600;fill:var(--cp-quad-ink)}
+.ce-pareto .cp-median{stroke:var(--cp-base);stroke-dasharray:2 4}
+.ce-pareto .cp-front{fill:none;stroke-width:2;stroke-dasharray:6 4;opacity:.75}
+.ce-pareto .cp-front.fam-qwen{stroke:var(--cp-qwen);fill:none}.ce-pareto .cp-front.fam-gpt{stroke:var(--cp-gpt);fill:none}
+.ce-pareto .cp-front-key{stroke:var(--cp-ink2);stroke-width:2}
+.ce-pareto .cp-dominated{fill:var(--cp-dom)}
+.ce-pareto .cp-dominated-key{fill:var(--cp-dom);stroke:var(--cp-base)}
+.ce-pareto .cp-stairs,.ce-pareto .cp-stairs-key{fill:none;stroke:var(--cp-ink);stroke-width:2;stroke-linejoin:round}
+.ce-pareto .cp-front-dotted,.ce-pareto .cp-front-dotted-key{fill:none;stroke:var(--cp-ink2);stroke-width:1.5;stroke-dasharray:2 4;stroke-linecap:round}
+.ce-pareto .cp-front-solid,.ce-pareto .cp-front-solid-key{fill:none;stroke:var(--cp-ink2);stroke-width:1.5}
+.ce-pareto .cp-box,.ce-pareto .cp-box-key{fill:var(--cp-box)}
+.ce-pareto .cp-cross{stroke:var(--cp-gpt);stroke-width:1.2;stroke-dasharray:5 4}
+.ce-pareto .cp-halo{fill:var(--cp-gpt);opacity:.18}
+.ce-pareto .cp-callout{font-size:13px;font-weight:600;fill:var(--cp-ink)}
+.ce-pareto .s0-stroke{stroke:var(--cp-s0)}.ce-pareto .s1-stroke{stroke:var(--cp-s1)}.ce-pareto .s2-stroke{stroke:var(--cp-s2)}
+.ce-pareto .s3-stroke{stroke:var(--cp-s3)}.ce-pareto .s4-stroke{stroke:var(--cp-s4)}.ce-pareto .s5-stroke{stroke:var(--cp-s5)}
+.ce-pareto .s6-stroke{stroke:var(--cp-s6)}.ce-pareto .s7-stroke{stroke:var(--cp-s7)}.ce-pareto .s8-stroke{stroke:var(--cp-s8)}
+.ce-pareto .cp-fam{fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;opacity:.6;transition:opacity .12s}
+.ce-pareto .cp-fam-hit{fill:none;stroke:transparent;stroke-width:10;cursor:pointer}
+.ce-pareto .cp-fam-key{stroke-width:2}
+.ce-pareto .cp-front-line,.ce-pareto .cp-front-key{fill:none;stroke:var(--cp-ink);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.ce-pareto .cp-front-band{fill:none;stroke:var(--cp-ink);stroke-opacity:.1;stroke-width:12;stroke-linejoin:round;stroke-linecap:round}
+.ce-pareto .cp-group{font-weight:600;color:var(--cp-ink);margin-right:-6px}
+.ce-pareto .cp-break{flex-basis:100%;height:0}
+.ce-pareto .cp-famlabs{display:none}
+.ce-pareto.focus .cp-famlabs.on{display:inline}
+.ce-pareto.focus .cp-pt:not(.on) .cp-dot{opacity:.12}
+.ce-pareto.focus .cp-fam:not(.on){opacity:.07}
+.ce-pareto.focus .cp-fam.on{opacity:1;stroke-width:2.6}
+.ce-pareto.focus .static:not(.on){opacity:.18}
+.ce-pareto.focus .cp-front-line:not(.on),.ce-pareto.focus .cp-front-band:not(.on){opacity:.35}
+.ce-pareto .cp-key.on span{color:var(--cp-ink);font-weight:600}
+.ce-pareto .fam-qwen-stroke{stroke:var(--cp-qwen)}.ce-pareto .fam-gpt-stroke{stroke:var(--cp-gpt)}
+.ce-pareto .cp-soft{opacity:.7}
+.ce-pareto .cp-fpath{display:none;fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.ce-pareto.focus .cp-fpath.on{display:inline}
+.ce-pareto .cp-thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:14px}
+.ce-pareto .cp-thumb{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:6px 6px 4px;border:1px solid var(--cp-grid);border-radius:6px;cursor:pointer;transition:border-color .12s,background .12s}
+.ce-pareto .cp-thumb:hover,.ce-pareto .cp-thumb.on{border-color:var(--cp-ink2)}
+.ce-pareto .cp-thumb:focus-visible{outline:2px solid var(--cp-qwen);outline-offset:2px}
+.ce-pareto .cp-thumb-t{display:flex;justify-content:space-between;align-items:baseline;gap:4px;font-size:12px;line-height:1.25;color:var(--cp-ink2);white-space:nowrap}
+.ce-pareto .cp-thumb-t b{color:var(--cp-ink);font-weight:600}
+.ce-pareto .cp-thumb-t span{font-size:11px;font-variant-numeric:tabular-nums}
+.ce-pareto .cp-thumb svg{display:block;width:100%;height:auto}
+.ce-pareto .cp-tdot{fill:var(--cp-base)}
+.ce-pareto .cp-tfront{fill:none;stroke:var(--cp-base);stroke-width:1}
+.ce-pareto .cp-tpath{fill:none;stroke-width:1.4;stroke-linejoin:round}
+.ce-pareto .cp-thumb-note{font-size:12px;line-height:1.4;color:var(--cp-ink2);align-self:center;padding:4px}
+@media (max-width:560px){.ce-pareto .cp-thumbs{grid-template-columns:repeat(3,minmax(0,1fr))}.ce-pareto .cp-thumb-t span{display:none}}
+.ce-pareto .cp-aa-front,.ce-pareto .cp-aa-front-key{fill:none;stroke:var(--cp-ink);stroke-width:1.6;stroke-dasharray:5 4;stroke-linejoin:round;opacity:.75}
+.ce-pareto.cp-g .cp-legend{display:block}
+.ce-pareto .cp-row{display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center;margin-bottom:6px}
+.ce-pareto .cp-row > .cp-key:first-child{min-width:150px}
+.ce-pareto .cp-row > .cp-key:last-child:not(.cp-chip){margin-left:auto}
+.ce-pareto .cp-chip{all:unset;display:inline-flex;align-items:center;padding:0 8px;border:1px solid var(--cp-grid);border-radius:999px;color:var(--cp-ink2);cursor:pointer;font-size:12px;line-height:20px}
+.ce-pareto .cp-chip i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.ce-pareto .cp-chip i.fam-qwen{background:var(--cp-qwen)}.ce-pareto .cp-chip i.fam-gpt{background:var(--cp-gpt)}
+.ce-pareto .cp-chip:hover,.ce-pareto .cp-chip.on{border-color:var(--cp-ink2);color:var(--cp-ink)}
+.ce-pareto .cp-chip:focus-visible{outline:2px solid var(--cp-qwen);outline-offset:2px}
+.ce-pareto.cp-g.focus .cp-lab:not(.on),.ce-pareto.cp-g.focus .cp-leader:not(.on){opacity:.12}
+.ce-pareto.cp-g.focus .cp-lab.on{fill:var(--cp-ink)}
+.ce-pareto.cp-g.focus .cp-aa-front:not(.on){opacity:.3}
+@media (max-width:560px){.ce-pareto .cp-legend{padding-left:0}.ce-pareto .cp-row > .cp-key:first-child{min-width:0;flex-basis:100%}}
+.ce-pareto .cp-tip{position:absolute;z-index:2;pointer-events:none;min-width:190px;padding:8px 10px;border-radius:6px;
+background:var(--entry,#fff);color:var(--cp-ink);border:1px solid var(--cp-grid);box-shadow:0 4px 14px rgba(0,0,0,.12);font-size:12.5px;line-height:1.5}
+.ce-pareto .cp-tip b{display:block;font-size:13.5px}
+.ce-pareto .cp-tip .k{color:var(--cp-ink2)}
+.ce-pareto .cp-tip .row{display:flex;justify-content:space-between;gap:16px;font-variant-numeric:tabular-nums}
+</style><script>
+(() => {
+  if (window.__cePareto) return; window.__cePareto = true;
+  const init = fig => {
+    const data = JSON.parse(fig.querySelector('.cp-data').textContent);
+    const tip = fig.querySelector('.cp-tip'), plot = fig.querySelector('.cp-plot');
+    const labels = i => fig.querySelectorAll(`.cp-lab[data-i="${i}"]`);
+    let pinned = null;
+    const show = g => {
+      const d = data[g.dataset.i], dot = g.querySelector('.cp-dot');
+      fig.querySelectorAll('.cp-pt.hot,.cp-lab.hot').forEach(e => e.classList.remove('hot'));
+      g.classList.add('hot'); labels(g.dataset.i).forEach(e => e.classList.add('hot'));
+      tip.innerHTML = `<b>${d.n}</b><span class="k">${d.f}${d.fr ? ' · on the frontier' : ''}</span>` +
+        `<div class="row"><span class="k">Accuracy</span><span>${d.y.toFixed(1)}%</span></div>` +
+        `<div class="row"><span class="k">Omission</span><span>${d.o.toFixed(1)}%</span></div>` +
+        `<div class="row"><span class="k">Hallucination</span><span>${d.h.toFixed(1)}%</span></div>` +
+        `<div class="row"><span class="k">Output tokens</span><span>${d.x}</span></div>` +
+        `<div class="row"><span class="k">Caption words</span><span>${d.w}</span></div>`;
+      tip.hidden = false;
+      const p = plot.getBoundingClientRect(), r = dot.getBoundingClientRect();
+      const cx = r.left + r.width / 2 - p.left, cy = r.top + r.height / 2 - p.top;
+      const w = tip.offsetWidth, h = tip.offsetHeight;
+      let x = cx + 14, y = cy - h - 10;
+      if (x + w > p.width) x = cx - w - 14;
+      if (y < 0) y = cy + 14;
+      tip.style.left = Math.max(0, x) + 'px'; tip.style.top = y + 'px';
+    };
+    const hide = () => {
+      if (pinned) return;
+      tip.hidden = true;
+      fig.querySelectorAll('.hot').forEach(e => e.classList.remove('hot'));
+    };
+    fig.querySelectorAll('.cp-pt').forEach(g => {
+      g.addEventListener('pointerenter', () => { if (!pinned) show(g); });
+      g.addEventListener('pointerleave', hide);
+      if (!fig.classList.contains('cp-fammode'))
+        g.addEventListener('click', e => { e.stopPropagation(); pinned = pinned === g ? null : g; show(g); if (!pinned) hide(); });
+    });
+    document.addEventListener('click', () => { if (pinned) { pinned = null; hide(); } });
+    if (fig.classList.contains('cp-fammode')) {
+      // Highlight one family (or the frontier): hover to preview, click to keep it
+      let pinnedKey = null;
+      const focus = key => {
+        fig.querySelectorAll('.on').forEach(e => e.classList.remove('on'));
+        fig.classList.toggle('focus', !!key);
+        if (!key) return;
+        const sel = key === 'front' ? '[data-front]' : key === 'qwen' || key === 'gpt' ? `[data-vendor="${key}"]` : `[data-fam="${key}"]`;
+        fig.querySelectorAll(sel).forEach(e => e.classList.add('on'));
+        fig.querySelectorAll(`.cp-key[data-key="${key}"]`).forEach(e => e.classList.add('on'));
+      };
+      const bind = (el, key) => {
+        el.addEventListener('pointerenter', () => focus(key()));
+        el.addEventListener('pointerleave', () => focus(pinnedKey));
+        el.addEventListener('click', e => { e.stopPropagation(); pinnedKey = pinnedKey === key() ? null : key(); focus(pinnedKey || key()); });
+      };
+      fig.querySelectorAll('.cp-pt').forEach(g => bind(g, () => g.dataset.fam));
+      fig.querySelectorAll('.cp-fam-hit').forEach(l => bind(l, () => l.dataset.fam));
+      fig.querySelectorAll('.cp-key').forEach(k => {
+        bind(k, () => k.dataset.key);
+        k.addEventListener('focus', () => focus(k.dataset.key));
+        k.addEventListener('blur', () => focus(pinnedKey));
+      });
+      document.addEventListener('click', () => { pinnedKey = null; focus(null); tip.hidden = true; });
+      return;
+    }
+    // Legend: hover or focus a key to pick out its models
+    const keys = fig.querySelectorAll('.cp-key');
+    const pick = key => {
+      const pts = [...fig.querySelectorAll('.cp-pt')].filter(g => g.dataset.keys.split(' ').includes(key));
+      if (!pts.length) return;
+      fig.classList.add('dim');
+      pts.forEach(g => { g.classList.add('sel'); labels(g.dataset.i).forEach(e => e.classList.add('sel')); });
+    };
+    const unpick = () => { fig.classList.remove('dim'); fig.querySelectorAll('.sel').forEach(e => e.classList.remove('sel')); };
+    keys.forEach(k => {
+      k.addEventListener('pointerenter', () => pick(k.dataset.key));
+      k.addEventListener('pointerleave', unpick);
+      k.addEventListener('focus', () => pick(k.dataset.key));
+      k.addEventListener('blur', unpick);
+    });
+  };
+  const run = () => document.querySelectorAll('.ce-pareto:not([data-ready])').forEach(fig => { fig.dataset.ready = '1'; init(fig); });
+  window.__ceParetoRun = run;
+  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', run) : run();
+})();
+</script>
+</head>
+<body>
+<main><figure class="ce-pareto cp-g cp-fammode"><div class="cp-legend"><div class="cp-row"><button type="button" class="cp-key" data-key="qwen"><svg width="12" height="12" aria-hidden="true"><circle class="fam-qwen" cx="6" cy="6" r="5"/></svg><span>Qwen, open weights</span></button><button type="button" class="cp-key cp-chip" data-key="s0">Qwen2-VL</button><button type="button" class="cp-key cp-chip" data-key="s1">Qwen2.5-VL</button><button type="button" class="cp-key cp-chip" data-key="s2">Qwen3-VL</button><button type="button" class="cp-key cp-chip" data-key="s3">Qwen3.5</button><button type="button" class="cp-key cp-chip" data-key="s4">Qwen3.6</button></div><div class="cp-row"><button type="button" class="cp-key" data-key="gpt"><svg width="12" height="12" aria-hidden="true"><circle class="fam-gpt" cx="6" cy="6" r="5"/></svg><span>OpenAI API</span></button><button type="button" class="cp-key cp-chip" data-key="s5">GPT-5</button><button type="button" class="cp-key cp-chip" data-key="s6">GPT-5.4</button><button type="button" class="cp-key cp-chip" data-key="s7">GPT-5.6</button><button type="button" class="cp-key cp-chip" data-key="s8">GPT-6</button><button type="button" class="cp-key" data-key="front"><svg width="20" height="12" aria-hidden="true"><line class="cp-aa-front-key" x1="1" y1="6" x2="19" y2="6" stroke-dasharray="4 3"/></svg><span>Pareto frontier</span></button></div></div><div class="cp-plot"><svg viewBox="0 0 760 560" role="img" aria-label="Scatter of 35 captioners, mean output tokens per caption against CaptionExam accuracy. The Pareto frontier runs through Qwen2-VL-72B, Qwen2.5-VL-7B, GPT-6 Sol, GPT-6 Luna, GPT-5.6 Terra, GPT-5.6 Sol, GPT-6 Astra."><rect class="cp-quad" x="58" y="12" width="425.4" height="241.1"/><line class="cp-grid" x1="58" y1="485.1" x2="746" y2="485.1"/><text class="cp-tick" x="50" y="489.1" text-anchor="end">10%</text><line class="cp-grid" x1="58" y1="400.6" x2="746" y2="400.6"/><text class="cp-tick" x="50" y="404.6" text-anchor="end">20%</text><line class="cp-grid" x1="58" y1="316.1" x2="746" y2="316.1"/><text class="cp-tick" x="50" y="320.1" text-anchor="end">30%</text><line class="cp-grid" x1="58" y1="231.7" x2="746" y2="231.7"/><text class="cp-tick" x="50" y="235.7" text-anchor="end">40%</text><line class="cp-grid" x1="58" y1="147.2" x2="746" y2="147.2"/><text class="cp-tick" x="50" y="151.2" text-anchor="end">50%</text><line class="cp-grid" x1="58" y1="62.7" x2="746" y2="62.7"/><text class="cp-tick" x="50" y="66.7" text-anchor="end">60%</text><line class="cp-grid" x1="58.0" y1="12" x2="58.0" y2="502"/><text class="cp-tick" x="58.0" y="521" text-anchor="middle">200</text><line class="cp-grid" x1="230.0" y1="12" x2="230.0" y2="502"/><text class="cp-tick" x="230.0" y="521" text-anchor="middle">400</text><line class="cp-grid" x1="402.0" y1="12" x2="402.0" y2="502"/><text class="cp-tick" x="402.0" y="521" text-anchor="middle">600</text><line class="cp-grid" x1="574.0" y1="12" x2="574.0" y2="502"/><text class="cp-tick" x="574.0" y="521" text-anchor="middle">800</text><line class="cp-grid" x1="746.0" y1="12" x2="746.0" y2="502"/><text class="cp-tick" x="746.0" y="521" text-anchor="middle">1,000</text><line class="cp-base" x1="58" y1="502" x2="746" y2="502"/><text class="cp-axis" x="402" y="548" text-anchor="middle">Output tokens per caption (mean over 109 images)</text><text class="cp-axis" transform="translate(14,257) rotate(-90)" text-anchor="middle">Accuracy (judged by Phi-4)</text><line class="cp-median" x1="483.4" y1="12" x2="483.4" y2="502"/><line class="cp-median" x1="58" y1="253.1" x2="746" y2="253.1"/><text class="cp-quad-label" x="68" y="32">Most attractive quadrant</text><text class="cp-note" x="68" y="47">fewer tokens and higher accuracy than the median model</text><polyline class="cp-aa-front" data-front="1" points="92.8,438.7 119.7,436.3 138.7,265.9 219.9,250.4 412.3,173.5 428.8,141.3 641.6,52.2"/><polyline class="cp-fpath fam-qwen-stroke" data-fam="s0" points="147.2,473.4 97.3,456.5 92.8,438.7"/><polyline class="cp-fpath fam-qwen-stroke" data-fam="s1" points="120.4,470.6 119.7,436.3 432.9,374.7 257.1,367.6"/><polyline class="cp-fpath fam-qwen-stroke" data-fam="s2" points="545.8,349.9 515.6,277.6 398.7,279.5 262.4,287.7 649.7,233.5 450.5,211.1"/><polyline class="cp-fpath fam-qwen-stroke" data-fam="s3" points="530.9,355.9 476.8,291.8 548.6,264.8 489.8,253.1 588.2,208.1 523.4,221.7 546.3,228.5 483.4,206.7"/><polyline class="cp-fpath fam-qwen-stroke" data-fam="s4" points="549.9,222.0 526.7,219.6"/><polyline class="cp-fpath fam-gpt-stroke" data-fam="s5" points="307.5,331.6 737.3,171.3 526.0,151.9"/><polyline class="cp-fpath fam-gpt-stroke" data-fam="s6" points="668.6,347.4 515.3,250.6 727.9,154.9"/><polyline class="cp-fpath fam-gpt-stroke" data-fam="s7" points="413.8,196.4 412.3,173.5 428.8,141.3"/><polyline class="cp-fpath fam-gpt-stroke" data-fam="s8" points="219.9,250.4 138.7,265.9 641.6,52.2"/><text data-fam="s8" data-vendor="gpt" data-front="1" class="cp-lab cp-strong" data-i="9" x="652.1" y="55.6" text-anchor="start" font-size="11.5">GPT-6 Astra</text><text data-fam="s7" data-vendor="gpt" data-front="1" class="cp-lab cp-strong" data-i="6" x="418.3" y="144.8" text-anchor="end" font-size="11.5">GPT-5.6 Sol</text><line data-fam="s7" data-vendor="gpt" data-front="1" class="cp-leader" x1="420.8" y1="173.5" x2="428.8" y2="173.5"/><text data-fam="s7" data-vendor="gpt" data-front="1" class="cp-lab cp-strong" data-i="7" x="428.8" y="176.9" text-anchor="start" font-size="11.5">GPT-5.6 Terra</text><text data-fam="s8" data-vendor="gpt" data-front="1" class="cp-lab cp-strong" data-i="10" x="213.1" y="236.9" text-anchor="end" font-size="11.5">GPT-6 Luna</text><text data-fam="s8" data-vendor="gpt" data-front="1" class="cp-lab cp-strong" data-i="11" x="128.2" y="269.3" text-anchor="end" font-size="11.5">GPT-6 Sol</text><text data-fam="s1" data-vendor="qwen" data-front="1" class="cp-lab cp-strong" data-i="18" x="130.2" y="439.7" text-anchor="start" font-size="11.5">Qwen2.5-VL-7B</text><line data-fam="s0" data-vendor="qwen" data-front="1" class="cp-leader" x1="99.7" y1="433.7" x2="135.4" y2="407.6"/><text data-fam="s0" data-vendor="qwen" data-front="1" class="cp-lab cp-strong" data-i="13" x="135.4" y="407.3" text-anchor="start" font-size="11.5">Qwen2-VL-72B</text><text data-fam="s5" data-vendor="gpt" class="cp-lab" data-i="8" x="535.5" y="155.4" text-anchor="start" font-size="11.5">GPT-5</text><text data-fam="s6" data-vendor="gpt" class="cp-lab" data-i="4" x="718.4" y="158.4" text-anchor="end" font-size="11.5">GPT-5.4</text><text data-fam="s5" data-vendor="gpt" class="cp-lab" data-i="0" x="730.8" y="189.5" text-anchor="end" font-size="11.5">GPT-5 mini</text><text data-fam="s7" data-vendor="gpt" class="cp-lab" data-i="5" x="408.4" y="217.4" text-anchor="end" font-size="11.5">GPT-5.6 Luna</text><line data-fam="s3" data-vendor="qwen" class="cp-leader" x1="480.6" y1="213.7" x2="474.7" y2="228.3"/><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="30" x="474.7" y="235.5" text-anchor="end" font-size="11.5">Qwen3.5-397B-A17B</text><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="27" x="597.7" y="211.6" text-anchor="start" font-size="11.5">Qwen3.5-27B</text><line data-fam="s2" data-vendor="qwen" class="cp-leader" x1="450.5" y1="218.6" x2="450.5" y2="250.7"/><text data-fam="s2" data-vendor="qwen" class="cp-lab" data-i="19" x="466.1" y="257.9" text-anchor="end" font-size="11.5">Qwen3-VL-235B-A22B</text><line data-fam="s4" data-vendor="qwen" class="cp-leader" x1="529.9" y1="226.3" x2="536.0" y2="239.4"/><text data-fam="s4" data-vendor="qwen" class="cp-lab" data-i="34" x="536.0" y="246.6" text-anchor="start" font-size="11.5">Qwen3.6-35B-A3B</text><line data-fam="s3" data-vendor="qwen" class="cp-leader" x1="523.4" y1="214.2" x2="523.4" y2="189.4"/><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="29" x="556.1" y="189.1" text-anchor="end" font-size="11.5">Qwen3.5-35B-A3B</text><line data-fam="s4" data-vendor="qwen" class="cp-leader" x1="557.4" y1="222.0" x2="565.4" y2="222.0"/><text data-fam="s4" data-vendor="qwen" class="cp-lab" data-i="33" x="565.4" y="225.5" text-anchor="start" font-size="11.5">Qwen3.6-27B</text><line data-fam="s3" data-vendor="qwen" class="cp-leader" x1="550.5" y1="234.8" x2="562.6" y2="252.6"/><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="26" x="562.6" y="259.8" text-anchor="start" font-size="11.5">Qwen3.5-122B-A10B</text><text data-fam="s2" data-vendor="qwen" class="cp-lab" data-i="22" x="659.2" y="236.9" text-anchor="start" font-size="11.5">Qwen3-VL-32B</text><line data-fam="s6" data-vendor="gpt" class="cp-leader" x1="510.8" y1="256.6" x2="503.9" y2="265.7"/><text data-fam="s6" data-vendor="gpt" class="cp-lab" data-i="2" x="503.9" y="272.9" text-anchor="end" font-size="11.5">GPT-5.4 mini</text><line data-fam="s3" data-vendor="qwen" class="cp-leader" x1="492.0" y1="260.2" x2="502.1" y2="293.0"/><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="32" x="502.1" y="300.2" text-anchor="start" font-size="11.5">Qwen3.5-9B</text><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="31" x="554.8" y="283.8" text-anchor="start" font-size="11.5">Qwen3.5-4B</text><line data-fam="s2" data-vendor="qwen" class="cp-leader" x1="515.6" y1="285.1" x2="515.6" y2="305.8"/><text data-fam="s2" data-vendor="qwen" class="cp-lab" data-i="23" x="511.4" y="313.0" text-anchor="start" font-size="11.5">Qwen3-VL-4B</text><text data-fam="s2" data-vendor="qwen" class="cp-lab" data-i="24" x="389.2" y="283.0" text-anchor="end" font-size="11.5">Qwen3-VL-8B</text><text data-fam="s2" data-vendor="qwen" class="cp-lab" data-i="21" x="259.3" y="314.2" text-anchor="end" font-size="11.5">Qwen3-VL-30B-A3B</text><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="28" x="470.5" y="310.8" text-anchor="end" font-size="11.5">Qwen3.5-2B</text><text data-fam="s5" data-vendor="gpt" class="cp-lab" data-i="1" x="317.0" y="335.0" text-anchor="start" font-size="11.5">GPT-5 nano</text><text data-fam="s6" data-vendor="gpt" class="cp-lab" data-i="3" x="659.1" y="350.9" text-anchor="end" font-size="11.5">GPT-5.4 nano</text><text data-fam="s2" data-vendor="qwen" class="cp-lab" data-i="20" x="551.3" y="336.1" text-anchor="start" font-size="11.5">Qwen3-VL-2B</text><text data-fam="s3" data-vendor="qwen" class="cp-lab" data-i="25" x="521.4" y="359.3" text-anchor="end" font-size="11.5">Qwen3.5-0.8B</text><text data-fam="s1" data-vendor="qwen" class="cp-lab" data-i="17" x="266.6" y="371.0" text-anchor="start" font-size="11.5">Qwen2.5-VL-72B</text><text data-fam="s1" data-vendor="qwen" class="cp-lab" data-i="15" x="428.5" y="358.0" text-anchor="end" font-size="11.5">Qwen2.5-VL-32B</text><line data-fam="s0" data-vendor="qwen" class="cp-leader" x1="104.8" y1="456.5" x2="112.8" y2="456.5"/><text data-fam="s0" data-vendor="qwen" class="cp-lab" data-i="14" x="112.8" y="459.9" text-anchor="start" font-size="11.5">Qwen2-VL-7B</text><line data-fam="s1" data-vendor="qwen" class="cp-leader" x1="124.2" y1="477.1" x2="130.8" y2="488.2"/><text data-fam="s1" data-vendor="qwen" class="cp-lab" data-i="16" x="130.8" y="495.4" text-anchor="start" font-size="11.5">Qwen2.5-VL-3B</text><text data-fam="s0" data-vendor="qwen" class="cp-lab" data-i="12" x="156.7" y="476.8" text-anchor="start" font-size="11.5">Qwen2-VL-2B</text><g class="cp-pt" data-i="0" data-fam="s5" data-vendor="gpt" data-keys=""><circle class="cp-hit" cx="737.3" cy="171.3" r="10"/><circle class="cp-dot fam-gpt" cx="737.3" cy="171.3" r="5.5"/></g><g class="cp-pt" data-i="1" data-fam="s5" data-vendor="gpt" data-keys=""><circle class="cp-hit" cx="307.5" cy="331.6" r="10"/><circle class="cp-dot fam-gpt" cx="307.5" cy="331.6" r="5.5"/></g><g class="cp-pt" data-i="2" data-fam="s6" data-vendor="gpt" data-keys=""><circle class="cp-hit" cx="515.3" cy="250.6" r="10"/><circle class="cp-dot fam-gpt" cx="515.3" cy="250.6" r="5.5"/></g><g class="cp-pt" data-i="3" data-fam="s6" data-vendor="gpt" data-keys=""><circle class="cp-hit" cx="668.6" cy="347.4" r="10"/><circle class="cp-dot fam-gpt" cx="668.6" cy="347.4" r="5.5"/></g><g class="cp-pt" data-i="4" data-fam="s6" data-vendor="gpt" data-keys=""><circle class="cp-hit" cx="727.9" cy="154.9" r="10"/><circle class="cp-dot fam-gpt" cx="727.9" cy="154.9" r="5.5"/></g><g class="cp-pt" data-i="5" data-fam="s7" data-vendor="gpt" data-keys=""><circle class="cp-hit" cx="413.8" cy="196.4" r="10"/><circle class="cp-dot fam-gpt" cx="413.8" cy="196.4" r="5.5"/></g><g class="cp-pt" data-i="8" data-fam="s5" data-vendor="gpt" data-keys=""><circle class="cp-hit" cx="526.0" cy="151.9" r="10"/><circle class="cp-dot fam-gpt" cx="526.0" cy="151.9" r="5.5"/></g><g class="cp-pt" data-i="12" data-fam="s0" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="147.2" cy="473.4" r="10"/><circle class="cp-dot fam-qwen" cx="147.2" cy="473.4" r="5.5"/></g><g class="cp-pt" data-i="14" data-fam="s0" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="97.3" cy="456.5" r="10"/><circle class="cp-dot fam-qwen" cx="97.3" cy="456.5" r="5.5"/></g><g class="cp-pt" data-i="15" data-fam="s1" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="432.9" cy="374.7" r="10"/><circle class="cp-dot fam-qwen" cx="432.9" cy="374.7" r="5.5"/></g><g class="cp-pt" data-i="16" data-fam="s1" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="120.4" cy="470.6" r="10"/><circle class="cp-dot fam-qwen" cx="120.4" cy="470.6" r="5.5"/></g><g class="cp-pt" data-i="17" data-fam="s1" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="257.1" cy="367.6" r="10"/><circle class="cp-dot fam-qwen" cx="257.1" cy="367.6" r="5.5"/></g><g class="cp-pt" data-i="19" data-fam="s2" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="450.5" cy="211.1" r="10"/><circle class="cp-dot fam-qwen" cx="450.5" cy="211.1" r="5.5"/></g><g class="cp-pt" data-i="20" data-fam="s2" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="545.8" cy="349.9" r="10"/><circle class="cp-dot fam-qwen" cx="545.8" cy="349.9" r="5.5"/></g><g class="cp-pt" data-i="21" data-fam="s2" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="262.4" cy="287.7" r="10"/><circle class="cp-dot fam-qwen" cx="262.4" cy="287.7" r="5.5"/></g><g class="cp-pt" data-i="22" data-fam="s2" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="649.7" cy="233.5" r="10"/><circle class="cp-dot fam-qwen" cx="649.7" cy="233.5" r="5.5"/></g><g class="cp-pt" data-i="23" data-fam="s2" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="515.6" cy="277.6" r="10"/><circle class="cp-dot fam-qwen" cx="515.6" cy="277.6" r="5.5"/></g><g class="cp-pt" data-i="24" data-fam="s2" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="398.7" cy="279.5" r="10"/><circle class="cp-dot fam-qwen" cx="398.7" cy="279.5" r="5.5"/></g><g class="cp-pt" data-i="25" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="530.9" cy="355.9" r="10"/><circle class="cp-dot fam-qwen" cx="530.9" cy="355.9" r="5.5"/></g><g class="cp-pt" data-i="26" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="546.3" cy="228.5" r="10"/><circle class="cp-dot fam-qwen" cx="546.3" cy="228.5" r="5.5"/></g><g class="cp-pt" data-i="27" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="588.2" cy="208.1" r="10"/><circle class="cp-dot fam-qwen" cx="588.2" cy="208.1" r="5.5"/></g><g class="cp-pt" data-i="28" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="476.8" cy="291.8" r="10"/><circle class="cp-dot fam-qwen" cx="476.8" cy="291.8" r="5.5"/></g><g class="cp-pt" data-i="29" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="523.4" cy="221.7" r="10"/><circle class="cp-dot fam-qwen" cx="523.4" cy="221.7" r="5.5"/></g><g class="cp-pt" data-i="30" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="483.4" cy="206.7" r="10"/><circle class="cp-dot fam-qwen" cx="483.4" cy="206.7" r="5.5"/></g><g class="cp-pt" data-i="31" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="548.6" cy="264.8" r="10"/><circle class="cp-dot fam-qwen" cx="548.6" cy="264.8" r="5.5"/></g><g class="cp-pt" data-i="32" data-fam="s3" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="489.8" cy="253.1" r="10"/><circle class="cp-dot fam-qwen" cx="489.8" cy="253.1" r="5.5"/></g><g class="cp-pt" data-i="33" data-fam="s4" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="549.9" cy="222.0" r="10"/><circle class="cp-dot fam-qwen" cx="549.9" cy="222.0" r="5.5"/></g><g class="cp-pt" data-i="34" data-fam="s4" data-vendor="qwen" data-keys=""><circle class="cp-hit" cx="526.7" cy="219.6" r="10"/><circle class="cp-dot fam-qwen" cx="526.7" cy="219.6" r="5.5"/></g><g class="cp-pt" data-i="6" data-fam="s7" data-vendor="gpt" data-front="1" data-keys=""><circle class="cp-hit" cx="428.8" cy="141.3" r="10"/><circle class="cp-dot fam-gpt" cx="428.8" cy="141.3" r="6.5"/></g><g class="cp-pt" data-i="7" data-fam="s7" data-vendor="gpt" data-front="1" data-keys=""><circle class="cp-hit" cx="412.3" cy="173.5" r="10"/><circle class="cp-dot fam-gpt" cx="412.3" cy="173.5" r="6.5"/></g><g class="cp-pt" data-i="9" data-fam="s8" data-vendor="gpt" data-front="1" data-keys=""><circle class="cp-hit" cx="641.6" cy="52.2" r="10"/><circle class="cp-dot fam-gpt" cx="641.6" cy="52.2" r="6.5"/></g><g class="cp-pt" data-i="10" data-fam="s8" data-vendor="gpt" data-front="1" data-keys=""><circle class="cp-hit" cx="219.9" cy="250.4" r="10"/><circle class="cp-dot fam-gpt" cx="219.9" cy="250.4" r="6.5"/></g><g class="cp-pt" data-i="11" data-fam="s8" data-vendor="gpt" data-front="1" data-keys=""><circle class="cp-hit" cx="138.7" cy="265.9" r="10"/><circle class="cp-dot fam-gpt" cx="138.7" cy="265.9" r="6.5"/></g><g class="cp-pt" data-i="13" data-fam="s0" data-vendor="qwen" data-front="1" data-keys=""><circle class="cp-hit" cx="92.8" cy="438.7" r="10"/><circle class="cp-dot fam-qwen" cx="92.8" cy="438.7" r="6.5"/></g><g class="cp-pt" data-i="18" data-fam="s1" data-vendor="qwen" data-front="1" data-keys=""><circle class="cp-hit" cx="119.7" cy="436.3" r="10"/><circle class="cp-dot fam-qwen" cx="119.7" cy="436.3" r="6.5"/></g></svg><div class="cp-tip" hidden></div></div><script type="application/json" class="cp-data">[{"n":"GPT-5 mini","f":"GPT-5 \u00b7 OpenAI API","x":990,"y":47.1,"o":37.4,"h":15.5,"w":785,"fr":false},{"n":"GPT-5 nano","f":"GPT-5 \u00b7 OpenAI API","x":490,"y":28.2,"o":58.5,"h":13.3,"w":388,"fr":false},{"n":"GPT-5.4 mini","f":"GPT-5.4 \u00b7 OpenAI API","x":732,"y":37.8,"o":49.1,"h":13.1,"w":548,"fr":false},{"n":"GPT-5.4 nano","f":"GPT-5.4 \u00b7 OpenAI API","x":910,"y":26.3,"o":58.5,"h":15.2,"w":639,"fr":false},{"n":"GPT-5.4","f":"GPT-5.4 \u00b7 OpenAI API","x":979,"y":49.1,"o":36.2,"h":14.7,"w":728,"fr":false},{"n":"GPT-5.6 Luna","f":"GPT-5.6 \u00b7 OpenAI API","x":614,"y":44.2,"o":41.1,"h":14.7,"w":493,"fr":false},{"n":"GPT-5.6 Sol","f":"GPT-5.6 \u00b7 OpenAI API","x":631,"y":50.7,"o":33.8,"h":15.5,"w":485,"fr":true},{"n":"GPT-5.6 Terra","f":"GPT-5.6 \u00b7 OpenAI API","x":612,"y":46.9,"o":37.6,"h":15.5,"w":479,"fr":true},{"n":"GPT-5","f":"GPT-5 \u00b7 OpenAI API","x":744,"y":49.4,"o":33.0,"h":17.6,"w":549,"fr":false},{"n":"GPT-6 Astra","f":"GPT-6 \u00b7 OpenAI API","x":879,"y":61.2,"o":25.1,"h":13.6,"w":683,"fr":true},{"n":"GPT-6 Luna","f":"GPT-6 \u00b7 OpenAI API","x":388,"y":37.8,"o":49.5,"h":12.7,"w":306,"fr":true},{"n":"GPT-6 Sol","f":"GPT-6 \u00b7 OpenAI API","x":294,"y":35.9,"o":52.8,"h":11.3,"w":228,"fr":true},{"n":"Qwen2-VL-2B","f":"Qwen2-VL \u00b7 open weights","x":304,"y":11.4,"o":81.4,"h":7.2,"w":243,"fr":false},{"n":"Qwen2-VL-72B","f":"Qwen2-VL \u00b7 open weights","x":240,"y":15.5,"o":76.9,"h":7.6,"w":191,"fr":true},{"n":"Qwen2-VL-7B","f":"Qwen2-VL \u00b7 open weights","x":246,"y":13.4,"o":79.1,"h":7.5,"w":197,"fr":false},{"n":"Qwen2.5-VL-32B","f":"Qwen2.5-VL \u00b7 open weights","x":636,"y":23.1,"o":64.7,"h":12.3,"w":469,"fr":false},{"n":"Qwen2.5-VL-3B","f":"Qwen2.5-VL \u00b7 open weights","x":273,"y":11.7,"o":81.3,"h":6.9,"w":209,"fr":false},{"n":"Qwen2.5-VL-72B","f":"Qwen2.5-VL \u00b7 open weights","x":432,"y":23.9,"o":65.0,"h":11.1,"w":336,"fr":false},{"n":"Qwen2.5-VL-7B","f":"Qwen2.5-VL \u00b7 open weights","x":272,"y":15.8,"o":75.1,"h":9.1,"w":215,"fr":true},{"n":"Qwen3-VL-235B-A22B","f":"Qwen3-VL \u00b7 open weights","x":656,"y":42.4,"o":40.6,"h":16.9,"w":496,"fr":false},{"n":"Qwen3-VL-2B","f":"Qwen3-VL \u00b7 open weights","x":767,"y":26.0,"o":61.1,"h":12.8,"w":614,"fr":false},{"n":"Qwen3-VL-30B-A3B","f":"Qwen3-VL \u00b7 open weights","x":438,"y":33.4,"o":51.0,"h":15.7,"w":337,"fr":false},{"n":"Qwen3-VL-32B","f":"Qwen3-VL \u00b7 open weights","x":888,"y":39.8,"o":42.0,"h":18.2,"w":632,"fr":false},{"n":"Qwen3-VL-4B","f":"Qwen3-VL \u00b7 open weights","x":732,"y":34.6,"o":47.0,"h":18.4,"w":572,"fr":false},{"n":"Qwen3-VL-8B","f":"Qwen3-VL \u00b7 open weights","x":596,"y":34.3,"o":49.1,"h":16.6,"w":461,"fr":false},{"n":"Qwen3.5-0.8B","f":"Qwen3.5 \u00b7 open weights","x":750,"y":25.3,"o":60.3,"h":14.4,"w":532,"fr":false},{"n":"Qwen3.5-122B-A10B","f":"Qwen3.5 \u00b7 open weights","x":768,"y":40.4,"o":39.7,"h":19.9,"w":540,"fr":false},{"n":"Qwen3.5-27B","f":"Qwen3.5 \u00b7 open weights","x":817,"y":42.8,"o":38.5,"h":18.7,"w":572,"fr":false},{"n":"Qwen3.5-2B","f":"Qwen3.5 \u00b7 open weights","x":687,"y":32.9,"o":51.0,"h":16.1,"w":492,"fr":false},{"n":"Qwen3.5-35B-A3B","f":"Qwen3.5 \u00b7 open weights","x":741,"y":41.2,"o":40.8,"h":18.0,"w":525,"fr":false},{"n":"Qwen3.5-397B-A17B","f":"Qwen3.5 \u00b7 open weights","x":695,"y":42.9,"o":38.8,"h":18.3,"w":500,"fr":false},{"n":"Qwen3.5-4B","f":"Qwen3.5 \u00b7 open weights","x":770,"y":36.1,"o":44.5,"h":19.4,"w":543,"fr":false},{"n":"Qwen3.5-9B","f":"Qwen3.5 \u00b7 open weights","x":702,"y":37.5,"o":44.2,"h":18.4,"w":503,"fr":false},{"n":"Qwen3.6-27B","f":"Qwen3.6 \u00b7 open weights","x":772,"y":41.1,"o":40.7,"h":18.2,"w":537,"fr":false},{"n":"Qwen3.6-35B-A3B","f":"Qwen3.6 \u00b7 open weights","x":745,"y":41.4,"o":40.1,"h":18.5,"w":533,"fr":false}]</script></figure></main>
+<script>
+(() => {
+  const root = document.documentElement;
+  let host = null;
+  try { if (window.parent !== window) host = window.parent.document.documentElement; } catch (e) {}
+  const apply = () => {
+    root.dataset.theme = host ? (host.dataset.theme === 'dark' ? 'dark' : 'light')
+      : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+  apply();
+  if (host) new MutationObserver(apply).observe(host, { attributes: true, attributeFilter: ['data-theme'] });
+  // The content's own height: the document's scrollHeight never drops below the frame it sits in
+  const main = document.querySelector('main');
+  const fit = () => { if (window.frameElement) window.frameElement.style.height = Math.ceil(main.getBoundingClientRect().height) + 'px'; };
+  new ResizeObserver(fit).observe(main);
+  addEventListener('load', fit);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="346" viewBox="0 0 760 346" role="img" aria-label="Number of CaptionExam questions of each type">
+<rect x="0" y="0" width="760" height="346" fill="white"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif">
+<text x="198" y="35" font-size="13.5" fill="#233b50" text-anchor="end">Objects and scene</text>
+<rect x="210" y="22" width="430.0" height="18" rx="2" fill="#629ac3"/>
+<text x="648.0" y="35" font-size="12.5" fill="#566b7b">914  <tspan fill="#8b9aa6">29.5%</tspan></text>
+<text x="198" y="65" font-size="13.5" fill="#233b50" text-anchor="end">Color</text>
+<rect x="210" y="52" width="231.0" height="18" rx="2" fill="#629ac3"/>
+<text x="449.0" y="65" font-size="12.5" fill="#566b7b">491  <tspan fill="#8b9aa6">15.8%</tspan></text>
+<text x="198" y="95" font-size="13.5" fill="#233b50" text-anchor="end">Position and layout</text>
+<rect x="210" y="82" width="223.0" height="18" rx="2" fill="#629ac3"/>
+<text x="441.0" y="95" font-size="12.5" fill="#566b7b">474  <tspan fill="#8b9aa6">15.3%</tspan></text>
+<text x="198" y="125" font-size="13.5" fill="#233b50" text-anchor="end">Material, texture, lighting</text>
+<rect x="210" y="112" width="179.2" height="18" rx="2" fill="#629ac3"/>
+<text x="397.2" y="125" font-size="12.5" fill="#566b7b">381  <tspan fill="#8b9aa6">12.3%</tspan></text>
+<text x="198" y="155" font-size="13.5" fill="#233b50" text-anchor="end">Text content</text>
+<rect x="210" y="142" width="133.1" height="18" rx="2" fill="#629ac3"/>
+<text x="351.1" y="155" font-size="12.5" fill="#566b7b">283  <tspan fill="#8b9aa6">9.1%</tspan></text>
+<text x="198" y="185" font-size="13.5" fill="#233b50" text-anchor="end">Pose and orientation</text>
+<rect x="210" y="172" width="120.0" height="18" rx="2" fill="#629ac3"/>
+<text x="338.0" y="185" font-size="12.5" fill="#566b7b">255  <tspan fill="#8b9aa6">8.2%</tspan></text>
+<text x="198" y="215" font-size="13.5" fill="#233b50" text-anchor="end">Typography</text>
+<rect x="210" y="202" width="58.3" height="18" rx="2" fill="#629ac3"/>
+<text x="276.3" y="215" font-size="12.5" fill="#566b7b">124  <tspan fill="#8b9aa6">4.0%</tspan></text>
+<text x="198" y="245" font-size="13.5" fill="#233b50" text-anchor="end">Count</text>
+<rect x="210" y="232" width="56.0" height="18" rx="2" fill="#629ac3"/>
+<text x="274.0" y="245" font-size="12.5" fill="#566b7b">119  <tspan fill="#8b9aa6">3.8%</tspan></text>
+<text x="198" y="275" font-size="13.5" fill="#233b50" text-anchor="end">Cropping and visibility</text>
+<rect x="210" y="262" width="20.2" height="18" rx="2" fill="#629ac3"/>
+<text x="238.2" y="275" font-size="12.5" fill="#566b7b">43  <tspan fill="#8b9aa6">1.4%</tspan></text>
+<text x="198" y="305" font-size="13.5" fill="#233b50" text-anchor="end">Art style and medium</text>
+<rect x="210" y="292" width="7.1" height="18" rx="2" fill="#629ac3"/>
+<text x="225.1" y="305" font-size="12.5" fill="#566b7b">15  <tspan fill="#8b9aa6">0.5%</tspan></text>
+</g></svg>
