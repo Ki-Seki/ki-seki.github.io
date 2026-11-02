@@ -145,6 +145,14 @@
   line-height: 1.8;
 }
 
+/* Underline links the way PaperMod does in .post-content, which the single
+   moment page uses */
+.moment-content a {
+  box-shadow: 0 1px 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 .moment-content h2,
 .moment-content h3,
 .moment-content h4,

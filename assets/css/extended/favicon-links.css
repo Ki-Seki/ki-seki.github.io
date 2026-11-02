@@ -27,7 +27,7 @@ a.has-favicon {
 .post-content a.has-favicon,
 .entry-cover a.has-favicon,
 .footer a.has-favicon,
-.moment-content .media-figure > figcaption a.has-favicon {
+.moment-content a.has-favicon {
   padding-bottom: 1px;
   border-bottom: none;
   box-shadow: none;
@@ -45,7 +45,7 @@ a.has-favicon {
 [data-theme="dark"] .post-content a.has-favicon,
 [data-theme="dark"] .entry-cover a.has-favicon,
 [data-theme="dark"] .footer a.has-favicon,
-[data-theme="dark"] .moment-content .media-figure > figcaption a.has-favicon {
+[data-theme="dark"] .moment-content a.has-favicon {
   background-image: var(--favicon), var(--favicon-tile), linear-gradient(var(--favicon-underline, currentColor), var(--favicon-underline, currentColor));
   background-position: left 0.1em center, left center, 1.3em 100%;
   background-size: 0.8em, 1em, calc(100% - 1.3em) 1px;
