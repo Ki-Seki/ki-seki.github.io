@@ -18,6 +18,13 @@
   font-weight: inherit;
 }
 
+/* In a moment, a link in a caption keeps the caption's gray; its underline
+   still marks it as a link */
+.moment-content .media-figure > figcaption a,
+.moment-single .media-figure > figcaption a {
+  color: inherit;
+}
+
 .post-content a.media-lightbox-trigger,
 .moment-content a.media-lightbox-trigger {
   box-shadow: none;
