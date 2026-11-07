@@ -1,15 +1,12 @@
 ---
-date: '2026-11-03T12:08:30+08:00'
+date: '2026-11-07T22:47:37+08:00'
 title: 'Efficient Large-Scale Crawling with an AI Agent: 3 Days, $175, 3 Billion Original Images'
 author:
   - Elliot Shichao Song
 summary: 'Downloading the originals behind 2.98 billion image URLs in OmniCorpus-CW, I left almost all operations to an AI agent: patrols, rate tuning, creating and deleting machines, incident handling and billing. I only made the decisions. In 79 hours it saved 99.6% of the images, 744 TB, for about $175 in machines.'
 cover:
   image: "assets/billion-image-download-cover.png"
-  relative: true
-  alt: "An AI agent directs a download fleet, channeling streams of images into orderly storage."
   caption: "An AI-coordinated image hub (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
-draft: false
 tags:
   - AI
   - large-scale
