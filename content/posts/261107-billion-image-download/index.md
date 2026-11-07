@@ -16,11 +16,11 @@ math: false
 
 ## Introduction
 
-I still remember when I first [learned web crawling](https://ki-seki.github.io/posts/210817-scrapy/). It was the first time the computer science I studied felt useful, and it gave me a concrete sense of how the web works. Back then I had to learn many details: CSS selectors, XPath, request parsing, URL patterns. I never expected that five years later all of them would matter so little.
+I still remember when I first [learned web crawling](https://ki-seki.github.io/posts/210817-scrapy/). Back then I had to learn many details: CSS selectors, XPath, request parsing, URL patterns. I never expected that five years later all of them would matter so little.
 
 This post covers how I downloaded the original images in [OmniCorpus-CW](https://openxlab.org.cn/datasets/Li-Qingyun/OmniCorpus-CW) [^li_omnicorpus], a large-scale dataset of Chinese web images. It is an interleaved image-text corpus: each web page is stored as text paragraphs plus links to its images, mostly from WeChat, Xiaohongshu and Zhihu. Such images are valuable for training text-to-image models.
 
-I know the basics of crawling but had never crawled at scale. With AI, I got it done cheaply, quickly and reliably: 95 Hetzner cloud servers, $175 in machine costs, and 2,973,430,108 images saved (99.62%) in 79 hours 25 minutes, 744 TB in all, averaging about 10,000 images and 2.6 GB per second. I'm very happy with that.
+I know the basics of crawling but had never crawled at scale. With AI, I got it done cheaply, quickly and reliably: 95 Hetzner cloud servers, $175 in machine costs, and 2,973,430,108 images saved (99.62%) in 79 hours 25 minutes, 744 TB in all, averaging about 10,000 images and 2.6 GB per second.
 
 Over those three days the AI agent did almost all the operations: patrols, rate tuning, creating and deleting machines, incident handling and billing. I only made the decisions that cost money, added resources or carried risk.
 
@@ -43,16 +43,7 @@ CC patrolled hourly by day and every 30 minutes at night, and event monitors wok
 - **Memory:** Finding machines low on memory, it restarted them one by one as planned and added swap files where swap was short.
 - **Retries:** After the run it counted the failures and re-downloaded only the transient ones, recovering 98.3% of them for Xiaohongshu and 99.3% for WeChat.
 - **Dev machine reclaimed:** CC's dev machine was reclaimed, stopping CC for 1 hour 42 minutes. The credentials then expired and every machine exited cleanly. A CC session on my own computer took over: it pushed credentials from another dev machine and restarted every lane, then handed back to the original CC once its machine returned.
-- **Billing:** From each machine's uptime it worked out costs and top-ups. November totaled $94.21, matching the console to the cent.
 - **Wrap-up:** It deleted all 95 machines, confirmed no resources were left in the accounts, read all of the roughly 120,000 completion markers and produced the final statistics.
-
-This work used to take a senior crawler engineer. Of course, it also made mistakes:
-
-- It used the wrong global stop flag, which kept Xiaohongshu stopped 22 minutes longer.
-- The watchdog rule "slow for 20 minutes: delete and rebuild" would, near the end, delete machines finishing their last tasks. The rule was later switched off once few tasks remained.
-- Tuning the small sites, it first took both "slow because the images are large" and "slow because evening networks are slow" for throttling, at one point cutting the fleet to a third of its speed, until the condition was fixed.
-- False alarms, such as "a problem pushing credentials", or flagging a lane that had finished normally.
-- A few scheduled patrols didn't fire, or fired late.
 
 ## Prompt
 
@@ -68,7 +59,7 @@ Goals
 - Resumable; reruns never re-download.
 
 Permissions
-- Hetzner API token at <path>, S3 credentials at <path>. Read by path only; never print them or put them in code or logs.
+- Hetzner API token at <path>, S3 credentials at <path>.
 - You may create and delete machines and tune rates. Ask me before exceeding the budget, requesting more quota or deleting stored data.
 
 Step 1: Probe to set budget and deadline
@@ -109,7 +100,7 @@ Throughout: live spot checks
 
 Interestingly, a safety-aligned AI may refuse outright to try things like solving "verify you are human" challenges; Opus 5.5 firmly refuses such requests. An unaligned AI might try to bypass them. So this post leaves that topic aside for now.
 
-## Using Hetzner from China: Sign-Up, Verification and Payment
+## Using Hetzner from China
 
 Plenty has been written about signing up for Hetzner, so just one point: you don't need to make anything up. Fill in your details truthfully and you'll pass. A passport makes identity verification easy.
 
