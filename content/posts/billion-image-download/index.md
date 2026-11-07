@@ -1,14 +1,14 @@
 ---
 date: '2026-11-03T12:08:30+08:00'
-title: 'AI agent 的高效大规模爬虫实践：三天、175 美元、 30 亿张原图'
+title: 'Efficient Large-Scale Crawling with an AI Agent: 3 Days, $175, 3 Billion Original Images'
 author:
   - Elliot Shichao Song
-summary: '把 OmniCorpus-CW 的 29.8 亿个图片 URL 下成原图，几乎所有运维都交给了 AI agent：巡检、调速、开删机器、排查事故和算账都由它来做，我只做决定。79 小时保存了 99.6%，共 744 TB，机器花费约 175 美元。'
+summary: 'Downloading the originals behind 2.98 billion image URLs in OmniCorpus-CW, I left almost all operations to an AI agent: patrols, rate tuning, creating and deleting machines, incident handling and billing. I only made the decisions. In 79 hours it saved 99.6% of the images, 744 TB, for about $175 in machines.'
 cover:
   image: "assets/billion-image-download-cover.png"
   relative: true
-  alt: "AI agent 协调自动化下载集群，让图片流汇入有序的存储。"
-  caption: "AI 协调的图片集散站（[GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/) 生成）"
+  alt: "An AI agent directs a download fleet, channeling streams of images into orderly storage."
+  caption: "An AI-coordinated image hub (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
 draft: false
 tags:
   - AI
@@ -17,118 +17,118 @@ tags:
 math: false
 ---
 
-## 引言
+## Introduction
 
-我还记得最早[学习爬虫](https://ki-seki.github.io/posts/210817-scrapy/)的时候，那是我第一次觉得学习的计算机知识可以有所用处，也让我对网络世界的运作有了更直观的理解。那会儿要学习很多细节的知识 css selector，xpath，请求解析，url pattern 分析等等。没有想到 5 年后这些所有的细节已经变得无比不重要。
+I still remember when I first [learned web crawling](https://ki-seki.github.io/posts/210817-scrapy/). It was the first time the computer science I studied felt useful, and it gave me a concrete sense of how the web works. Back then I had to learn many details: CSS selectors, XPath, request parsing, URL patterns. I never expected that five years later all of them would matter so little.
 
-本文会介绍下载大规模中文网络图片数据集 [OmniCorpus-CW](https://openxlab.org.cn/datasets/Li-Qingyun/OmniCorpus-CW) [^li_omnicorpus] 中原图的数据爬取经验。这个数据集提供图文交错的语料，每篇网页存成一段段文字和其中图片的链接，大多是微信，小红书，知乎上的内容。这些图片对于训练文生图模型大有裨益。
+This post covers how I downloaded the original images in [OmniCorpus-CW](https://openxlab.org.cn/datasets/Li-Qingyun/OmniCorpus-CW) [^li_omnicorpus], a large-scale dataset of Chinese web images. It is an interleaved image-text corpus: each web page is stored as text paragraphs plus links to its images, mostly from WeChat, Xiaohongshu and Zhihu. Such images are valuable for training text-to-image models.
 
-我了解爬虫的各方面基础，但还没有大规模爬取的实战经验。这次借助 AI，我低成本、快速、稳定地完成了下载：用 Hetzner 的 95 台云服务器，机器花费 175 美元，在 79 小时 25 分钟里保存了 2,973,430,108 张（99.62%），共 744 TB，平均每秒约 1 万张、2.6 GB/s。对我来说，这个时间和速度已经非常令人满意。
+I know the basics of crawling but had never crawled at scale. With AI, I got it done cheaply, quickly and reliably: 95 Hetzner cloud servers, $175 in machine costs, and 2,973,430,108 images saved (99.62%) in 79 hours 25 minutes, 744 TB in all, averaging about 10,000 images and 2.6 GB per second. I'm very happy with that.
 
-这三天里，几乎所有运维都是 AI agent 做的：巡检、调速、开删机器、排查事故和算账。我只做要花钱、加资源和有风险的决定。
+Over those three days the AI agent did almost all the operations: patrols, rate tuning, creating and deleting machines, incident handling and billing. I only made the decisions that cost money, added resources or carried risk.
 
 {{< media
 src="assets/architecture.svg"
-caption="图 1：人向 AI agent 提供目标与授权，AI agent 运维 Hetzner 下载集群，图片从网站 CDN 经下载机写入 S3。"
+caption="Figure 1: The human gives the AI agent goals and permissions; the agent operates the Hetzner download fleet, which moves images from website CDNs into S3."
 >}}
 
-## 让 AI agent 来运维
+## Letting an AI Agent Run the Operations
 
-我这次用 Claude Code（CC）[^anthropic_claude_code] 来管理和运维整个爬虫系统，模型是 Opus 5.5。CC 常驻在一台开发机上，一直开着。agent 本身并不便宜。按 Claude Opus 5.5 的 API 标价折算，CC 用掉的 token 约值 500 美元，是机器花费的近 3 倍。我猜其实用不着这么强的模型，比如现在的 DeepSeek 4 可能就够了，只是人要多操心一些。
+I used Claude Code (CC)[^anthropic_claude_code] with Opus 5.5 to run the whole crawling system. CC lived on a dev machine and ran nonstop. The agent isn't cheap: at Opus 5.5 API list prices, its tokens are worth about $500, nearly 3 times the machine cost. I suspect a model this strong isn't needed; today's DeepSeek 4 might do, with a bit more human attention.
 
-Hetzner 平台提供 API token，可以很方便地让模型自己开关机器，所以一开始我就把这个权限交给了 CC，也允许它自己探测和调节下载速率。
+Hetzner's API tokens make it easy for a model to start and stop machines, so from the start I gave CC that permission and let it probe and tune download rates itself.
 
-白天 CC 每小时巡检一次，夜里每 30 分钟一次；另外还有事件监控，出了问题会马上叫醒它。三天下来，工作日志写了 2,600 多行。下面是几个例子：
+CC patrolled hourly by day and every 30 minutes at night, and event monitors woke it the moment something broke. Over three days its work log passed 2,600 lines. Some examples:
 
-- **微信调速：** 加机器后，所有机器同时、同比例地掉速。它据此判断微信是按全集群的总量限流，于是写了一个调速器，让整队一直贴着上限跑；又在美国开了一台机器做对照，证明换地区也加不上去，8 分钟后就删掉了。
-- **小红书提速：** 在一台机器上逐档上探单个 IP 的速率，到每秒 80 次都没出现挑战页，留出余量定在 70，再分批推到全集群。
-- **一万多个小站：** 把这部分约 1,500 万行按网站重新切成任务，给每个站单独调速；跑的过程中，按我的决定放开了几个大图床的上限，放弃了两个大多返回 403 的站。
-- **内存：** 发现有机器内存快满，就按计划逐台重启；swap 不够的机器，补了 swap 文件。
-- **补下：** 跑完后统计失败的行，只把暂时性的失败单独再下一遍。重下的行里，小红书补回了 98.3%，微信补回了 99.3%。
-- **开发机被回收：** CC 所在的开发机被回收，它跟着停了 1 小时 42 分钟。凭据随后过期，所有机器正常退出。我在自己电脑上另开了一个 CC 会话临时接管，从另一台开发机推送凭据、重新拉起各条线；开发机回来以后，再交还给原来的 CC。
-- **算账：** 按每台机器的开机时长，算出花费和要补的钱。11 月合计 94.21 美元，和控制台上的数字一分不差。
-- **收尾：** 删掉全部 95 台机器，核对账户里没有遗留资源，再读完全部约 12 万个完成标记，出全量统计。
+- **WeChat rate control:** After machines were added, all of them slowed down at once and in proportion. It concluded that WeChat caps the fleet's total rate and wrote a rate controller that kept the fleet right at the cap. A control machine in the US showed that another region didn't help; it was deleted 8 minutes later.
+- **Xiaohongshu speed-up:** On one machine it raised the per-IP rate step by step. No challenge pages appeared even at 80 requests per second, so it settled on 70 for margin and rolled it out to the fleet in batches.
+- **10,000+ small sites:** It re-split their roughly 15 million rows into tasks by site and tuned each site's rate separately. Along the way, on my decisions, it lifted the caps for a few large image hosts and dropped two sites that mostly returned 403.
+- **Memory:** Finding machines low on memory, it restarted them one by one as planned and added swap files where swap was short.
+- **Retries:** After the run it counted the failures and re-downloaded only the transient ones, recovering 98.3% of them for Xiaohongshu and 99.3% for WeChat.
+- **Dev machine reclaimed:** CC's dev machine was reclaimed, stopping CC for 1 hour 42 minutes. The credentials then expired and every machine exited cleanly. A CC session on my own computer took over: it pushed credentials from another dev machine and restarted every lane, then handed back to the original CC once its machine returned.
+- **Billing:** From each machine's uptime it worked out costs and top-ups. November totaled $94.21, matching the console to the cent.
+- **Wrap-up:** It deleted all 95 machines, confirmed no resources were left in the accounts, read all of the roughly 120,000 completion markers and produced the final statistics.
 
-这些事以前需要一位资深的爬虫工程师来做。当然，它也犯过错：
+This work used to take a senior crawler engineer. Of course, it also made mistakes:
 
-- 用错了全局停止标记，小红书跟着多停了 22 分钟。
-- 守护规则「慢 20 分钟就删机重建」到了收尾阶段，会误删正在收尾的机器。后来改成剩下的任务很少时，就关掉这条规则。
-- 小站调速一开始把「图大所以慢」和「傍晚线路慢」都当成对方在限流，一度把整队速度砍到三分之一，后来改了判断条件。
-- 误报，比如报「凭据推送有问题」，或者把正常跑完的线标成要处理。
-- 定时巡检有几次没有触发，或者推迟了。
+- It used the wrong global stop flag, which kept Xiaohongshu stopped 22 minutes longer.
+- The watchdog rule "slow for 20 minutes: delete and rebuild" would, near the end, delete machines finishing their last tasks. The rule was later switched off once few tasks remained.
+- Tuning the small sites, it first took both "slow because the images are large" and "slow because evening networks are slow" for throttling, at one point cutting the fleet to a third of its speed, until the condition was fixed.
+- False alarms, such as "a problem pushing credentials", or flagging a lane that had finished normally.
+- A few scheduled patrols didn't fire, or fired late.
 
 ## Prompt
 
-下面是我总结的一个大致完整的交给 AI agent 进行大规模图片下载的 prompt 示例，供参考。
+Below is a fairly complete example prompt for handing a large-scale image download to an AI agent.
 
 ```text
-你负责把 <数据集>（<位置>）里约 <N> 个图片 URL 下载成原图，连同图片的基础元信息一起存到 <S3 前缀>。从探测到收尾都由你运维，我只做决定。
+Download about <N> image URLs from <dataset> (<location>) as originals, and store them with basic metadata in <S3 prefix>. You run everything from probing to wrap-up; I only make decisions.
 
-目标
-- 存原始字节，不转码。
-- 每个 URL 写一行结果，带上它在数据集里的行号，方便和原数据对上。
-- 成功的记存储路径和基础元信息：宽高、格式、字节数、内容哈希；失败的记状态码和原因。
-- 可断点续跑，重跑不重复下载。
+Goals
+- Store raw bytes; no transcoding.
+- One result row per URL, with its dataset row number for joining back.
+- Success: storage path and basic metadata (width, height, format, bytes, content hash). Failure: status code and reason.
+- Resumable; reruns never re-download.
 
-权限
-- Hetzner API token 在 <路径>，S3 凭据在 <路径>。只按路径读，不打印，不写进代码和日志。
-- 你可以自己开机、删机、调速。超预算、申请提额、删除已存的数据，先问我。
+Permissions
+- Hetzner API token at <path>, S3 credentials at <path>. Read by path only; never print them or put them in code or logs.
+- You may create and delete machines and tune rates. Ask me before exceeding the budget, requesting more quota or deleting stored data.
 
-一、探测：定预算和期限
-1. 探测期间，同时运行的机器最多 <K> 台。
-2. 按域名统计 URL，按站点分线。
-3. 每条线先在一台机器上跑，测吞吐，找出瓶颈是 CPU、带宽还是对方限流；比较各机型每美元的吞吐。
-4. 每个大站逐档上探速率。再加几台机器，看单机速度是否同比例下降，判断对方按 IP 限还是按总量限。
-5. 交给我一份估算：各站的上限和限流方式、机型和台数、总时长、总花费。我定下预算和期限后再扩容。
+Step 1: Probe to set budget and deadline
+1. At most <K> machines at a time while probing.
+2. Count URLs by domain; split into lanes by site.
+3. Run each lane on one machine first: measure throughput, find the bottleneck (CPU, bandwidth or the site's limit), compare throughput per dollar across machine types.
+4. Ramp each large site's rate step by step. Then add a few machines: if per-machine speed drops in proportion, the site caps the total, not each IP.
+5. Give me an estimate: each site's limit and limit type, machine types and counts, total time, total cost. Scale up only after I set budget and deadline.
 
-二、运行
-- 调速是持续的，不是探测完就定死。每条线按错误率自动上下调：平稳一段时间就小步上调；出现限流就按比例降，并记下这个上限，之后接近它时步子放小。对方的上限会随时段变，深夜往往更高，所以要一直试探。
-- 只有出错时才降速。慢不等于被限流：图大、晚高峰线路都会慢。
-- 对方的拒绝分三档：限流就降速；某个站持续返回 403 就停这个站；需要人来验证的挑战页一多就熔断整条线，等我决定。
-- 长尾小站没法逐个探测：一律从低速、少连接起步，按站自动调速；连不上的站先暂停一段时间再试。
-- 速率和启停由一个中心控制文件下发，不用重启进程；每条线有自己的停止开关。
-- 校验响应：HTML、挑战页、占位图都算失败，哪怕状态码是 200。
-- 区分可重试和终态失败，暂时性失败最后单独补下一轮。
-- 每摸清一个站，更新一次估算。
+Step 2: Run
+- Rate tuning never stops. Each lane adjusts automatically by error rate: small steps up after a stable stretch; on throttling, cut by a factor and record the ceiling, then step more carefully near it. Limits shift with time of day, often higher late at night, so keep probing.
+- Slow down only on errors. Slow is not throttled: large images and evening network peaks are slow too.
+- Three levels of refusal: throttling, slow down; persistent 403 from a site, stop that site; challenge pages needing human verification piling up, trip the whole lane and wait for me.
+- Long-tail small sites can't each be probed: start low with few connections and auto-tune per site; pause unreachable sites and retry later.
+- Rates and start/stop come from one central control file, no process restarts; each lane has its own stop switch.
+- Validate responses: HTML, challenge pages and placeholders are failures, even with status 200.
+- Separate retryable from final failures; retry transient ones in a final round.
+- Update the estimate whenever a site's limit becomes clear.
 
-三、收尾
-- 每个 URL 都有终态结果，且暂时性失败已补下过一轮，才算跑完。
-- 核对输入行数等于结果行数。
-- 删掉全部机器，确认没有遗留资源。
-- 按机器时长算账，和控制台对上，出最终统计。
+Step 3: Wrap up
+- Done only when every URL has a final result and transient failures have had one retry round.
+- Input row count must equal result row count.
+- Delete all machines; confirm nothing is left.
+- Compute cost from machine hours, reconcile with the console, produce final statistics.
 
-全程：巡查和监控
-- 白天每小时、夜里每 30 分钟巡查一次；另设事件监控，出事立刻叫醒你。
-- 巡查看各线进度和速度、错误构成、机器的 CPU/内存/磁盘、已花的钱、预计完成时间。能修的直接修，记进工作日志；只有要我决定的事，才通过 <联系方式> 找我。
-- 自动处理慢机的规则要顾及长尾：任务快跑完时慢是正常的，别误删正在收尾的机器。
-- 做一个实时监控网页，内容同上。
-- 状态和日志都存盘：你所在的机器挂了，新会话也能接着干。
+Throughout: patrols and monitoring
+- Patrol hourly by day, every 30 minutes at night; event monitors wake you the moment something breaks.
+- Each patrol: per-lane progress and speed, error mix, machine CPU/memory/disk, spend, ETA. Fix what you can and log it; contact me via <contact> only for decisions.
+- Slow-machine rules must allow for the long tail: near the end, slow is normal; don't delete machines that are finishing.
+- Build a live monitoring page showing the above.
+- Persist state and logs so a new session can take over if your machine dies.
 
-全程：实时抽检
-- 从试跑开始，每条线持续随机抽样，从存储读回图片，放到监控网页的抽检页上，让使用方 <谁> 随时看。
-- 能不能用由使用方定：占位图、「图片已删除」、缩略图、水印、裁切都可能让数据用不了。使用方说某条线不能用，就先停这条线，查清原因再定。
-- 你也要自查：按哈希找每个站重复最多的图，多半是占位图；抽样和浏览器打开同一 URL 拿到的图对比，确认拿到的是原图。
+Throughout: live spot checks
+- From the trial run on, keep sampling each lane at random, read images back from storage, and show them on a spot-check page of the monitor for the data's users (<who>) to review anytime.
+- Users decide usability: placeholders, "image deleted" images, thumbnails, watermarks and crops can all make data unusable. If they reject a lane, stop it first, find the cause, then decide.
+- Self-check too: find each site's most repeated hashes (usually placeholders); compare samples with what a browser gets for the same URL to confirm originals.
 ```
 
-有意思的是，对于类似尝试解“验证你是人“的挑战，safety aligned的 AI 可能都不会去做，Opus 5.5 就会严肃拒绝这类请求。not aligned的 AI 可能会尝试绕过。所以本文暂时不讨论这块内容。
+Interestingly, a safety-aligned AI may refuse outright to try things like solving "verify you are human" challenges; Opus 5.5 firmly refuses such requests. An unaligned AI might try to bypass them. So this post leaves that topic aside for now.
 
-## 从国内用 Hetzner：注册、认证和付款
+## Using Hetzner from China: Sign-Up, Verification and Payment
 
-网上有许多资源讲 Hetzner 的注册问题，这里只说一句：不需要编造任何信息，如实填写就能通过。如果有护照，身份认证会很方便。
+Plenty has been written about signing up for Hetzner, so just one point: you don't need to make anything up. Fill in your details truthfully and you'll pass. A passport makes identity verification easy.
 
-关于额度，初始的时候 vCPU 的数量有限，所以能并行开的机器数量也有限。在网站上通过官方渠道提工单，在我的例子中，尽管是新注册的账号，3 天就从 20 个 vCPU 提到了 100 个。
+New accounts start with few vCPUs, which caps how many machines you can run at once. Open a ticket through the official channel; in my case, even with a brand-new account, the quota went from 20 to 100 vCPUs in 3 days.
 
-感谢 Hetzner 的低价服务，让我们能以很低的成本完成这次大规模图片下载。
+Thanks to Hetzner's low prices, this large-scale download cost very little.
 
-## 结论
+## Conclusion
 
-一次有趣的、由 AI agent 主导的大规模图片下载实践。
+An interesting large-scale image download, led by an AI agent.
 
-## 引用
+## Citation
 
 {{< bibtex >}}
 
-## 参考文献
+## References
 
 [^anthropic_claude_code]: **Anthropic.** *Claude Code*. 2025, https://claude.com/claude-code.
 
