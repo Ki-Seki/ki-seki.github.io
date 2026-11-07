@@ -4,6 +4,11 @@ title: 'AI agent 的高效大规模爬虫实践：三天、175 美元、 30 亿�
 author:
   - Elliot Shichao Song
 summary: '把 OmniCorpus-CW 的 29.8 亿个图片 URL 下成原图，几乎所有运维都交给了 AI agent：巡检、调速、开删机器、排查事故和算账都由它来做，我只做决定。79 小时保存了 99.6%，共 744 TB，机器花费约 175 美元。'
+cover:
+  image: "assets/billion-image-download-cover.png"
+  relative: true
+  alt: "AI agent 协调自动化下载集群，让图片流汇入有序的存储。"
+  caption: "AI 协调的图片集散站（[GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/) 生成）"
 draft: false
 tags:
   - AI
@@ -105,11 +110,7 @@ Hetzner 平台提供 API token，可以很方便地让模型自己开关机器�
 - 你也要自查：按哈希找每个站重复最多的图，多半是占位图；抽样和浏览器打开同一 URL 拿到的图对比，确认拿到的是原图。
 ```
 
-{{% admonition type="note" title="一个有意思的现象" open=true %}}
-对于违反 robots.txt 的事儿，尝试解“验证你是人“的挑战，safety aligned的 AI 可能都不会去做，Opus 5.5 就会严肃拒绝这类请求。not aligned的 AI 可能会尝试绕过。
-
-所以我的这个 prompt 也不涉及这块内容。
-{{% /admonition %}}
+有意思的是，对于类似尝试解“验证你是人“的挑战，safety aligned的 AI 可能都不会去做，Opus 5.5 就会严肃拒绝这类请求。not aligned的 AI 可能会尝试绕过。所以本文暂时不讨论这块内容。
 
 ## 从国内用 Hetzner：注册、认证和付款
 
