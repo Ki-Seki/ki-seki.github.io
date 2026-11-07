@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960" height="556" viewBox="0 54 960 556" role="img" aria-label="A human gives the AI agent goals and permissions and gets reports and requests back; the agent monitors, tunes rates and scales a Hetzner download fleet, which downloads original images from website CDNs and stores them with metadata in S3.">
+<rect x="0" y="54" width="960" height="556" fill="white"/>
+<defs>
+<marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#568097"/></marker>
+<marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#568097"/></marker>
+<marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#ca683e"/></marker>
+<g id="win">
+<rect x="0" y="0" width="94" height="85" rx="7" fill="#fcfaf8"/>
+<path d="M0,19 V7 A7,7 0 0 1 7,0 H87 A7,7 0 0 1 94,7 V19 Z" fill="#d3dee7"/>
+<line x1="0" y1="19" x2="94" y2="19" stroke="#23282b" stroke-width="2.6"/>
+<circle cx="13" cy="9.5" r="3" fill="#23282b"/><circle cx="23" cy="9.5" r="3" fill="#23282b"/><circle cx="33" cy="9.5" r="3" fill="#23282b"/>
+<circle cx="71" cy="38" r="8" fill="#f5c882"/>
+<polygon points="10,75 35,46 52,64 64,53 85,75" fill="#95b289"/>
+<rect x="0" y="0" width="94" height="85" rx="7" fill="none" stroke="#23282b" stroke-width="3"/>
+</g>
+<g id="unit">
+<rect x="0" y="0" width="68" height="24" rx="6" fill="#dde6ed" stroke="#23282b" stroke-width="3"/>
+<line x1="11" y1="12" x2="30" y2="12" stroke="#23282b" stroke-width="3" stroke-linecap="round"/>
+<circle cx="56" cy="12" r="4.5" fill="#5ba34a"/>
+</g>
+<g id="rack">
+<use xlink:href="#unit" href="#unit" y="0"/>
+<use xlink:href="#unit" href="#unit" y="25.5"/>
+<use xlink:href="#unit" href="#unit" y="51"/>
+<rect x="8" y="76" width="6.5" height="8" fill="#23282b"/><rect x="53.5" y="76" width="6.5" height="8" fill="#23282b"/>
+</g>
+</defs>
+<g font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI', Arial, sans-serif" fill="#23282b" text-anchor="middle">
+
+<!-- 人 -->
+<path d="M127,145 A28,28 0 1 1 152.5,145 C158,146.5 170,149 178,156.5 C185,163 187.5,173 187.5,184 Q187.5,191 181,191 H98 Q91.5,191 91.5,184 C91.5,173 94,163 101,156.5 C109,149 121,146.5 127,145 Z" fill="#d2dee9" stroke="#23282b" stroke-width="3.3" stroke-linejoin="round"/>
+<text x="140" y="235" font-size="30" font-weight="700">Human</text>
+
+<!-- 人 ⇄ agent -->
+<line x1="197" y1="127" x2="405" y2="127" stroke="#568097" stroke-width="4.2" marker-end="url(#ab)"/>
+<line x1="405" y1="167" x2="197" y2="167" stroke="#568097" stroke-width="4.2" marker-end="url(#ab)"/>
+<text x="300" y="109" font-size="20" font-weight="600">Goals &amp; permissions</text>
+<text x="301" y="202" font-size="20" font-weight="600">Reports &amp; requests</text>
+
+<!-- AI Agent -->
+<rect x="421" y="88" width="144" height="100" rx="10" fill="#f8f9f9"/>
+<path d="M421,114 V98 A10,10 0 0 1 431,88 H555 A10,10 0 0 1 565,98 V114 Z" fill="#a5bfd3"/>
+<line x1="421" y1="114" x2="565" y2="114" stroke="#23282b" stroke-width="3"/>
+<circle cx="441" cy="101" r="4.3" fill="#23282b"/><circle cx="455" cy="101" r="4.3" fill="#23282b"/><circle cx="469" cy="101" r="4.3" fill="#23282b"/>
+<polyline points="446,134 458,145 446,156" fill="none" stroke="#23282b" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="465" y1="156" x2="485" y2="156" stroke="#23282b" stroke-width="3.4" stroke-linecap="round"/>
+<rect x="421" y="88" width="144" height="100" rx="10" fill="none" stroke="#23282b" stroke-width="3.2"/>
+<text x="493" y="230" font-size="31" font-weight="700">AI Agent</text>
+<text x="493" y="261" font-size="22" fill="#5f666c">Dev machine</text>
+
+<!-- agent → 集群 -->
+<line x1="491" y1="273" x2="491" y2="368" stroke="#568097" stroke-width="3" stroke-dasharray="8 5.5" marker-end="url(#ad)"/>
+<text x="516" y="315" font-size="22" font-weight="600" text-anchor="start">Monitor · Tune rates · Scale</text>
+
+<!-- 网站 CDN -->
+<use xlink:href="#win" href="#win" x="121" y="372"/>
+<use xlink:href="#win" href="#win" x="88" y="393"/>
+<use xlink:href="#win" href="#win" x="58" y="414"/>
+<text x="149" y="547" font-size="31" font-weight="700">Website CDNs</text>
+<text x="149" y="580" font-size="19" fill="#5f666c">WeChat · Xiaohongshu · Zhihu</text>
+
+<!-- CDN → 集群 → S3 -->
+<line x1="221" y1="443" x2="355" y2="443" stroke="#ca683e" stroke-width="4.2" marker-end="url(#ao)"/>
+<text x="290" y="420" font-size="22" font-weight="600">Download</text>
+<line x1="645" y1="443" x2="785" y2="443" stroke="#ca683e" stroke-width="4.2" marker-end="url(#ao)"/>
+<text x="711" y="420" font-size="22" font-weight="600">Store</text>
+
+<!-- Hetzner 集群 -->
+<rect x="361" y="376" width="279" height="135" rx="18" fill="#f3f6f9" stroke="#8ba9b9" stroke-width="3"/>
+<use xlink:href="#rack" href="#rack" x="383" y="405"/>
+<use xlink:href="#rack" href="#rack" x="467" y="405"/>
+<use xlink:href="#rack" href="#rack" x="551" y="405"/>
+<text x="501" y="549" font-size="31" font-weight="700">Hetzner</text>
+<text x="501" y="581" font-size="22" fill="#5f666c">Download fleet</text>
+
+<!-- S3 -->
+<path d="M790,392 V486 A56,17 0 0 0 902,486 V392" fill="#f8f5ef" stroke="#23282b" stroke-width="3"/>
+<ellipse cx="846" cy="392" rx="56" ry="17" fill="#f7f3ec" stroke="#23282b" stroke-width="3"/>
+<circle cx="864" cy="433" r="8" fill="#f5c882"/>
+<polygon points="809,472 836,442 853,457 861,449 882,472" fill="#95b289"/>
+<text x="846" y="547" font-size="31" font-weight="700">S3</text>
+<text x="846" y="580" font-size="22" fill="#5f666c">Images &amp; metadata</text>
+</g>
+</svg>
