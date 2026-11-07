@@ -31,7 +31,7 @@ caption="Figure 1: The human gives the AI agent goals and permissions; the agent
 
 ## Letting an AI Agent Run the Operations
 
-I used Claude Code (CC)[^anthropic_claude_code] with Opus 5.5 to run the whole crawling system. CC lived on a dev machine and ran nonstop. The agent isn't cheap: at Opus 5.5 API list prices, its tokens are worth about $500, nearly 3 times the machine cost. I suspect a model this strong isn't needed; today's DeepSeek 4 might do, with a bit more human attention.
+I used Claude Code (CC) [^anthropic_claude_code] with Opus 5.5 to run the whole crawling system. CC lived on a dev machine and ran nonstop. The agent isn't cheap: at Opus 5.5 API list prices, its tokens are worth about $500, nearly 3 times the machine cost. I suspect a model this strong isn't needed; today's DeepSeek 4 might do, with a bit more human attention.
 
 Hetzner's API tokens make it easy for a model to start and stop machines, so from the start I gave CC that permission and let it probe and tune download rates itself.
 
