@@ -1,15 +1,14 @@
 ---
 date: '2026-11-03T12:08:30+08:00'
-title: '让 AI agent 来运维：三天、175 美元下载 30 亿张原图'
+title: 'AI agent 的高效大规模爬虫实践：三天、175 美元、 30 亿张原图'
 author:
   - Elliot Shichao Song
 summary: '把 OmniCorpus-CW 的 29.8 亿个图片 URL 下成原图，几乎所有运维都交给了 AI agent：巡检、调速、开删机器、排查事故和算账都由它来做，我只做决定。79 小时保存了 99.6%，共 744 TB，机器花费约 175 美元。'
 draft: false
 tags:
-  - ai-agent
-  - training-data
+  - AI
   - large-scale
-  - text-to-image
+  - web-crawling
 math: false
 ---
 
@@ -23,7 +22,7 @@ math: false
 
 这三天里，几乎所有运维都是 AI agent 做的：巡检、调速、开删机器、排查事故和算账。我只做要花钱、加资源和有风险的决定。本文先讲这套分工怎么搭、agent 实际做了什么、它犯过哪些错，再给出一份交给 agent 的 prompt，最后记一下从国内用 Hetzner 要注意的几件事。
 
-【补充人，AI，外部 cdns，s3，hetzner 等的关系，交互示意图】
+![人向 AI agent 提供目标与授权，AI agent 运维 Hetzner 下载集群，图片从网站 CDN 经下载机写入 S3。](architecture-sunburst.png)
 
 ## 让 AI agent 来运维
 
