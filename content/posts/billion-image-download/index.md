@@ -27,7 +27,7 @@ math: false
 
 ## 让 AI agent 来运维
 
-我这次用 Claude Code（CC）[^anthropic_claude_code] 来管理和运维整个爬虫系统，模型是 Opus 5.5。CC 常驻在一台开发机上，一直开着。agent 本身并不便宜：按 API 标价折算约 500 美元，是机器花费的近 3 倍，大头是长会话反复读上下文。我猜其实用不着这么强的模型，比如现在的 DeepSeek 4 可能就够了，只是人要多操心一些。
+我这次用 Claude Code（CC）[^anthropic_claude_code] 来管理和运维整个爬虫系统，模型是 Opus 5.5。CC 常驻在一台开发机上，一直开着。agent 本身并不便宜。按 Claude Opus 5.5 的 API 标价折算，CC 用掉的 token 约值 500 美元，是机器花费的近 3 倍。我猜其实用不着这么强的模型，比如现在的 DeepSeek 4 可能就够了，只是人要多操心一些。
 
 Hetzner 平台提供 API token，可以很方便地让模型自己开关机器，所以一开始我就把这个权限交给了 CC，也允许它自己探测和调节下载速率。但有一条底线：不许绕过对方的反爬机制，不换 IP 或 UA，不解挑战页；遇到挑战页就停下来，等我决定。
 
