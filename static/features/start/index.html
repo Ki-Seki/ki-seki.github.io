@@ -553,18 +553,9 @@ function defaults() {
   return {
     settings: { lang: 'en', theme: 'auto', engines: DEFAULT_ENGINES.map(e => ({ ...e })), engine: 'google', newTab: false, historyOn: true },
     groups: [
-      { id: uid(), key: '', name: 'fav', links: [
-        L('kiseki log', 'https://ki-seki.github.io/'),
-        L('kiseki gallery', 'https://ki-seki.github.io/gallery/'),
-        L('jianlin', 'https://spaces.ac.cn/')] },
-      { id: uid(), key: '', name: 'util', links: [
-        L('ouroboros', 'https://ki-seki.github.io/ouroboros/'),
-        L('hypo test', 'https://ki-seki.github.io/features/hypothesis-testing-guide/?lang=en')] },
       { id: uid(), key: '', name: 'fun', links: [
         L('fmhy', 'https://fmhy.net/'),
-        L('4kvm', 'https://www.4kvm.net/'),
-        L('murdoku', 'https://murdoku.com/'),
-        L('sudoku techniques', 'https://ki-seki.github.io/hodoku-translation/')] },
+        L('murdoku', 'https://murdoku.com/')] },
       { id: uid(), key: '', name: 'common', links: [
         L('github', 'https://github.com/'),
         L('chatgpt', 'https://chatgpt.com/')] }
