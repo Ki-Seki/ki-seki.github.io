@@ -3,17 +3,18 @@ date: '2026-11-12T23:43:04+08:00'
 title: "Things I've Made"
 author:
   - Elliot Shichao Song
-summary: 'Products I keep working on, and small things I built along the way, all in one place.'
+summary: 'Products and small things I have made, all in one place.'
 cover:
-  image: "assets/products-cover.webp"
-  alt: "Screenshots of Pelican, agent-memory, Followroll, Ouroboros, the Hypothesis Testing Guide, HoDoKu Sudoku Techniques and the start page"
+  image: "assets/products-cover.png"
+  alt: "Small works displayed in wall niches, with empty niches left for new ones"
+  caption: "A gallery with room for more (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
 tags:
   - portfolio
   - products
 math: false
 ---
 
-Products I keep working on, and small things I built along the way. I will keep adding to this list as I make more.
+Products and small things I have made, all in one place. I will keep adding to this list as I make more.
 
 ## Products
 
@@ -54,7 +55,7 @@ caption="The page on a computer and on a phone, with made-up sample data"
 
 An AI workspace in a single HTML file that turns natural language instructions into interactive tools and tiles.
 
-[Live demo](https://ki-seki.github.io/ouroboros/) · [Original PRD](https://ki-seki.github.io/posts/260322-ouroboros/) · [Demo video of an early version](https://www.youtube.com/watch?v=b9H8kX_NKn4) · <https://github.com/Ki-Seki/ouroboros>
+[Live demo](https://ki-seki.github.io/ouroboros/) · [Original PRD](https://ki-seki.github.io/posts/260322-ouroboros/) · [Early demo on YouTube](https://www.youtube.com/watch?v=b9H8kX_NKn4) · [Early demo on Bilibili](https://www.bilibili.com/video/BV1jkX5BvEuF) · <https://github.com/Ki-Seki/ouroboros>
 
 {{< media
 src="assets/ouroboros.webp"
@@ -62,6 +63,17 @@ caption="Asked for a workspace for a product launch and a trip to Kyoto, it buil
 >}}
 
 ## Small Things
+
+### Start Page
+
+An ultra-minimal new tab page: one search line and your bookmarks, nothing else.
+
+[Open it](https://ki-seki.github.io/features/start/) · [Source](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/start/index.html)
+
+{{< media
+src="assets/start.webp"
+caption="The whole page"
+>}}
 
 ### Hypothesis Testing Guide
 
@@ -83,17 +95,6 @@ HoDoKu's guide to Sudoku solving techniques, in English and Chinese: about 70 te
 {{< media
 src="assets/hodoku-translation.webp"
 caption="X-Wing, the smallest basic fish"
->}}
-
-### Start Page
-
-An ultra-minimal new tab page: one search line and your bookmarks, nothing else.
-
-[Open it](https://ki-seki.github.io/features/start/) · [Source](https://github.com/Ki-Seki/ki-seki.github.io/blob/main/static/features/start/index.html)
-
-{{< media
-src="assets/start.webp"
-caption="The whole page"
 >}}
 
 ## Citation
