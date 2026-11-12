@@ -29,6 +29,12 @@ src="assets/followroll.webp"
 caption="The page on a computer and on a phone, with made-up sample data"
 >}}
 
+{{< details "How it works" >}}
+
+Every six hours a GitHub Actions run in your fork reads who you follow and looks for each person's blog: the website on their GitHub profile, then `<login>.github.io`. A blog counts only if it is really theirs: their GitHub Pages site, a domain their Pages repository points to, or a home page that links back to their GitHub profile. The run reads each feed with its public comment counts and Hacker News points, publishes the page to GitHub Pages, and the next run picks up from what it published.
+
+{{< /details >}}
+
 ### Ouroboros
 
 An AI workspace in a single HTML file that turns natural language instructions into interactive tools and tiles.
@@ -39,6 +45,12 @@ An AI workspace in a single HTML file that turns natural language instructions i
 src="assets/ouroboros.webp"
 caption="Asked for a workspace for a product launch and a trip to Kyoto, it built five small tools"
 >}}
+
+{{< details "How it works" >}}
+
+Everything is in one HTML file. Your request goes, with the system prompt and tools embedded in the page, to a model behind any Responses API; you set the base URL, model and key. The model inspects the live page, builds apps with JavaScript that is recorded, and checks them in an isolated copy before it finishes. Every load rebuilds the page by replaying the recorded scripts. App data and images stay in your browser, and Export HTML writes one file that carries them all.
+
+{{< /details >}}
 
 ### agent-memory
 
@@ -51,6 +63,16 @@ src="assets/agent-memory.webp"
 caption="`mem ui`: the memories, and one open with where it came from"
 >}}
 
+{{< details "How it works" >}}
+
+`mem install` wires two hooks and a shared protocol into Claude Code and Codex. At session start a hook gives the agent an index of the memories that apply where it runs. The agent saves what is worth keeping as Markdown files, and at the end of each turn a hook records where each came from, commits and pushes to your private data repository, which keeps your machines in sync.
+
+{{< media
+src="assets/agent-memory-how-it-works.svg"
+>}}
+
+{{< /details >}}
+
 ### Pelican
 
 Every Claude Code session on your computer, on your phone. No wrapper, no relay, no account. Pelican runs next to Claude Code on your computer, and your phone connects to it directly.
@@ -61,6 +83,16 @@ Every Claude Code session on your computer, on your phone. No wrapper, no relay,
 src="assets/pelican.webp"
 caption="The session list, an edit waiting for approval, and a chart Claude drew"
 >}}
+
+{{< details "How it works" >}}
+
+Pelican is one small server next to Claude Code on your computer. It reads the transcripts Claude Code keeps in `~/.claude`, so it sees every session wherever it was started, and continues them through the official Agent SDK. It listens only on `127.0.0.1`; your phone reaches it through Tailscale or an SSH tunnel, and every browser signs in.
+
+{{< media
+src="assets/pelican-how-it-works.svg"
+>}}
+
+{{< /details >}}
 
 ## Small Things
 
