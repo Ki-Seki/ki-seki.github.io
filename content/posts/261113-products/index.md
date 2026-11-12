@@ -6,8 +6,8 @@ author:
 summary: 'Products and small things I have made, all in one place.'
 cover:
   image: "assets/products-cover.png"
-  alt: "Small works displayed in wall niches, with empty niches left for new ones"
-  caption: "A gallery with room for more (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
+  alt: "Pen-and-ink drawing of someone at a desk drawing the next piece, below shelves holding the works"
+  caption: "A shelf of works, and the next one being drawn (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
 tags:
   - portfolio
   - products
