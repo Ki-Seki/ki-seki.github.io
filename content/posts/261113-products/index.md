@@ -5,7 +5,7 @@ author:
   - Elliot Shichao Song
 summary: 'Products and small things I have made, all in one place.'
 cover:
-  image: "assets/products-cover.png"
+  image: "assets/products-cover.webp"
   alt: "Cyanotype of the works, a phone, windows, a ring, a bell curve and a grid, joined by a thread that runs on"
   caption: "The works, joined by a thread that runs on (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
 tags:
