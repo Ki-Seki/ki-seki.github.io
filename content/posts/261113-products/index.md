@@ -6,8 +6,8 @@ author:
 summary: 'Products and small things I have made, all in one place.'
 cover:
   image: "assets/products-cover.png"
-  alt: "Pen-and-ink drawing of someone at a desk drawing the next piece, below shelves holding the works"
-  caption: "A shelf of works, and the next one being drawn (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
+  alt: "Cyanotype of the works, a phone, windows, a ring, a bell curve and a grid, joined by a thread that runs on"
+  caption: "The works, joined by a thread that runs on (generated with [GPT Image 2.6 Sunburst](https://openai.com/index/introducing-images-2-6/))"
 tags:
   - portfolio
   - products
