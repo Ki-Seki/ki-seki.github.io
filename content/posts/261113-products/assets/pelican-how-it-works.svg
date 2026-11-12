@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+  <title id="title">How Pelican works</title>
+  <desc id="desc">Your phone runs Pelican's web app, which talks to the Pelican server on your computer over REST and a WebSocket. The server runs Claude Code through the Claude Agent SDK and streams back its replies and permission requests. It also reads the transcripts in ~/.claude, which Claude Code writes, and which the terminal, Claude Desktop and VS Code write too, for every session's history and live updates.</desc>
+  <style>
+    svg { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .h1 { font-size: 17px; font-weight: 600; }
+    .b { font-size: 13px; }
+    .s { font-size: 12px; }
+    .xs { font-size: 11.5px; }
+    .bg { fill: #FBFAF7; stroke: #E8E6DF; }
+    .region { fill: none; stroke: #D9D6CC; stroke-dasharray: 5 5; }
+    .card { fill: #FFFFFF; stroke: #E2E0D8; }
+    .card-teal { fill: #FFFFFF; stroke: #67B7C8; }
+    .t1 { fill: #1F1E1C; }
+    .t2 { fill: #6B6A64; }
+    .t-teal { fill: #155E75; }
+    .white { fill: #FFFFFF; }
+    .f-teal { fill: #0E7490; }
+    .pill-teal { fill: #ECF8FA; stroke: #B5DFE7; }
+    .tag { fill: #F6F5F1; stroke: #E2E0D8; }
+    .s-teal { stroke: #0E7490; }
+    .s-gray { stroke: #8C8A82; }
+    .line { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .ico { fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .head-teal { fill: #0E7490; }
+    .head-gray { fill: #8C8A82; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #191918; stroke: #2E2D2A; }
+      .region { stroke: #3F3E3A; }
+      .card, .card-teal { fill: #232321; }
+      .card { stroke: #3A3936; }
+      .card-teal { stroke: #1F7A8C; }
+      .t1 { fill: #F1EFE8; }
+      .t2 { fill: #A8A69E; }
+      .t-teal { fill: #8FD6E3; }
+      .pill-teal { fill: #16313A; stroke: #1F5A66; }
+      .tag { fill: #2B2B29; stroke: #3A3936; }
+      .s-teal { stroke: #3BA7BD; }
+      .s-gray { stroke: #8C8A82; }
+      .f-teal { fill: #0E7490; }
+      .head-teal { fill: #3BA7BD; }
+    }
+  </style>
+  <defs>
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="head-teal" d="M1 1 9 5 1 9Z"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="head-gray" d="M1 1 9 5 1 9Z"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0.5" y="0.5" width="959" height="499" rx="16"/>
+
+  <!-- Your phone -->
+  <rect class="card-teal" x="36" y="164" width="222" height="132" rx="12"/>
+  <g class="ico s-teal" transform="translate(58 186)">
+    <rect x="0" y="0" width="15" height="24" rx="3.5"/>
+    <path d="M5.5 19.5h4"/>
+  </g>
+  <text class="h1 t1" x="84" y="204">Your phone</text>
+  <text class="s t2" x="58" y="244">Pelican's web app,</text>
+  <text class="s t2" x="58" y="262">in any browser</text>
+
+  <!-- Your computer -->
+  <rect class="region" x="298" y="28" width="634" height="444" rx="14"/>
+  <text class="xs t2" x="318" y="54">Your computer</text>
+
+  <!-- Pelican server -->
+  <rect class="card-teal" x="338" y="128" width="252" height="196" rx="12"/>
+  <text class="h1 t1" x="360" y="162">Pelican</text>
+  <text class="b t2" x="360" y="184">one small Node process</text>
+  <rect class="pill-teal" x="360" y="210" width="176" height="26" rx="13"/>
+  <text class="xs mono t-teal" x="448" y="227" text-anchor="middle">REST · WebSocket</text>
+  <rect class="pill-teal" x="360" y="248" width="176" height="26" rx="13"/>
+  <text class="xs mono t-teal" x="448" y="265" text-anchor="middle">Claude Agent SDK</text>
+  <text class="s t2" x="360" y="304">sign-in · host and origin checks</text>
+
+  <!-- Claude Code -->
+  <rect class="card" x="672" y="128" width="232" height="196" rx="12"/>
+  <text class="h1 t1" x="694" y="162">Claude Code</text>
+  <text class="b t2" x="694" y="184">with your own setup</text>
+  <rect class="tag" x="694" y="210" width="86" height="26" rx="6"/>
+  <text class="xs t2" x="737" y="227" text-anchor="middle">your login</text>
+  <rect class="tag" x="788" y="210" width="94" height="26" rx="6"/>
+  <text class="xs mono t2" x="835" y="227" text-anchor="middle">CLAUDE.md</text>
+  <rect class="tag" x="694" y="248" width="86" height="26" rx="6"/>
+  <text class="xs t2" x="737" y="265" text-anchor="middle">skills</text>
+  <rect class="tag" x="788" y="248" width="94" height="26" rx="6"/>
+  <text class="xs t2" x="835" y="265" text-anchor="middle">MCP servers</text>
+
+  <!-- ~/.claude -->
+  <rect class="card" x="338" y="376" width="566" height="72" rx="12"/>
+  <text class="h1 mono t1" x="360" y="406">~/.claude</text>
+  <text class="s t2" x="360" y="428">every session's transcript</text>
+  <text class="xs t2" x="572" y="417">also written by</text>
+  <rect class="tag" x="662" y="400" width="66" height="26" rx="6"/>
+  <text class="xs t2" x="695" y="417" text-anchor="middle">terminal</text>
+  <rect class="tag" x="734" y="400" width="100" height="26" rx="6"/>
+  <text class="xs t2" x="784" y="417" text-anchor="middle">Claude Desktop</text>
+  <rect class="tag" x="840" y="400" width="56" height="26" rx="6"/>
+  <text class="xs t2" x="868" y="417" text-anchor="middle">editors</text>
+
+  <!-- 1: phone and server -->
+  <path class="line s-teal" d="M262 216H332" marker-end="url(#arrow-teal)"/>
+  <path class="line s-teal" d="M334 246H264" marker-end="url(#arrow-teal)"/>
+  <circle class="f-teal" cx="297" cy="196" r="9"/>
+  <text class="s white" x="297" y="200.5" text-anchor="middle" font-weight="600">1</text>
+
+  <!-- 2: server and Claude Code -->
+  <path class="line s-teal" d="M594 216H666" marker-end="url(#arrow-teal)"/>
+  <path class="line s-gray" d="M668 246H596" marker-end="url(#arrow-gray)"/>
+  <circle class="f-teal" cx="631" cy="196" r="9"/>
+  <text class="s white" x="631" y="200.5" text-anchor="middle" font-weight="600">2</text>
+
+  <!-- Claude Code writes; 3: Pelican reads -->
+  <path class="line s-gray" d="M788 328V370" marker-end="url(#arrow-gray)"/>
+  <path class="line s-teal" d="M464 372V330" marker-end="url(#arrow-teal)"/>
+  <circle class="f-teal" cx="446" cy="351" r="9"/>
+  <text class="s white" x="446" y="355.5" text-anchor="middle" font-weight="600">3</text>
+</svg>

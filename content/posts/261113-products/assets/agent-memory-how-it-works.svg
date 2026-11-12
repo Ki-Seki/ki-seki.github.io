@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="576" viewBox="0 0 960 576" role="img" aria-labelledby="title desc">
+  <title id="title">How agent-memory works</title>
+  <desc id="desc">mem install, from the agent-memory package, wires hooks and shared rules into Claude Code and Codex. At session start each tool loads an index of relevant memories from the private agent-memory-data repository; at the end of each turn it commits and pushes new memory files back. The data repository syncs across machines with git, and you can browse and edit it with mem ui.</desc>
+  <style>
+    svg { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .h1 { font-size: 17px; font-weight: 600; }
+    .h2 { font-size: 15px; font-weight: 600; }
+    .h3 { font-size: 13px; font-weight: 600; }
+    .b { font-size: 13px; }
+    .s { font-size: 12px; }
+    .xs { font-size: 11.5px; }
+    .bg { fill: #FBFAF7; stroke: #E8E6DF; }
+    .card { fill: #FFFFFF; stroke: #E2E0D8; }
+    .card-ind { fill: #FFFFFF; stroke: #AFA9EC; }
+    .card-amb { fill: #FFFFFF; stroke: #F2C27A; }
+    .t1 { fill: #1F1E1C; }
+    .t2 { fill: #6B6A64; }
+    .t-ind { fill: #3C3489; }
+    .t-amb { fill: #854F0B; }
+    .t-dark { fill: #2C2C2A; }
+    .white { fill: #FFFFFF; }
+    .f-ind { fill: #534AB7; }
+    .f-amb { fill: #BA7517; }
+    .f-term { fill: #2C2C2A; }
+    .f-gray { fill: #5F5E5A; }
+    .chip-light { fill: #F1EFE8; }
+    .pill-ind { fill: #EEEDFE; stroke: #CECBF6; }
+    .pill-amb { fill: #FAEEDA; stroke: #FAC775; }
+    .pill-dark { fill: #F1EFE8; stroke: #D3D1C7; }
+    .tag { fill: #F6F5F1; stroke: #E2E0D8; }
+    .s-ind { stroke: #534AB7; }
+    .s-amb { stroke: #BA7517; }
+    .s-dark { stroke: #5F5E5A; }
+    .ico-w { stroke: #FFFFFF; }
+    .ico-d { stroke: #2C2C2A; }
+    .line { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .ico { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #191918; stroke: #2E2D2A; }
+      .card, .card-ind, .card-amb { fill: #232321; }
+      .card { stroke: #3A3936; }
+      .card-ind { stroke: #534AB7; }
+      .card-amb { stroke: #854F0B; }
+      .t1 { fill: #F1EFE8; }
+      .t2 { fill: #A8A69E; }
+      .t-ind { fill: #CECBF6; }
+      .t-amb { fill: #FAC775; }
+      .t-dark { fill: #D3D1C7; }
+      .f-term { fill: #3A3936; }
+      .f-gray { fill: #888780; }
+      .chip-light { fill: #3A3936; }
+      .pill-ind { fill: #26215C; stroke: #3C3489; }
+      .pill-amb { fill: #412402; stroke: #633806; }
+      .pill-dark { fill: #2C2C2A; stroke: #444441; }
+      .tag { fill: #2C2C2A; stroke: #3A3936; }
+      .s-ind { stroke: #7F77DD; }
+      .s-amb { stroke: #EF9F27; }
+      .s-dark { stroke: #B4B2A9; }
+      .ico-d { stroke: #F1EFE8; }
+    }
+  </style>
+  <defs>
+    <marker id="ah-ind" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" class="line s-ind"/></marker>
+    <marker id="ah-amb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" class="line s-amb"/></marker>
+    <marker id="ah-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" class="line s-dark"/></marker>
+  </defs>
+
+  <rect class="bg" x="0.5" y="0.5" width="959" height="575" rx="18"/>
+
+  <!-- Code repo -->
+  <rect class="card-ind" x="290" y="32" width="380" height="92" rx="14"/>
+  <rect class="f-ind" x="312" y="56" width="44" height="44" rx="11"/>
+  <path class="ico ico-w" d="M328 70L322 78L328 86M340 70L346 78L340 86M336.5 68L331.5 88"/>
+  <text class="h1 t1" x="372" y="71">agent-memory</text>
+  <rect class="pill-ind" x="500" y="57" width="54" height="20" rx="10"/>
+  <text class="xs t-ind" x="527" y="71" text-anchor="middle">public</text>
+  <text class="b t2" x="372" y="93">Code repo · on PyPI as agent-memory-git</text>
+  <text class="s mono t2" x="372" y="112">hooks · mem CLI · PROTOCOL.md</text>
+
+  <!-- 1: install -->
+  <path class="line s-ind" d="M480 124V146"/>
+  <rect class="pill-ind" x="410" y="146" width="140" height="30" rx="15"/>
+  <circle class="f-ind" cx="428" cy="161" r="10"/>
+  <text class="s white" x="428" y="165.5" text-anchor="middle" font-weight="600">1</text>
+  <text class="b mono t-ind" x="444" y="165.5">mem install</text>
+  <path class="line s-ind" d="M410 161H280V209" marker-end="url(#ah-ind)"/>
+  <path class="line s-ind" d="M550 161H680V209" marker-end="url(#ah-ind)"/>
+  <text class="s t2" x="480" y="198" text-anchor="middle">wires up the hooks and the shared rules</text>
+
+  <!-- Claude Code -->
+  <rect class="card" x="150" y="212" width="260" height="110" rx="14"/>
+  <rect class="f-term" x="170" y="232" width="44" height="44" rx="11"/>
+  <path class="ico ico-w" d="M181 246L188 254L181 262M192 262H203"/>
+  <text class="h1 t1" x="228" y="251">Claude Code</text>
+  <text class="b t2" x="228" y="271">rules from CLAUDE.md</text>
+  <rect class="pill-amb" x="170" y="290" width="100" height="20" rx="10"/>
+  <text class="xs mono t-amb" x="220" y="304" text-anchor="middle">SessionStart</text>
+  <rect class="pill-dark" x="278" y="290" width="50" height="20" rx="10"/>
+  <text class="xs mono t-dark" x="303" y="304" text-anchor="middle">Stop</text>
+  <text class="s t2" x="338" y="304">hooks</text>
+
+  <!-- Codex -->
+  <rect class="card" x="550" y="212" width="260" height="110" rx="14"/>
+  <rect class="f-term" x="570" y="232" width="44" height="44" rx="11"/>
+  <path class="ico ico-w" d="M581 246L588 254L581 262M592 262H603"/>
+  <text class="h1 t1" x="628" y="251">Codex</text>
+  <text class="b t2" x="628" y="271">rules from AGENTS.md</text>
+  <rect class="pill-amb" x="570" y="290" width="100" height="20" rx="10"/>
+  <text class="xs mono t-amb" x="620" y="304" text-anchor="middle">SessionStart</text>
+  <rect class="pill-dark" x="678" y="290" width="50" height="20" rx="10"/>
+  <text class="xs mono t-dark" x="703" y="304" text-anchor="middle">Stop</text>
+  <text class="s t2" x="738" y="304">hooks</text>
+
+  <!-- 2: recall (data repo -> tools) -->
+  <path class="line s-amb" d="M262 440V326" marker-end="url(#ah-amb)"/>
+  <path class="line s-amb" d="M698 440V326" marker-end="url(#ah-amb)"/>
+  <!-- 3: save (tools -> data repo) -->
+  <path class="line s-dark" d="M298 323V436" stroke-dasharray="5 4" marker-end="url(#ah-dark)"/>
+  <path class="line s-dark" d="M662 323V436" stroke-dasharray="5 4" marker-end="url(#ah-dark)"/>
+
+  <circle class="f-amb" cx="340" cy="352" r="10"/>
+  <text class="s white" x="340" y="356.5" text-anchor="middle" font-weight="600">2</text>
+  <text class="h3 t-amb" x="358" y="357">Recall at session start</text>
+  <text class="s t2" x="358" y="375">inject an index of relevant memories</text>
+
+  <circle class="f-gray" cx="340" cy="400" r="10"/>
+  <text class="s white" x="340" y="404.5" text-anchor="middle" font-weight="600">3</text>
+  <text class="h3 t-dark" x="358" y="405">Save at the end of each turn</text>
+  <text class="s t2" x="358" y="423">commit and push new memory files</text>
+
+  <!-- Data repo -->
+  <rect class="card-amb" x="250" y="440" width="460" height="104" rx="14"/>
+  <rect class="f-amb" x="272" y="466" width="44" height="44" rx="11"/>
+  <path class="ico ico-w" d="M287 477H297L303 483V499H287ZM297 477V483H303M291 489H299M291 494H296"/>
+  <text class="h1 t1" x="332" y="483">agent-memory-data</text>
+  <rect class="pill-amb" x="505" y="469" width="70" height="20" rx="10"/>
+  <path class="ico s-amb" stroke-width="1.5" d="M514.5 478.5V476.5A3 3 0 0 1 520.5 476.5V478.5M513 478.5H522V484.5H513Z"/>
+  <text class="xs t-amb" x="527" y="483">private</text>
+  <text class="b t2" x="332" y="504">Data repo · one Markdown file per memory</text>
+  <rect class="tag" x="332" y="515" width="44" height="20" rx="6"/>
+  <text class="xs mono t2" x="354" y="529" text-anchor="middle">user</text>
+  <rect class="tag" x="384" y="515" width="72" height="20" rx="6"/>
+  <text class="xs mono t2" x="420" y="529" text-anchor="middle">feedback</text>
+  <rect class="tag" x="464" y="515" width="64" height="20" rx="6"/>
+  <text class="xs mono t2" x="496" y="529" text-anchor="middle">project</text>
+  <rect class="tag" x="536" y="515" width="78" height="20" rx="6"/>
+  <text class="xs mono t2" x="575" y="529" text-anchor="middle">reference</text>
+
+  <!-- You -->
+  <rect class="card" x="30" y="444" width="190" height="96" rx="14"/>
+  <rect class="chip-light" x="107" y="456" width="36" height="36" rx="9"/>
+  <path class="ico ico-d" d="M125 464.5m-4.5 0a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0 -9 0M117 484a8 8 0 0 1 16 0"/>
+  <text class="h2 t1" x="125" y="511" text-anchor="middle">You</text>
+  <text class="s t2" x="125" y="529" text-anchor="middle">search and edit in mem ui</text>
+  <path class="line s-dark" d="M223 492H247" marker-start="url(#ah-dark)" marker-end="url(#ah-dark)"/>
+
+  <!-- Other machines -->
+  <rect class="card" x="740" y="444" width="190" height="96" rx="14"/>
+  <circle class="f-gray" cx="762" cy="466" r="10"/>
+  <text class="s white" x="762" y="470.5" text-anchor="middle" font-weight="600">4</text>
+  <rect class="chip-light" x="817" y="456" width="36" height="36" rx="9"/>
+  <path class="ico ico-d" d="M827 467.5A1.5 1.5 0 0 1 828.5 466H841.5A1.5 1.5 0 0 1 843 467.5V478H827ZM823 482H847"/>
+  <text class="h2 t1" x="835" y="511" text-anchor="middle">Other machines</text>
+  <text class="s t2" x="835" y="529" text-anchor="middle">kept in sync with git</text>
+  <path class="line s-dark" d="M713 492H737" marker-start="url(#ah-dark)" marker-end="url(#ah-dark)"/>
+</svg>
