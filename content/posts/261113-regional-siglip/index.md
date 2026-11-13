@@ -1,6 +1,6 @@
 ---
 date: '2026-11-13T11:28:01+08:00'
-title: 'Regional SigLIP: Finding What Is Where with One Vector per Image'
+title: 'Regional SigLIP：一张图一个向量，检索「什么在哪儿」'
 author:
   - Elliot Shichao Song
 summary: ''
@@ -13,121 +13,121 @@ tags:
 math: true
 ---
 
-> **Outline.** Each section below lists what it will say. Numbers come from the 20k-step ablation and the long run; the prose and figures come later.
+> **大纲。** 下面每节列出这一节要讲的内容。数字来自 2 万步消融和长训练；正文和图之后补。
 
-## Introduction
+## 引言
 
-- The query: "a logo in the top-left corner", written as `{"bbox": [x1, y1, x2, y2], "description": "..."}` with xyxy in 0–1000. Ordinary CLIP/SigLIP search matches the content and ignores where it is.
-- Why: picking training data by layout, such as SFT data for design generation. This follows on from the billion-scale retrieval post, which searches by content only.
-- The constraint: keep one vector per image, so the IVF-PQ index from that post still works. Position goes into the query, never into the index.
-- The three findings, one line each:
-  1. one vector per image can learn position, but slowly; position grows with training steps;
-  2. a loss only teaches the score differences it compares;
-  3. how to test whether a model actually reads the box.
-- Figure 1: the JSON query goes through the text tower, the image through the image tower, and the score is one dot product.
+- 查询的样子：比如「左上角有个 logo」，写成 `{"bbox": [x1, y1, x2, y2], "description": "..."}`，坐标是 0–1000 的 xyxy。普通的 CLIP / SigLIP 检索只匹配内容，不管它在哪儿。
+- 用处：按版式挑训练数据，比如给设计生成挑 SFT 数据。这篇接着十亿级检索系统那篇往下写，那篇只能按内容检索。
+- 约束：每张图仍然只存一个向量，好让那篇里的 IVF-PQ 索引照常能用。位置只进查询，不进索引。
+- 三个结论，各一句：
+  1. 一张图一个向量能学会位置，但学得慢，位置能力跟着训练步数涨；
+  2. 损失只教会它比较过的那些分差；
+  3. 怎么测出模型到底有没有在看框。
+- 图 1：JSON 查询进文本塔，图像进图像塔，分数就是一个点积。
 
-## Related Work
+## 相关工作
 
-- Region-aware CLIP models (RegionCLIP, Alpha-CLIP and others): they take the region as input on the image side, so the index has to be rebuilt for each region.
-- One vector per object: ObjEmbed (ICML 2026) is the closest comparison; its index grows with the number of objects.
-- Detection and grounding (GLIP, Grounding DINO): these answer "where" for a single image, but cannot search a billion images.
-- Coordinates as text tokens: Pix2Seq, Kosmos-2, Shikra.
-- Spatial and compositional failures of CLIP: COLA, What'sUp.
-- How this work differs: the box goes into the text tower, the index stays one vector per image, and the training positives come from structured annotations.
+- 区域感知的 CLIP（RegionCLIP、Alpha-CLIP 等）：区域要作为图像一侧的输入，所以每换一个区域，索引都得重建。
+- 每个物体一个向量：ObjEmbed（ICML 2026）是最接近的对比对象，它的索引随物体数量增长。
+- 检测与 grounding（GLIP、Grounding DINO）：能回答单张图里「在哪儿」，但没法在十亿张图里检索。
+- 把坐标当文本 token：Pix2Seq、Kosmos-2、Shikra。
+- CLIP 在空间和组合关系上的失败：COLA、What'sUp。
+- 我们的不同之处：框进文本塔，索引保持一张图一个向量，训练正样本来自结构化标注。
 
-## Method
+## 方法
 
-### Query Format and Two Models
+### 查询格式与两种模型
 
-- The JSON model puts the whole JSON string into the SigLIP2 text tower.
-- The residual model encodes the text and the box separately, then fuses them with a zero-initialized residual.
-- The score is $s(q, I) = \langle f(\text{desc}, \text{box}), g(I) \rangle$, with sigmoid outputs.
+- JSON 模型：整个 JSON 字符串直接进 SigLIP2 的文本塔。
+- 残差模型：文本和框分开编码，再用零初始化的残差融合起来。
+- 分数是 $s(q, I) = \langle f(\text{desc}, \text{box}), g(I) \rangle$，用 sigmoid 输出。
 
-### Training Data
+### 训练数据
 
-- In-house design images, with a box and a description for every element (from layer detection plus captioning).
-- 4 positive queries per image. The window is the tight box with probability 1/3; otherwise it is a larger window that contains the box. The text is the full description, its first sentence, keywords or the label.
+- 内部的设计图，每个元素都有一个框和一段描述（来自图层检测加图像描述）。
+- 每张图 4 个正样本查询：窗口有 1/3 的概率是紧框，其余是包含它的更大的窗口；文本是完整描述、第一句、关键词或类别名。
 
-### Negatives and the Loss
+### 负样本与损失
 
-- Same image, same description, wrong window: 2 per image, placed where they touch no related box.
-- Unrelated images: they share no words with the query and no related category.
-- Another image that has the same category, but outside the window: this exists only for about 25 everyday categories.
-- One sigmoid loss with weights 1 / 0.5 / 0.5 / 0.35; all other pairs are ignored.
-- Figure 2: one design image with each kind of positive and negative drawn on it.
+- 同一张图、同一句描述、窗口不对：每张图 2 个，放在不碰任何相关框的位置。
+- 不相关的图：和查询没有共同的词，也没有相关类别。
+- 另一张图有同类东西，但不在窗口里：只对约 25 个常见类别才有。
+- 一个 sigmoid 损失，权重 1 / 0.5 / 0.5 / 0.35；其余的对都忽略。
+- 图 2：在一张设计图上画出每种正样本和负样本。
 
-## How to Tell Whether a Model Reads the Box
+## 怎么判断模型真的在看框
 
-- Region retrieval hit@10 alone can be passed without looking at the box.
-- Each test holds something fixed and changes one thing:
-  - region retrieval: same query, different images (949-image gallery, 3,725 region queries);
-  - mirror box: same image and text, with the box mirrored (2,483 trials);
-  - mirror image: the image mirrored instead of the box;
-  - jigsaw swap: two images side by side or stacked, the query about one half; 50% means text only (14,900 trials).
-- A pitfall: the spatial-pair metric logged during training already read 86% at 2,500 steps, far too optimistic. Trust the jigsaw test.
-- Figure 3: the four tests as small schematics.
+- 单看区域检索 hit@10，不看框也能拿高分。
+- 每个测试固定一些东西，只改一样：
+  - 区域检索：同一个查询，换不同的图（图库 949 张，3,725 个区域查询）；
+  - 镜像框：同一张图、同一句描述，把框镜像过去（2,483 次）；
+  - 镜像图：镜像的是图，不是框；
+  - 拼图对调：两张图左右或上下拼在一起，查询问其中一半；50% 等于只看文字（14,900 次）。
+- 一个坑：训练时记录的空间对指标在 2,500 步时就到了 86%，严重高估。以拼图对调测试为准。
+- 图 3：四个测试的小示意图。
 
-## Position Comes with Training Steps
+## 位置能力跟着步数走
 
-- The long run reaches jigsaw 92 / 93 (horizontal / vertical) at 124,745 steps, after about 32M images.
-- What I got wrong: at 4,000 steps I concluded that one vector cannot learn position. The deployed model's region queries proved otherwise; it simply needed more training.
-- Figure 4: jigsaw accuracy against steps, for the long run and the 20k ablation.
+- 长训练到 124,745 步、看过约 3,200 万张图时，拼图对调是 92 / 93（左右 / 上下）。
+- 我犯过的错：在 4,000 步时我下结论说一个向量学不会位置。部署出去的模型在区域查询上的表现推翻了这个结论，它只是需要更多训练。
+- 图 4：拼图对调准确率随步数的变化，包括长训练和 2 万步消融。
 
-## Six Models at 20k Steps
+## 2 万步下的六个模型
 
-- Same recipe for all: batch 128, 8 GPUs, 20,000 steps, same data and seed.
-- Three objectives, each in a JSON and a residual version:
-  - the retrieval loss above;
-  - crop distillation: a frozen SigLIP2 scores the crop at the window, and the student matches those scores;
-  - pair distillation: the student matches the teacher on the right window against a moved window, on the same image.
-- Table:
+- 配方完全一样：批大小 128，8 卡，20,000 步，同样的数据和随机种子。
+- 三种训练目标，各有 JSON 和残差两个版本：
+  - 上面的检索损失；
+  - 裁图蒸馏：冻结的 SigLIP2 给窗口里的裁图打分，学生去拟合这些分数；
+  - 成对蒸馏：在同一张图上，学生拟合老师对「对的窗口」和「挪开的窗口」两个分数的比较。
+- 结果表：
 
-  | Model | Jigsaw H / V | Mirror box | Hit@10 |
+  | 模型 | 拼图 左右 / 上下 | 镜像框 | Hit@10 |
   |---|---|---|---|
-  | JSON baseline | 74 / 78 | 69 | 73 |
-  | Residual | 59 / 66 | 65 | 78 |
-  | Crop distillation, JSON | 54 / 59 | 52 | 82 |
-  | Crop distillation, residual | 54 / 53 | 50 | 84 |
-  | Pair distillation, JSON | 60 / 77 | 76 | 15 |
-  | Pair distillation, residual | 52 / 57 | 59 | 5 |
+  | JSON 基线 | 74 / 78 | 69 | 73 |
+  | 残差 | 59 / 66 | 65 | 78 |
+  | 裁图蒸馏 JSON | 54 / 59 | 52 | 82 |
+  | 裁图蒸馏残差 | 54 / 53 | 50 | 84 |
+  | 成对蒸馏 JSON | 60 / 77 | 76 | 15 |
+  | 成对蒸馏残差 | 52 / 57 | 59 | 5 |
 
-- Each test has a different winner. Figure 5 shows real queries side by side; it needs public images.
+- 每个测试的第一名都不一样。图 5 并排放真实查询的结果，需要换成公开图片。
 
-## Why Each Loss Wins a Different Test
+## 为什么每种损失赢的测试不同
 
-- Every test compares two scores with something held fixed. A loss shapes only the differences it compares.
-- There are three such differences: which image, which box and which layout.
-- Crop distillation never sees "same text, same image, box moved", so the mirror box test stays at 50% for all 20,000 steps.
-- Pair distillation compares two windows on the same image, so the content term cancels and retrieval collapses: hit@10 drops from 37 to 1 by step 2,500.
-- The retrieval loss covers all three differences, but its position signal is scarce and easy, so it learns slowly.
-- Figure 6: a matrix of losses against the three differences, with training curves.
+- 每个测试都是在固定某些东西的前提下比较两个分数。损失只塑造它比较过的那些分差。
+- 这样的分差有三种：哪张图、哪个框、哪种摆法。
+- 裁图蒸馏从来没见过「同一句话、同一张图、只挪框」，所以镜像框在整整 2 万步里一直停在 50%。
+- 成对蒸馏比较的是同一张图上的两个窗口，内容那一项被抵消掉，检索随之崩掉：hit@10 在第 2,500 步就从 37 掉到 1。
+- 检索损失三种分差都有，但位置信号又少又容易，所以学得慢。
+- 图 6：损失与三种分差的对应矩阵，加训练曲线。
 
-## What Would Make Position Faster
+## 怎样让位置学得更快
 
-- Why the retrieval loss is slow at position:
-  - only 2 wrong-window negatives per image, mostly on empty background;
-  - the cross-image layout signal exists only for about 25 categories;
-  - at 20k steps the wrong-window loss is the largest term left (0.317, against 0.064 for unrelated images).
-- More of the same data is not the lever:
-  - neither run ever repeated an image (2.56M images in the ablation; about 32M of 83M in the long run);
-  - doubling the images per step (256 vs 128) gave only 2–3 points at matched steps.
-- A clearer loss, not yet run: three equal-weight choices.
-  - Which image: keep the current term.
-  - Which box: the right box against several moved boxes, half of them on other elements.
-  - Which layout: the source image against its flipped and shifted copies, with flipped positives to block shortcuts. No collages in training, so the jigsaw test stays held out.
-- Denser data: images with several instances of the same kind, and denser boxes.
-- Figure 7: the three-question loss beside the current one.
+- 检索损失学位置为什么慢：
+  - 每张图只有 2 个窗口不对的负样本，大多落在空白背景上；
+  - 跨图的版式信号只对约 25 个类别才有；
+  - 到 2 万步，窗口不对这一项是剩下最大的损失（0.317，不相关的图只有 0.064）。
+- 多加同类数据不是关键：
+  - 两次训练都没有重复用过一张图（消融看了 256 万张；长训练看了 8,300 万张里的约 3,200 万张）；
+  - 每步图片数翻倍（256 对 128），同步数下只高 2–3 个点。
+- 一个更清楚的损失（还没跑）：三道等权的选择题。
+  - 哪张图：保留现在这一项。
+  - 哪个框：对的框对几个挪开的框，其中一半挪到别的元素上。
+  - 哪种摆法：原图对它的翻转、平移副本；翻转图配上翻转后的框也当正样本，堵住捷径。训练里不用拼图，拼图对调测试保持不参与训练。
+- 更密的数据：同一张图里有好几个同类东西，框也标得更密。
+- 图 7：三问式损失和现在的损失并排对比。
 
-## Limitations
+## 局限
 
-- A small gallery (949 images), one seed, no public benchmark, and in-house training data.
+- 图库小（949 张）、只跑了一个种子、没有公开基准、训练数据是内部数据。
 
-## Conclusion
+## 结语
 
-- Three takeaways, matching the three findings in the introduction.
+- 三条结论，和引言里的三个结论一一对应。
 
-## Citation
+## 引用
 
 {{< bibtex >}}
 
-## References
+## 参考文献
