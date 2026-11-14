@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1124" height="248" viewBox="0 0 1124 248" role="img" aria-label="Three tasks over the same triple of image, box and description: given the box and the description, find the image; given the image and the description, find the box; given the image and the box, find the description.">
+<rect x="0" y="0" width="1124" height="248" fill="white"/>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#566b7b" stroke-width="1.6"/></marker></defs>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif">
+<line x1="376" y1="24" x2="376" y2="224" stroke="#e6ecf0" stroke-width="1.2"/>
+<line x1="744" y1="24" x2="744" y2="224" stroke="#e6ecf0" stroke-width="1.2"/>
+
+<text x="40" y="40" font-size="18" font-weight="600" fill="#233b50">(b, t) → I</text>
+<text x="40" y="62" font-size="14" fill="#566b7b">what-and-where retrieval</text>
+<rect x="40" y="86" width="128" height="96" rx="6" fill="#ffffff" stroke="#bdcad4" stroke-dasharray="4 3"/>
+<rect x="52" y="94" width="36" height="32" rx="2" fill="none" stroke="#566b7b" stroke-width="1.8"/>
+<rect x="40" y="194" width="72" height="30" rx="15" fill="#ffffff" stroke="#bdcad4"/>
+<text x="76" y="214" text-anchor="middle" font-size="15" fill="#233b50">sun</text>
+<line x1="182" y1="140" x2="214" y2="140" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="222" y="86" width="70" height="52" rx="5" fill="#e6ecf0" stroke="#629ac3" stroke-width="2.6"/>
+<circle cx="236" cy="98" r="6" fill="#c3ced7"/>
+<polygon points="228,132 246,110 256,120 270,104 288,132" fill="#aab8c3"/>
+<rect x="296" y="86" width="70" height="52" rx="5" fill="#e6ecf0"/>
+<circle cx="352" cy="98" r="6" fill="#c3ced7"/>
+<polygon points="302,132 320,110 330,120 344,104 362,132" fill="#aab8c3"/>
+<rect x="222" y="146" width="70" height="52" rx="5" fill="#e6ecf0"/>
+<circle cx="257" cy="158" r="6" fill="#c3ced7"/>
+<polygon points="228,192 246,170 256,180 270,164 288,192" fill="#aab8c3"/>
+<rect x="296" y="146" width="70" height="52" rx="5" fill="#e6ecf0"/>
+<circle cx="310" cy="174" r="6" fill="#c3ced7"/>
+<polygon points="302,192 320,170 330,180 344,164 362,192" fill="#aab8c3"/>
+
+<text x="408" y="40" font-size="18" font-weight="600" fill="#233b50">(I, t) → b</text>
+<text x="408" y="62" font-size="14" fill="#566b7b">grounding · detection</text>
+<rect x="408" y="86" width="128" height="96" rx="6" fill="#e6ecf0"/>
+<circle cx="438" cy="110" r="9" fill="#c3ced7"/>
+<polygon points="418,172 452,130 470,148 494,120 526,172" fill="#aab8c3"/>
+<rect x="408" y="194" width="72" height="30" rx="15" fill="#ffffff" stroke="#bdcad4"/>
+<text x="444" y="214" text-anchor="middle" font-size="15" fill="#233b50">sun</text>
+<line x1="550" y1="140" x2="582" y2="140" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="592" y="86" width="128" height="96" rx="6" fill="#e6ecf0"/>
+<circle cx="622" cy="110" r="9" fill="#c3ced7"/>
+<polygon points="602,172 636,130 654,148 678,120 710,172" fill="#aab8c3"/>
+<rect x="604" y="94" width="36" height="32" rx="2" fill="none" stroke="#629ac3" stroke-width="2.6"/>
+
+<text x="776" y="40" font-size="18" font-weight="600" fill="#233b50">(I, b) → t</text>
+<text x="776" y="62" font-size="14" fill="#566b7b">region classification · captioning</text>
+<rect x="776" y="86" width="128" height="96" rx="6" fill="#e6ecf0"/>
+<circle cx="806" cy="110" r="9" fill="#c3ced7"/>
+<polygon points="786,172 820,130 838,148 862,120 894,172" fill="#aab8c3"/>
+<rect x="788" y="94" width="36" height="32" rx="2" fill="none" stroke="#566b7b" stroke-width="1.8"/>
+<line x1="918" y1="140" x2="950" y2="140" stroke="#566b7b" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="960" y="125" width="72" height="30" rx="15" fill="#dbe9f4" stroke="#629ac3" stroke-width="1.6"/>
+<text x="996" y="145" text-anchor="middle" font-size="15" font-weight="600" fill="#1f5a88">sun</text>
+</g></svg>
