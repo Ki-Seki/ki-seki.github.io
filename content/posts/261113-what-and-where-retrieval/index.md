@@ -21,6 +21,9 @@ math: true
   - Demo：手机相册里用格子指定位置找图
   - 示例训练数据：100 对图像与 JSON，JSON 只保留训练时用到的字段
   - 评测集：949 张图、3,725 个区域查询，以及镜像、拼图对调的构造方式
+  - 推理代码：JSON 查询怎么拼、怎么打分
+  - 评测代码：内部四个测试，加上 SPEC 的「格子换成框」转换
+  - 训练代码：采样和损失
 
 ## 引言
 
@@ -48,7 +51,7 @@ math: true
 
 {{< media
 src="assets/three-tasks.svg"
-caption="图 2：同一个三元组（图 I、框 b、描述 t），已知其中两个、找第三个，就是三类任务。蓝色是要找的那一项。"
+caption="图 2：同一个三元组（图 I、框 b、描述 t），已知其中两个、找第三个，就是三类任务。深色是给定的，蓝色是要找的。三栏都是 BBox-SigLIP（第 208,448 步）的真实结果：左栏在图库里检索「左边一列有人」的前三张；中栏在 19 个候选窗口里选出分最高的；右栏给定人的框，在 COCO 的 80 个类别里排序。照片来自 COCO val2017（CC BY / CC BY-SA，来源见文末）。"
 >}}
 
 - 本文的约束只有一条：$s(I, b, t) = \langle f(b, t), g(I) \rangle$，$g(I)$ 是一个低维向量，离线算好、和查询无关，所以能直接用 ANN。
@@ -228,3 +231,5 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
 {{< bibtex >}}
 
 ## 参考文献
+
+- 图 2、图 3 的照片（COCO val2017，待补作者署名）：[422706](http://farm5.staticflickr.com/4053/4612270698_66a0fc9286_z.jpg)（CC BY）、[491366](http://farm4.staticflickr.com/3031/2548567657_4f81a39e0f_z.jpg)（CC BY-SA）、[157601](http://farm9.staticflickr.com/8478/8239498722_1b6cb129fd_z.jpg)（CC BY）、[220584](http://farm8.staticflickr.com/7277/7852484584_e823c15b32_z.jpg)（CC BY）
