@@ -17,7 +17,7 @@ math: true
 
 - **可公开的资源（占位，待整理）：**
   - 模型：BBox-SigLIP 第 208,448 步
-  - 实验记录：W&B
+  - 实验记录：W&B [songsc-team/bbox-siglip](https://forge.coreweave.com/wandb/songsc-team/bbox-siglip)（9 个 run，待设为公开）
   - Demo：手机相册里用格子指定位置找图
   - 示例训练数据：100 对图像与 JSON，JSON 只保留训练时用到的字段
   - 评测集：949 张图、3,725 个区域查询，以及镜像、拼图对调的构造方式
