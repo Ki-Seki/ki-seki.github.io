@@ -62,7 +62,8 @@
   min-width: 0;
 }
 
-.post-content .admonition svg {
+/* only the title row's own icons: SVGs in the body belong to the math renderer */
+.post-content .admonition > summary > svg {
   flex: none;
   fill: none;
   stroke: currentColor;
@@ -100,11 +101,8 @@
   transform: rotate(90deg);
 }
 
-/* the body; wide math scrolls sideways */
-.post-content .admonition-content {
-  overflow-x: auto;
-}
-
+/* the body; wide display math scrolls on its own (math.css), so the body
+   itself never scrolls */
 .post-content .admonition-content > :first-child {
   margin-top: 0;
 }
