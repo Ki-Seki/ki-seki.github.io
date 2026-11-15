@@ -270,10 +270,9 @@
       }
     };
 
-    // Typesets math in content the first time it is shown, and wires up
-    // admonitions in the translation as admonition.js did for the original.
-    // The translation can be shown on load, before MathJax has typeset the
-    // page, so the original may need typesetting when switched back to.
+    // Typesets math in content the first time it is shown. The translation
+    // can be shown on load, before MathJax has typeset the page, so the
+    // original may need typesetting when switched back to.
     // Resolves once math is rendered.
     const prepared = new WeakSet();
     const prepare = (content) => {
@@ -281,11 +280,6 @@
         return Promise.resolve();
       }
       prepared.add(content);
-      if (content !== original) {
-        content.querySelectorAll(".details .details-summary").forEach((summary) => {
-          summary.addEventListener("click", () => summary.parentElement.classList.toggle("open"));
-        });
-      }
       if (window.MathJax?.startup?.promise) {
         return window.MathJax.startup.promise.then(() => window.MathJax.typesetPromise([content]));
       }
