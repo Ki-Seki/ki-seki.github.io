@@ -1,310 +1,127 @@
 /*
- * LoveIt Theme Admonition Styles
- * Directly copied and adapted from LoveIt theme
+ * Callouts from the admonition shortcode (a native <details>).
+ *
+ * A faint tint, a left rule in the accent, and the type icon hanging on the
+ * top-left corner. Each kind of callout has one accent color, --adm; the rest
+ * follows the theme's own variables, so light and dark both come for free.
  */
 
-/* Details component base styles */
-.details .details-summary:hover {
+/* accents: blue for notes, green for tips, violet for questions and
+   examples, amber for warnings, red for failures, grey for quotes */
+.post-content .admonition { --adm: #3d72d1; }
+.post-content .admonition:is(.tip, .success) { --adm: #2f8f5b; }
+.post-content .admonition:is(.question, .example) { --adm: #7b5bd6; }
+.post-content .admonition.warning { --adm: #b26b00; }
+.post-content .admonition:is(.failure, .danger, .bug) { --adm: #c4453c; }
+.post-content .admonition.quote { --adm: #6b7280; }
+
+[data-theme="dark"] .post-content .admonition { --adm: #7fa8ef; }
+[data-theme="dark"] .post-content .admonition:is(.tip, .success) { --adm: #6cc391; }
+[data-theme="dark"] .post-content .admonition:is(.question, .example) { --adm: #a993f0; }
+[data-theme="dark"] .post-content .admonition.warning { --adm: #e3ad52; }
+[data-theme="dark"] .post-content .admonition:is(.failure, .danger, .bug) { --adm: #ef8174; }
+[data-theme="dark"] .post-content .admonition.quote { --adm: #9ca3af; }
+
+.post-content .admonition {
+  position: relative;
+  margin: 1.6em 0;
+  padding: 1em 1.3em 1em 1.5em;
+  border-left: 3px solid var(--adm);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--adm) 9%, var(--theme));
+}
+
+/* the title row */
+.post-content .admonition > summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6em;
+  color: var(--primary);
+  font-weight: 700;
+  list-style: none;
   cursor: pointer;
+  user-select: none;
 }
 
-.details i.details-icon {
+.post-content .admonition > summary::-webkit-details-marker {
+  display: none;
+}
+
+.post-content .admonition > summary:focus-visible {
+  outline: 2px solid var(--adm);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.post-content .admonition[open] > summary {
+  margin-bottom: 0.45em;
+}
+
+.post-content .admonition-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-content .admonition svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the type icon, on a disc of page color over the top-left corner */
+.post-content .admonition-icon {
+  position: absolute;
+  top: -15px;
+  left: -16.5px;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: var(--adm);
+}
+
+.post-content .admonition-chevron {
+  width: 1em;
+  height: 1em;
+  margin-top: 0.2em;
   color: var(--secondary);
-  -webkit-transition: transform 0.2s ease;
-  -moz-transition: transform 0.2s ease;
-  -o-transition: transform 0.2s ease;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
-[data-theme="dark"] .details i.details-icon,
-.dark .details i.details-icon {
-  color: #5d5d5f;
+.post-content .admonition > summary:hover .admonition-chevron {
+  color: var(--primary);
 }
 
-.details .details-content {
-  max-height: 0;
-  overflow-y: hidden;
-  -webkit-transition: max-height 0.8s cubic-bezier(0, 1, 0, 1) -0.1s;
-  -moz-transition: max-height 0.8s cubic-bezier(0, 1, 0, 1) -0.1s;
-  -o-transition: max-height 0.8s cubic-bezier(0, 1, 0, 1) -0.1s;
-  transition: max-height 0.8s cubic-bezier(0, 1, 0, 1) -0.1s;
-}
-
-.details.open i.details-icon {
-  -webkit-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
+.post-content .admonition[open] > summary .admonition-chevron {
   transform: rotate(90deg);
 }
 
-.details.open .details-content {
-  max-height: 10000px;
-  -webkit-transition: max-height 0.8s cubic-bezier(0.5, 0, 1, 0) 0s;
-  -moz-transition: max-height 0.8s cubic-bezier(0.5, 0, 1, 0) 0s;
-  -o-transition: max-height 0.8s cubic-bezier(0.5, 0, 1, 0) 0s;
-  transition: max-height 0.8s cubic-bezier(0.5, 0, 1, 0) 0s;
+/* the body; wide math scrolls sideways */
+.post-content .admonition-content {
+  overflow-x: auto;
 }
 
-/* Admonition styles - directly from LoveIt */
-.admonition {
-  position: relative;
-  margin: 1rem 0;
-  padding: 0 0.75rem;
-  border-left: 0.25rem solid;
-  overflow: auto;
+.post-content .admonition-content > :first-child {
+  margin-top: 0;
 }
 
-.admonition .admonition-title {
-  font-weight: bold;
-  margin: 0 -0.75rem;
-  padding: 0.25rem 1.8rem;
+.post-content .admonition-content > :last-child {
+  margin-bottom: 0;
 }
 
-.admonition .admonition-content {
-  padding: 0.5rem 0;
+/* on phones the page gutter is narrow: keep the icon on screen */
+@media (max-width: 600px) {
+  .post-content .admonition-icon {
+    left: -13px;
+  }
 }
 
-.admonition i.icon {
-  font-size: 0.85rem;
-  position: absolute;
-  top: 0.79rem;
-  left: 0.4rem;
-}
-
-.admonition i.details-icon {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.3rem;
-}
-
-/* Note type (default) */
-.admonition {
-  background-color: rgba(68, 138, 255, 0.1);
-  border-left-color: #448aff;
-}
-
-.admonition .admonition-title {
-  border-bottom-color: rgba(68, 138, 255, 0.1);
-  background-color: rgba(68, 138, 255, 0.25);
-}
-
-.admonition.open .admonition-title {
-  background-color: rgba(68, 138, 255, 0.1);
-}
-
-.admonition i.icon {
-  color: #448aff;
-}
-
-/* Abstract type */
-.admonition.abstract {
-  background-color: rgba(0, 176, 255, 0.1);
-  border-left-color: #00b0ff;
-}
-
-.admonition.abstract .admonition-title {
-  border-bottom-color: rgba(0, 176, 255, 0.1);
-  background-color: rgba(0, 176, 255, 0.25);
-}
-
-.admonition.abstract.open .admonition-title {
-  background-color: rgba(0, 176, 255, 0.1);
-}
-
-.admonition.abstract i.icon {
-  color: #00b0ff;
-}
-
-/* Info type */
-.admonition.info {
-  background-color: rgba(83, 211, 230, 0.1);
-  border-left-color: #00b8d4;
-}
-
-.admonition.info .admonition-title {
-  border-bottom-color: rgba(83, 211, 230, 0.1);
-  background-color: rgba(83, 211, 230, 0.25);
-}
-
-.admonition.info.open .admonition-title {
-  background-color: rgba(83, 211, 230, 0.1);
-}
-
-.admonition.info i.icon {
-  color: #00b8d4;
-}
-
-/* Tip type */
-.admonition.tip {
-  background-color: rgba(0, 191, 165, 0.1);
-  border-left-color: #00bfa5;
-}
-
-.admonition.tip .admonition-title {
-  border-bottom-color: rgba(0, 191, 165, 0.1);
-  background-color: rgba(0, 191, 165, 0.25);
-}
-
-.admonition.tip.open .admonition-title {
-  background-color: rgba(0, 191, 165, 0.1);
-}
-
-.admonition.tip i.icon {
-  color: #00bfa5;
-}
-
-/* Success type */
-.admonition.success {
-  background-color: rgba(0, 200, 83, 0.1);
-  border-left-color: #00c853;
-}
-
-.admonition.success .admonition-title {
-  border-bottom-color: rgba(0, 200, 83, 0.1);
-  background-color: rgba(0, 200, 83, 0.25);
-}
-
-.admonition.success.open .admonition-title {
-  background-color: rgba(0, 200, 83, 0.1);
-}
-
-.admonition.success i.icon {
-  color: #00c853;
-}
-
-/* Question type */
-.admonition.question {
-  background-color: rgba(100, 221, 23, 0.1);
-  border-left-color: #64dd17;
-}
-
-.admonition.question .admonition-title {
-  border-bottom-color: rgba(100, 221, 23, 0.1);
-  background-color: rgba(100, 221, 23, 0.25);
-}
-
-.admonition.question.open .admonition-title {
-  background-color: rgba(100, 221, 23, 0.1);
-}
-
-.admonition.question i.icon {
-  color: #64dd17;
-}
-
-/* Warning type */
-.admonition.warning {
-  background-color: rgba(255, 145, 0, 0.1);
-  border-left-color: #ff9100;
-}
-
-.admonition.warning .admonition-title {
-  border-bottom-color: rgba(255, 145, 0, 0.1);
-  background-color: rgba(255, 145, 0, 0.25);
-}
-
-.admonition.warning.open .admonition-title {
-  background-color: rgba(255, 145, 0, 0.1);
-}
-
-.admonition.warning i.icon {
-  color: #ff9100;
-}
-
-/* Failure type */
-.admonition.failure {
-  background-color: rgba(255, 82, 82, 0.1);
-  border-left-color: #ff5252;
-}
-
-.admonition.failure .admonition-title {
-  border-bottom-color: rgba(255, 82, 82, 0.1);
-  background-color: rgba(255, 82, 82, 0.25);
-}
-
-.admonition.failure.open .admonition-title {
-  background-color: rgba(255, 82, 82, 0.1);
-}
-
-.admonition.failure i.icon {
-  color: #ff5252;
-}
-
-/* Danger type */
-.admonition.danger {
-  background-color: rgba(255, 23, 68, 0.1);
-  border-left-color: #ff1744;
-}
-
-.admonition.danger .admonition-title {
-  border-bottom-color: rgba(255, 23, 68, 0.1);
-  background-color: rgba(255, 23, 68, 0.25);
-}
-
-.admonition.danger.open .admonition-title {
-  background-color: rgba(255, 23, 68, 0.1);
-}
-
-.admonition.danger i.icon {
-  color: #ff1744;
-}
-
-/* Bug type */
-.admonition.bug {
-  background-color: rgba(245, 0, 87, 0.1);
-  border-left-color: #f50057;
-}
-
-.admonition.bug .admonition-title {
-  border-bottom-color: rgba(245, 0, 87, 0.1);
-  background-color: rgba(245, 0, 87, 0.25);
-}
-
-.admonition.bug.open .admonition-title {
-  background-color: rgba(245, 0, 87, 0.1);
-}
-
-.admonition.bug i.icon {
-  color: #f50057;
-}
-
-/* Example type */
-.admonition.example {
-  background-color: rgba(101, 31, 255, 0.1);
-  border-left-color: #651fff;
-}
-
-.admonition.example .admonition-title {
-  border-bottom-color: rgba(101, 31, 255, 0.1);
-  background-color: rgba(101, 31, 255, 0.25);
-}
-
-.admonition.example.open .admonition-title {
-  background-color: rgba(101, 31, 255, 0.1);
-}
-
-.admonition.example i.icon {
-  color: #651fff;
-}
-
-/* Quote type */
-.admonition.quote {
-  background-color: rgba(159, 159, 159, 0.1);
-  border-left-color: #9e9e9e;
-}
-
-.admonition.quote .admonition-title {
-  border-bottom-color: rgba(159, 159, 159, 0.1);
-  background-color: rgba(159, 159, 159, 0.25);
-}
-
-.admonition.quote.open .admonition-title {
-  background-color: rgba(159, 159, 159, 0.1);
-}
-
-.admonition.quote i.icon {
-  color: #9e9e9e;
-}
-
-.admonition:last-child {
-  margin-bottom: 0.75rem;
+@media (prefers-reduced-motion: reduce) {
+  .post-content .admonition-chevron {
+    transition: none;
+  }
 }

@@ -1,42 +1,50 @@
-{{/*  Copied from LoveIt theme  */}}
-{{- $inner := .Inner | .Page.RenderString -}}
+{{- /*
+  A collapsible callout: a native <details>, open unless open=false, so it needs
+  no script. Each type has an icon here and an accent color in
+  assets/css/extended/admonition.css; types of the same kind share a color.
 
-{{- $iconMap := dict "note" "fas fa-pencil-alt fa-fw" -}}
-{{- $iconMap  = dict "abstract" "fas fa-list-ul fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "info" "fas fa-info-circle fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "tip" "fas fa-lightbulb fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "success" "fas fa-check-circle fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "question" "fas fa-question-circle fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "warning" "fas fa-exclamation-triangle fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "failure" "fas fa-times-circle fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "danger" "fas fa-skull-crossbones fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "bug" "fas fa-bug fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "example" "fas fa-list-ol fa-fw" | merge $iconMap -}}
-{{- $iconMap  = dict "quote" "fas fa-quote-right fa-fw" | merge $iconMap -}}
-{{- $iconDetails := "fas fa-angle-right fa-fw" -}}
-
+  Named:      {{< admonition type=tip title="..." open=false >}} ... {{< /admonition >}}
+  Positional: {{< admonition tip "..." false >}} ... {{< /admonition >}}
+*/ -}}
+{{- $type := "" -}}
+{{- $title := "" -}}
+{{- $open := true -}}
 {{- if .IsNamedParams -}}
-    {{- $type := .Get "type" | default "note" -}}
-    <div class="details admonition {{ $type }}{{ if .Get `open` | ne false }} open{{ end }}">
-        <div class="details-summary admonition-title">
-            <i class="icon {{ index $iconMap $type | default (index $iconMap "note") }}" aria-hidden="true"></i>{{ .Get "title" | default (T $type) }}<i class="details-icon {{ $iconDetails }}" aria-hidden="true"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content">
-                {{- $inner -}}
-            </div>
-        </div>
-    </div>
+  {{- $type = .Get "type" -}}
+  {{- $title = .Get "title" -}}
+  {{- $open = .Get "open" | ne false -}}
 {{- else -}}
-    {{- $type := .Get 0 | default "note" -}}
-    <div class="details admonition {{ $type }}{{ if .Get 2 | ne false }} open{{ end }}">
-        <div class="details-summary admonition-title">
-            <i class="icon {{ index $iconMap $type | default (index $iconMap "note") }}" aria-hidden="true"></i>{{ .Get 1 | default (T $type) }}<i class="details-icon {{ $iconDetails }}" aria-hidden="true"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content">
-                {{- $inner -}}
-            </div>
-        </div>
-    </div>
+  {{- $type = .Get 0 -}}
+  {{- $title = .Get 1 -}}
+  {{- $open = .Get 2 | ne false -}}
 {{- end -}}
+{{- $type = $type | default "note" -}}
+{{- $title = $title | default (T $type) | default (humanize $type) -}}
+
+{{- /* 24×24 stroke icons, drawn in currentColor */ -}}
+{{- $icons := dict
+  "note"     `<path d="M4.5 19.5l1-4.2L16.2 4.6a1.8 1.8 0 0 1 2.6 0l.6.6a1.8 1.8 0 0 1 0 2.6L8.7 18.5z"/><path d="M14.2 6.6l3.2 3.2"/>`
+  "abstract" `<path d="M9 6.5h10.5M9 12h10.5M9 17.5h10.5"/><path d="M4.75 6.5h.01M4.75 12h.01M4.75 17.5h.01"/>`
+  "info"     `<circle cx="12" cy="12" r="8.75"/><path d="M12 11v5.25"/><path d="M12 7.75h.01"/>`
+  "tip"      `<path d="M9.5 18.25h5M10.25 21h3.5"/><path d="M8.6 14.6a5.75 5.75 0 1 1 6.8 0c-.6.45-.9 1.1-.9 1.85v.55h-5v-.55c0-.75-.3-1.4-.9-1.85z"/>`
+  "success"  `<circle cx="12" cy="12" r="8.75"/><path d="M8.4 12.3l2.5 2.5 4.8-5.1"/>`
+  "question" `<circle cx="12" cy="12" r="8.75"/><path d="M9.6 9.6a2.45 2.45 0 1 1 3.5 2.2c-.65.32-1.1.9-1.1 1.6v.45"/><path d="M12 16.9h.01"/>`
+  "warning"  `<path d="M10.4 4.6 3.1 17.3a1.8 1.8 0 0 0 1.6 2.7h14.6a1.8 1.8 0 0 0 1.6-2.7L13.6 4.6a1.85 1.85 0 0 0-3.2 0z"/><path d="M12 9.5v4.25"/><path d="M12 16.75h.01"/>`
+  "failure"  `<circle cx="12" cy="12" r="8.75"/><path d="M9.4 9.4l5.2 5.2M14.6 9.4l-5.2 5.2"/>`
+  "danger"   `<path d="M8.4 3.25h7.2l5.15 5.15v7.2l-5.15 5.15H8.4l-5.15-5.15V8.4z"/><path d="M12 8v4.75"/><path d="M12 15.9h.01"/>`
+  "bug"      `<rect x="8" y="7.5" width="8" height="12.5" rx="4"/><path d="M12 11v9M8 12.5H4.5M19.5 12.5H16M8.2 16.5l-3 1.8M15.8 16.5l3 1.8M8.6 9.2 5.8 7.4M15.4 9.2l2.8-1.8M10 7.5a2 2 0 0 1 4 0"/>`
+  "example"  `<path d="M9.75 3.5h4.5M10.5 3.5v5.8L5.3 18.1A1.95 1.95 0 0 0 7 21h10a1.95 1.95 0 0 0 1.7-2.9l-5.2-8.8V3.5"/><path d="M7.6 15h8.8"/>`
+  "quote"    `<path d="M10 6.5c-2.6.9-4.25 3.1-4.25 6.1v4.9H10v-4.25H5.75"/><path d="M18.25 6.5c-2.6.9-4.25 3.1-4.25 6.1v4.9h4.25v-4.25H14"/>`
+-}}
+{{- $icon := index $icons $type | default (index $icons "note") -}}
+
+<details class="admonition {{ $type }}"{{ if $open }} open{{ end }}>
+  <summary class="admonition-title">
+    <svg class="admonition-icon" viewBox="0 0 24 24" aria-hidden="true">{{ $icon | safeHTML }}</svg>
+    <span class="admonition-label">{{ $title }}</span>
+    <svg class="admonition-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6.5 5.5 5.5-5.5 5.5"/></svg>
+  </summary>
+  <div class="admonition-content">
+    {{- .Inner | .Page.RenderString -}}
+  </div>
+</details>
