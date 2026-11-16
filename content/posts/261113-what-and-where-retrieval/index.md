@@ -97,23 +97,25 @@ $$\mathrm{cost}(u) = \begin{cases} C_{\mathrm{enc}} + |\mathcal{U}| \, C_{\mathr
 
 根据任务和模型结构我们可以非常清晰的分出来12 种方法。下表的列是三类任务；行是模型结构，也就是三个量怎样分组编码，竖线右边是单独成组的量：$(b, t) \mid I$ 是框和描述一起编码、图单独编码，以此类推；$(I, b, t)$ 是单塔，三个量在同一个网络里一起算，比如多模态大模型。并且我们知道只有对角线上的方法是在对应任务上高效的。
 
-实际上第二三列的任务，detection，classfication，caption 都是研究很充分的领域，完整的梳理也有相关综述 [^xiao_vgsurvey] [^wu_ovsurvey]。而第一种目前还没有充分的研究。而据我们所知，第一列的 what-and-where 任务尚只有这列出的 5 份工作。
+实际上第二三列的任务，detection，classfication，caption 都是研究很充分的领域，完整的梳理也有相关综述 [^xiao_vgsurvey] [^wu_ovsurvey]。而第一种目前还没有充分的研究。而据我们所知，第一列的 what-and-where 任务尚只有这列出的 6 份工作。
 
 | | 已知 $(b, t)$ 找 $I$ | 已知 $(I, t)$ 找 $b$ | 已知 $(I, b)$ 找 $t$ |
 |---|---|---|---|
-| ${(b, t) \mid I}$ | <small>Spatial-Semantic&nbsp;Search&nbsp;<small>CVPR'17</small>&nbsp;[^mai_spatialsemantic]<br>Text+Trace&nbsp;Model&nbsp;<small>ICCV'21</small>&nbsp;[^changpinyo_whatwhere]<br>**BBox-SigLIP**&nbsp;<small>本文</small></small> | <small>暂无</small> | <small>暂无</small> |
+| ${(b, t) \mid I}$ | <small>Spatial&#8209;Semantic&nbsp;Search&nbsp;<small>CVPR'17</small>&nbsp;[^mai_spatialsemantic]<br>FCN&#8209;based&nbsp;Retrieval&nbsp;<small>MMM'18</small>&nbsp;[^furuta_segretrieval]<br>Text+Trace&nbsp;Model&nbsp;<small>ICCV'21</small>&nbsp;[^changpinyo_whatwhere]<br>**BBox&#8209;SigLIP**&nbsp;<small>本文</small></small> | <small>暂无</small> | <small>暂无</small> |
 | ${(I, t) \mid b}$ | <small>不可行</small> | <small>MDETR&nbsp;<small>ICCV'21</small>&nbsp;[^kamath_mdetr]<br>GLIP&nbsp;<small>CVPR'22</small>&nbsp;[^li_glip]<br>Grounding&nbsp;DINO&nbsp;<small>ECCV'24</small>&nbsp;[^liu_groundingdino]</small> | <small>暂无</small> |
-| ${(I, b) \mid t}$ | <small>Concept&nbsp;Map&nbsp;<small>SIGIR'10</small>&nbsp;[^xu_conceptmap]<br>Shutterstock&nbsp;构图检索&nbsp;<small>US&nbsp;Patent'19</small>&nbsp;[^ranzinger_patent]</small> | <small>OWL-ViT&nbsp;<small>ECCV'22</small>&nbsp;[^minderer_owlvit]<br>RegionCLIP&nbsp;<small>CVPR'22</small>&nbsp;[^zhong_regionclip]<br>ObjEmbed&nbsp;<small>ICML'26</small>&nbsp;[^fu_objembed]</small> | <small>Alpha-CLIP&nbsp;<small>CVPR'24</small>&nbsp;[^sun_alphaclip]<br>CLOC&nbsp;<small>ICML'25</small>&nbsp;[^chen_cloc]<br>FG-CLIP&nbsp;2&nbsp;<small>ICML'26</small>&nbsp;[^xie_fgclip2]</small> |
-| ${(I, b, t)}$ | <small>不可行</small> | <small>Kosmos-2&nbsp;<small>ICLR'24</small>&nbsp;[^peng_kosmos2]<br>Rex-Thinker&nbsp;<small>ICLR'26</small>&nbsp;[^jiang_rexthinker]</small> | <small>UniRef&nbsp;<small>EMNLP'22</small>&nbsp;[^zheng_uniref]<br>Ferret&nbsp;<small>ICLR'24</small>&nbsp;[^you_ferret]<br>GAR&nbsp;<small>ICLR'26</small>&nbsp;[^wang_gar]</small> |
+| ${(I, b) \mid t}$ | <small>Concept&nbsp;Map&nbsp;<small>SIGIR'10</small>&nbsp;[^xu_conceptmap]<br>Shutterstock&nbsp;构图检索&nbsp;<small>US&nbsp;Patent'19</small>&nbsp;[^ranzinger_patent]</small> | <small>OWL&#8209;ViT&nbsp;<small>ECCV'22</small>&nbsp;[^minderer_owlvit]<br>RegionCLIP&nbsp;<small>CVPR'22</small>&nbsp;[^zhong_regionclip]<br>ObjEmbed&nbsp;<small>ICML'26</small>&nbsp;[^fu_objembed]</small> | <small>Alpha&#8209;CLIP&nbsp;<small>CVPR'24</small>&nbsp;[^sun_alphaclip]<br>CLOC&nbsp;<small>ICML'25</small>&nbsp;[^chen_cloc]<br>FG&#8209;CLIP&nbsp;2&nbsp;<small>ICML'26</small>&nbsp;[^xie_fgclip2]</small> |
+| ${(I, b, t)}$ | <small>不可行</small> | <small>Kosmos&#8209;2&nbsp;<small>ICLR'24</small>&nbsp;[^peng_kosmos2]<br>Rex&#8209;Thinker&nbsp;<small>ICLR'26</small>&nbsp;[^jiang_rexthinker]</small> | <small>UniRef&nbsp;<small>EMNLP'22</small>&nbsp;[^zheng_uniref]<br>Ferret&nbsp;<small>ICLR'24</small>&nbsp;[^you_ferret]<br>GAR&nbsp;<small>ICLR'26</small>&nbsp;[^wang_gar]</small> |
 
-第一列中以找图为目标的五个方法，差别在查询长什么样、框进了哪一侧、每张图要存什么（图 3）。和我们结构相同、都是 $(b, t) \mid I$ 的有两项。最接近的是 Text+Trace Model [^changpinyo_whatwhere]，「what+where 检索」这个叫法就出自这篇，图库一侧也和我们一样，每张图只存一个向量。但它的查询不是为找图设计的，而是直接搬用 Localized Narratives 的标注方式：标注员一边口述整张图，一边移动鼠标，每段话说出时鼠标扫过的范围取成一个框。位置因此只是说话时鼠标恰好停在哪里，不是用户有意圈出的范围：语音和鼠标对不齐，论文要在时间和空间上各放宽一圈才能用，"we can see" 这类虚词也带着轨迹。我们统计过它的评测数据，每条口述平均被切成 36 到 50 段，每段平均只有 1.1 个词，11% 到 15% 的段落里没有任何轨迹点。用户想找一只在右下角的狗，也得先把整张图讲一遍。另一项是 Spatial-Semantic Search [^mai_spatialsemantic]：它把画布上的词向量合成一张 7×7×832 的查询特征图，和图库里固定的 GoogLeNet 特征图整张比。结构对得上，但每张图存的是摊平后约 4 万维的空间特征图，是我们的 35 倍，查询也只能是单个词。
+第一列中以找图为目标的六个方法，差别在查询长什么样、框进了哪一侧、每张图要存什么（图 3）。和我们结构相同、都是 $(b, t) \mid I$ 的有三项。最接近的是 Text+Trace Model [^changpinyo_whatwhere]，「what+where 检索」这个叫法就出自这篇，图库一侧也和我们一样，每张图只存一个向量。但它的查询不是为找图设计的，而是直接搬用 Localized Narratives 的标注方式：标注员一边口述整张图，一边移动鼠标，每段话说出时鼠标扫过的范围取成一个框。位置因此只是说话时鼠标恰好停在哪里，不是用户有意圈出的范围：语音和鼠标对不齐，论文要在时间和空间上各放宽一圈才能用，"we can see" 这类虚词也带着轨迹。我们统计过它的评测数据，每条口述平均被切成 36 到 50 段，每段平均只有 1.1 个词，11% 到 15% 的段落里没有任何轨迹点。用户想找一只在右下角的狗，也得先把整张图讲一遍。另一项是 Spatial-Semantic Search [^mai_spatialsemantic]：它把画布上的词向量合成一张 7×7×832 的查询特征图，和图库里固定的 GoogLeNet 特征图整张比。结构对得上，但每张图存的是摊平后约 4 万维的空间特征图，是我们的 35 倍，查询也只能是单个词。FCN-based Retrieval [^furuta_segretrieval] 和它类似：用户在画布上直接画一张语义分割图，每块区域涂一个类别；每张图离线存一张 DeepLab 输出的 60 类、64×64 的概率图，摊平约 24.6 万维，再用乘积量化压缩。它的区域可以是任意形状，但查询同样只能用这 60 个固定类别。
 
 {{< media
 src="assets/where-the-box-goes.svg"
-caption="图 3：找图的五个方法。左边是查询和查询编码器的输出，右边是每张图存的东西。上面三行框和描述一起进查询编码器（表中 (b, t) | I），下面两行框只在打分时作用在图的格子上（表中 (I, b) | t）。"
+caption="图 3：找图的六个方法。左边是查询和查询编码器的输出，右边是每张图存的东西。上面四行框和描述一起进查询编码器（表中 (b, t) | I），下面两行框只在打分时作用在图的格子上（表中 (I, b) | t）。"
 >}}
 
 Concept Map [^xu_conceptmap] 和 Shutterstock 构图检索 [^ranzinger_patent] 要找的是图，模型结构却是 $(I, b) \mid t$，任务和结构从一开始就对不上，注定低效：每张图要存一整张网格、每格一份特征；每来一个查询，都要拿关键词和每张图的每个格子比一遍，计算和存储都是格子数的倍数，框也只能对齐到格子边界。两者做法相同：离线把每张图切成网格，每格存一份特征；关键词单独编码；查询时先算关键词和每个格子的匹配度，得到一张热力图，再按用户给的位置读出分数。不同的只是各模块的实现：格子特征分别是视觉词袋直方图、CNN 向量，关键词分别表示成网页搜图挖出的视觉实例、神经语言模型的词向量，位置分别来自可拉伸的矩形、画布上的点。
+
+以上几项都没有公开代码或者模型。评测方面，只有 Text+Trace Model 用的 Localized Narratives 是公开数据，但是由于他的方法设定过于奇怪，我们不打算在本文中采用。
 
 ## 方法：BBox-SigLIP
 
@@ -257,6 +259,8 @@ Concept Map [^xu_conceptmap] 和 Shutterstock 构图检索 [^ranzinger_patent] �
 [^chen_cloc]: **Chen, Hong-You, et al.** *Contrastive Localized Language-Image Pre-Training*. 2025. *ICML*, https://arxiv.org/abs/2410.02746.
 
 [^fu_objembed]: **Fu, Shenghao, et al.** *ObjEmbed: Towards Universal Multimodal Object Embeddings*. 2026. *ICML*, https://arxiv.org/abs/2602.01753.
+
+[^furuta_segretrieval]: **Furuta, Ryosuke, Naoto Inoue, and Toshihiko Yamasaki.** *Efficient and Interactive Spatial-Semantic Image Retrieval*. 2018. *MMM*, https://doi.org/10.1007/978-3-319-73603-7_16.
 
 [^istock_copyspace]: **CreativePro.** *iStockphoto Makes it Easy for Designers to Match Copy to Images with New CopySpace Feature*. 2005, https://creativepro.com/istockphoto-makes-it-easy-for-designers-to-match-copy-to-images-with-new-copyspace-feature/.
 
