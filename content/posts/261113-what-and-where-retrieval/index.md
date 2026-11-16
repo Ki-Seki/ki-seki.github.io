@@ -79,7 +79,7 @@ $$u^\star = \arg\max_{u \in \mathcal{U}} s(I, b, t)$$
 
 $$s(I, b, t) := \langle f(b, t),\ g(I) \rangle$$
 
-{{% admonition type="tip" title="证明任务决定模型输入结构" open=true %}}
+{{% admonition type="tip" title="证明：任务结构与模型结构匹配时时空复杂度最优" open=true %}}
 双塔模型把三个量分成不重叠的两组 $X$ 和 $Y$，各进一个编码器，分数是两个向量的点积：
 
 $$s(I, b, t) = \langle \phi(X),\ \psi(Y) \rangle$$
@@ -95,49 +95,25 @@ $$\mathrm{cost}(u) = \begin{cases} C_{\mathrm{enc}} + |\mathcal{U}| \, C_{\mathr
 
 ## 相关工作
 
-按论文实际训练和评测的任务，把相关工作分进三类（下表）。第一类是本文的任务，列出我们找到的全部工作；后两类工作很多，按研究方向各举两篇代表，其中一篇是 2026 年的最新工作，完整的梳理见综述 [^xiao_vgsurvey] [^wu_ovsurvey]。只靠文字找图、查询里不带位置的检索，以及从一张图同时输出框和描述的 dense captioning，不在这三类里，不列。
+根据任务和模型结构我们可以非常清晰的分出来12 种方法。下表的列是三类任务；行是模型结构，也就是三个量怎样分组编码，竖线右边是单独成组的量：$(b, t) \mid I$ 是框和描述一起编码、图单独编码，以此类推；$(I, b, t)$ 是单塔，三个量在同一个网络里一起算，比如多模态大模型。并且我们知道只有对角线上的方法是在对应任务上高效的。
 
-| 任务 | 工作 |
-|---|---|
-| 已知 $(b, t)$<br>找 $I$ | Concept Map（SIGIR'10） [^xu_conceptmap]<br>Spatial-Semantic Image Search（CVPR'17） [^mai_spatialsemantic]<br>Shutterstock 构图检索专利（US Patent'19） [^ranzinger_patent]<br>CAL（WACV'21） [^kilickaya_cal]<br>Changpinyo 等人（ICCV'21，口述加鼠标轨迹） [^changpinyo_whatwhere]<br>**BBox-SigLIP（本文）** |
-| 已知 $(I, t)$<br>找 $b$ | 视觉 grounding：MDETR（ICCV'21） [^kamath_mdetr]、Rex-Thinker（ICLR'26） [^jiang_rexthinker]<br>开放词表检测：GLIP（CVPR'22） [^li_glip]、ObjEmbed（ICML'26） [^fu_objembed] |
-| 已知 $(I, b)$<br>找 $t$ | 区域级图文对齐：CLOC（ICML'25） [^chen_cloc]、FG-CLIP 2（ICML'26） [^xie_fgclip2]<br>区域描述：UniRef（EMNLP'22） [^zheng_uniref]、GAR（ICLR'26） [^wang_gar] |
+实际上第二三列的任务，detection，classfication，caption 都是研究很充分的领域，完整的梳理也有相关综述 [^xiao_vgsurvey] [^wu_ovsurvey]。而第一种目前还没有充分的研究。而据我们所知，第一列的 what-and-where 任务尚只有这列出的 5 份工作。
 
-把这些方法拿来找图，差别在于每张图要存什么（图 3）。
+| | 已知 $(b, t)$ 找 $I$ | 已知 $(I, t)$ 找 $b$ | 已知 $(I, b)$ 找 $t$ |
+|---|---|---|---|
+| ${(b, t) \mid I}$ | <small>Spatial-Semantic&nbsp;Search&nbsp;<small>CVPR'17</small>&nbsp;[^mai_spatialsemantic]<br>Text+Trace&nbsp;Model&nbsp;<small>ICCV'21</small>&nbsp;[^changpinyo_whatwhere]<br>**BBox-SigLIP**&nbsp;<small>本文</small></small> | <small>暂无</small> | <small>暂无</small> |
+| ${(I, t) \mid b}$ | <small>不可行</small> | <small>MDETR&nbsp;<small>ICCV'21</small>&nbsp;[^kamath_mdetr]<br>GLIP&nbsp;<small>CVPR'22</small>&nbsp;[^li_glip]<br>Grounding&nbsp;DINO&nbsp;<small>ECCV'24</small>&nbsp;[^liu_groundingdino]</small> | <small>暂无</small> |
+| ${(I, b) \mid t}$ | <small>Concept&nbsp;Map&nbsp;<small>SIGIR'10</small>&nbsp;[^xu_conceptmap]<br>Shutterstock&nbsp;构图检索&nbsp;<small>US&nbsp;Patent'19</small>&nbsp;[^ranzinger_patent]</small> | <small>OWL-ViT&nbsp;<small>ECCV'22</small>&nbsp;[^minderer_owlvit]<br>RegionCLIP&nbsp;<small>CVPR'22</small>&nbsp;[^zhong_regionclip]<br>ObjEmbed&nbsp;<small>ICML'26</small>&nbsp;[^fu_objembed]</small> | <small>Alpha-CLIP&nbsp;<small>CVPR'24</small>&nbsp;[^sun_alphaclip]<br>CLOC&nbsp;<small>ICML'25</small>&nbsp;[^chen_cloc]<br>FG-CLIP&nbsp;2&nbsp;<small>ICML'26</small>&nbsp;[^xie_fgclip2]</small> |
+| ${(I, b, t)}$ | <small>不可行</small> | <small>Kosmos-2&nbsp;<small>ICLR'24</small>&nbsp;[^peng_kosmos2]<br>Rex-Thinker&nbsp;<small>ICLR'26</small>&nbsp;[^jiang_rexthinker]</small> | <small>UniRef&nbsp;<small>EMNLP'22</small>&nbsp;[^zheng_uniref]<br>Ferret&nbsp;<small>ICLR'24</small>&nbsp;[^you_ferret]<br>GAR&nbsp;<small>ICLR'26</small>&nbsp;[^wang_gar]</small> |
+
+第一列中以找图为目标的五个方法，差别在查询长什么样、框进了哪一侧、每张图要存什么（图 3）。和我们结构相同、都是 $(b, t) \mid I$ 的有两项。最接近的是 Text+Trace Model [^changpinyo_whatwhere]，「what+where 检索」这个叫法就出自这篇，图库一侧也和我们一样，每张图只存一个向量。但它的查询不是为找图设计的，而是直接搬用 Localized Narratives 的标注方式：标注员一边口述整张图，一边移动鼠标，每段话说出时鼠标扫过的范围取成一个框。位置因此只是说话时鼠标恰好停在哪里，不是用户有意圈出的范围：语音和鼠标对不齐，论文要在时间和空间上各放宽一圈才能用，"we can see" 这类虚词也带着轨迹。我们统计过它的评测数据，每条口述平均被切成 36 到 50 段，每段平均只有 1.1 个词，11% 到 15% 的段落里没有任何轨迹点。用户想找一只在右下角的狗，也得先把整张图讲一遍。另一项是 Spatial-Semantic Search [^mai_spatialsemantic]：它把画布上的词向量合成一张 7×7×832 的查询特征图，和图库里固定的 GoogLeNet 特征图整张比。结构对得上，但每张图存的是摊平后约 4 万维的空间特征图，是我们的 35 倍，查询也只能是单个词。
 
 {{< media
 src="assets/where-the-box-goes.svg"
-caption="图 3：把各类方法拿来找图时，每张图要存什么。"
+caption="图 3：找图的五个方法。左边是查询和查询编码器的输出，右边是每张图存的东西。上面三行框和描述一起进查询编码器（表中 (b, t) | I），下面两行框只在打分时作用在图的格子上（表中 (I, b) | t）。"
 >}}
 
-### 同一定位的工作：已知框和描述，找图
-
-- Image Search by Concept Map（SIGIR 2010，MSRA）：
-  - 交互：在空白画布上打关键词，每个关键词带一个可以拉伸的矩形，默认占画布的 1/9。
-  - 查询：关键词先拿去文本搜图，取前 50 张，用 affinity propagation 聚类挖出 6 个「视觉实例」；位置变成一个二维高斯。
-  - 图库：每张图切成 9×9 个格子，每格一个视觉词袋直方图（SIFT 6K 词表或 HSV 192 色）。
-  - 打分：每个实例在每个格子上算出现程度，外观分乘空间分；多个概念取平均，再减去离散程度。
-  - 评测：只在文本搜索结果上重排（每个关键词组合取前 500 张），42 个任务、33 个概念，NDCG，外加 20 人的用户研究。
-- Spatial-Semantic Image Search by Visual Feature Synthesis（CVPR 2017，Adobe 和 Portland State）：
-  - 查询：画布变成 31×31×300 的网格，框里的格子填 Word2Vec 向量；三层卷积网络把它「合成」成 7×7×832 的视觉特征。
-  - 图库：固定的 ImageNet GoogLeNet 卷积特征（摊平约 4 万维），不训练，所以换查询模型不用重算图库。
-  - 损失：0.6 × 相似度 + 0.3 × 分类 + 0.1 × 三元组；只用单概念查询训练，多概念时逐个合成再取逐元素最大值。
-  - 评测：COCO 加 Visual Genome 共 179,877 张图、269 个概念、28,699 个测试查询；相关度是同类框 IoU 的平均；NDCG、mAP、Spearman 都超过文本搜索、Concept Map 和直接用目标图真实特征的 oracle；合成一个查询 1 毫秒，500 万张图一秒内搜完。
-- Structured Visual Search via Composition-aware Learning（WACV 2021）：
-  - 查询：COCO 80 类的框组成的画布（32×32×80 的 one-hot）。
-  - 图库：冻结的 ResNet-50 加三层卷积，输出 7×7×256 的特征图。
-  - 损失：让两张图特征的点积去拟合它们版式的 IoU，版式变了，特征跟着变。
-  - 评测：COCO 上 5,000 个查询、约 7 万张图的图库，mAP@1 81.2；另在 HICO-DET 上测。
-- 和我们比：这三项的查询都是单个词或类别名，不是自由描述；图像一侧是空间特征图（81 个格子或 7×7 网格，几千到几万维），位置信息摊在特征的空间布局里，不用学。我们用自由文本描述，每张图只存一个向量。
-
-### 相近的设定：口述加鼠标轨迹，找图
-
-- Telling the What while Pointing to the Where（ICCV 2021，Google）：「what+where 检索」这个叫法出自这篇。
-  - 查询：标注员一边口述整张图（Localized Narratives），一边用鼠标指着说到的东西。每段话说出时鼠标扫过的范围取成一个框，在时间和空间上各放宽一圈，再和文字一起送进文本编码器（早融合）。
-  - 图库：ResNet-152 整图特征加 16 个 Faster R-CNN 区域特征，过 6 层 Transformer 后取平均，每张图一个向量，点积打分。
-  - 训练：先在 Open Images 50.7 万张图的口述数据上预训练，再在 Flickr30k 的口述数据上微调；文字用 1 万个子词，随机初始化。
-  - 评测：Flickr30k、COCO、ADE20K 的口述数据，加上轨迹后 R@1 比只用文字高 7 到 13 个点（Flickr30k 83.4 → 90.6）。
-- 和我们比：图库一侧同样每张图一个向量，区别在查询。它的位置来自说话时鼠标恰好停在哪里，不是用户有意圈出的范围：轨迹和语音对不齐，要放宽一圈才能用，"we can see" 这类虚词也带着轨迹；而且查询是一整段描述全图的口语，用户得把整张图讲一遍。我们的查询是用户直接画的框加一句描述，找什么、在哪里都是明确的。
+Concept Map [^xu_conceptmap] 和 Shutterstock 构图检索 [^ranzinger_patent] 要找的是图，模型结构却是 $(I, b) \mid t$，任务和结构从一开始就对不上，注定低效：每张图要存一整张网格、每格一份特征；每来一个查询，都要拿关键词和每张图的每个格子比一遍，计算和存储都是格子数的倍数，框也只能对齐到格子边界。两者做法相同：离线把每张图切成网格，每格存一份特征；关键词单独编码；查询时先算关键词和每个格子的匹配度，得到一张热力图，再按用户给的位置读出分数。不同的只是各模块的实现：格子特征分别是视觉词袋直方图、CNN 向量，关键词分别表示成网页搜图挖出的视觉实例、神经语言模型的词向量，位置分别来自可拉伸的矩形、画布上的点。
 
 ## 方法：BBox-SigLIP
 
@@ -296,13 +272,21 @@ caption="图 3：把各类方法拿来找图时，每张图要存什么。"
 
 [^lin_coco]: **Lin, Tsung-Yi, et al.** *Microsoft COCO: Common Objects in Context*. 2014. *ECCV*, https://arxiv.org/abs/1405.0312.
 
+[^liu_groundingdino]: **Liu, Shilong, et al.** *Grounding DINO: Marrying DINO with Grounded Pre-Training for Open-Set Object Detection*. 2024. *ECCV*, https://arxiv.org/abs/2303.05499.
+
 [^mai_spatialsemantic]: **Mai, Long, et al.** *Spatial-Semantic Image Search by Visual Feature Synthesis*. 2017. *CVPR*, https://openaccess.thecvf.com/content_cvpr_2017/html/Mai_Spatial-Semantic_Image_Search_CVPR_2017_paper.html.
+
+[^minderer_owlvit]: **Minderer, Matthias, et al.** *Simple Open-Vocabulary Object Detection with Vision Transformers*. 2022. *ECCV*, https://arxiv.org/abs/2205.06230.
+
+[^peng_kosmos2]: **Peng, Zhiliang, et al.** *Kosmos-2: Grounding Multimodal Large Language Models to the World*. 2024. *ICLR*, https://arxiv.org/abs/2306.14824.
 
 [^petapixel_shutterstock]: **PetaPixel.** *Shutterstock's Composition Aware AI Photo Search Uses Deep Learning*. 2017, https://petapixel.com/2017/10/13/shutterstocks-composition-aware-ai-photo-search-uses-deep-learning/.
 
 [^radford_clip]: **Radford, Alec, et al.** *Learning Transferable Visual Models From Natural Language Supervision*. 2021. *ICML*, https://arxiv.org/abs/2103.00020.
 
 [^ranzinger_patent]: **Ranzinger, Mike, and Heath Hohwald.** *Composition Aware Image Querying*. 2019. *US Patent 10,503,775 B1*, https://patents.google.com/patent/US10503775B1/en.
+
+[^sun_alphaclip]: **Sun, Zeyi, et al.** *Alpha-CLIP: A CLIP Model Focusing on Wherever You Want*. 2024. *CVPR*, https://arxiv.org/abs/2312.03818.
 
 [^wang_gar]: **Wang, Haochen, et al.** *Grasp Any Region: Towards Precise, Contextual Pixel Understanding for Multimodal LLMs*. 2026. *ICLR*, https://arxiv.org/abs/2510.18876.
 
@@ -316,9 +300,12 @@ caption="图 3：把各类方法拿来找图时，每张图要存什么。"
 
 [^xu_conceptmap]: **Xu, Hao, et al.** *Image Search by Concept Map*. 2010. *SIGIR*, https://www.microsoft.com/en-us/research/wp-content/uploads/2010/07/fp83-xu.pdf.
 
+[^you_ferret]: **You, Haoxuan, et al.** *Ferret: Refer and Ground Anything Anywhere at Any Granularity*. 2024. *ICLR*, https://arxiv.org/abs/2310.07704.
+
 [^yu_refcoco]: **Yu, Licheng, et al.** *Modeling Context in Referring Expressions*. 2016. *ECCV*, https://arxiv.org/abs/1608.00272.
 
 [^zhai_siglip]: **Zhai, Xiaohua, et al.** *Sigmoid Loss for Language Image Pre-Training*. 2023. *ICCV*, https://arxiv.org/abs/2303.15343.
 
 [^zheng_uniref]: **Zheng, Duo, et al.** *Towards Unifying Reference Expression Generation and Comprehension*. 2022. *EMNLP*, https://arxiv.org/abs/2210.13076.
 
+[^zhong_regionclip]: **Zhong, Yiwu, et al.** *RegionCLIP: Region-based Language-Image Pretraining*. 2022. *CVPR*, https://arxiv.org/abs/2112.09106.
