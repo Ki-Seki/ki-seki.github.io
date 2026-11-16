@@ -1,6 +1,6 @@
 ---
 date: '2026-11-13T11:28:01+08:00'
-title: 'What-and-Where 图像检索：一张图一个向量，按内容和位置找图'
+title: 'BBox-SigLIP: A Better Way to Find Images by What and Where'
 author:
   - Elliot Shichao Song
 summary: ''
@@ -27,49 +27,105 @@ math: true
 
 ## 引言
 
-- 查询的样子：比如「左上角有个 logo」，写成 `{"bbox": [x1, y1, x2, y2], "description": "..."}`，坐标是 0–1000 的 xyxy。普通的 CLIP / SigLIP 检索只匹配内容，不管它在哪儿。
-- 用处：
-  - 图库网站早就有这个需求：iStock、Shutterstock、Adobe Stock 都做过按版式或留白找图（见相关工作）。
-  - 手机相册也一样：用户常常记得「狗在左下角的那张」，却记不得是哪天拍的。
-- 约束：每张图仍然只存一个向量，IVF-PQ 这类 ANN 索引照常能用，位置只进查询，不进索引。
-- 结论，各一句：
-  1. 一张图一个向量能学会位置，BBox-SigLIP 训够步数后拼图对调到 93.6 / 94.1；
-  2. 位置能力跟着训练步数涨，前几千步几乎看不出来；
-  3. 怎么测出模型到底有没有在看框；
-  4. 在公开基准 SPEC 的绝对位置测试上做到 97.8 / 98.2，此前公开的最好成绩是 30.6 / 34.2。
-- 图 1：JSON 查询进文本塔，图像进图像塔，分数就是一个点积。
+用 CLIP、SigLIP 这类模型搜图，查询是一句话，比如「一只狗」，返回的是内容最像的图。但有时候，人想要的不只是图里有什么，还有它在哪儿。比如翻手机相册的人可能想找到「狗在右下角的那张照片」（图 1）。普通的图文检索只匹配内容，同一只狗在左边还是在右边，分数几乎一样。
 
-## 问题定义
+一些图库网站曾做过类似的功能，但都没有开源实现。比如 iStock 可以在 3×3 的格子里指定哪里要留白 [^istock_copyspace]，Shutterstock 试过把关键词拖到版面上的某个位置再搜 [^petapixel_shutterstock]，Adobe Stock 能在示例图里拖动一个物体再找相似的图 [^adobe_findsimilar]。
 
-- 一条事实是一个三元组 $(I, b, t)$：图 $I$ 的区域 $b$ 里是 $t$。$b = [x_1, y_1, x_2, y_2]$ 是归一化到 0–1000 的框，$t$ 是一段描述。
-- 模型是一个打分函数 $s(I, b, t)$，三元组成立时分数高。
-- 已知三个里的两个、找第三个，正好对应三类已有的任务：
-  - 已知 $(b, t)$ 找 $I$：按内容和位置找图，也就是本文的 what-and-where 图像检索；
-  - 已知 $(I, t)$ 找 $b$：视觉 grounding、开放词表检测，比如 RefCOCO 上的指代表达定位；
-  - 已知 $(I, b)$ 找 $t$：区域分类、区域描述，比如给定框的类别判断和 dense captioning。
-- 同一个 $s$ 可以服务这三类任务，区别在于 $s$ 怎么拆成两半：框跟描述放在查询一侧，还是跟图放在索引一侧。
+学术上，这个问题探索得还不多。已有的方法通常在图像一侧下功夫：要么给每张图存一张空间特征图 [^xu_conceptmap][^mai_spatialsemantic][^kilickaya_cal]，要么给每个候选框各存一个向量 [^xie_fgclip][^chen_cloc][^fu_objembed]。用这样的表示建近似最近邻（ANN）索引，索引要比一图一向量大一到两个数量级。
+
+因此我们提出 BBox-SigLIP，一个按精细内容和精确位置一起找图的图文表征模型。用它建库，**每张图只需要存一个向量**，和普通的 SigLIP 检索完全一样，IVF-PQ 这类 ANN 索引照常能用。位置和描述都写在查询里，是一段 JSON：`bbox` 是框，坐标 $[x_1, y_1, x_2, y_2]$ 归一化到 0–1000；`description` 说框里应该有什么。图 1 是一个例子：查询给出狗的精确位置和一段细致的描述，只有狗确实在框里的那张图分高。
+
+{{< media
+src="assets/query-and-scores.svg"
+caption="图 1：BBox-SigLIP（第 208,448 步）是一个双塔模型，包含文本和图像 encoders。查询把框和描述写成一段 JSON，进文本编码器得到一个向量 f(b, t)；图库里每张图进图像编码器，各得到一个向量 g(I)，可以离线算好。红色是查询给定的框：只有狗确实在框里的第一张图分高；同一张图左右镜像、狗在别处、框里是别的东西，分数都低。"
+>}}
+
+BBox-SigLIP 沿用 SigLIP2 的结构，没有加任何新模块：JSON 查询当作一段文本整个送进文本编码器，图像送进图像编码器，分数是两个向量的点积（图 1）。它和 SigLIP2 的区别全在训练：我们用带框的数据把两个编码器一起微调，让文本编码器学会读坐标，让图像编码器把「什么东西在哪儿」压进一个 1,152 维的向量。
+
+<!-- TODO：到最后再润色贡献 -->
+本文的贡献有四点：
+
+1. **提出 BBox-SigLIP**，一个按内容和位置一起找图的图文表征模型，图库里每张图只存一个向量。它沿用 SigLIP2 的结构，不加新模块，只是把框写进查询，再用带框的数据微调。同一个模型也能用在另外两个方向上：给定图和描述找框，给定图和框找描述（图 2）。
+2. **设计了一组专门测框有没有起作用的测试。** 区域检索的命中率高，不代表模型看了框：不看框也能拿到很高的命中率。镜像框、拼图对调这些测试每次只改一样东西，其余不变，分数的变化只能来自框和位置。
+3. **发现一张图一个向量能学会位置，但要训很久。** 拼图对调把两张图拼在一起，查询问其中一半，只看内容的模型只能拿到 50%。BBox-SigLIP 训到第 208,448 步时，左右拼是 93.6%，上下拼是 94.1%；原版 SigLIP2 是 50.2% 和 50.1%。这个能力出来得很慢：第 2,500 步时只比 50% 高三四个点，第 1 万步时是 63.2% / 70.8%，第 124,745 步时才到 91.9% / 93.3%。
+4. **在公开基准 SPEC 的绝对位置测试上，图找文 97.8%，文找图 98.2%**（九选一，随机是 11.1%）。SPEC 论文里的模型读的是写在句子里的位置，CLIP 是 12.6% / 12.3%，作者专门微调过的 CLIP 是 30.6% / 34.2%；我们把位置以框的形式交给模型，两边的输入方式不同，细节见评测。
+
+
+
+## 问题定义 
+
+我们把图像、区域和描述放在一起，看成一个三元组 $(I, b, t)$：图 $I$ 里，框 $b$ 框住的地方是 $t$。框通常可以用四元组表示 $b = [x_1, y_1, x_2, y_2]$ ，本文我们选择将坐标归一化到 0–1000；$t$ 是一段自由文本，可以是一个词，也可以是几句细致的描述。
+
+记 $t$ 所说的东西的紧框为 $b^\star$，只要 $b^\star \subseteq b$，三元组就算匹配；图里没有这个东西，或者 $b \cap b^\star = \varnothing$，就算不匹配。只部分重叠的框介于两者之间属于部分匹配。我们希望模型要学会一个打分函数 $s(I, b, t)$：三元组匹配时分高，不匹配时分低，部分匹配时分居中。
+
+现实世界中，如果三个量里已知两个、找第三个，恰好可以划分出来真实的三类任务（图 2）。
 
 {{< media
 src="assets/three-tasks.svg"
-caption="图 2：同一个三元组（图 I、框 b、描述 t），已知其中两个、找第三个，就是三类任务。深色是给定的，蓝色是要找的。三栏都是 BBox-SigLIP（第 208,448 步）的真实结果：左栏在图库里检索「左边一列有人」的前三张；中栏在 19 个候选窗口里选出分最高的；右栏给定人的框，在 COCO 的 80 个类别里排序。照片来自 COCO val2017（CC BY / CC BY-SA，来源见文末）。"
+caption="图 2：同一个三元组（图 I、框 b、描述 t），已知其中两个、找第三个，就是三类任务。"
 >}}
 
-- 本文的约束只有一条：$s(I, b, t) = \langle f(b, t), g(I) \rangle$，$g(I)$ 是一个低维向量，离线算好、和查询无关，所以能直接用 ANN。
-- 「怎样算对上」（紧框，或包含它的更大窗口）放在评测里讲。
-- 评测里的每个测试都是固定三元组里的两个，只改一个：只改 $I$ 是区域检索，只改 $b$ 是镜像框，内容不变、只换摆法是拼图对调。
+- 已知 $(b, t)$，找 $I \in \mathcal{I}$：按内容和位置找图，也就是本文的 what-and-where 图像检索；
+- 已知 $(I, t)$，找 $b \in \mathcal{B}$：视觉 grounding 和开放词表检测，比如在 RefCOCO [^yu_refcoco] 上按指代表达找框；
+- 已知 $(I, b)$，找 $t \in \mathcal{T}$：区域分类和区域描述，比如给定框判断类别，或者 dense captioning。
+
+面对本文最早提出的问题，在大量候选图中，找到与给定框和描述匹配的图像，三种建模方式都可以解决，但显而易见第一种方式最优，本文的方法也限制在第一种。
+
+{{% admonition type="tip" title="Proof" open=true %}}
+简单证明如下。
+
+以第三种方式为例，假设存在一个能完成 $f_3: (I, b) \mapsto t$ 的区域分类模型，那么当一个查询 $(b, t)$ 来找图时，我们可以取 $I^\star = \arg\max_{\color{red} I \in \mathcal{I}} \langle \color{red} f_3(I, b) \color{black},\ t \rangle$.
+
+不过显然是第一种最佳，图库里的大量图离线编码好即固定，在线查询时只需要现算$(b, t)$ 这一侧，若 $f_1: (b, t) \mapsto I$，则可以直接取 $I^\star = \arg\max_{\color{red} I \in \mathcal{I}} \langle f_1(b, t),\ \color{red} g(I) \color{black} \rangle$.
+
+两者的区别是，由于循环变量是图像，而第一种方式图库离线已经计算完毕，所以他的时间复杂度是 $O(|\mathcal{I}|)$，而第三种方式则会是 $O(|\mathcal{I}| \cdot \text{计算 } f_3(I, b) \text{ 的时间})$。
+
+对于第二种方式也同理。
+{{% /admonition %}}
+
+
+
+以往的工作大多只看其中一两个方向，比如 UniRef [^zheng_uniref] 和 CapDet [^long_capdet] 把后两个方向放在一起训练。
+
+放进同一个三元组里看，三类任务可以共用一个 $s$，区别只在于哪些量要提前算好。
+
+检索时，图库里的几百万张图必须先编码好，查询来了只能现算查询这一侧，所以分数要写成两个向量的点积，一个只看查询，一个只看图库，和 CLIP [^radford_clip]、SigLIP [^zhai_siglip]、DPR [^karpukhin_dpr] 这类双塔模型一样。
+
+$I$ 和 $t$ 各在一边，框 $b$ 跟谁放在一起，是各类方法最大的分歧，而这又取决于方法原本要做哪个方向：
+
+- 框跟着图，$s = \langle f(t),\ g(I, b) \rangle$。已知 $(I, b)$ 找 $t$ 时，图和框一起给出，区域特征算一次，就能和任意多句描述比。FG-CLIP、CLOC 这类区域级图文对齐都这样拆。拿它来找图，查询来之前不知道框在哪儿，只能给每张图的每个候选框各存一个向量。
+- 框跟着描述，$s = \langle f(b, t),\ g(I) \rangle$。已知 $(b, t)$ 找 $I$ 时，框和描述一起给出，图库那一侧与查询无关，建一次就行。Concept Map 这类按版式找图的方法属于这一种，但它们的 $g(I)$ 是一张空间特征图，位置摊在特征的空间布局里。
+
+图 3 把这几类方法都放到找图的场景里对比。本文也是后一种，但要求 $g(I)$ 只是一个向量：
+
+$$s(I, b, t) = \langle f(b, t),\ g(I) \rangle$$
+
+其中 $g(I)$ 是每张图一个低维向量（BBox-SigLIP 里是 1,152 维），离线算好，直接放进 ANN 索引。代价是 $g(I)$ 要事先把「什么东西在哪儿」都压进这一个向量：它没有空间布局可读，位置只能靠训练学进去。
+
+这样拆也能做另外两类任务。固定一张图 $I$，$g(I)$ 只算一次；换框或者换描述，只需要重新算 $f(b, t)$。给一组候选框，就能挑出描述最可能在的位置；给一组候选描述，就能挑出框里最可能是什么。图 2 的中栏和右栏就是这样得到的，右栏的候选描述是 COCO [^lin_coco] 的 80 个类别名。
+
+后面的评测也沿用这个三元组：每个测试都只改一样东西，其余不变。只换图 $I$，是区域检索；只把框 $b$ 左右镜像过去，是镜像框；图里的东西不变、只换它们的位置，是拼图对调。
 
 ## 相关工作
 
+按论文实际训练和评测的任务，把相关工作分进三类（下表）。第一类是本文的任务，列出我们找到的全部工作；后两类工作很多，按研究方向各举两篇代表，其中一篇是 2026 年的最新工作，完整的梳理见综述 [^xiao_vgsurvey] [^wu_ovsurvey]。只靠文字找图、查询里不带位置的检索，以及从一张图同时输出框和描述的 dense captioning，不在这三类里，不列。
+
+| 任务 | 工作 |
+|---|---|
+| 已知 $(b, t)$<br>找 $I$ | Concept Map（SIGIR'10） [^xu_conceptmap]<br>Spatial-Semantic Image Search（CVPR'17） [^mai_spatialsemantic]<br>Shutterstock 构图检索专利（US Patent'19） [^ranzinger_patent]<br>CAL（WACV'21） [^kilickaya_cal]<br>Changpinyo 等人（ICCV'21，口述加鼠标轨迹） [^changpinyo_whatwhere]<br>**BBox-SigLIP（本文）** |
+| 已知 $(I, t)$<br>找 $b$ | 视觉 grounding：MDETR（ICCV'21） [^kamath_mdetr]、Rex-Thinker（ICLR'26） [^jiang_rexthinker]<br>开放词表检测：GLIP（CVPR'22） [^li_glip]、ObjEmbed（ICML'26） [^fu_objembed] |
+| 已知 $(I, b)$<br>找 $t$ | 区域级图文对齐：CLOC（ICML'25） [^chen_cloc]、FG-CLIP 2（ICML'26） [^xie_fgclip2]<br>区域描述：UniRef（EMNLP'22） [^zheng_uniref]、GAR（ICLR'26） [^wang_gar] |
+
 - 按问题定义里的两种拆法归类（图 3）：
-  - 框和描述都在查询一侧：Concept Map、Spatial-Semantic Image Search、CAL 和我们，都是已知 $(b, t)$ 找 $I$；
-  - 框在索引一侧：FG-CLIP、CLOC、ObjEmbed，要按框从图像特征上取区域特征，或者每个候选框存一个向量，不是本文的设定，不展开比较。
+  - 框跟着描述：Concept Map、Spatial-Semantic Image Search、CAL 和我们，做的都是已知 $(b, t)$ 找 $I$；区别在图库一侧，前三者存空间特征图，我们存一个向量。Changpinyo 等人也属于这一种，图库同样每张图一个向量，区别在查询（见下文）；
+  - 框跟着图：FG-CLIP、CLOC、ObjEmbed，主要做区域识别（已知 $(I, b)$ 找 $t$）和定位（已知 $(I, t)$ 找 $b$），按框从图像特征上取区域特征，或者每个候选框存一个向量。ObjEmbed 也能找图，但查询里没有位置。任务方向不同，不展开比较。
 
 {{< media
 src="assets/where-the-box-goes.svg"
 caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一侧时，图库向量和查询无关，建一次就行；框在索引一侧时，要按框从图像特征上取区域特征，或者给每个候选框存一个向量。"
 >}}
 
-- 下面只展开和我们定位相同的工作。
+- 下面只展开和我们定位相同或相近的工作。
 
 ### 同一定位的工作：已知框和描述，找图
 
@@ -91,6 +147,15 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
   - 评测：COCO 上 5,000 个查询、约 7 万张图的图库，mAP@1 81.2；另在 HICO-DET 上测。
 - 和我们比：这三项都只认固定的类别词，图像一侧是空间特征图（81 个格子或 7×7 网格，几千到几万维），位置信息摊在特征的空间布局里，不用学。我们用自由文本描述，图像一侧是一个 1,152 维的整图向量，可以直接用 ANN，代价是位置要靠训练学进去。
 
+### 相近的设定：口述加鼠标轨迹，找图
+
+- Telling the What while Pointing to the Where（ICCV 2021，Google）：「what+where 检索」这个叫法出自这篇。
+  - 查询：标注员一边口述整张图（Localized Narratives），一边用鼠标指着说到的东西。每段话说出时鼠标扫过的范围取成一个框，在时间和空间上各放宽一圈，再和文字一起送进文本编码器（早融合）。
+  - 图库：ResNet-152 整图特征加 16 个 Faster R-CNN 区域特征，过 6 层 Transformer 后取平均，每张图一个向量，点积打分。
+  - 训练：先在 Open Images 50.7 万张图的口述数据上预训练，再在 Flickr30k 的口述数据上微调；文字用 1 万个子词，随机初始化。
+  - 评测：Flickr30k、COCO、ADE20K 的口述数据，加上轨迹后 R@1 比只用文字高 7 到 13 个点（Flickr30k 83.4 → 90.6）。
+- 和我们比：图库一侧同样每张图一个向量，区别在查询。它的位置来自说话时鼠标恰好停在哪里，不是用户有意圈出的范围：轨迹和语音对不齐，要放宽一圈才能用，"we can see" 这类虚词也带着轨迹；而且查询是一整段描述全图的口语，用户得把整张图讲一遍。我们的查询是用户直接画的框加一句描述，找什么、在哪里都是明确的。
+
 ### 按版式找图的产品
 
 - iStock CopySpace（2005）：一个 3×3 格子，每格选「放文字」「放图」或「都行」，可以和关键词、颜色、尺寸一起筛。所有图片都预先处理过，找出连续、平坦的留白区域。位置信息是每张图预先算好的，只回答「哪里空」，不回答「哪里有什么」。
@@ -101,9 +166,9 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
 
 ### 模型和查询格式
 
-- 底座：SigLIP2 so400m-patch16-naflex，共约 11.4 亿参数：图像塔 4.28 亿，文本塔 4.13 亿，另有 2.95 亿的词表嵌入（25.6 万词 × 1,152 维）。不加任何新模块，两个塔都微调。
-- 查询：整个 JSON 字符串直接进文本塔。写成紧凑格式，键的顺序固定为先 bbox 后 description，坐标取整，全部小写（SigLIP2 预训练时用的是小写文本）。超过 128 个 token 直接报错，不截断。
-- 图像：NaFlex 按原图宽高比切 patch，最多 1,024 个（官方默认 256），训练和推理一致；每张图输出一个 1,152 维向量。两个塔都微调过，所以图库向量要用 BBox-SigLIP 的图像塔重新提一遍。
+- 底座：SigLIP2 so400m-patch16-naflex，共约 11.4 亿参数：图像编码器 4.28 亿，文本编码器 4.13 亿，另有 2.95 亿的词表嵌入（25.6 万词 × 1,152 维）。不加任何新模块，两个编码器都微调。
+- 查询：整个 JSON 字符串直接进文本编码器。写成紧凑格式，键的顺序固定为先 bbox 后 description，坐标取整，全部小写（SigLIP2 预训练时用的是小写文本）。超过 128 个 token 直接报错，不截断。
+- 图像：NaFlex 按原图宽高比切 patch，最多 1,024 个（官方默认 256），训练和推理一致；每张图输出一个 1,152 维向量。两个编码器都微调过，所以图库向量要用 BBox-SigLIP 的图像编码器重新提一遍。
 
 ### 文本长度从 64 扩到 128
 
@@ -232,4 +297,53 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
 
 ## 参考文献
 
-- 图 2、图 3 的照片（COCO val2017，待补作者署名）：[422706](http://farm5.staticflickr.com/4053/4612270698_66a0fc9286_z.jpg)（CC BY）、[491366](http://farm4.staticflickr.com/3031/2548567657_4f81a39e0f_z.jpg)（CC BY-SA）、[157601](http://farm9.staticflickr.com/8478/8239498722_1b6cb129fd_z.jpg)（CC BY）、[220584](http://farm8.staticflickr.com/7277/7852484584_e823c15b32_z.jpg)（CC BY）
+[^adobe_findsimilar]: **Adobe.** *Find assets similar to another asset in Adobe Stock*. Adobe Stock Help, https://helpx.adobe.com/stock/web/search-for-assets/find-similar-assets.html.
+
+[^changpinyo_whatwhere]: **Changpinyo, Soravit, et al.** *Telling the What while Pointing to the Where: Multimodal Queries for Image Retrieval*. 2021. *ICCV*, https://arxiv.org/abs/2102.04980.
+
+[^chen_cloc]: **Chen, Hong-You, et al.** *Contrastive Localized Language-Image Pre-Training*. 2025. *ICML*, https://arxiv.org/abs/2410.02746.
+
+[^fu_objembed]: **Fu, Shenghao, et al.** *ObjEmbed: Towards Universal Multimodal Object Embeddings*. 2026. *ICML*, https://arxiv.org/abs/2602.01753.
+
+[^istock_copyspace]: **CreativePro.** *iStockphoto Makes it Easy for Designers to Match Copy to Images with New CopySpace Feature*. 2005, https://creativepro.com/istockphoto-makes-it-easy-for-designers-to-match-copy-to-images-with-new-copyspace-feature/.
+
+[^jiang_rexthinker]: **Jiang, Qing, et al.** *Rex-Thinker: Grounded Object Referring via Chain-of-Thought Reasoning*. 2026. *ICLR*, https://arxiv.org/abs/2506.04034.
+
+[^kamath_mdetr]: **Kamath, Aishwarya, et al.** *MDETR – Modulated Detection for End-to-End Multi-Modal Understanding*. 2021. *ICCV*, https://arxiv.org/abs/2104.12763.
+
+[^karpukhin_dpr]: **Karpukhin, Vladimir, et al.** *Dense Passage Retrieval for Open-Domain Question Answering*. 2020. *EMNLP*, https://arxiv.org/abs/2004.04906.
+
+[^kilickaya_cal]: **Kilickaya, Mert, and Arnold W. M. Smeulders.** *Structured Visual Search via Composition-aware Learning*. 2021. *WACV*, https://openaccess.thecvf.com/content/WACV2021/html/Kilickaya_Structured_Visual_Search_via_Composition-Aware_Learning_WACV_2021_paper.html.
+
+[^li_glip]: **Li, Liunian Harold, et al.** *Grounded Language-Image Pre-training*. 2022. *CVPR*, https://arxiv.org/abs/2112.03857.
+
+[^lin_coco]: **Lin, Tsung-Yi, et al.** *Microsoft COCO: Common Objects in Context*. 2014. *ECCV*, https://arxiv.org/abs/1405.0312.
+
+[^long_capdet]: **Long, Yanxin, et al.** *CapDet: Unifying Dense Captioning and Open-World Detection Pretraining*. 2023. *CVPR*, https://arxiv.org/abs/2303.02489.
+
+[^mai_spatialsemantic]: **Mai, Long, et al.** *Spatial-Semantic Image Search by Visual Feature Synthesis*. 2017. *CVPR*, https://openaccess.thecvf.com/content_cvpr_2017/html/Mai_Spatial-Semantic_Image_Search_CVPR_2017_paper.html.
+
+[^petapixel_shutterstock]: **PetaPixel.** *Shutterstock's Composition Aware AI Photo Search Uses Deep Learning*. 2017, https://petapixel.com/2017/10/13/shutterstocks-composition-aware-ai-photo-search-uses-deep-learning/.
+
+[^radford_clip]: **Radford, Alec, et al.** *Learning Transferable Visual Models From Natural Language Supervision*. 2021. *ICML*, https://arxiv.org/abs/2103.00020.
+
+[^ranzinger_patent]: **Ranzinger, Mike, and Heath Hohwald.** *Composition Aware Image Querying*. 2019. *US Patent 10,503,775 B1*, https://patents.google.com/patent/US10503775B1/en.
+
+[^wang_gar]: **Wang, Haochen, et al.** *Grasp Any Region: Towards Precise, Contextual Pixel Understanding for Multimodal LLMs*. 2026. *ICLR*, https://arxiv.org/abs/2510.18876.
+
+[^wu_ovsurvey]: **Wu, Jianzong, et al.** *Towards Open Vocabulary Learning: A Survey*. 2024. *TPAMI*, https://arxiv.org/abs/2306.15880.
+
+[^xiao_vgsurvey]: **Xiao, Linhui, et al.** *Towards Visual Grounding: A Survey*. 2026. *TPAMI*, https://arxiv.org/abs/2412.20206.
+
+[^xie_fgclip]: **Xie, Chunyu, et al.** *FG-CLIP: Fine-Grained Visual and Textual Alignment*. 2025. *ICML*, https://arxiv.org/abs/2505.05071.
+
+[^xie_fgclip2]: **Xie, Chunyu, et al.** *FG-CLIP 2: A Bilingual Fine-grained Vision-Language Alignment Model*. 2026. *ICML*, https://arxiv.org/abs/2510.10921.
+
+[^xu_conceptmap]: **Xu, Hao, et al.** *Image Search by Concept Map*. 2010. *SIGIR*, https://www.microsoft.com/en-us/research/wp-content/uploads/2010/07/fp83-xu.pdf.
+
+[^yu_refcoco]: **Yu, Licheng, et al.** *Modeling Context in Referring Expressions*. 2016. *ECCV*, https://arxiv.org/abs/1608.00272.
+
+[^zhai_siglip]: **Zhai, Xiaohua, et al.** *Sigmoid Loss for Language Image Pre-Training*. 2023. *ICCV*, https://arxiv.org/abs/2303.15343.
+
+[^zheng_uniref]: **Zheng, Duo, et al.** *Towards Unifying Reference Expression Generation and Comprehension*. 2022. *EMNLP*, https://arxiv.org/abs/2210.13076.
+
