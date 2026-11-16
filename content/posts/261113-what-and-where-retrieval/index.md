@@ -62,49 +62,36 @@ BBox-SigLIP 沿用 SigLIP2 的结构，没有加任何新模块：JSON 查询当
 
 {{< media
 src="assets/three-tasks.svg"
-caption="图 2：同一个三元组（图 I、框 b、描述 t），已知其中两个、找第三个，就是三类任务。"
+caption="图 2：同一个三元组（图 I、框 b、描述 t），已知其中两个、找第三个，就是三类任务。图中分数来自 BBox-SigLIP（第 208,448 步）。"
 >}}
 
 - 已知 $(b, t)$，找 $I \in \mathcal{I}$：按内容和位置找图，也就是本文的 what-and-where 图像检索；
 - 已知 $(I, t)$，找 $b \in \mathcal{B}$：视觉 grounding 和开放词表检测，比如在 RefCOCO [^yu_refcoco] 上按指代表达找框；
-- 已知 $(I, b)$，找 $t \in \mathcal{T}$：区域分类和区域描述，比如给定框判断类别，或者 dense captioning。
+- 已知 $(I, b)$，找 $t \in \mathcal{T}$：区域分类和区域描述，比如给定框判断类别，或者给定框生成描述。
 
-面对本文最早提出的问题，在大量候选图中，找到与给定框和描述匹配的图像，三种建模方式都可以解决，但显而易见第一种方式最优，本文的方法也限制在第一种。
+三类任务都可以写成对未知量取 argmax。记未知量为 $u \in \{I, b, t\}$，它的候选集合为 $\mathcal{U}$（找图时是 $\mathcal{I}$，找框时是 $\mathcal{B}$，找描述时是 $\mathcal{T}$）：
 
-{{% admonition type="tip" title="Proof" open=true %}}
-简单证明如下。
+$$u^\star = \arg\max_{u \in \mathcal{U}} s(I, b, t)$$
 
-以第三种方式为例，假设存在一个能完成 $f_3: (I, b) \mapsto t$ 的区域分类模型，那么当一个查询 $(b, t)$ 来找图时，我们可以取 $I^\star = \arg\max_{\color{red} I \in \mathcal{I}} \langle \color{red} f_3(I, b) \color{black},\ t \rangle$.
+所以同一个 $s$ 能做全部三类任务，区别只在代价。如果能尽可能地离线编码未知量的候选，就能降低在线检索时的时延。能够实现这样检索方式的只能是类似 CLIP [^radford_clip]、SigLIP [^zhai_siglip]、DPR [^karpukhin_dpr]的双塔模型，即把查询和候选分开编码，候选可以提前离线计算。
 
-不过显然是第一种最佳，图库里的大量图离线编码好即固定，在线查询时只需要现算$(b, t)$ 这一侧，若 $f_1: (b, t) \mapsto I$，则可以直接取 $I^\star = \arg\max_{\color{red} I \in \mathcal{I}} \langle f_1(b, t),\ \color{red} g(I) \color{black} \rangle$.
+显而易见，对于 what-and-where 图像检索任务，我们最好也用双塔模型，并且把 $(b, t)$ 放在查询一侧，$I$ 放在候选一侧，即：
 
-两者的区别是，由于循环变量是图像，而第一种方式图库离线已经计算完毕，所以他的时间复杂度是 $O(|\mathcal{I}|)$，而第三种方式则会是 $O(|\mathcal{I}| \cdot \text{计算 } f_3(I, b) \text{ 的时间})$。
+$$s(I, b, t) := \langle f(b, t),\ g(I) \rangle$$
 
-对于第二种方式也同理。
+{{% admonition type="tip" title="证明任务决定模型输入结构" open=true %}}
+双塔模型把三个量分成不重叠的两组 $X$ 和 $Y$，各进一个编码器，分数是两个向量的点积：
+
+$$s(I, b, t) = \langle \phi(X),\ \psi(Y) \rangle$$
+
+记 $u$ 所在的一组为 $Y$。若 $Y = \{u\}$，所有候选的 $\psi(u)$ 都能提前算好，查询时只需把已知量编码一次，再做 $|\mathcal{U}|$ 次点积；否则 $u$ 要和已知量一起进编码器，每个候选都得重新编码一次：
+
+$$\mathrm{cost}(u) = \begin{cases} C_{\mathrm{enc}} + |\mathcal{U}| \, C_{\mathrm{dot}}, & Y = \{u\} \\ |\mathcal{U}| \, C_{\mathrm{enc}}, & Y \neq \{u\} \end{cases}$$
+
+其中 $C_{\mathrm{enc}}$ 是一次编码，$C_{\mathrm{dot}}$ 是一次点积，并且 $C_{\mathrm{enc}} \gg C_{\mathrm{dot}}$。
+
+以 what-and-where 任务为例，$|\mathcal{I}|$ 可以有几百万甚至数十亿，只有 $Y = \{I\}$ 付得起。$Y = \{I, b\}$ 时也可以给每张图预存 $K$ 个候选框的 $\psi(I, b)$，但存储变成 $K$ 倍，查询的框也只能就近对上某个候选框。
 {{% /admonition %}}
-
-
-
-以往的工作大多只看其中一两个方向，比如 UniRef [^zheng_uniref] 和 CapDet [^long_capdet] 把后两个方向放在一起训练。
-
-放进同一个三元组里看，三类任务可以共用一个 $s$，区别只在于哪些量要提前算好。
-
-检索时，图库里的几百万张图必须先编码好，查询来了只能现算查询这一侧，所以分数要写成两个向量的点积，一个只看查询，一个只看图库，和 CLIP [^radford_clip]、SigLIP [^zhai_siglip]、DPR [^karpukhin_dpr] 这类双塔模型一样。
-
-$I$ 和 $t$ 各在一边，框 $b$ 跟谁放在一起，是各类方法最大的分歧，而这又取决于方法原本要做哪个方向：
-
-- 框跟着图，$s = \langle f(t),\ g(I, b) \rangle$。已知 $(I, b)$ 找 $t$ 时，图和框一起给出，区域特征算一次，就能和任意多句描述比。FG-CLIP、CLOC 这类区域级图文对齐都这样拆。拿它来找图，查询来之前不知道框在哪儿，只能给每张图的每个候选框各存一个向量。
-- 框跟着描述，$s = \langle f(b, t),\ g(I) \rangle$。已知 $(b, t)$ 找 $I$ 时，框和描述一起给出，图库那一侧与查询无关，建一次就行。Concept Map 这类按版式找图的方法属于这一种，但它们的 $g(I)$ 是一张空间特征图，位置摊在特征的空间布局里。
-
-图 3 把这几类方法都放到找图的场景里对比。本文也是后一种，但要求 $g(I)$ 只是一个向量：
-
-$$s(I, b, t) = \langle f(b, t),\ g(I) \rangle$$
-
-其中 $g(I)$ 是每张图一个低维向量（BBox-SigLIP 里是 1,152 维），离线算好，直接放进 ANN 索引。代价是 $g(I)$ 要事先把「什么东西在哪儿」都压进这一个向量：它没有空间布局可读，位置只能靠训练学进去。
-
-这样拆也能做另外两类任务。固定一张图 $I$，$g(I)$ 只算一次；换框或者换描述，只需要重新算 $f(b, t)$。给一组候选框，就能挑出描述最可能在的位置；给一组候选描述，就能挑出框里最可能是什么。图 2 的中栏和右栏就是这样得到的，右栏的候选描述是 COCO [^lin_coco] 的 80 个类别名。
-
-后面的评测也沿用这个三元组：每个测试都只改一样东西，其余不变。只换图 $I$，是区域检索；只把框 $b$ 左右镜像过去，是镜像框；图里的东西不变、只换它们的位置，是拼图对调。
 
 ## 相关工作
 
@@ -116,16 +103,12 @@ $$s(I, b, t) = \langle f(b, t),\ g(I) \rangle$$
 | 已知 $(I, t)$<br>找 $b$ | 视觉 grounding：MDETR（ICCV'21） [^kamath_mdetr]、Rex-Thinker（ICLR'26） [^jiang_rexthinker]<br>开放词表检测：GLIP（CVPR'22） [^li_glip]、ObjEmbed（ICML'26） [^fu_objembed] |
 | 已知 $(I, b)$<br>找 $t$ | 区域级图文对齐：CLOC（ICML'25） [^chen_cloc]、FG-CLIP 2（ICML'26） [^xie_fgclip2]<br>区域描述：UniRef（EMNLP'22） [^zheng_uniref]、GAR（ICLR'26） [^wang_gar] |
 
-- 按问题定义里的两种拆法归类（图 3）：
-  - 框跟着描述：Concept Map、Spatial-Semantic Image Search、CAL 和我们，做的都是已知 $(b, t)$ 找 $I$；区别在图库一侧，前三者存空间特征图，我们存一个向量。Changpinyo 等人也属于这一种，图库同样每张图一个向量，区别在查询（见下文）；
-  - 框跟着图：FG-CLIP、CLOC、ObjEmbed，主要做区域识别（已知 $(I, b)$ 找 $t$）和定位（已知 $(I, t)$ 找 $b$），按框从图像特征上取区域特征，或者每个候选框存一个向量。ObjEmbed 也能找图，但查询里没有位置。任务方向不同，不展开比较。
+把这些方法拿来找图，差别在于每张图要存什么（图 3）。
 
 {{< media
 src="assets/where-the-box-goes.svg"
-caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一侧时，图库向量和查询无关，建一次就行；框在索引一侧时，要按框从图像特征上取区域特征，或者给每个候选框存一个向量。"
+caption="图 3：把各类方法拿来找图时，每张图要存什么。"
 >}}
-
-- 下面只展开和我们定位相同或相近的工作。
 
 ### 同一定位的工作：已知框和描述，找图
 
@@ -135,7 +118,7 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
   - 图库：每张图切成 9×9 个格子，每格一个视觉词袋直方图（SIFT 6K 词表或 HSV 192 色）。
   - 打分：每个实例在每个格子上算出现程度，外观分乘空间分；多个概念取平均，再减去离散程度。
   - 评测：只在文本搜索结果上重排（每个关键词组合取前 500 张），42 个任务、33 个概念，NDCG，外加 20 人的用户研究。
-- Spatial-Semantic Image Search by Visual Feature Synthesis（CVPR 2017，Adobe 和 Portland State）：最接近的前作。
+- Spatial-Semantic Image Search by Visual Feature Synthesis（CVPR 2017，Adobe 和 Portland State）：
   - 查询：画布变成 31×31×300 的网格，框里的格子填 Word2Vec 向量；三层卷积网络把它「合成」成 7×7×832 的视觉特征。
   - 图库：固定的 ImageNet GoogLeNet 卷积特征（摊平约 4 万维），不训练，所以换查询模型不用重算图库。
   - 损失：0.6 × 相似度 + 0.3 × 分类 + 0.1 × 三元组；只用单概念查询训练，多概念时逐个合成再取逐元素最大值。
@@ -145,7 +128,7 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
   - 图库：冻结的 ResNet-50 加三层卷积，输出 7×7×256 的特征图。
   - 损失：让两张图特征的点积去拟合它们版式的 IoU，版式变了，特征跟着变。
   - 评测：COCO 上 5,000 个查询、约 7 万张图的图库，mAP@1 81.2；另在 HICO-DET 上测。
-- 和我们比：这三项都只认固定的类别词，图像一侧是空间特征图（81 个格子或 7×7 网格，几千到几万维），位置信息摊在特征的空间布局里，不用学。我们用自由文本描述，图像一侧是一个 1,152 维的整图向量，可以直接用 ANN，代价是位置要靠训练学进去。
+- 和我们比：这三项的查询都是单个词或类别名，不是自由描述；图像一侧是空间特征图（81 个格子或 7×7 网格，几千到几万维），位置信息摊在特征的空间布局里，不用学。我们用自由文本描述，每张图只存一个向量。
 
 ### 相近的设定：口述加鼠标轨迹，找图
 
@@ -155,12 +138,6 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
   - 训练：先在 Open Images 50.7 万张图的口述数据上预训练，再在 Flickr30k 的口述数据上微调；文字用 1 万个子词，随机初始化。
   - 评测：Flickr30k、COCO、ADE20K 的口述数据，加上轨迹后 R@1 比只用文字高 7 到 13 个点（Flickr30k 83.4 → 90.6）。
 - 和我们比：图库一侧同样每张图一个向量，区别在查询。它的位置来自说话时鼠标恰好停在哪里，不是用户有意圈出的范围：轨迹和语音对不齐，要放宽一圈才能用，"we can see" 这类虚词也带着轨迹；而且查询是一整段描述全图的口语，用户得把整张图讲一遍。我们的查询是用户直接画的框加一句描述，找什么、在哪里都是明确的。
-
-### 按版式找图的产品
-
-- iStock CopySpace（2005）：一个 3×3 格子，每格选「放文字」「放图」或「都行」，可以和关键词、颜色、尺寸一起筛。所有图片都预先处理过，找出连续、平坦的留白区域。位置信息是每张图预先算好的，只回答「哪里空」，不回答「哪里有什么」。
-- Shutterstock Composition Aware Search（2017 年在 Shutterstock Labs 上线测试，约 1.5 亿张图）：输入几个关键词，每个变成一个圆点，在版面框里拖到想要的位置，结果实时更新；另有一个按钮找有留白的图。技术上只说用了深度学习、已申请专利，没有公开细节。
-- Adobe Stock：「Images with Copy Space」筛选只判断有没有留白；Find Similar 可以在一张示例图里选中一个物体，拖动、缩放后再搜，还能换关键词。同样没有公开技术细节。
 
 ## 方法：BBox-SigLIP
 
@@ -242,7 +219,7 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
 ## Demo：在手机相册里用格子指定位置
 
 - 把画面分成 3×3 格子，用户点选格子，比输入 0–1000 的坐标容易。选中格子的外接矩形就是框。
-- 图库用 COCO val2017 的 5,000 张日常照片，只放 BBox-SigLIP（第 208,448 步）。
+- 图库用 COCO val2017 [^lin_coco] 的 5,000 张日常照片，只放 BBox-SigLIP（第 208,448 步）。
 - 跟着框走的例子和没做好的例子各放几个。
 - 图 9：demo 截图。
 
@@ -318,8 +295,6 @@ caption="图 3：各类方法把框 b 放在哪一边。框和描述在查询一
 [^li_glip]: **Li, Liunian Harold, et al.** *Grounded Language-Image Pre-training*. 2022. *CVPR*, https://arxiv.org/abs/2112.03857.
 
 [^lin_coco]: **Lin, Tsung-Yi, et al.** *Microsoft COCO: Common Objects in Context*. 2014. *ECCV*, https://arxiv.org/abs/1405.0312.
-
-[^long_capdet]: **Long, Yanxin, et al.** *CapDet: Unifying Dense Captioning and Open-World Detection Pretraining*. 2023. *CVPR*, https://arxiv.org/abs/2303.02489.
 
 [^mai_spatialsemantic]: **Mai, Long, et al.** *Spatial-Semantic Image Search by Visual Feature Synthesis*. 2017. *CVPR*, https://openaccess.thecvf.com/content_cvpr_2017/html/Mai_Spatial-Semantic_Image_Search_CVPR_2017_paper.html.
 
