@@ -34,13 +34,13 @@ math: false
 | TextLogo3K [^wang_textlogo3k] | 300 | 中文电影海报 | 中文 | 只标了中文标题 |
 | ICDAR 2013 FST [^karatzas_icdar13] | 233 | 对焦拍摄的场景文字 | 英文 | 笔画级 |
 | COCO-TS [^bonechi_cocots] | 100 | COCO 日常照片里的文字 | 以英文为主 | 笔画级，EAFormer 作者重标 [^yu_eaformer] |
-| MLT-S [^bonechi_mlts] | 93 | ICDAR 2017 MLT 场景照片 | 拉丁字母为主，另有少量阿拉伯文、中文、日文、韩文、孟加拉文 | 笔画级，EAFormer 作者重标 |
+| MLT-S [^bonechi_mlts] | 100 | ICDAR 2017 MLT [^nayef_mlt17] 场景照片 | 拉丁字母为主，另有少量韩文、阿拉伯文、日文、中文、孟加拉文 | 笔画级，EAFormer 作者重标 |
 | Crello [^yamaguchi_canvasvae] | 300 | 模板设计图 | 几乎全是英文 | 我们由设计图层渲染 |
 
 - **HierText、WAS-R：** 用官方测试集的全部图片。
 - **TextLogo3K：** 每张海报只标了中文标题，副标题、英文译名和日期都没标。所以只在标题框各边外扩 10% 的范围内计分。这个范围里如果有没标的英文或日期，模型把它们分出来会被算作错误，这是这个测试集的已知偏差。
 - **ICDAR 2013 FST：** 来自 ICDAR 2013 Robust Reading Competition 的文字分割任务。分割标注里每个字符一种颜色，我们把所有非白色像素当作字；词框取自同一挑战的文字检测标注。它有两处标注习惯和别的测试集不同：个别图里整块 logo 被标成了字，空心涂鸦字的内部也被填满。这几张图像素恰好很多，对 fgIoU 的影响很大，所以 FST 上我们同时报逐张平均（见下文指标）。
-- **COCO-TS、MLT-S：** 原始标注是用弱监督自动生成的，比较粗。EAFormer 的作者人工重标了测试集，公开了其中约 100 张，我们只用这一部分：COCO-TS 100 张；MLT-S 有 7 张只有标注、没有图片，剩 93 张。MLT-S 只有像素标注、没有词框，不报漏词率。
+- **COCO-TS、MLT-S：** 原始标注是用弱监督自动生成的，比较粗。EAFormer 的作者人工重标了测试集，各公开了其中 100 张，我们只用这一部分。MLT-S 公开的部分缺 7 张原图，词框也没有放出；我们从 ICDAR 2017 MLT 官方补齐原图，并用它的词级标注作为词框（不计无法辨认的词）。
 - **Crello：** CyberAgent 公开的模板设计数据集，每个设计都带完整的图层。我们按图层顺序重画每个设计，文字图层的字形就是真值，被上层元素挡住的部分扣掉；重画结果和官方预览图对不上的设计跳过。从 Crello 测试集随机抽了 300 张。它有两个限制：一是几乎全是英文；二是做成图片或矢量图形的字（比如 logo）不在文字图层里，真值里不算字，大约五分之一的图有这种字，我们会补标。另外，我们的模型初始化自 LayerD [^suzuki_layerd]，而 LayerD 在 Crello 训练集上训练过，所以在这个测试集上可能有主场优势。
 
 ### 规则
@@ -94,6 +94,8 @@ math: false
 [^karatzas_icdar13]: **Karatzas, Dimosthenis, et al.** *ICDAR 2013 Robust Reading Competition*. 2013. *ICDAR*, https://rrc.cvc.uab.es/?ch=2.
 
 [^long_hiertext]: **Long, Shangbang, et al.** *Towards End-to-End Unified Scene Text Detection and Layout Analysis*. 2022. *CVPR*, https://arxiv.org/abs/2203.15143.
+
+[^nayef_mlt17]: **Nayef, Nibal, et al.** *ICDAR2017 Robust Reading Challenge on Multi-Lingual Scene Text Detection and Script Identification – RRC-MLT*. 2017. *ICDAR*, https://rrc.cvc.uab.es/?ch=8.
 
 [^peng_upocr]: **Peng, Dezhi, et al.** *UPOCR: Towards Unified Pixel-Level OCR Interface*. 2024. *ICML*, https://arxiv.org/abs/2312.02694.
 
