@@ -13,8 +13,6 @@ tags:
 math: true
 ---
 
-> **大纲。** 下面每节列出这一节要讲的内容，正文和图之后补。正文只讲 BBox-SigLIP，其他方案的对比放在附录。
-
 - **可公开的资源（占位，待整理）：**
   - 模型：BBox-SigLIP 第 208,448 步
   - 实验记录：W&B [songsc-team/bbox-siglip](https://forge.coreweave.com/wandb/songsc-team/bbox-siglip)（9 个 run，待设为公开）
@@ -24,6 +22,8 @@ math: true
   - 推理代码：JSON 查询怎么拼、怎么打分
   - 评测代码：内部四个测试，加上 SPEC 的「格子换成框」转换
   - 训练代码：采样和损失
+
+TODO：引用尽量找权威的发表版本。
 
 ## 引言
 
@@ -119,35 +119,44 @@ caption="图 3：找图的六个方法。左边是查询和查询编码器的输
 
 ## 方法：BBox-SigLIP
 
-### 模型和查询格式
+BBox-SigLIP 从 Google 的 SigLIP2 [^tschannen_siglip2] 初始化，不加任何新模块，两个编码器一起微调。实现有效的 BBo-SigLIP主要有赖于三处设计：训练数据哪里来，$(b, t)$在训练和推理中怎么编码，损失函数怎么设计，以及文本长度从 64 扩到 128 的方法。一些模型细节见附录 A（TODO：回头加上 anchor）。
 
-- 底座：SigLIP2 so400m-patch16-naflex，共约 11.4 亿参数：图像编码器 4.28 亿，文本编码器 4.13 亿，另有 2.95 亿的词表嵌入（25.6 万词 × 1,152 维）。不加任何新模块，两个编码器都微调。
-- 查询：整个 JSON 字符串直接进文本编码器。写成紧凑格式，键的顺序固定为先 bbox 后 description，坐标取整，全部小写（SigLIP2 预训练时用的是小写文本）。超过 128 个 token 直接报错，不截断。
-- 图像：NaFlex 按原图宽高比切 patch，最多 1,024 个（官方默认 256），训练和推理一致；每张图输出一个 1,152 维向量。两个编码器都微调过，所以图库向量要用 BBox-SigLIP 的图像编码器重新提一遍。
+### 合成训练数据
 
-### 文本长度从 64 扩到 128
+训练的基础数据来自品类多样的约 8,300 万张通用图像。我们需要图像的 region-wise 的 caption 信息，所以需要数据标注。内部实测发现 Gemini 模型在位置标注准确性较高。但鉴于成本过高，所以我们用了 Gemini 蒸馏出来的 4B 模型：用 Gemini 的标注把 Qwen3.5-4B 微调成看图写结构化描述的模型，再用它逐张标注训练图。每张图标出若干元素，每个元素有一个类别名、一个框和一段描述（prompt 和样例见附录）。描述里如果出现 left、right、top、center 这类方位词，这个元素就不用：位置只能从框里读，不能从字里读。
 
-- 原生的文本上限是 64 个 token；为了放下完整描述加上框，扩到 128。
-- 做法：前 20 个位置编码保留原值，其余 44 个线性插值拉伸成 108 个，只多出 7.4 万个参数。
-- 新的位置表单独用 5e-6 的学习率，是其余参数（1e-6）的 5 倍。
+每张图随机取 4 个元素，各合成一条查询 $(b, t)$。框有 1/3 的概率直接用紧框 $b^\star$，其余时候随机放大 5%–90%，成为一个包住它的窗口：按问题定义，只要 $b^\star \subseteq b$ 就算匹配，用户画的框本来也很少恰好贴着物体。放大后的窗口如果超过全图的 85%，就退回紧框，免得查询退化成「图里有没有这个东西」。描述有四种写法：完整描述、第一句、2–3 个关键词、类别名，比例是 25 / 30 / 35 / 10%，让模型既读得了长描述，也接得住只打几个词的查询。
 
-### 训练数据
+4 条查询里有 2 条各配一个「窗口不对」的负样本：描述不变，同样大小的窗口挪到不碰任何相关框的位置，即 $b \cap b^\star = \varnothing$。相关框包括这个元素自己、和它有共同概念词的元素，以及同类的东西，所以挪开后的窗口里确实没有查询说的东西。图 4 在一张训练图上画出了这几种窗口。
 
-- 约 8,300 万张内部的通用图像，每个元素都有一个框和一段描述（来自图层检测加图像描述）。
-- 每张图 4 个正样本查询：窗口有 1/3 的概率是紧框，其余是包含它的更大的窗口；文本是完整描述、第一句、关键词或类别名。
+### 查询编码与损失函数
 
-### 负样本与损失
+查询编码器 $f$ 的输入就是一段 JSON：框和描述原样写成文本，送进 SigLIP2 的文本编码器，不另设坐标编码器。图 1 的查询实际是：
 
-- 同一张图、同一句描述、窗口不对：每张图 2 个，放在不碰任何相关框的位置。
-- 不相关的图：和查询没有共同的词，也没有相关类别。
-- 另一张图有同类东西，但不在窗口里：只对约 25 个常见类别才有。
-- 一个 sigmoid 损失，权重 1 / 0.5 / 0.5 / 0.35；其余的对都忽略。
-- 图 4：在一张训练图上画出每种正样本和负样本。
+```json
+{"bbox":[500,612,765,898],"description":"a dark brown dog with short shiny fur bounds through the shallow water at the edge of a lake, front legs reaching forward and tail held up."}
+```
 
-### 训练配置
+SigLIP2 的分词器把数字逐位拆开，所以模型是一位一位地读坐标。这要求训练和推理拼出的字符串格式完全一致，具体规则见附录。
 
-- 2 个节点共 16 卡，每步 256 张图，学习率 1e-6（文本位置编码 5e-6），预热 1,000 步；FP32 参数、BF16 前向。
-- 计划把 8,300 万张图完整过一遍（329,851 步），训练到 208,700 步中断，约完成计划的 63%。本文所有结果都用最后一个 checkpoint，第 208,448 步，这时看过约 5,340 万张图。
+训练时，一批 256 张图里的每条查询都和每张图配成一对。我们按标注把这些对分成四类：
+
+- **正样本**：查询和它来源的那张图；
+- **窗口不对**：同一张图，配上挪开的窗口；
+- **跨图窗口不对**：另一张图里有同类的东西，但全在窗口外。这一类只对人、狗、车、椅子等 30 个常见类别才能判断；
+- **不相关**：另一张图和查询没有共同的概念词，也没有同类的东西。
+
+其余的对不进损失。它们是标注没法判断的情况：另一张图里可能也有查询说的东西，或者东西和窗口只部分重叠，硬标成负样本会制造假负例。这和问题定义一一对应：包含算匹配，不相交算不匹配，部分重叠不监督。
+
+损失沿用 SigLIP [^zhai_siglip] 的 sigmoid 损失。记 $z = \alpha \langle f(b, t), g(I) \rangle + \beta$，其中 $\alpha$、$\beta$ 是可学习的温度和偏置；正样本的损失是 $\log(1 + e^{-z})$，三类负样本是 $\log(1 + e^{z})$。四类各自在全批上取平均 $\bar\ell$，再加权求和：
+
+$$\mathcal{L} = \bar\ell_{\mathrm{pos}} + 0.5\,\bar\ell_{\mathrm{unrel}} + 0.5\,\bar\ell_{\mathrm{own}} + 0.35\,\bar\ell_{\mathrm{cross}}$$
+
+下标依次是正样本、不相关、窗口不对、跨图窗口不对。各自取平均，是为了不让数量决定权重：一批里不相关的对有几十万个，窗口不对只有几百个。
+
+### 线性插值扩展上下文
+
+SigLIP2 的文本编码器最多读 64 个 token。一条查询光框这一段就占约 21 个，而我们评测集里有 9% 的描述，不加框就已经超过 64 个 token。我们把上限扩到 128，做法沿用 Long-CLIP [^zhang_longclip]：前 20 个位置编码保留原值，其余 44 个线性插值拉伸成 108 个。Long-CLIP 的依据是，预训练文本大多很短，靠前的位置编码训练得最充分，应当原样保留，靠后的只需拉伸。恰好任何合法的框，坐标数字都落在这前 20 个位置上，模型读坐标用的仍是原来的位置编码。新的位置表只多出 7.4 万个参数，单独用 5e-6 的学习率，是其余参数的 5 倍。
 
 ## 评测
 
@@ -206,6 +215,74 @@ caption="图 3：找图的六个方法。左边是查询和查询编码器的输
 - 四条结论，和引言里的四个结论一一对应。
 - 局限，简单提：内部评测图库小（949 张）、只跑了一个种子、训练数据是内部数据；单个向量装不下一张图里所有小物体的信息。
 
+## 附录 A：实现细节
+
+### 训练数据的标注
+
+用 Gemini 的标注微调过的 Qwen3.5-4B，贪心解码，不开思考模式。prompt 如下：
+
+```text
+[system]
+You produce a complete structured design description from an image. Return only valid JSON in the requested full schema.
+
+[user]
+<image>
+Generate the complete JSON containing elements. Every item must contain label, bbox in xyxy_1000 coordinates, and desc.
+```
+
+下面是一张训练图（来自 Pixabay，图 A1）的标注：
+
+```json
+[
+  {"label":"<woman 1>","bbox":[0,0,584,1000],"desc":"A woman shown from the chest up on the left side of the frame, bathed in slatted sunlight and shadow."},
+  {"label":"<face 1>","bbox":[172,0,517,483],"desc":"The face of the woman, tilted upward with closed eyes, covered in horizontal shadow lines from window blinds."},
+  {"label":"<lips 1>","bbox":[377,249,488,368],"desc":"The woman's lips, coated in deep red lipstick and slightly parted."},
+  {"label":"<hair 1>","bbox":[0,0,273,990],"desc":"Dark, straight hair falling along the left side of the woman's face and shoulder."},
+  {"label":"<rose 1>","bbox":[447,345,755,1000],"desc":"A single red rose held in the lower right foreground, featuring a full bloom and green stem."},
+  {"label":"<flower head 1>","bbox":[447,345,735,747],"desc":"The deep red bloom of the rose, with dense, velvety petals catching soft light."},
+  {"label":"<stem 1>","bbox":[481,627,755,1000],"desc":"The green stem and leaves of the rose extending downward from the flower head."}
+]
+```
+
+其中 `<woman 1>`、`<hair 1>`、`<rose 1>` 的描述带方位词（left、lower right），我们会用规则尽量去除，不用来合成查询，但仍留在这张图的元素列表里，判断哪些框、哪些图和查询相关时还会用到。其余 4 个元素各能合成一条查询。
+
+{{< media
+src="assets/training-annotation.svg"
+caption="图 A1：上面那条标注画在原图上。实线的 4 个元素描述里没有方位词，各合成一条查询；虚线的 3 个元素描述里带方位词，不合成查询。图片来自 Pixabay。"
+>}}
+
+### 模型参数
+
+| 项目 | 设置 |
+|---|---|
+| 底座 | SigLIP2 so400m-patch16-naflex |
+| 总参数量 | 约 11.4 亿 |
+| 图像编码器 | 4.28 亿参数 |
+| 文本编码器 | 4.13 亿参数 |
+| 词表嵌入 | 2.95 亿参数（25.6 万个词 × 1,152 维） |
+| 图像切分 | NaFlex，按原图宽高比切 16×16 的 patch，最多 1,024 个（官方默认 256），训练和推理一致 |
+| 文本长度 | 最多 128 个 token（原 64） |
+| 输出向量 | 图和查询各一个 1,152 维向量 |
+| 微调范围 | 两个编码器都微调 |
+
+两个编码器都改过，所以图库要用 BBox-SigLIP 重新提向量。
+
+### 训练配置
+
+| 项目 | 设置 |
+|---|---|
+| 硬件 | 2 个节点共 16 卡 |
+| 每步图片数 | 256 |
+| 优化器 | AdamW，β = (0.9, 0.98)，ε = 1e-8 |
+| 学习率 | 1e-6；文本位置表 5e-6 |
+| 学习率调度 | 预热 1,000 步，之后余弦衰减，最低到峰值的 10% |
+| weight decay | 0.01 |
+| 梯度裁剪 | 1.0 |
+| 精度 | FP32 参数，BF16 前向 |
+| 计划步数 | 329,851 步，8,300 万张图完整过一遍 |
+| 实际步数 | 第 208,800 步中断，约完成 63% |
+| 本文结果用的 checkpoint | 第 208,448 步，看过约 5,340 万张图，学习率约为峰值的 37% |
+
 ## 附录：2 万步下的方案对比
 
 ### 六个方案
@@ -232,7 +309,7 @@ caption="图 3：找图的六个方法。左边是查询和查询编码器的输
 - 裁图蒸馏从来没见过「同一句话、同一张图、只挪框」，所以镜像框在整整 2 万步里一直停在 50%。
 - 成对蒸馏比较的是同一张图上的两个窗口，内容那一项被抵消掉，检索随之崩掉：hit@10 在第 2,500 步就从 37 掉到 1。
 - 检索损失三种分差都有，但位置信号又少又容易，所以学得慢。
-- 图 A1：目标与三种分差的对应矩阵，加训练曲线。
+- 图 A2：目标与三种分差的对应矩阵，加训练曲线。
 
 ### 怎样让位置学得更快
 
@@ -244,7 +321,7 @@ caption="图 3：找图的六个方法。左边是查询和查询编码器的输
   - 两次训练都没有重复用过一张图；
   - 每步图片数翻倍（256 对 128），同步数下只高 2–3 个点。
 - 一个更清楚的损失（还没跑）：三道等权的选择题，哪张图、哪个框、哪种摆法。
-- 图 A2：三问式损失和现在的损失并排对比。
+- 图 A3：三问式损失和现在的损失并排对比。
 
 ## 引用
 
@@ -292,6 +369,8 @@ caption="图 3：找图的六个方法。左边是查询和查询编码器的输
 
 [^sun_alphaclip]: **Sun, Zeyi, et al.** *Alpha-CLIP: A CLIP Model Focusing on Wherever You Want*. 2024. *CVPR*, https://arxiv.org/abs/2312.03818.
 
+[^tschannen_siglip2]: **Tschannen, Michael, et al.** *SigLIP 2: Multilingual Vision-Language Encoders with Improved Semantic Understanding, Localization, and Dense Features*. 2025. *arXiv*, https://arxiv.org/abs/2502.14786.
+
 [^wang_gar]: **Wang, Haochen, et al.** *Grasp Any Region: Towards Precise, Contextual Pixel Understanding for Multimodal LLMs*. 2026. *ICLR*, https://arxiv.org/abs/2510.18876.
 
 [^wu_ovsurvey]: **Wu, Jianzong, et al.** *Towards Open Vocabulary Learning: A Survey*. 2024. *TPAMI*, https://arxiv.org/abs/2306.15880.
@@ -309,6 +388,8 @@ caption="图 3：找图的六个方法。左边是查询和查询编码器的输
 [^yu_refcoco]: **Yu, Licheng, et al.** *Modeling Context in Referring Expressions*. 2016. *ECCV*, https://arxiv.org/abs/1608.00272.
 
 [^zhai_siglip]: **Zhai, Xiaohua, et al.** *Sigmoid Loss for Language Image Pre-Training*. 2023. *ICCV*, https://arxiv.org/abs/2303.15343.
+
+[^zhang_longclip]: **Zhang, Beichen, et al.** *Long-CLIP: Unlocking the Long-Text Capability of CLIP*. 2024. *ECCV*, https://arxiv.org/abs/2403.15378.
 
 [^zheng_uniref]: **Zheng, Duo, et al.** *Towards Unifying Reference Expression Generation and Comprehension*. 2022. *EMNLP*, https://arxiv.org/abs/2210.13076.
 
