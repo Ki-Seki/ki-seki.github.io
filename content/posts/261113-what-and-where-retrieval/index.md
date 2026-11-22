@@ -119,11 +119,11 @@ caption="图 3：找图的六个方法。左边是查询和查询编码器的输
 
 ## 方法：BBox-SigLIP
 
-BBox-SigLIP 以 Google 的 SigLIP2 [^tschannen_siglip2] 为基座，通过微调两个编码器而来。接下来依次讲查询怎么编码，训练查询怎么造，一批里的对怎么分组、怎么算损失。模型和训练配置见附录 A（TODO：回头加上 anchor）。
+BBox-SigLIP 以 Google 的 SigLIP2 [^tschannen_siglip2] 为基座，通过微调两个编码器而来。接下来依次讲查询怎么编码，训练图怎么标注，训练查询怎么造，一批里的对怎么分组、怎么算损失。模型和训练配置见[附录 A](#附录-a实现细节)。
 
 ### 查询编码
 
-查询编码器 $f$ 的输入就是一段 JSON：框和描述原样写成文本，送进 SigLIP2 的文本编码器（图 1）。我们也试过另设一个坐标编码器，把框和描述分开编码再融合，拼图对调和镜像框都不如 JSON，对比见附录「2 万步下的方案对比」。
+查询编码器 $f$ 的输入就是一段 JSON：框和描述原样写成文本，送进 SigLIP2 的文本编码器（图 1）。我们也试过另设一个坐标编码器，把框和描述分开编码再融合，在拼图对调和镜像框两项位置测试上都不如 JSON，对比见[附录「2 万步下的方案对比」](#附录2-万步下的方案对比)。
 
 带 BBox 的 JSON 让查询变长了很多：光框就占约 21 个 token，而 SigLIP2 的文本编码器最多读 64 个，评测集里 9% 的描述不加框就已超过 64。我们按 Long-CLIP [^zhang_longclip] 的做法把上限扩到 128：前 20 个位置编码原样保留，其余 44 个线性插值拉伸成 108 个。记原表的位置编码为 $P_0, \dots, P_{63}$，新表为
 
@@ -140,28 +140,53 @@ $$
 
 $x_k$ 是新表第 $k$ 个位置在原表里对应的位置，一般落在两个整数之间，就取两边原值按距离加权，比如新表第 21 个约等于 $0.6\,P_{20} + 0.4\,P_{21}$。$\tfrac{43}{107}$ 让新表的第 20 和第 127 个正好对上原表的第 20 和第 63 个。任何合法的框，坐标都落在前 20 个位置里，所以模型读坐标用的还是原来的位置编码。
 
+### 训练图的标注
+
+训练图是品类多样的约 8,300 万张非公开的通用图像，造训练查询需要每张图逐个元素的框和描述。内部实测 Gemini 的位置标注较准，但成本太高，所以我们先用 Gemini 的标注微调 Qwen3.5-4B，再用它逐张标注全部训练图（贪心解码，不开思考模式），prompt 如下：
+
+```text
+[system]
+You produce a complete structured design description from an image. Return only valid JSON in the requested full schema.
+
+[user]
+<image>
+Generate the complete JSON containing elements. Every item must contain label, bbox in xyxy_1000 coordinates, and desc.
+```
+
+每张图标出若干元素，每个元素有一个类别名（label）、一个紧框 $b^\star$（bbox，坐标范围 0–1000）和一段描述（desc）。下面是一张训练图的标注，图 4 ① 把它画在了原图上：
+
+```json
+[
+  {"label":"<woman 1>","bbox":[0,0,584,1000],"desc":"A woman shown from the chest up on the left side of the frame, bathed in slatted sunlight and shadow."},
+  {"label":"<face 1>","bbox":[172,0,517,483],"desc":"The face of the woman, tilted upward with closed eyes, covered in horizontal shadow lines from window blinds."},
+  {"label":"<lips 1>","bbox":[377,249,488,368],"desc":"The woman's lips, coated in deep red lipstick and slightly parted."},
+  {"label":"<hair 1>","bbox":[0,0,273,990],"desc":"Dark, straight hair falling along the left side of the woman's face and shoulder."},
+  {"label":"<rose 1>","bbox":[447,345,755,1000],"desc":"A single red rose held in the lower right foreground, featuring a full bloom and green stem."},
+  {"label":"<flower head 1>","bbox":[447,345,735,747],"desc":"The deep red bloom of the rose, with dense, velvety petals catching soft light."},
+  {"label":"<stem 1>","bbox":[481,627,755,1000],"desc":"The green stem and leaves of the rose extending downward from the flower head."}
+]
+```
+
+描述里带方位词（left、lower right 等）的元素不用来造查询，以免模型从描述的方位词、而不是从框里读位置。这张图里是 woman、hair 和 rose，它们仍留在这张图的元素列表里，后面判断哪些框和查询相关时还要用到。其余 4 个元素各能造一条查询。
+
+{{< media
+src="assets/training-queries.svg"
+caption="图 4：一张训练图怎样变成训练查询，三行依次对应标注、造查询和挪开的窗口。① 标注：上面那条标注画在原图上，实线的 4 个元素造查询，虚线的 3 个描述带方位词，不造；蓝框是花头的紧框 b*。② 查询：框和描述各按比例抽一种写法，红色是这次抽到的：框放大成窗口 b，描述取 2–3 个关键词。③ 挪开的窗口：描述不变，同样大小的窗口挪到左边，避开斜线的相关框，即花头自己和同属「花」这一大类的整枝玫瑰。图片来自 Pixabay。"
+>}}
+
 ### 训练查询
 
-训练图是品类多样的约 8,300 万张非公开的通用图像，每张图都需要逐个元素的框和描述。内部实测 Gemini 的位置标注较准，但成本太高，所以我们先用 Gemini 的标注微调 Qwen3.5-4B，再用它逐张标注全部训练图。每张图标出若干元素，每个元素有一个类别名、一个紧框 $b^\star$ 和一段描述。此外，描述里带方位词（left、upper 等）的元素不用来造查询，以免模型从描述的方位词、而不是从框里读位置。具体的 prompt、样例和过滤规则见附录 A。
-
-每张图随机取 4 个元素，各造一条查询 $(b, t)$：
+每张图从能造查询的元素里随机取 4 个，各造一条查询 $(b, t)$（图 4 ②）：
 
 - **框**：有 1/3 的概率直接用紧框 $b^\star$；为了满足用户的模糊查询，其他时候把宽高随机放大 5%–90%。
 - **描述**：有四种写法，完整描述、第一句、2–3 个关键词、类别名，比例是 25 / 30 / 35 / 10%，让模型既读得了长描述，也接得住只打几个词的查询。
 
-挪开的窗口和后面的分组，都要判断哪些框、哪些图和一条查询相关。我们靠类别名来判断，从中取两样东西：
+前 2 条查询还各配一个挪开的窗口（图 4 ③），作为同一张图上的负样本：描述不变，把同样大小的窗口随机挪到别处。难点是保证挪开后的窗口里没有查询说的东西：同一种东西可能在图里出现好几次，名字也不一定一样，比如上面的标注里，花头标的是「flower head」，整枝玫瑰标的是「rose」。我们通过启发式规则判断两个元素是不是同一种东西：
 
-- **概念词**：类别名里的词，转成小写，去掉 a、of 这类虚词，再去掉词尾的 s。比如「flower head」的概念词是 flower 和 head。一张图的概念词是它所有元素概念词的合集。两边只要有一个共同的概念词，就可能说的是同一种东西。
-- **大类**：我们手写了 30 个常见大类，比如人、狗、车、椅子、花，共收 64 个词，比如「花」收 flower 和 rose，「猫」收 cat、kitten 和 feline。一个元素的概念词落在某一个大类里，它就属于这个大类。概念词只认字面相同的词，大类还能把 rose 和 flower、kitten 和 cat 认作同类。
+- **概念词**：类别名转成小写，去掉 a、of 这类虚词，再去掉词尾的 s，剩下的词。比如「flower head」的概念词是 flower 和 head。两个元素只要有一个共同的概念词，就当作同一种东西。
+- **大类**：我们手写了 30 个常见大类，共收 64 个词，比如「花」收 flower 和 rose，「猫」收 cat、kitten 和 feline。同一大类的两个元素也当作同一种东西。概念词只认字面相同的词，大类补上了 rose 和 flower 这类名字不同的情况。
 
-完整的规则和词表见附录 A。
-
-前 2 条查询还各配一个挪开的窗口，作为同一张图上的负样本：描述不变，把同样大小的窗口随机挪到和所有相关框都不相交的位置。相关框有三种：这个元素自己的紧框 $b^\star$，和它有共同概念词的元素的框，和它同一大类的元素的框。这样挪开后的窗口里确实没有查询说的东西。图 4 在一张训练图上画出了这几种窗口。
-
-{{< media
-src="assets/training-queries.svg"
-caption="图 4：一个标注元素怎样变成训练查询。蓝框是标注的紧框 b*；红色实线是放大后的查询窗口 b，花偏在窗口右下角；红色虚线是负样本窗口，和 b 一样大，挪到了左边。斜线区域是相关框，即花头本身和同属「花」这一类的整枝玫瑰。图片来自 Pixabay。"
->}}
+窗口要避开的框于是有三种：这个元素自己的紧框 $b^\star$，和它有共同概念词的元素的框，和它同一大类的元素的框。完整的规则和词表见[附录 A](#概念词与大类)。
 
 ### 分组与损失
 
@@ -170,7 +195,7 @@ caption="图 4：一个标注元素怎样变成训练查询。蓝框是标注的
 - **包含**（$\bar\ell_{\mathrm{in}}$）：查询和它来源的那张图，期望判为匹配；
 - **同图不相交**（$\bar\ell^{\mathrm{same}}_{\mathrm{out}}$）：同一张图配上挪开的窗口，期望判为不匹配；
 - **他图不相交**（$\bar\ell^{\mathrm{other}}_{\mathrm{out}}$）：另一张图里有同一大类的东西，但全在窗口外，期望判为不匹配。只有那 30 个大类能这样判断；
-- **图里没有**（$\bar\ell_{\mathrm{absent}}$）：另一张图和查询没有共同的概念词，也没有同一大类的东西，期望判为不匹配；
+- **图里没有**（$\bar\ell_{\mathrm{absent}}$）：另一张图里没有和查询同一种东西的元素，即既没有共同的概念词，也没有同一大类的，期望判为不匹配；
 - **不监督**：其余的对，标注判断不了：另一张图里可能也有查询说的东西，或者东西和窗口只部分重叠。硬标成负样本会制造假负例，所以不进损失。这和 Faster R-CNN [^ren_fasterrcnn] 里 IoU 介于两个阈值之间的 anchor 不进损失是同一个做法。
 
 {{< media
@@ -195,7 +220,7 @@ src="assets/loss-matrix.svg"
 caption="图 6：一批 4 张图的分数矩阵（示意，行是图、列是查询）。每张图出 4 条原窗口查询和 2 条挪开的窗口查询，每格是一对查询和图，颜色对应损失里的四项，虚线空格不进损失。为了看得清，图中「他图不相交」画得比实际多，真实比例见正文。"
 >}}
 
-四类各自取平均，是为了不让数量决定权重。一条原窗口查询配其余 255 张图，约 208 张是「图里没有」，约 46 张不监督，「他图不相交」平均不到 1 张；「同图不相交」每条查询至多 1 对。一批合起来，「图里没有」约 21 万对，「同图不相交」只有几百对。如果整批直接平均，损失几乎全由「图里没有」决定。
+四类分开取平均，是因为各类对的数量相差悬殊。一条原窗口查询与批里另外 255 张图组成的对中，约 208 对属于「图里没有」，约 46 对不监督，「他图不相交」平均不到 1 对；「同图不相交」每条查询至多 1 对。全批合计，「图里没有」约 21 万对，「同图不相交」至多 512 对。若全批统一取平均，损失将由「图里没有」主导；分开平均后，各类的权重只由公式里的系数决定。
 
 ## 评测
 
@@ -256,43 +281,9 @@ caption="图 6：一批 4 张图的分数矩阵（示意，行是图、列是查
 
 ## 附录 A：实现细节
 
-### 训练数据的标注
-
-用 Gemini 的标注微调过的 Qwen3.5-4B，贪心解码，不开思考模式。prompt 如下：
-
-```text
-[system]
-You produce a complete structured design description from an image. Return only valid JSON in the requested full schema.
-
-[user]
-<image>
-Generate the complete JSON containing elements. Every item must contain label, bbox in xyxy_1000 coordinates, and desc.
-```
-
-下面是一张训练图（来自 Pixabay，图 A1）的标注：
-
-```json
-[
-  {"label":"<woman 1>","bbox":[0,0,584,1000],"desc":"A woman shown from the chest up on the left side of the frame, bathed in slatted sunlight and shadow."},
-  {"label":"<face 1>","bbox":[172,0,517,483],"desc":"The face of the woman, tilted upward with closed eyes, covered in horizontal shadow lines from window blinds."},
-  {"label":"<lips 1>","bbox":[377,249,488,368],"desc":"The woman's lips, coated in deep red lipstick and slightly parted."},
-  {"label":"<hair 1>","bbox":[0,0,273,990],"desc":"Dark, straight hair falling along the left side of the woman's face and shoulder."},
-  {"label":"<rose 1>","bbox":[447,345,755,1000],"desc":"A single red rose held in the lower right foreground, featuring a full bloom and green stem."},
-  {"label":"<flower head 1>","bbox":[447,345,735,747],"desc":"The deep red bloom of the rose, with dense, velvety petals catching soft light."},
-  {"label":"<stem 1>","bbox":[481,627,755,1000],"desc":"The green stem and leaves of the rose extending downward from the flower head."}
-]
-```
-
-其中 `<woman 1>`、`<hair 1>`、`<rose 1>` 的描述带方位词（left、lower right），我们会用规则尽量去除，不用来合成查询，但仍留在这张图的元素列表里，判断哪些框、哪些图和查询相关时还会用到。其余 4 个元素各能合成一条查询。
-
-{{< media
-src="assets/training-annotation.svg"
-caption="图 A1：上面那条标注画在原图上。实线的 4 个元素描述里没有方位词，各合成一条查询；虚线的 3 个元素描述里带方位词，不合成查询。图片来自 Pixabay。"
->}}
-
 ### 概念词与大类
 
-**概念词**从元素的类别名里取：转成小写，按字母切词，数字和标点丢掉；去掉 a、an、the、of、and、with、in、on、part、group、unit 这 11 个词；长度超过 3 的词去掉词尾的 s；最后去重。上面那张训练图的 7 个元素：
+**概念词**从元素的类别名里取：转成小写，按字母切词，数字和标点丢掉；去掉 a、an、the、of、and、with、in、on、part、group、unit 这 11 个词；长度超过 3 的词去掉词尾的 s；最后去重。正文图 4 那张训练图的 7 个元素：
 
 | 类别名 | 概念词 |
 |---|---|
@@ -388,7 +379,7 @@ caption="图 A1：上面那条标注画在原图上。实线的 4 个元素描�
 - 裁图蒸馏从来没见过「同一句话、同一张图、只挪框」，所以镜像框在整整 2 万步里一直停在 50%。
 - 成对蒸馏比较的是同一张图上的两个窗口，内容那一项被抵消掉，检索随之崩掉：hit@10 在第 2,500 步就从 37 掉到 1。
 - 检索损失三种分差都有，但位置信号又少又容易，所以学得慢。
-- 图 A2：目标与三种分差的对应矩阵，加训练曲线。
+- 图 A1：目标与三种分差的对应矩阵，加训练曲线。
 
 ### 怎样让位置学得更快
 
@@ -400,7 +391,7 @@ caption="图 A1：上面那条标注画在原图上。实线的 4 个元素描�
   - 两次训练都没有重复用过一张图；
   - 每步图片数翻倍（256 对 128），同步数下只高 2–3 个点。
 - 一个更清楚的损失（还没跑）：三道等权的选择题，哪张图、哪个框、哪种摆法。
-- 图 A3：三问式损失和现在的损失并排对比。
+- 图 A2：三问式损失和现在的损失并排对比。
 
 ## 引用
 
