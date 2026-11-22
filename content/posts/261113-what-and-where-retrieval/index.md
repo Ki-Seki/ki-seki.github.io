@@ -153,47 +153,41 @@ caption="图 5：一条真实查询在一批里配成的对怎样分组。"
 - **图里没有**（$\bar\ell_{\mathrm{absent}}$）：另一张图和查询没有共同的概念词，也没有同类的东西，我们期望模型判为不匹配。
 - **不监督**：其余的对。它们是标注没法判断的情况：另一张图里可能也有查询说的东西，或者东西和窗口只部分重叠，硬标成负样本会制造假负例。这和问题定义一一对应：包含算匹配，不相交算不匹配，部分重叠不监督。
 
-损失沿用 SigLIP [^zhai_siglip] 的 sigmoid 损失。记 $z = \alpha \langle f(b, t), g(I) \rangle + \beta$，其中 $\alpha$、$\beta$ 是可学习的温度和偏置；判为匹配的一类损失是 $\log(1 + e^{-z})$，判为不匹配的三类是 $\log(1 + e^{z})$。四类各自在全批上取平均 $\bar\ell$，再加权求和：
+损失沿用 SigLIP [^zhai_siglip] 的 sigmoid 损失，但四类各自在全批上取平均，再加权求和：
 
-$$\mathcal{L} = \bar\ell_{\mathrm{in}} + 0.5\,\bar\ell^{\mathrm{same}}_{\mathrm{out}} + 0.35\,\bar\ell^{\mathrm{other}}_{\mathrm{out}} + 0.5\,\bar\ell_{\mathrm{absent}}$$
+$$
+\begin{aligned}
+\mathcal{L} &= \bar\ell_{\mathrm{in}} + 0.5\,\bar\ell^{\mathrm{same}}_{\mathrm{out}} + 0.35\,\bar\ell^{\mathrm{other}}_{\mathrm{out}} + 0.5\,\bar\ell_{\mathrm{absent}} \\[6pt]
+\bar\ell_{\Omega} &= \frac{1}{|\Omega|}\sum_{(i,j)\in\Omega}\log\left(1+e^{-y_{\Omega}\,z_{ij}}\right) \\[6pt]
+z_{ij} &= \alpha\, s(I_j, b_i, t_i) + \beta, \qquad Z = [z_{ij}] \in \mathbb{R}^{6N\times N}
+\end{aligned}
+$$
+
+一批 $N = 256$ 张图，每张出 4 条查询，前两条再各配一个挪开的窗口，共 $6N$ 条，所以分数矩阵 $Z$ 是 $6N \times N$ 的，不是 SigLIP 那样的方阵（图 6）。$s$ 是问题定义里的点积，$\alpha$、$\beta$ 是可学习的温度和偏置。$\Omega$ 是某一类对的集合，「包含」取 $y_\Omega = +1$，其余三类取 $-1$；不监督的对不在任何 $\Omega$ 里，这和 Faster R-CNN [^ren_fasterrcnn] 里 IoU 介于两个阈值之间的 anchor 不进损失是同一个做法。
+
+{{< media
+src="assets/loss-matrix.svg"
+caption="图 6：一批 4 张图的分数矩阵（示意，行是图、列是查询）。每张图出 4 条原窗口查询和 2 条挪开的窗口查询，每格是一对查询和图，颜色对应损失里的四项，虚线空格不进损失。真实的一批里「他图不相交」比图中少得多：一条原窗口查询配其余 255 张图，约 208 张是「图里没有」，约 46 张不监督，「他图不相交」平均不到 1 张。"
+>}}
 
 各自取平均，是为了不让数量决定权重。如图 5 所示，每条查询平均要配约 200 张「图里没有」的图，「同图不相交」的至多 1 张；一批合起来，前者近 20 万个，后者只有几百个。
 
-一步训练写成伪代码如下，省略了多卡之间的拼接：
-
-```python
-# images：一批 256 张图，每张带标注的元素（框、描述、概念词、大类）
-queries = []
-for img in images:
-    for k, e in enumerate(sample(img.elements, 4)):
-        b = jitter(e.box)          # 1/3 用紧框，其余放大 5%–90%
-        t = rewrite(e.desc)        # 完整、第一句、关键词、类别名四选一
-        queries.append(Query(img, b, t, moved=False))
-        if k < 2:                  # 前两条再配一个挪开的窗口
-            b2 = move_off(b, related_boxes(img, e))
-            queries.append(Query(img, b2, t, moved=True))
-
-# f、g 输出单位向量；z 是 1,536 × 256 的分数矩阵
-z = alpha * f([json(q.b, q.t) for q in queries]) @ g(images).T + beta
-
-# own[i, j]：第 i 条查询来自第 j 张图；moved[i]：第 i 条是挪开的窗口
-own, moved = same_image(queries, images), is_moved(queries)[:, None]
-inside = own & ~moved
-same   = own & moved
-other  = ~own & ~moved & same_class_all_outside(queries, images)
-absent = ~own & ~moved & no_shared_word_or_class(queries, images)
-# 其余的对不进损失；softplus(x) = log(1 + e^x)
-
-loss = (softplus(-z)[inside].mean()
-        + 0.5 * softplus(z)[same].mean()
-        + 0.35 * softplus(z)[other].mean()
-        + 0.5 * softplus(z)[absent].mean())
-loss.backward()
-```
-
 ### 线性插值扩展上下文
 
-SigLIP2 的文本编码器最多读 64 个 token。一条查询光框这一段就占约 21 个，而我们评测集里有 9% 的描述，不加框就已经超过 64 个 token。我们把上限扩到 128，做法沿用 Long-CLIP [^zhang_longclip]：前 20 个位置编码保留原值，其余 44 个线性插值拉伸成 108 个。Long-CLIP 的依据是，预训练文本大多很短，靠前的位置编码训练得最充分，应当原样保留，靠后的只需拉伸。恰好任何合法的框，坐标数字都落在这前 20 个位置上，模型读坐标用的仍是原来的位置编码。新的位置表只多出 7.4 万个参数，单独用 5e-6 的学习率，是其余参数的 5 倍。
+SigLIP2 的文本编码器最多读 64 个 token，而一条查询光框就占约 21 个，评测集里 9% 的描述不加框就已超过 64。我们按 Long-CLIP [^zhang_longclip] 的做法把上限扩到 128：前 20 个位置编码原样保留，其余 44 个线性插值拉伸成 108 个。记原表第 $k$ 个位置编码为 $P_k$（$k = 0, \dots, 63$），新表为
+
+$$
+\begin{aligned}
+\tilde P_k &=
+\begin{cases}
+P_k, & 0 \le k < 20 \\[4pt]
+(1 - \lambda_k)\, P_{\lfloor x_k \rfloor} + \lambda_k\, P_{\lceil x_k \rceil}, & 20 \le k < 128
+\end{cases} \\[8pt]
+x_k &= 20 + \tfrac{43}{107}\,(k - 20), \qquad \lambda_k = x_k - \lfloor x_k \rfloor
+\end{aligned}
+$$
+
+$x_k$ 是新表第 $k$ 个位置在原表里对应的位置，一般落在两个整数之间，就取两边原值按距离加权，比如新表第 21 个约等于 $0.6\,P_{20} + 0.4\,P_{21}$。$\tfrac{43}{107}$ 让新表的第 20 和第 127 个正好对上原表的第 20 和第 63 个。任何合法的框，坐标都落在前 20 个位置里，所以模型读坐标用的还是原来的位置编码。
 
 ## 评测
 
@@ -206,7 +200,7 @@ SigLIP2 的文本编码器最多读 64 个 token。一条查询光框这一段�
   - 镜像图：镜像的是图，不是框；
   - 拼图对调：两张图左右或上下拼在一起，查询问其中一半；50% 等于只看文字（14,900 次）。
 - 一个坑：训练时记录的空间对指标在 2,500 步时就到了 86%，严重高估。以拼图对调测试为准。
-- 图 6：四个测试的小示意图。
+- 图 7：四个测试的小示意图。
 
 ### 结果
 
@@ -218,7 +212,7 @@ SigLIP2 的文本编码器最多读 64 个 token。一条查询光框这一段�
   | 拼图对调 | 53.7 / 54.3 | 57.6 / 63.4 | 63.2 / 70.8 | 91.9 / 93.3 | 93.6 / 94.1 |
 
 - 我犯过的错：10 月 9 日，我对一个只训了 4,000 步的模型做了「看不看框」的诊断：对的框比错的框分数高的只占 43.5%，框只让查询向量变了约 2.4%。我据此下结论说一个向量学不会位置。长训练的模型推翻了这个结论，它只是需要更多训练。
-- 图 7：上表画成曲线。图 8：真实查询的例子，需要换成公开图片。
+- 图 8：上表画成曲线。图 9：真实查询的例子，需要换成公开图片。
 
 ### 公开基准：SPEC 绝对位置（CVPR 2024）
 
@@ -238,14 +232,14 @@ SigLIP2 的文本编码器最多读 64 个 token。一条查询光框这一段�
 - 两套分簇差别很大：ARI 0.125，NMI 0.285；在一个 2 万张图的固定池里，两个模型给同一张图找的前 20 个近邻平均只有 8% 重合（1,000 张查询图）。
 - 簇和「图里有几个元素」的关联（调整互信息）从 0.035 升到 0.095，约 2.7 倍；和宽高比的关联从 0.065 降到 0.051。也就是说，新的向量空间更多按版式的繁简来组织图片。
 - 要注明：两边的底座分辨率不同（固定 384 对 NaFlex），差别不全来自微调；分簇一致性也不等于检索质量。
-- 图 9：两个模型的 t-SNE 簇图，加几组「旧簇 → 新簇」的拼图。
+- 图 10：两个模型的 t-SNE 簇图，加几组「旧簇 → 新簇」的拼图。
 
 ## Demo：在手机相册里用格子指定位置
 
 - 把画面分成 3×3 格子，用户点选格子，比输入 0–1000 的坐标容易。选中格子的外接矩形就是框。
 - 图库用 COCO val2017 [^lin_coco] 的 5,000 张日常照片，只放 BBox-SigLIP（第 208,448 步）。
 - 跟着框走的例子和没做好的例子各放几个。
-- 图 10：demo 截图。
+- 图 11：demo 截图。
 
 ## 结论
 
@@ -298,7 +292,7 @@ caption="图 A1：上面那条标注画在原图上。实线的 4 个元素描�
 | 文本编码器 | 4.13 亿参数 |
 | 词表嵌入 | 2.95 亿参数（25.6 万个词 × 1,152 维） |
 | 图像切分 | NaFlex，按原图宽高比切 16×16 的 patch，最多 1,024 个（官方默认 256），训练和推理一致 |
-| 文本长度 | 最多 128 个 token（原 64） |
+| 文本长度 | 最多 128 个 token（原 64），位置表多出 7.4 万个参数 |
 | 输出向量 | 图和查询各一个 1,152 维向量 |
 | 微调范围 | 两个编码器都微调 |
 
@@ -405,6 +399,8 @@ caption="图 A1：上面那条标注画在原图上。实线的 4 个元素描�
 [^radford_clip]: **Radford, Alec, et al.** *Learning Transferable Visual Models From Natural Language Supervision*. 2021. *ICML*, https://arxiv.org/abs/2103.00020.
 
 [^ranzinger_patent]: **Ranzinger, Mike, and Heath Hohwald.** *Composition Aware Image Querying*. 2019. *US Patent 10,503,775 B1*, https://patents.google.com/patent/US10503775B1/en.
+
+[^ren_fasterrcnn]: **Ren, Shaoqing, et al.** *Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks*. 2015. *NeurIPS*, https://arxiv.org/abs/1506.01497.
 
 [^sun_alphaclip]: **Sun, Zeyi, et al.** *Alpha-CLIP: A CLIP Model Focusing on Wherever You Want*. 2024. *CVPR*, https://arxiv.org/abs/2312.03818.
 
